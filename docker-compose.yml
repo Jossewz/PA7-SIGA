@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:18.3
+    container_name: siga-postgres
+    environment:
+      POSTGRES_DB: siga
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234567
+    ports:
+      - "5432:5432"
+    volumes:
+      - siga_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d siga"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+    container_name: siga-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/siga
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234567
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/workspace
+      - siga_maven_cache:/root/.m2
+    command: sh ./mvnw spring-boot:run
+
+  frontend:
+    image: node:22-alpine
+    container_name: siga-vite
+    profiles:
+      - frontend
+    working_dir: /workspace/frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/workspace
+      - siga_node_modules:/workspace/frontend/node_modules
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+
+volumes:
+  siga_postgres_data:
+  siga_maven_cache:
+  siga_node_modules:

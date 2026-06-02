@@ -5,9 +5,10 @@ services:
     environment:
       POSTGRES_DB: siga
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234567
+      POSTGRES_PASSWORD: siga
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - siga_postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -26,7 +27,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/siga
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: 1234567
+      SPRING_DATASOURCE_PASSWORD: siga
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_DEVTOOLS_RESTART_ENABLED: "true"
     ports:

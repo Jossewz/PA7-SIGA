@@ -1,141 +1,194 @@
 # SIGA IEA
 
-## Configuración del Entorno de Desarrollo
+## Indice
 
-Para ejecutar correctamente el proyecto, se recomienda instalar las siguientes herramientas y extensiones según el entorno de desarrollo utilizado.
+- Tecnologias: linea 12
+- Base de datos: linea 28
+- Comandos Git: linea 57
+- Comandos para correr el proyecto: linea 80
+- Comandos para dockerizar y correr contenedores: linea 106
+- Comandos de utilidad: linea 146
 
-### Requisitos Previos
+## Tecnologias
 
-Antes de abrir el proyecto, asegúrese de tener instalado:
-
-- Java JDK 21 o superior
-- Maven 3.9+ (opcional si el IDE ya lo gestiona internamente)
-- Docker y Docker Compose
+- Java JDK 21
+- Spring Boot 3.5.x
+- Maven Wrapper
 - PostgreSQL 18.3
-- Node.js 22+ y npm
-- Vite para el frontend
+- Docker y Docker Compose
+- Thymeleaf
+- Spring Security
+- Spring Data JPA
+- Validation
+- Lombok
+- HTMX con Thymeleaf
+- Node.js 22+
+- Vite
 
----
+## Base de datos
 
-## Base de Datos
-
-El proyecto usa PostgreSQL 18.3 con la siguiente configuración por defecto:
+Credenciales del proyecto:
 
 ```text
 Base de datos: siga
 Usuario: postgres
 Password: 1234567
-Puerto: 5432
 ```
 
-La aplicación Spring Boot lee estos valores desde variables de entorno, pero también tiene valores por defecto para trabajar en local:
+Para usar la base de datos en Docker:
 
-```properties
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/siga
-SPRING_DATASOURCE_USERNAME=postgres
-SPRING_DATASOURCE_PASSWORD=1234567
+```text
+Host desde la maquina: localhost
+Puerto desde la maquina: 5433
+Host dentro de Docker: db
+Puerto dentro de Docker: 5432
+URL local/IDE: jdbc:postgresql://localhost:5433/siga
+URL en Docker: jdbc:postgresql://db:5432/siga
 ```
 
----
+El puerto externo quedó en `5433` porque `5432` suele estar ocupado por PostgreSQL local. Ese cambio ya está en `docker-compose.yml`, así que al subirlo al repositorio no hay que repetirlo manualmente.
 
-## Docker
+Para usar una base de datos PostgreSQL local fuera de Docker, cree la base `siga` con usuario `postgres` y password `1234567`. Si su PostgreSQL local usa el puerto `5432`, cambie temporalmente la variable:
 
-La configuración incluida está pensada para desarrollo. El código del proyecto se monta como volumen dentro del contenedor, por lo que no es necesario reconstruir la imagen cada vez que cambie el código. Spring Boot DevTools ayuda con reinicios durante desarrollo; si cambia código Java dentro del contenedor y no se recompila automáticamente, reinicie solo el servicio `app`.
+```bash
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/siga ./mvnw spring-boot:run
+```
 
-### Levantar backend y base de datos
+## Comandos Git
+
+Clonar el repositorio:
+
+```bash
+git clone <url-del-repositorio>
+cd PA7
+```
+
+Ver cambios pendientes:
+
+```bash
+git status
+```
+
+Subir cambios (A tu rama del repositorio): 
+
+```bash
+git add .
+git commit -m "Configurar Docker y documentacion inicial"
+git push
+```
+
+Bajar cambios: 
+
+```bash
+git checkout rama_origen
+git pull
+git checkout tu_rama
+git merge rama_origen (para traer los cambios a TU rama)
+```
+
+Para mandar cambios a la main es necesario hacer un pull request desde github
+y esperar que el lider de proyecto autorice el cambio para evitar conflictos
+a la hora de mergear cambios y asi llevar un control mas limpios.
+
+## Comandos para correr el proyecto
+
+Instalar dependencias y compilar:
+
+```bash
+./mvnw clean install
+```
+
+Correr Spring Boot usando la base de datos configurada en `application.properties`:
+
+```bash
+./mvnw spring-boot:run
+```
+
+Correr Spring Boot usando PostgreSQL local en puerto `5432`:
+
+```bash
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/siga ./mvnw spring-boot:run
+```
+
+Si `mvnw` no tiene permisos de ejecucion:
+
+```bash
+chmod +x mvnw
+```
+
+## Comandos para dockerizar y correr contenedores
+
+Levantar backend y PostgreSQL con Docker:
 
 ```bash
 docker compose up --build
 ```
 
-Servicios disponibles:
-
-```text
-Backend Spring Boot: http://localhost:8080
-PostgreSQL: localhost:5432
-```
-
-### Levantar solo la base de datos
-
-Use este modo si quiere ejecutar Spring Boot desde el IDE o desde la terminal local:
+Levantar solo PostgreSQL en Docker para usar Spring Boot desde el IDE:
 
 ```bash
 docker compose up -d db
 ```
 
-Luego ejecute la aplicación:
-
-```bash
-./mvnw spring-boot:run
-```
-
-Si `mvnw` no tiene permisos de ejecución en Linux/macOS:
-
-```bash
-chmod +x mvnw
-./mvnw spring-boot:run
-```
-
-### Ver logs
-
-```bash
-docker compose logs -f app
-docker compose logs -f db
-```
-
-### Reiniciar solo la aplicación
-
-```bash
-docker compose restart app
-```
-
-### Detener contenedores
-
-```bash
-docker compose down
-```
-
-### Detener y borrar los datos de PostgreSQL
-
-Use este comando solo si quiere reiniciar la base de datos desde cero:
-
-```bash
-docker compose down -v
-```
-
----
-
-## Frontend con Vite
-
-El repositorio todavía no incluye una carpeta frontend. Cuando se cree, se recomienda ubicarla en:
-
-```text
-frontend/
-```
-
-La configuración de Docker Compose ya incluye un servicio opcional para Vite usando Node.js 22. Este servicio se activa con el perfil `frontend`:
+Levantar backend, PostgreSQL y Vite cuando exista `frontend/`:
 
 ```bash
 docker compose --profile frontend up --build
 ```
 
-Servicios disponibles con el perfil frontend:
+Detener contenedores:
 
-```text
-Backend Spring Boot: http://localhost:8080
-Frontend Vite: http://localhost:5173
-PostgreSQL: localhost:5432
+```bash
+docker compose down
 ```
 
-Vite queda configurado para escuchar dentro del contenedor con `--host 0.0.0.0`, y el código se monta como volumen. Esto permite modificar archivos del frontend y ver los cambios inmediatamente sin hacer rebuild.
+Detener contenedores y borrar datos de PostgreSQL:
 
-Si aún no existe el frontend, se puede crear con:
+```bash
+docker compose down -v
+```
+
+Servicios disponibles:
+
+```text
+Backend: http://localhost:8080
+PostgreSQL Docker: localhost:5433
+Vite: http://localhost:5173
+```
+
+## Comandos de utilidad
+
+Ver configuracion final de Docker Compose:
+
+```bash
+docker compose config
+```
+
+Ver logs del backend:
+
+```bash
+docker compose logs -f app
+```
+
+Ver logs de PostgreSQL:
+
+```bash
+docker compose logs -f db
+```
+
+Reiniciar solo el backend:
+
+```bash
+docker compose restart app
+```
+
+Crear el frontend con Vite:
 
 ```bash
 npm create vite@latest frontend
 ```
 
-Después de crear el proyecto Vite, entre a `frontend/`, instale dependencias si trabaja localmente, o use directamente el perfil de Docker:
+Correr Vite localmente:
 
 ```bash
 cd frontend
@@ -143,72 +196,15 @@ npm install
 npm run dev
 ```
 
-## Visual Studio Code
-
-Si el proyecto se trabajará en **Visual Studio Code**, se recomienda instalar las siguientes extensiones:
-
-### Extensiones obligatorias
-
-- **Extension Pack for Java**  
-  Proporciona soporte completo para desarrollo Java, depuración, ejecución y Maven.
-
-- **Spring Boot Extension Pack**  
-  Facilita el desarrollo con Spring Boot, incluyendo navegación, ejecución del proyecto y autocompletado.
-
-- **Thymeleaf**  
-  Proporciona soporte para vistas Thymeleaf (`th:text`, `th:if`, `th:each`, etc.).
-
-### Extensiones recomendadas
-
-- **Auto Rename Tag**  
-  Renombra automáticamente etiquetas HTML de apertura y cierre.
-
-- **Path Intellisense**  
-  Autocompletado de rutas de archivos.
-
-- **SQLTools** + Driver de PostgreSQL  
-  Permite gestionar la base de datos PostgreSQL directamente desde VS Code.
-
-- **Error Lens**  
-  Muestra errores y advertencias directamente sobre el código.
-
----
-
-## IntelliJ IDEA
-
-Si el proyecto se trabajará en **IntelliJ IDEA**, se recomienda utilizar la versión **Community** o **Ultimate**.
-
-### Plugins recomendados
-
-Normalmente IntelliJ ya incluye soporte para Java y Maven, pero se recomienda verificar:
-
-- **Spring Boot Support**  
-  Soporte para proyectos Spring Boot.
-
-- **Thymeleaf Plugin**  
-  Resaltado de sintaxis y soporte para plantillas Thymeleaf.
-
-- **Database Tools** *(Ultimate o plugin equivalente)*  
-  Para conexión y administración de PostgreSQL desde el IDE.
-
-### Configuración recomendada
-
-Verificar que IntelliJ esté utilizando:
-
-```text
-JDK 21
-```
-
-y que Maven esté correctamente sincronizado al abrir el proyecto.
-
----
-
-## Importante
-
-Después de clonar el proyecto, ejecutar:
+Verificar que PostgreSQL Docker responda:
 
 ```bash
-./mvnw clean install
+docker compose exec db pg_isready -U postgres -d siga
 ```
 
-para descargar dependencias y compilar correctamente el proyecto antes de ejecutarlo.
+## Notas rapidas
+
+- Al entrar a `http://localhost:8080`, Spring Security puede pedir login.
+- Usuario temporal: `user`.
+- La password temporal aparece en los logs como `Using generated security password`.
+- Si aparece el aviso de Thymeleaf sobre `classpath:/templates/`, es normal mientras no existan vistas HTML.

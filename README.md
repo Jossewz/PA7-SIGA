@@ -11,7 +11,7 @@
 
 ## Tecnologias
 
-- Java JDK 21
+- Java JDK 25
 - Spring Boot 3.5.x
 - Maven Wrapper
 - PostgreSQL 18.3

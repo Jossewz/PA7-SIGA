@@ -218,8 +218,8 @@ http://localhost:5050
 
 Credenciales de acceso:
 
-Correo: admin@siga.com
-Contraseña: admin123
+Correo: admin@siga.dev
+Contraseña: admin
 
 Agregar servidor PostgreSQL:
 

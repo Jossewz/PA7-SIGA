@@ -1,10 +1,4 @@
-﻿package com.siga.siga_iea.shared.util;
-
-import java.time.LocalDate;
+package com.siga.siga_iea.shared.util;
 
 public class DateUtil {
-    public static LocalDate today() {
-        return LocalDate.now();
-    }
 }
-

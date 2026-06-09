@@ -37,6 +37,21 @@ services:
       - siga_maven_cache:/root/.m2
     command: sh ./mvnw spring-boot:run
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: siga-pgadmin
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@siga.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - siga_pgadmin_data:/var/lib/pgadmin
+
   frontend:
     image: node:22-alpine
     container_name: siga-vite
@@ -54,3 +69,4 @@ volumes:
   siga_postgres_data:
   siga_maven_cache:
   siga_node_modules:
+  siga_pgadmin_data:

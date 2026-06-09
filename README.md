@@ -1,136 +1,149 @@
+````md
 # SIGA IEA
 
-## Indice
+Sistema de Gestión IEA desarrollado con Spring Boot, PostgreSQL, Thymeleaf y Docker.
 
-- Tecnologias: linea 12
-- Base de datos: linea 28
-- Comandos Git: linea 57
-- Comandos para correr el proyecto: linea 80
-- Comandos para dockerizar y correr contenedores: linea 106
-- Comandos de utilidad: linea 146
+## Tecnologías
 
-## Tecnologias
-
-- Java JDK 25
+- Java JDK 21
 - Spring Boot 3.5.x
 - Maven Wrapper
 - PostgreSQL 18.3
-- Docker y Docker Compose
+- Docker + Docker Compose
 - Thymeleaf
 - Spring Security
 - Spring Data JPA
 - Validation
 - Lombok
-- HTMX con Thymeleaf
+- HTMX + Thymeleaf
 - Node.js 22+
 - Vite
 
 ## Base de datos
 
-Credenciales del proyecto:
+Credenciales:
 
 ```text
 Base de datos: siga
 Usuario: postgres
 Password: 1234567
-```
+````
 
-Para usar la base de datos en Docker:
+Puertos y conexión:
 
 ```text
-Host desde la maquina: localhost
-Puerto desde la maquina: 5433
-Host dentro de Docker: db
-Puerto dentro de Docker: 5432
-URL local/IDE: jdbc:postgresql://localhost:5433/siga
-URL en Docker: jdbc:postgresql://db:5432/siga
+PostgreSQL dentro de Docker:
+Host: db
+Puerto: 5432
+
+PostgreSQL desde tu PC (IDE/local):
+Host: localhost
+Puerto: 5433
 ```
 
-El puerto externo quedó en `5433` porque `5432` suele estar ocupado por PostgreSQL local. Ese cambio ya está en `docker-compose.yml`, así que al subirlo al repositorio no hay que repetirlo manualmente.
+URLs:
 
-Para usar una base de datos PostgreSQL local fuera de Docker, cree la base `siga` con usuario `postgres` y password `1234567`. Si su PostgreSQL local usa el puerto `5432`, cambie temporalmente la variable:
+```text
+Desde IDE/local:
+jdbc:postgresql://localhost:5433/siga
+
+Desde Docker:
+jdbc:postgresql://db:5432/siga
+```
+
+`5433` es el puerto expuesto en tu máquina para evitar conflictos con instalaciones locales de PostgreSQL que normalmente usan `5432`.
+
+Si tienes PostgreSQL instalado localmente fuera de Docker:
 
 ```bash
 SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/siga ./mvnw spring-boot:run
 ```
 
-## Comandos Git
+## Git
 
-Clonar el repositorio:
+Clonar repositorio:
 
 ```bash
 git clone <url-del-repositorio>
 cd PA7
 ```
 
-Ver cambios pendientes:
+Ver cambios:
 
 ```bash
 git status
 ```
 
-Subir cambios (A tu rama del repositorio): 
+Subir cambios a tu rama:
 
 ```bash
 git add .
-git commit -m "Configurar Docker y documentacion inicial"
+git commit -m "mensaje"
 git push
 ```
 
-Bajar cambios: 
+Traer cambios de otra rama:
 
 ```bash
 git checkout rama_origen
 git pull
 git checkout tu_rama
-git merge rama_origen (para traer los cambios a TU rama)
+git merge rama_origen
 ```
 
-Para mandar cambios a la main es necesario hacer un pull request desde github
-y esperar que el lider de proyecto autorice el cambio para evitar conflictos
-a la hora de mergear cambios y asi llevar un control mas limpios.
+Para enviar cambios a `main` se debe crear un Pull Request y esperar aprobación.
 
-## Comandos para correr el proyecto
+## Ejecutar proyecto
 
-Instalar dependencias y compilar:
+Compilar e instalar dependencias:
+
+### Linux / macOS
 
 ```bash
 ./mvnw clean install
 ```
 
-Correr Spring Boot usando la base de datos configurada en `application.properties`:
+Ejecutar Spring Boot:
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Correr Spring Boot usando PostgreSQL local en puerto `5432`:
-
-```bash
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/siga ./mvnw spring-boot:run
-```
-
-Si `mvnw` no tiene permisos de ejecucion:
+Si `mvnw` no tiene permisos:
 
 ```bash
 chmod +x mvnw
 ```
 
-## Comandos para dockerizar y correr contenedores
+### Windows
 
-Levantar backend y PostgreSQL con Docker:
+Compilar:
+
+```cmd
+mvnw.cmd clean install
+```
+
+Ejecutar:
+
+```cmd
+mvnw.cmd spring-boot:run
+```
+
+## Docker
+
+Levantar backend + PostgreSQL:
 
 ```bash
 docker compose up --build
 ```
 
-Levantar solo PostgreSQL en Docker para usar Spring Boot desde el IDE:
+Levantar solo PostgreSQL (para usar Spring Boot desde el IDE):
 
 ```bash
 docker compose up -d db
 ```
 
-Levantar backend, PostgreSQL y Vite cuando exista `frontend/`:
+Levantar backend + PostgreSQL + frontend:
 
 ```bash
 docker compose --profile frontend up --build
@@ -142,27 +155,21 @@ Detener contenedores:
 docker compose down
 ```
 
-Detener contenedores y borrar datos de PostgreSQL:
+Eliminar contenedores y datos:
 
 ```bash
 docker compose down -v
 ```
 
-Servicios disponibles:
+Servicios:
 
 ```text
 Backend: http://localhost:8080
-PostgreSQL Docker: localhost:5433
+PostgreSQL: localhost:5433
 Vite: http://localhost:5173
 ```
 
-## Comandos de utilidad
-
-Ver configuracion final de Docker Compose:
-
-```bash
-docker compose config
-```
+## Comandos útiles
 
 Ver logs del backend:
 
@@ -176,19 +183,25 @@ Ver logs de PostgreSQL:
 docker compose logs -f db
 ```
 
-Reiniciar solo el backend:
+Reiniciar backend:
 
 ```bash
 docker compose restart app
 ```
 
-Crear el frontend con Vite:
+Verificar PostgreSQL:
+
+```bash
+docker compose exec db pg_isready -U postgres -d siga
+```
+
+Crear frontend con Vite:
 
 ```bash
 npm create vite@latest frontend
 ```
 
-Correr Vite localmente:
+Correr frontend:
 
 ```bash
 cd frontend
@@ -196,15 +209,34 @@ npm install
 npm run dev
 ```
 
-Verificar que PostgreSQL Docker responda:
+## pgAdmin (Interfaz gráfica PostgreSQL)
 
-```bash
-docker compose exec db pg_isready -U postgres -d siga
+Acceder desde navegador:
+
+```text
+http://localhost:5050
+
+Credenciales de acceso:
+
+Correo: admin@siga.com
+Contraseña: admin123
+
+Agregar servidor PostgreSQL:
+
+Name: Docker
+Host name/address: db
+Port: 5432
+Maintenance database: siga
+Username: postgres
+Password: siga
+
+Importante: si pgAdmin corre en Docker, el host debe ser db y no localhost, ya que ambos contenedores se comunican por la red interna de Docker.
+
+## Notas
+
+* Spring Security puede pedir login al entrar a `http://localhost:8080`.
+* Usuario temporal: `user`.
+* La contraseña temporal aparece en logs como `Using generated security password`.
+* El aviso de Thymeleaf sobre `classpath:/templates/` es normal mientras no existan vistas HTML.
+
 ```
-
-## Notas rapidas
-
-- Al entrar a `http://localhost:8080`, Spring Security puede pedir login.
-- Usuario temporal: `user`.
-- La password temporal aparece en los logs como `Using generated security password`.
-- Si aparece el aviso de Thymeleaf sobre `classpath:/templates/`, es normal mientras no existan vistas HTML.

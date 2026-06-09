@@ -1,8 +1,4 @@
-﻿package com.siga.siga_iea.shared.exception;
+package com.siga.siga_iea.shared.exception;
 
-public class NotFoundException extends RuntimeException {
-    public NotFoundException(String message) {
-        super(message);
-    }
+public class NotFoundException {
 }
-

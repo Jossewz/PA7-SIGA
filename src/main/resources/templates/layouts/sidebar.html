@@ -1,99 +1,84 @@
-﻿<th:block
+<th:block
 th:fragment="sidebar(activePage, bottomText, bottomUrl)">
 
     <aside class="sidebar">
 
-        <!-- Logo -->
-        <div class="sidebar-logo">
-
-            <h2>IEACI</h2>
-
-            <span>
-                Institutional
+        <a th:href="@{/}" class="sidebar-logo" aria-label="IEACI Institutional">
+            <span class="sidebar-logo-mark" aria-hidden="true">
+                <i data-lucide="leaf"></i>
             </span>
 
-        </div>
+            <span class="sidebar-logo-copy">
+                <strong>IEACI<br>Institutional</strong>
+                <small>Editorial Archive</small>
+            </span>
+        </a>
 
-        <!-- Navegación -->
-        <nav class="sidebar-nav">
+        <nav class="sidebar-nav" aria-label="Navegacion principal">
 
             <a th:href="@{/}"
                class="sidebar-item"
                th:classappend="${activePage == 'dashboard'} ? 'active'">
-
-                <span>🏠</span>
+                <i data-lucide="home"></i>
                 <span>Inicio</span>
-
             </a>
 
             <a th:href="@{/matricula}"
                class="sidebar-item"
                th:classappend="${activePage == 'matricula'} ? 'active'">
-
-                <span>🎓</span>
-                <span>Matrículas</span>
-
+                <i data-lucide="user-plus"></i>
+                <span>Matricula</span>
             </a>
 
             <a th:href="@{/calificaciones}"
                class="sidebar-item"
                th:classappend="${activePage == 'calificaciones'} ? 'active'">
-
-                <span>⭐</span>
+                <i data-lucide="star"></i>
                 <span>Calificaciones</span>
-
             </a>
 
             <a th:href="@{/asistencias}"
                class="sidebar-item"
                th:classappend="${activePage == 'asistencias'} ? 'active'">
-
-                <span>📋</span>
+                <i data-lucide="calendar-days"></i>
                 <span>Asistencia</span>
+            </a>
 
+            <a th:href="@{/certificados}"
+               class="sidebar-item"
+               th:classappend="${activePage == 'certificados'} ? 'active'">
+                <i data-lucide="badge-check"></i>
+                <span>Certificados</span>
             </a>
 
             <a th:href="@{/reportes}"
                class="sidebar-item"
                th:classappend="${activePage == 'reportes'} ? 'active'">
-
-                <span>📄</span>
+                <i data-lucide="bar-chart-3"></i>
                 <span>Reportes</span>
-
             </a>
 
             <a th:href="@{/ambiental}"
                class="sidebar-item"
                th:classappend="${activePage == 'ambiental'} ? 'active'">
-
-                <span>🌱</span>
-                <span>Módulo Ambiental</span>
-
+                <i data-lucide="sprout"></i>
+                <span>Modulo Ambiental</span>
             </a>
 
         </nav>
 
-        <!-- Footer Sidebar -->
         <div class="sidebar-footer">
 
             <a th:href="${bottomUrl}"
                class="sidebar-support">
-
-                <span>⚙️</span>
-
-                <span
-                  th:text="${bottomText}">
-                  Soporte Técnico
-                </span>
-
+                <i data-lucide="headphones"></i>
+                <span th:text="${bottomText}">Soporte Tecnico</span>
             </a>
 
             <a href="#"
                class="logout-btn">
-
-                <span>↩</span>
-                <span>Cerrar Sesión</span>
-
+                <i data-lucide="log-out"></i>
+                <span>Cerrar Sesion</span>
             </a>
 
         </div>

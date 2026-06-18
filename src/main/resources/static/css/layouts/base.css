@@ -1,14 +1,33 @@
+/* Layout raiz de la aplicacion: sidebar + contenido principal. */
 .app-layout{
     display: flex;
     min-height: 100vh;
+    background: #eafbe4;
 }
 
+/* Columna de contenido que queda a la derecha del sidebar. */
 .main-content{
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
 }
 
+/* Area interna donde se renderiza cada vista/pagina. */
 .page-content{
-    padding: 2rem;
+    flex: 1;
+    padding: 28px 32px 32px;
+}
+
+/* Tablet/movil: sidebar arriba y contenido debajo. */
+@media (max-width: 900px){
+    /* Apila layout completo en columna. */
+    .app-layout{
+        flex-direction: column;
+    }
+
+    /* Reduce padding general de paginas en pantallas pequenas. */
+    .page-content{
+        padding: 20px;
+    }
 }

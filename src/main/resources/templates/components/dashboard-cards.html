@@ -1,0 +1,35 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <article th:fragment="statCard(icon, label, value, detail, meta, tone)" th:class="'stat-card ' + ${tone}">
+        <div class="stat-card-top">
+            <span class="card-icon">
+                <i th:attr="data-lucide=${icon}"></i>
+            </span>
+            <span class="stat-pill" th:text="${meta}">+4%</span>
+        </div>
+        <p th:text="${label}">Total Estudiantes</p>
+        <div class="stat-value">
+            <strong th:text="${value}">1,284</strong>
+            <small th:if="${detail != null}" th:text="${detail}">esta semana</small>
+        </div>
+    </article>
+
+    <a th:fragment="moduleCard(icon, label, url)" th:href="${url}" class="module-card">
+        <span>
+            <i th:attr="data-lucide=${icon}"></i>
+        </span>
+        <strong th:text="${label}">Modulo</strong>
+    </a>
+
+    <article th:fragment="eventCard(day, month, title, detail)" class="event-card">
+        <time>
+            <strong th:text="${day}">25</strong>
+            <span th:text="${month}">MAY</span>
+        </time>
+        <div>
+            <strong th:text="${title}">Reunion</strong>
+            <p th:text="${detail}">09:00 AM</p>
+        </div>
+    </article>
+
+</th:block>

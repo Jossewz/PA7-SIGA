@@ -1,6 +1,10 @@
-﻿@import url('./variables.css');
+/* Importa variables de diseno reutilizables. */
+@import url('./variables.css');
+
+/* Importa reset global para normalizar estilos del navegador. */
 @import url('./reset.css');
 
+/* Estilos base del documento completo. */
 body{
     font-family:
         'Inter',

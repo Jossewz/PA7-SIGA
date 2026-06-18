@@ -1,4 +1,5 @@
-﻿*,
+/* Reset universal: elimina margenes/paddings por defecto y hace cajas predecibles. */
+*,
 *::before,
 *::after{
     box-sizing: border-box;
@@ -6,17 +7,20 @@
     padding: 0;
 }
 
+/* Configuracion base del documento y scroll suave. */
 html{
     font-size: 16px;
     scroll-behavior: smooth;
 }
 
+/* Base del body para ocupar toda la pantalla y mejorar renderizado de texto. */
 body{
     min-height: 100vh;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
 }
 
+/* Medios fluidos para que imagenes, SVG y videos no desborden. */
 img,
 picture,
 svg,
@@ -25,6 +29,7 @@ video{
     max-width: 100%;
 }
 
+/* Controles de formulario heredan tipografia y arrancan sin borde nativo. */
 button,
 input,
 textarea,
@@ -34,11 +39,13 @@ select{
     outline: none;
 }
 
+/* Links sin subrayado y heredando color del contexto. */
 a{
     text-decoration: none;
     color: inherit;
 }
 
+/* Listas sin bullets/numeracion por defecto. */
 ul,
 ol{
     list-style: none;

@@ -1,43 +1,136 @@
-﻿<!DOCTYPE html>
-<html
-xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet"
-          th:href="@{/css/globals/global.css}">
+    <title th:text="${title ?: 'Dashboard'}">Dashboard</title>
 
-    <link rel="stylesheet"
-          th:href="@{/css/layouts/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/globals/global.css}">
+    <link rel="stylesheet" th:href="@{/css/layouts/base.css}">
+    <link rel="stylesheet" th:href="@{/css/layouts/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/layouts/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/modules/dashboard.css}">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
+<div class="app-layout">
 
-<div style="display:flex;">
+    <aside th:replace="~{layouts/sidebar :: sidebar('dashboard', 'Soporte Tecnico', '/soporte')}"></aside>
 
-    <div
-        th:replace="
-        ~{layouts/sidebar ::
-        sidebar(
-        'dashboard',
-        'Soporte Técnico',
-        '/soporte'
-        )}">
-    </div>
+    <main class="main-content">
 
-    <main
-      style="
-      flex:1;
-      padding:40px;">
+        <header th:replace="~{layouts/navbar :: navbar}"></header>
 
-        <h1>
-            Dashboard
-        </h1>
+        <section class="page-content dashboard-shell">
 
+            <section class="dashboard-grid">
+
+                <div class="dashboard-top">
+
+                    <section class="welcome-panel">
+                        <div>
+                            <h1>Bienvenido, Admin.</h1>
+                            <p>Resumen del estado institucional para hoy, 24 de Mayo.</p>
+                        </div>
+                        <i data-lucide="zap" aria-hidden="true"></i>
+                    </section>
+
+                    <section class="stats-grid" aria-label="Indicadores institucionales">
+                        <div th:replace="~{components/dashboard-cards :: statCard('users', 'Total Estudiantes', '1,284', null, '+4%', 'success')}"></div>
+                        <div th:replace="~{components/dashboard-cards :: statCard('clipboard-check', 'Asistencia Hoy %', '94.2%', null, 'Optimo', 'success')}"></div>
+                        <div th:replace="~{components/dashboard-cards :: statCard('badge-check', 'Certificados', '45', 'esta semana', 'Meta: 60', 'success')}"></div>
+                        <div th:replace="~{components/dashboard-cards :: statCard('triangle-alert', 'Alertas', '12', null, 'Revisar', 'warning')}"></div>
+                    </section>
+
+                </div>
+
+                <div class="dashboard-main">
+
+                    <section class="modules-section">
+                        <h2>
+                            <i data-lucide="layout-grid"></i>
+                            Modulos de Gestion
+                        </h2>
+
+                        <div class="modules-grid">
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('user-check', 'Matricula', '/matricula')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('star', 'Calificaciones', '/calificaciones')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('calendar-check', 'Asistencia', '/asistencias')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('badge-check', 'Certificados', '/certificados')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('bar-chart-3', 'Reportes', '/reportes')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('leaf', 'Modulo Ambiental', '/ambiental')}"></div>
+                        </div>
+                    </section>
+
+                    <div class="dashboard-bottom">
+                        <article class="audit-card">
+                            <span>Sostenibilidad</span>
+                            <h3>Ultima Auditoria Verde</h3>
+                            <div class="audit-score">
+                                <strong>9.4</strong>
+                                <small>/ 10.0</small>
+                            </div>
+                        </article>
+
+                        <article class="activity-card">
+                            <h2>
+                                <i data-lucide="history"></i>
+                                Actividad Reciente
+                            </h2>
+
+                            <ul>
+                                <li class="ok">
+                                    <strong>Nueva Matricula: Mateo Silva</strong>
+                                    <span>hace 15 min</span>
+                                </li>
+                                <li class="ok">
+                                    <strong>Certificado Generado</strong>
+                                    <span>hace 2 hrs</span>
+                                </li>
+                                <li class="danger">
+                                    <strong>Alerta de Asistencia</strong>
+                                    <span>hace 4 hrs</span>
+                                </li>
+                            </ul>
+                        </article>
+                    </div>
+
+                </div>
+
+                <aside class="dashboard-side">
+                    <section class="events-panel">
+                        <h2>
+                            <i data-lucide="calendar-days"></i>
+                            Proximos Eventos
+                        </h2>
+
+                        <div class="events-list">
+                            <div th:replace="~{components/dashboard-cards :: eventCard('25', 'MAY', 'Reunion de Coordinadores', '09:00 AM - Sala de Juntas')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: eventCard('28', 'MAY', 'Cierre de Calificaciones', 'Todo el dia - Portal Digital')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: eventCard('02', 'JUN', 'Taller Huerto Escolar', '11:30 AM - Zona Verde')}"></div>
+                        </div>
+
+                        <div class="quote-card">
+                            <strong>Inspiracion del Dia</strong>
+                            <p>"La educacion es el arma mas poderosa para cambiar el mundo y preservar nuestra naturaleza."</p>
+                        </div>
+                    </section>
+
+                </aside>
+
+            </section>
+
+        </section>
     </main>
 
 </div>
 
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>

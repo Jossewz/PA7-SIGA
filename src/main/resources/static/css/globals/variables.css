@@ -1,47 +1,60 @@
-﻿:root {
+:root {
 
-    /* Sidebar */
+    /* Color de fondo principal del sidebar. */
     --sidebar-bg: #1B5E20;
+
+    /* Color de texto principal del sidebar. */
     --sidebar-text: #ECFFE4;
 
+    /* Fondo del item activo dentro del sidebar. */
     --sidebar-item-active:
         rgba(255,255,255,.10);
 
+    /* Color de borde o indicador activo del sidebar. */
     --sidebar-border:
         #ACF4A4;
 
-    /* Botón inferior */
+    /* Fondo del boton de accion inferior, como Soporte Tecnico. */
     --action-btn-bg:
         #A0F399;
 
+    /* Texto del boton de accion inferior. */
     --action-btn-text:
         #217128;
 
-    /* Fondo general */
+    /* Fondo general de la pagina. */
     --page-bg:
         #DFF2D8;
 
-    /* Cards */
+    /* Fondo base para cards translucidas. */
     --card-bg:
         rgba(255,255,255,.10);
 
+    /* Borde base para cards translucidas. */
     --card-border:
         rgba(172,244,164,.45);
 
-    /* Texto */
+    /* Color principal de textos. */
     --text-primary:
         #173518;
 
+    /* Color secundario de textos/descripciones. */
     --text-secondary:
         #527254;
 
-    /* Radius */
+    /* Radio extra grande para contenedores principales. */
     --radius-xl: 28px;
+
+    /* Radio grande para paneles y cards destacadas. */
     --radius-lg: 24px;
+
+    /* Radio medio para cards comunes. */
     --radius-md: 18px;
+
+    /* Radio pequeno para botones/inputs. */
     --radius-sm: 12px;
 
-    /* Shadow */
+    /* Sombra suave compartida para elementos elevados. */
     --shadow-soft:
         0 4px 20px rgba(0,0,0,.08);
 }

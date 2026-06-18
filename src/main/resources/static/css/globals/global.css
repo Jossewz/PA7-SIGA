@@ -1,1 +1,16 @@
-﻿/* css\globals\global.css */
+﻿@import url('./variables.css');
+@import url('./reset.css');
+
+body{
+    font-family:
+        'Inter',
+        sans-serif;
+
+    background:
+        var(--page-bg);
+
+    color:
+        var(--text-primary);
+
+    overflow-x: hidden;
+}

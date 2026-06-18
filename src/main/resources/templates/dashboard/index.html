@@ -1,1 +1,43 @@
-﻿<!DOCTYPE html>\n<html xmlns:th='http://www.thymeleaf.org'>\n<body>\n    <section th:fragment='content'>Index dashboard</section>\n</body>\n</html>
+﻿<!DOCTYPE html>
+<html
+xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Dashboard</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/globals/global.css}">
+
+    <link rel="stylesheet"
+          th:href="@{/css/layouts/sidebar.css}">
+</head>
+
+<body>
+
+<div style="display:flex;">
+
+    <div
+        th:replace="
+        ~{layouts/sidebar ::
+        sidebar(
+        'dashboard',
+        'Soporte Técnico',
+        '/soporte'
+        )}">
+    </div>
+
+    <main
+      style="
+      flex:1;
+      padding:40px;">
+
+        <h1>
+            Dashboard
+        </h1>
+
+    </main>
+
+</div>
+
+</body>
+</html>

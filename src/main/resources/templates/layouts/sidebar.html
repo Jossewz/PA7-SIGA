@@ -1,8 +1,103 @@
-﻿<div th:fragment="sidebar">
-    <nav>
-        <ul>
-            <li><a th:href="@{/dashboard}">Dashboard</a></li>
-            <li><a th:href="@{/usuarios}">Usuarios</a></li>
-        </ul>
-    </nav>
-</div>
+﻿<th:block
+th:fragment="sidebar(activePage, bottomText, bottomUrl)">
+
+    <aside class="sidebar">
+
+        <!-- Logo -->
+        <div class="sidebar-logo">
+
+            <h2>IEACI</h2>
+
+            <span>
+                Institutional
+            </span>
+
+        </div>
+
+        <!-- Navegación -->
+        <nav class="sidebar-nav">
+
+            <a th:href="@{/}"
+               class="sidebar-item"
+               th:classappend="${activePage == 'dashboard'} ? 'active'">
+
+                <span>🏠</span>
+                <span>Inicio</span>
+
+            </a>
+
+            <a th:href="@{/matricula}"
+               class="sidebar-item"
+               th:classappend="${activePage == 'matricula'} ? 'active'">
+
+                <span>🎓</span>
+                <span>Matrículas</span>
+
+            </a>
+
+            <a th:href="@{/calificaciones}"
+               class="sidebar-item"
+               th:classappend="${activePage == 'calificaciones'} ? 'active'">
+
+                <span>⭐</span>
+                <span>Calificaciones</span>
+
+            </a>
+
+            <a th:href="@{/asistencias}"
+               class="sidebar-item"
+               th:classappend="${activePage == 'asistencias'} ? 'active'">
+
+                <span>📋</span>
+                <span>Asistencia</span>
+
+            </a>
+
+            <a th:href="@{/reportes}"
+               class="sidebar-item"
+               th:classappend="${activePage == 'reportes'} ? 'active'">
+
+                <span>📄</span>
+                <span>Reportes</span>
+
+            </a>
+
+            <a th:href="@{/ambiental}"
+               class="sidebar-item"
+               th:classappend="${activePage == 'ambiental'} ? 'active'">
+
+                <span>🌱</span>
+                <span>Módulo Ambiental</span>
+
+            </a>
+
+        </nav>
+
+        <!-- Footer Sidebar -->
+        <div class="sidebar-footer">
+
+            <a th:href="${bottomUrl}"
+               class="sidebar-support">
+
+                <span>⚙️</span>
+
+                <span
+                  th:text="${bottomText}">
+                  Soporte Técnico
+                </span>
+
+            </a>
+
+            <a href="#"
+               class="logout-btn">
+
+                <span>↩</span>
+                <span>Cerrar Sesión</span>
+
+            </a>
+
+        </div>
+
+    </aside>
+
+</th:block>

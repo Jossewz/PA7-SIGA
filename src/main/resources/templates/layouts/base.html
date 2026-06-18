@@ -1,15 +1,83 @@
 ﻿<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html
+lang="es"
+xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8" />
-    <title th:replace="this::title">Colegio</title>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title
+        th:text="${title ?: 'SIGA'}">
+        SIGA
+    </title>
+
+    <!-- CSS GLOBAL -->
+    <link rel="stylesheet"
+          th:href="@{/css/globals/global.css}">
+
+    <!-- CSS LAYOUT -->
+    <link rel="stylesheet"
+          th:href="@{/css/layouts/base.css}">
+
+    <link rel="stylesheet"
+          th:href="@{/css/layouts/sidebar.css}">
+
+    <link rel="stylesheet"
+          th:href="@{/css/layouts/navbar.css}">
+
+    <!-- CSS DINÁMICO -->
+    <th:block
+      th:replace="${pageCss}">
+    </th:block>
+
+    <!-- HTMX -->
+    <script
+      src="https://unpkg.com/htmx.org">
+    </script>
+
 </head>
+
 <body>
-    <div th:replace="layouts/navbar :: navbar"></div>
-    <div th:replace="layouts/sidebar :: sidebar"></div>
-    <main>
-        <section th:fragment="content">Contenido</section>
+
+<div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside
+      th:replace="
+      ~{layouts/sidebar :: sidebar(
+        activePage='dashboard',
+        bottomUrl='/soporte',
+        bottomText='Soporte Técnico'
+      )}">
+    </aside>
+
+    <!-- CONTENIDO -->
+    <main class="main-content">
+
+        <!-- NAVBAR -->
+        <header
+          th:replace="
+          ~{layouts/navbar :: navbar}">
+        </header>
+
+        <!-- CONTENIDO DINÁMICO -->
+        <section
+          class="page-content">
+
+            <th:block
+              th:replace="${content}">
+            </th:block>
+
+        </section>
+
     </main>
-    <div th:replace="layouts/footer :: footer"></div>
+
+</div>
+
 </body>
 </html>

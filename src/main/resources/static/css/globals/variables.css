@@ -1,1 +1,47 @@
-﻿/* css\globals\variables.css */
+﻿:root {
+
+    /* Sidebar */
+    --sidebar-bg: #1B5E20;
+    --sidebar-text: #ECFFE4;
+
+    --sidebar-item-active:
+        rgba(255,255,255,.10);
+
+    --sidebar-border:
+        #ACF4A4;
+
+    /* Botón inferior */
+    --action-btn-bg:
+        #A0F399;
+
+    --action-btn-text:
+        #217128;
+
+    /* Fondo general */
+    --page-bg:
+        #DFF2D8;
+
+    /* Cards */
+    --card-bg:
+        rgba(255,255,255,.10);
+
+    --card-border:
+        rgba(172,244,164,.45);
+
+    /* Texto */
+    --text-primary:
+        #173518;
+
+    --text-secondary:
+        #527254;
+
+    /* Radius */
+    --radius-xl: 28px;
+    --radius-lg: 24px;
+    --radius-md: 18px;
+    --radius-sm: 12px;
+
+    /* Shadow */
+    --shadow-soft:
+        0 4px 20px rgba(0,0,0,.08);
+}

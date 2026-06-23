@@ -1,83 +1,83 @@
 <th:block
 th:fragment="sidebar(activePage, bottomText, bottomUrl)">
 
-    <aside class="sidebar">
+    <aside class="sticky top-0 w-[244px] h-screen p-[32px_16px_24px] flex flex-col bg-sidebar text-sidebar-text shadow-[inset_-1px_0_0_rgba(255,255,255,0.08)] overflow-hidden max-[900px]:static max-[900px]:w-full max-[900px]:h-auto max-[900px]:p-4 max-[900px]:overflow-visible">
 
-        <a th:href="@{/}" class="sidebar-logo" aria-label="IEACI Institutional">
-            <span class="sidebar-logo-mark" aria-hidden="true">
-                <i data-lucide="leaf"></i>
+        <a th:href="@{/}" class="flex items-center gap-3 m-[4px_20px_40px] text-sidebar-text uppercase max-[900px]:m-[0_4px_16px]" aria-label="IEACI Institutional">
+            <span class="grid place-items-center w-5.5 h-5.5" aria-hidden="true">
+                <i data-lucide="leaf" class="size-[18px] stroke-2 fill-sidebar-text"></i>
             </span>
 
-            <span class="sidebar-logo-copy">
-                <strong>IEACI<br>Institutional</strong>
-                <small>Editorial Archive</small>
+            <span class="grid gap-[2px]">
+                <strong class="text-[15px] leading-[0.92] font-black tracking-normal">IEACI<br>Institutional</strong>
+                <small class="text-[8px] leading-none font-extrabold tracking-[0.6px] opacity-86">Editorial Archive</small>
             </span>
         </a>
 
-        <nav class="sidebar-nav" aria-label="Navegacion principal">
+        <nav class="sidebar-nav flex flex-col gap-2 min-h-0 overflow-y-auto pr-0.5 max-[900px]:grid max-[900px]:grid-cols-3 max-[900px]:overflow-visible max-[900px]:pr-0 max-[620px]:grid-cols-2" aria-label="Navegacion principal">
 
             <a th:href="@{/}"
-               class="sidebar-item"
-               th:classappend="${activePage == 'dashboard'} ? 'active'">
-                <i data-lucide="home"></i>
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-[900px]:justify-center max-[900px]:px-2.5"
+               th:classappend="${activePage == 'dashboard'} ? 'bg-white/12 text-white'">
+                <i data-lucide="home" class="size-[18px] shrink-0 stroke-2"></i>
                 <span>Inicio</span>
             </a>
 
             <a th:href="@{/matricula}"
-               class="sidebar-item"
-               th:classappend="${activePage == 'matricula'} ? 'active'">
-                <i data-lucide="user-plus"></i>
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-[900px]:justify-center max-[900px]:px-2.5"
+               th:classappend="${activePage == 'matricula'} ? 'bg-white/12 text-white'">
+                <i data-lucide="user-plus" class="size-[18px] shrink-0 stroke-2"></i>
                 <span>Matricula</span>
             </a>
 
             <a th:href="@{/calificaciones}"
-               class="sidebar-item"
-               th:classappend="${activePage == 'calificaciones'} ? 'active'">
-                <i data-lucide="star"></i>
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-[900px]:justify-center max-[900px]:px-2.5"
+               th:classappend="${activePage == 'calificaciones'} ? 'bg-white/12 text-white'">
+                <i data-lucide="star" class="size-[18px] shrink-0 stroke-2"></i>
                 <span>Calificaciones</span>
             </a>
 
             <a th:href="@{/asistencias}"
-               class="sidebar-item"
-               th:classappend="${activePage == 'asistencias'} ? 'active'">
-                <i data-lucide="calendar-days"></i>
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-[900px]:justify-center max-[900px]:px-2.5"
+               th:classappend="${activePage == 'asistencias'} ? 'bg-white/12 text-white'">
+                <i data-lucide="calendar-days" class="size-[18px] shrink-0 stroke-2"></i>
                 <span>Asistencia</span>
             </a>
 
             <a th:href="@{/certificados}"
-               class="sidebar-item"
-               th:classappend="${activePage == 'certificados'} ? 'active'">
-                <i data-lucide="badge-check"></i>
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-[900px]:justify-center max-[900px]:px-2.5"
+               th:classappend="${activePage == 'certificados'} ? 'bg-white/12 text-white'">
+                <i data-lucide="badge-check" class="size-[18px] shrink-0 stroke-2"></i>
                 <span>Certificados</span>
             </a>
 
             <a th:href="@{/reportes}"
-               class="sidebar-item"
-               th:classappend="${activePage == 'reportes'} ? 'active'">
-                <i data-lucide="bar-chart-3"></i>
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-[900px]:justify-center max-[900px]:px-2.5"
+               th:classappend="${activePage == 'reportes'} ? 'bg-white/12 text-white'">
+                <i data-lucide="bar-chart-3" class="size-[18px] shrink-0 stroke-2"></i>
                 <span>Reportes</span>
             </a>
 
             <a th:href="@{/ambiental}"
-               class="sidebar-item"
-               th:classappend="${activePage == 'ambiental'} ? 'active'">
-                <i data-lucide="sprout"></i>
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-[900px]:justify-center max-[900px]:px-2.5"
+               th:classappend="${activePage == 'ambiental'} ? 'bg-white/12 text-white'">
+                <i data-lucide="sprout" class="size-[18px] shrink-0 stroke-2"></i>
                 <span>Modulo Ambiental</span>
             </a>
 
         </nav>
 
-        <div class="sidebar-footer">
+        <div class="mt-auto flex flex-col gap-3.5 max-[900px]:hidden">
 
             <a th:href="${bottomUrl}"
-               class="sidebar-support">
-                <i data-lucide="headphones"></i>
+               class="min-h-[44px] flex items-center gap-3 px-[18px] rounded-lg text-[13px] font-semibold bg-action-btn text-action-btn-text hover:brightness-97 transition-all">
+                <i data-lucide="headphones" class="size-[18px] shrink-0 stroke-2"></i>
                 <span th:text="${bottomText}">Soporte Tecnico</span>
             </a>
 
             <a href="#"
-               class="logout-btn">
-                <i data-lucide="log-out"></i>
+               class="min-h-[44px] flex items-center gap-3 px-[18px] rounded-lg text-[13px] font-semibold text-sidebar-text/72 hover:text-white hover:brightness-97 transition-all">
+                <i data-lucide="log-out" class="size-[18px] shrink-0 stroke-2"></i>
                 <span>Cerrar Sesion</span>
             </a>
 

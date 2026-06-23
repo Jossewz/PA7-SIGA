@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@source "../../templates";
+
+@theme {
+  --color-sidebar: #145f22;
+  --color-sidebar-text: #ecffe4;
+  --color-sidebar-active: rgba(255, 255, 255, 0.12);
+  --color-sidebar-border: #ACF4A4;
+  --color-action-btn: #a4f59c;
+  --color-action-btn-text: #1b6a25;
+  --color-page-bg: #eafbe4;
+  --color-card-bg: rgba(255, 255, 255, 0.1);
+  --color-card-border: rgba(172, 244, 164, 0.45);
+  
+  --color-card-green: #d3fccc;
+  --color-card-green-light: #c8f2c0;
+  --color-card-green-gradient-from: #c5f8bd;
+  --color-card-green-gradient-to: #d8ffcf;
+  --color-card-warning: #f7efd9;
+  
+  --color-text-primary: #173518;
+  --color-text-secondary: #527254;
+  --color-text-muted: #6f826f;
+  
+  --color-icon-green: #b7f3ae;
+  --color-icon-warning: #fff2e8;
+  
+  --color-pill-green: #a9f2a3;
+  --color-pill-red: #ffc2c4;
+  
+  --color-alert-red: #c13025;
+  
+  --color-dot-green: #148f2b;
+  --color-dot-red: #c82333;
+  
+  --color-search-placeholder: #8a978d;
+  --color-notification-red: #e53935;
+
+  --radius-xl: 28px;
+  --radius-lg: 24px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-page-bg);
+    color: var(--color-text-primary);
+    overflow-x: hidden;
+  }
+  
+  /* Scrollbar personalizado para el sidebar */
+  .sidebar-nav::-webkit-scrollbar {
+    width: 5px;
+  }
+  
+  .sidebar-nav::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(236, 255, 228, 0.28);
+  }
+}

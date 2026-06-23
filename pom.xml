@@ -137,6 +137,24 @@
                 </configuration>
             </plugin>
 
+            <!-- Tailwind CSS Maven Plugin -->
+            <plugin>
+                <groupId>io.github.4ndreidev</groupId>
+                <artifactId>tailwind-maven-plugin</artifactId>
+                <version>1.1.0</version>
+                <configuration>
+                    <inputFile>${project.basedir}/src/main/resources/static/css/input.css</inputFile>
+                    <outputFile>${project.build.outputDirectory}/static/css/output.css</outputFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 

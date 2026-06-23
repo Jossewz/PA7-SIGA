@@ -1,28 +1,30 @@
 <div th:fragment="navbar">
-    <header class="topbar">
-        <form class="topbar-search" action="#" role="search">
-            <i data-lucide="search" aria-hidden="true"></i>
+    <header class="h-16 flex items-center justify-between gap-6 px-8 bg-page-bg max-[720px]:h-auto max-[720px]:items-stretch max-[720px]:flex-col max-[720px]:px-5 max-[720px]:pt-4 max-[720px]:pb-0">
+        <form class="w-[min(425px,100%)] h-9 flex items-center gap-2.5 px-3.5 rounded-[10px] bg-white text-[#7c8d80] max-[720px]:w-full" action="#" role="search">
+            <i data-lucide="search" class="size-[17px] shrink-0" aria-hidden="true"></i>
             <input
                 type="search"
+                class="w-full bg-transparent text-[#183b1e] text-[12px] placeholder-search-placeholder"
                 placeholder="Buscar expedientes, alumnos o reportes..."
                 aria-label="Buscar expedientes, alumnos o reportes">
         </form>
 
-        <div class="topbar-actions">
-            <button class="icon-button has-dot" type="button" aria-label="Notificaciones">
-                <i data-lucide="bell"></i>
+        <div class="flex items-center gap-4 ml-auto max-[720px]:w-full max-[720px]:justify-end">
+            <button class="relative w-7 h-7 grid place-items-center rounded-full bg-transparent text-text-primary cursor-pointer after:content-[''] after:absolute after:top-1 after:right-[5px] after:w-[7px] after:h-[7px] after:border-[2px] after:border-page-bg after:rounded-full after:bg-notification-red" type="button" aria-label="Notificaciones">
+                <i data-lucide="bell" class="size-[18px] stroke-2"></i>
             </button>
 
-            <button class="icon-button" type="button" aria-label="Configuracion">
-                <i data-lucide="settings"></i>
+            <button class="relative w-7 h-7 grid place-items-center rounded-full bg-transparent text-text-primary cursor-pointer" type="button" aria-label="Configuracion">
+                <i data-lucide="settings" class="size-[18px] stroke-2"></i>
             </button>
 
-            <div class="user-chip">
-                <span>
-                    <strong>Admin Usuario</strong>
-                    <small>Coordinacion General</small>
+            <div class="flex items-center gap-2.5 text-text-primary text-right">
+                <span class="grid gap-[1px]">
+                    <strong class="text-[11px] leading-[1.1] font-extrabold">Admin Usuario</strong>
+                    <small class="text-text-secondary text-[9px] leading-[1.1] font-semibold">Coordinacion General</small>
                 </span>
                 <img
+                    class="w-9 h-9 border-[2px] border-[#0f6a3d] rounded-full object-cover"
                     src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=96&q=80"
                     alt="Admin Usuario">
             </div>

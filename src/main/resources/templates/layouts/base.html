@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html
 lang="es"
 xmlns:th="http://www.thymeleaf.org">
@@ -16,24 +16,9 @@ xmlns:th="http://www.thymeleaf.org">
         SIGA
     </title>
 
-    <!-- CSS GLOBAL -->
+    <!-- Tailwind CSS -->
     <link rel="stylesheet"
-          th:href="@{/css/globals/global.css}">
-
-    <!-- CSS LAYOUT -->
-    <link rel="stylesheet"
-          th:href="@{/css/layouts/base.css}">
-
-    <link rel="stylesheet"
-          th:href="@{/css/layouts/sidebar.css}">
-
-    <link rel="stylesheet"
-          th:href="@{/css/layouts/navbar.css}">
-
-    <!-- CSS DINÁMICO -->
-    <th:block
-      th:replace="${pageCss}">
-    </th:block>
+          th:href="@{/css/output.css}">
 
     <!-- HTMX -->
     <script
@@ -46,7 +31,7 @@ xmlns:th="http://www.thymeleaf.org">
 
 <body>
 
-<div class="app-layout">
+<div class="flex min-h-screen bg-page-bg max-[900px]:flex-col">
 
     <!-- SIDEBAR -->
     <aside
@@ -59,7 +44,7 @@ xmlns:th="http://www.thymeleaf.org">
     </aside>
 
     <!-- CONTENIDO -->
-    <main class="main-content">
+    <main class="flex-1 min-w-0 flex flex-col">
 
         <!-- NAVBAR -->
         <header
@@ -69,7 +54,7 @@ xmlns:th="http://www.thymeleaf.org">
 
         <!-- CONTENIDO DINÁMICO -->
         <section
-          class="page-content">
+          class="flex-1 p-[28px_32px_32px] max-[900px]:p-5">
 
             <th:block
               th:replace="${content}">

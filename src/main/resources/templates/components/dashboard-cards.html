@@ -1,34 +1,42 @@
 <th:block xmlns:th="http://www.thymeleaf.org">
 
-    <article th:fragment="statCard(icon, label, value, detail, meta, tone)" th:class="'stat-card ' + ${tone}">
-        <div class="stat-card-top">
-            <span class="card-icon">
-                <i th:attr="data-lucide=${icon}"></i>
+    <article th:fragment="statCard(icon, label, value, detail, meta, tone)" 
+             class="min-h-[clamp(132px,9vw,160px)] p-[clamp(22px,1.5vw,30px)] rounded-xl"
+             th:classappend="${tone == 'warning'} ? 'bg-card-warning' : 'bg-card-green'">
+        <div class="flex items-center justify-between gap-3 mb-5.5">
+            <span class="size-7 grid place-items-center rounded-md"
+                  th:classappend="${tone == 'warning'} ? 'bg-icon-warning text-[#c93831]' : 'bg-icon-green text-sidebar'">
+                <i th:attr="data-lucide=${icon}" class="size-4 shrink-0 stroke-2"></i>
             </span>
-            <span class="stat-pill" th:text="${meta}">+4%</span>
+            <span class="px-2.25 py-1.25 rounded-full text-[10px] leading-none font-extrabold"
+                  th:classappend="${tone == 'warning'} ? 'bg-pill-red text-alert-red' : 'bg-pill-green text-sidebar'"
+                  th:text="${meta}">+4%</span>
         </div>
-        <p th:text="${label}">Total Estudiantes</p>
-        <div class="stat-value">
-            <strong th:text="${value}">1,284</strong>
-            <small th:if="${detail != null}" th:text="${detail}">esta semana</small>
+        <p class="mb-1.5 text-text-secondary text-[12px] font-bold" th:text="${label}">Total Estudiantes</p>
+        <div class="flex items-baseline gap-1.5 flex-wrap">
+            <strong class="text-[25px] leading-none font-black" 
+                    th:classappend="${tone == 'warning'} ? 'text-alert-red' : 'text-sidebar'"
+                    th:text="${value}">1,284</strong>
+            <small th:if="${detail != null}" class="text-text-muted text-[10px] font-bold" th:text="${detail}">esta semana</small>
         </div>
     </article>
 
-    <a th:fragment="moduleCard(icon, label, url)" th:href="${url}" class="module-card">
-        <span>
-            <i th:attr="data-lucide=${icon}"></i>
+    <a th:fragment="moduleCard(icon, label, url)" th:href="${url}" 
+       class="min-h-[clamp(132px,9vw,158px)] grid place-items-center gap-4 p-4.5 rounded-xl bg-white text-[#243d28] text-center shadow-soft">
+        <span class="w-11 h-11 grid place-items-center rounded-full bg-[#f1f5f1] text-text-primary">
+            <i th:attr="data-lucide=${icon}" class="size-[18px] shrink-0 stroke-2"></i>
         </span>
-        <strong th:text="${label}">Modulo</strong>
+        <strong class="text-sm font-extrabold" th:text="${label}">Modulo</strong>
     </a>
 
-    <article th:fragment="eventCard(day, month, title, detail)" class="event-card">
-        <time>
-            <strong th:text="${day}">25</strong>
-            <span th:text="${month}">MAY</span>
+    <article th:fragment="eventCard(day, month, title, detail)" class="min-h-[98px] flex items-center gap-4 p-4 rounded-xl bg-white shadow-soft">
+        <time class="w-11 h-11 grid place-items-center content-center rounded-lg bg-sidebar text-white shrink-0">
+            <strong class="text-inherit" th:text="${day}">25</strong>
+            <span class="text-[8px] font-black" th:text="${month}">MAY</span>
         </time>
         <div>
-            <strong th:text="${title}">Reunion</strong>
-            <p th:text="${detail}">09:00 AM</p>
+            <strong class="block text-text-primary text-[12px] leading-[1.15] font-black" th:text="${title}">Reunion</strong>
+            <p class="mt-1 text-[#677768] text-[10px] leading-tight" th:text="${detail}">09:00 AM</p>
         </div>
     </article>
 

@@ -1,6 +1,6 @@
 <div th:fragment="navbar">
-    <header class="h-16 flex items-center justify-between gap-6 px-8 bg-page-bg max-[720px]:h-auto max-[720px]:items-stretch max-[720px]:flex-col max-[720px]:px-5 max-[720px]:pt-4 max-[720px]:pb-0">
-        <form class="w-[min(425px,100%)] h-9 flex items-center gap-2.5 px-3.5 rounded-[10px] bg-white text-[#7c8d80] max-[720px]:w-full" action="#" role="search">
+    <header class="h-16 flex items-center justify-between gap-6 px-8 bg-page-bg max-md:h-auto max-md:items-stretch max-md:flex-col max-md:px-5 max-md:pt-4 max-md:pb-0">
+        <form class="w-[min(425px,100%)] h-9 flex items-center gap-2.5 px-3.5 rounded-[10px] bg-white text-[#7c8d80] max-md:w-full" action="#" role="search">
             <i data-lucide="search" class="size-[17px] shrink-0" aria-hidden="true"></i>
             <input
                 type="search"
@@ -9,7 +9,7 @@
                 aria-label="Buscar expedientes, alumnos o reportes">
         </form>
 
-        <div class="flex items-center gap-4 ml-auto max-[720px]:w-full max-[720px]:justify-end">
+        <div class="flex items-center gap-4 ml-auto max-md:w-full max-md:justify-end">
             <button class="relative w-7 h-7 grid place-items-center rounded-full bg-transparent text-text-primary cursor-pointer after:content-[''] after:absolute after:top-1 after:right-[5px] after:w-[7px] after:h-[7px] after:border-[2px] after:border-page-bg after:rounded-full after:bg-notification-red" type="button" aria-label="Notificaciones">
                 <i data-lucide="bell" class="size-[18px] stroke-2"></i>
             </button>

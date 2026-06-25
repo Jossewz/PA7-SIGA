@@ -20,18 +20,19 @@ xmlns:th="http://www.thymeleaf.org">
     <link rel="stylesheet"
           th:href="@{/css/output.css}">
 
-    <!-- HTMX -->
+    <!-- HTMX v2 -->
     <script
-      src="https://unpkg.com/htmx.org">
+      src="https://unpkg.com/htmx.org@2.0.10/dist/htmx.min.js">
     </script>
 
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
 </head>
 
 <body>
 
-<div class="flex min-h-screen bg-page-bg max-[900px]:flex-col">
+<div class="flex min-h-screen bg-page-bg max-md:flex-col">
 
     <!-- SIDEBAR -->
     <aside
@@ -54,7 +55,7 @@ xmlns:th="http://www.thymeleaf.org">
 
         <!-- CONTENIDO DINÁMICO -->
         <section
-          class="flex-1 p-[28px_32px_32px] max-[900px]:p-5">
+          class="flex-1 p-[28px_32px_32px] max-md:p-5">
 
             <th:block
               th:replace="${content}">

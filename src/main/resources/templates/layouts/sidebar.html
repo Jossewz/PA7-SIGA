@@ -1,9 +1,9 @@
 <th:block
 th:fragment="sidebar(activePage, bottomText, bottomUrl)">
 
-    <aside class="sticky top-0 w-[244px] h-screen p-[32px_16px_24px] flex flex-col bg-sidebar text-sidebar-text shadow-[inset_-1px_0_0_rgba(255,255,255,0.08)] overflow-hidden max-[900px]:static max-[900px]:w-full max-[900px]:h-auto max-[900px]:p-4 max-[900px]:overflow-visible">
+    <aside class="sticky top-0 w-[244px] h-screen p-[32px_16px_24px] flex flex-col bg-sidebar text-sidebar-text shadow-[inset_-1px_0_0_rgba(255,255,255,0.08)] overflow-hidden max-md:static max-md:w-full max-md:h-auto max-md:p-4 max-md:overflow-visible">
 
-        <a th:href="@{/}" class="flex items-center gap-3 m-[4px_20px_40px] text-sidebar-text uppercase max-[900px]:m-[0_4px_16px]" aria-label="IEACI Institutional">
+        <a th:href="@{/}" class="flex items-center gap-3 m-[4px_20px_40px] text-sidebar-text uppercase max-md:m-[0_4px_16px]" aria-label="IEACI Institutional">
             <span class="grid place-items-center w-5.5 h-5.5" aria-hidden="true">
                 <i data-lucide="leaf" class="size-[18px] stroke-2 fill-sidebar-text"></i>
             </span>
@@ -14,52 +14,52 @@ th:fragment="sidebar(activePage, bottomText, bottomUrl)">
             </span>
         </a>
 
-        <nav class="sidebar-nav flex flex-col gap-2 min-h-0 overflow-y-auto pr-0.5 max-[900px]:grid max-[900px]:grid-cols-3 max-[900px]:overflow-visible max-[900px]:pr-0 max-[620px]:grid-cols-2" aria-label="Navegacion principal">
+        <nav class="sidebar-nav flex flex-col gap-2 min-h-0 overflow-y-auto pr-0.5 max-md:grid max-md:grid-cols-3 max-md:overflow-visible max-md:pr-0 max-sm:grid-cols-2" aria-label="Navegacion principal">
 
             <a th:href="@{/}"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-[900px]:justify-center max-[900px]:px-2.5"
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
                th:classappend="${activePage == 'dashboard'} ? 'bg-white/12 text-white'">
                 <i data-lucide="home" class="size-[18px] shrink-0 stroke-2"></i>
                 <span>Inicio</span>
             </a>
 
             <a th:href="@{/matricula}"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-[900px]:justify-center max-[900px]:px-2.5"
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
                th:classappend="${activePage == 'matricula'} ? 'bg-white/12 text-white'">
                 <i data-lucide="user-plus" class="size-[18px] shrink-0 stroke-2"></i>
                 <span>Matricula</span>
             </a>
 
             <a th:href="@{/calificaciones}"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-[900px]:justify-center max-[900px]:px-2.5"
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
                th:classappend="${activePage == 'calificaciones'} ? 'bg-white/12 text-white'">
                 <i data-lucide="star" class="size-[18px] shrink-0 stroke-2"></i>
                 <span>Calificaciones</span>
             </a>
 
             <a th:href="@{/asistencias}"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-[900px]:justify-center max-[900px]:px-2.5"
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
                th:classappend="${activePage == 'asistencias'} ? 'bg-white/12 text-white'">
                 <i data-lucide="calendar-days" class="size-[18px] shrink-0 stroke-2"></i>
                 <span>Asistencia</span>
             </a>
 
             <a th:href="@{/certificados}"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-[900px]:justify-center max-[900px]:px-2.5"
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
                th:classappend="${activePage == 'certificados'} ? 'bg-white/12 text-white'">
                 <i data-lucide="badge-check" class="size-[18px] shrink-0 stroke-2"></i>
                 <span>Certificados</span>
             </a>
 
             <a th:href="@{/reportes}"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-[900px]:justify-center max-[900px]:px-2.5"
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
                th:classappend="${activePage == 'reportes'} ? 'bg-white/12 text-white'">
                 <i data-lucide="bar-chart-3" class="size-[18px] shrink-0 stroke-2"></i>
                 <span>Reportes</span>
             </a>
 
             <a th:href="@{/ambiental}"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-[900px]:justify-center max-[900px]:px-2.5"
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
                th:classappend="${activePage == 'ambiental'} ? 'bg-white/12 text-white'">
                 <i data-lucide="sprout" class="size-[18px] shrink-0 stroke-2"></i>
                 <span>Modulo Ambiental</span>
@@ -67,7 +67,7 @@ th:fragment="sidebar(activePage, bottomText, bottomUrl)">
 
         </nav>
 
-        <div class="mt-auto flex flex-col gap-3.5 max-[900px]:hidden">
+        <div class="mt-auto flex flex-col gap-3.5 max-md:hidden">
 
             <a th:href="${bottomUrl}"
                class="min-h-[44px] flex items-center gap-3 px-[18px] rounded-lg text-[13px] font-semibold bg-action-btn text-action-btn-text hover:brightness-97 transition-all">

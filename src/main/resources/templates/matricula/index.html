@@ -1,1 +1,85 @@
-﻿<!DOCTYPE html>\n<html xmlns:th='http://www.thymeleaf.org'>\n<body>\n    <section th:fragment='content'>Index matricula</section>\n</body>\n</html>
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title th:text="${title ?: 'Formulario de Matrícula – IEACI'}">Formulario de Matrícula</title>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" th:href="@{/css/output.css}">
+
+    <!-- HTMX v2 -->
+    <script src="https://unpkg.com/htmx.org@2.0.10/dist/htmx.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+
+<body>
+    <div class="flex min-h-screen bg-page-bg max-md:flex-col">
+
+        <!-- BARRA LATERAL (SIDEBAR) -->
+        <aside th:replace="~{layouts/sidebar :: sidebar('matricula', 'Soporte Tecnico', '/soporte')}"></aside>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="flex-1 min-w-0 flex flex-col">
+
+            <!-- BARRA DE NAVEGACIÓN SUPERIOR (NAVBAR) -->
+            <header th:replace="~{layouts/navbar :: navbar}"></header>
+
+            <!-- SECCIÓN DE FORMULARIO -->
+            <section class="flex-1 pt-5 px-8 pb-8 max-md:p-5">
+
+                <section
+                    class="w-full grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(300px,360px)] gap-[clamp(24px,2vw,36px)] m-0 items-stretch">
+
+                    <!-- COLUMNA PRINCIPAL DE FORMULARIOS -->
+                    <div class="min-w-0 flex flex-col">
+                        <!-- Encabezado del Formulario -->
+                        <div class="mb-4">
+                            <h1 class="text-[#0d4117] text-[28px] font-black tracking-tight mb-1.5">Formulario de
+                                Matrícula – IEACI</h1>
+                            <p class="text-text-secondary text-sm font-semibold">Gestión de expedientes académicos y
+                                registro estudiantil 2024</p>
+                        </div>
+
+                        <!-- Barra de Progreso (Contenedor Dinámico) -->
+                        <div id="progress-bar-container" class="w-full">
+                            <div th:replace="~{components/form-components :: progressBar(${currentStep})}"></div>
+                        </div>
+
+                        <!-- CONTENEDOR DINÁMICO DE PASOS (HTMX) -->
+                        <div id="step-container" class="transition-all duration-300">
+                            <div th:replace="~{matricula/fragments/step-personal :: stepPersonal}"></div>
+                        </div>
+
+                    </div>
+
+                    <!-- COLUMNA DERECHA: SIDEBAR DE RESUMEN -->
+                    <aside class="flex flex-col md:pt-16 pt-0 md:h-full">
+                        <!-- Resumen de Registro (Contenedor Dinámico) -->
+                        <div id="summary-container" class="flex-1 flex flex-col h-full">
+                            <div th:replace="~{components/form-components :: stepSummary}"></div>
+                        </div>
+                    </aside>
+
+                </section>
+
+            </section>
+        </main>
+
+    </div>
+
+    <!-- Inicializar iconos y re-renderizar tras cada swap HTMX -->
+    <script>
+        lucide.createIcons();
+        document.addEventListener('htmx:afterSwap', function () {
+            lucide.createIcons();
+        });
+    </script>
+
+</body>
+
+</html>

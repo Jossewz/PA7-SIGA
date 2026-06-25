@@ -1,0 +1,89 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <!-- PASO 2: INFORMACIÓN DEL ACUDIENTE -->
+    <div th:fragment="stepAcudiente" class="step-content block" data-step="2">
+        <div class="p-9 rounded-2xl bg-[#e3f7dc]/50 border border-[#c4eec0] shadow-sm mb-8">
+            <!-- Título del paso -->
+            <div class="flex gap-4 items-start mb-6">
+                <span class="w-11 h-11 grid place-items-center rounded-xl bg-sidebar text-white shrink-0">
+                    <i data-lucide="users-2" class="size-6 stroke-[1.75]"></i>
+                </span>
+                <div>
+                    <h2 class="text-sidebar text-[17px] font-black">Información del Acudiente</h2>
+                    <p class="text-text-secondary text-[11px] font-semibold leading-relaxed mt-0.5">
+                        Ingrese los datos de la persona responsable del estudiante
+                    </p>
+                </div>
+            </div>
+
+            <!-- Form Grid -->
+            <form id="form-step-2" class="grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5 mb-6">
+                <div class="col-span-2 max-md:col-span-1">
+                    <label for="parent-name" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Nombres Completos</label>
+                    <input type="text" id="parent-name" name="parentName" th:value="${parentName}" class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200" placeholder="Ej: Martha Cecilia Rodríguez">
+                </div>
+                <div>
+                    <label for="parent-relation" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Parentesco</label>
+                    <select id="parent-relation" name="parentRelation" class="w-full h-11 px-4 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200">
+                        <option value="">Seleccione una opción</option>
+                        <option value="madre" th:selected="${parentRelation == 'madre'}">Madre</option>
+                        <option value="padre" th:selected="${parentRelation == 'padre'}">Padre</option>
+                        <option value="tutor" th:selected="${parentRelation == 'tutor'}">Tutor Legal</option>
+                        <option value="otro" th:selected="${parentRelation == 'otro'}">Otro</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="parent-id" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Número de Identificación</label>
+                    <input type="text" id="parent-id" name="parentId" th:value="${parentId}" class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200" placeholder="CC / NIT">
+                </div>
+                <div>
+                    <label for="parent-phone" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Teléfono de Contacto</label>
+                    <input type="text" id="parent-phone" name="parentPhone" th:value="${parentPhone}" class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200" placeholder="+57 300 000 0000">
+                </div>
+                <div>
+                    <label for="parent-address" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Dirección de Residencia</label>
+                    <input type="text" id="parent-address" name="parentAddress" th:value="${parentAddress}" class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200" placeholder="Calle, Carrera, Barrio">
+                </div>
+            </form>
+
+            <!-- Upload Section -->
+            <div>
+                <label class="block mb-3.5 text-[10px] font-black tracking-wider text-text-secondary uppercase">Documento de Identidad (Acudiente)</label>
+                <div th:fragment="parentDocContainer" id="parent-doc-container">
+                    <label for="parent-doc-file" class="w-full border-2 border-dashed border-[#b7f3ae] bg-[#f1fbe4]/60 rounded-xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-[#e6f7d5]/60 transition-colors block">
+                        <input type="file" class="hidden file-input" id="parent-doc-file" name="file" accept="application/pdf,image/*"
+                               hx-post="/matricula/upload-file"
+                               hx-vals='{"fieldName": "parentDoc"}'
+                               hx-encoding="multipart/form-data"
+                               hx-target="#parent-doc-container"
+                               hx-swap="outerHTML">
+                        <i data-lucide="file-up" class="size-10 text-sidebar-border stroke-[1.5]"></i>
+                        <div class="text-center">
+                            <strong class="block text-text-primary text-[12px] font-black" th:text="${parentDocName != null ? 'Archivo seleccionado: ' + parentDocName : 'Haz clic para subir o arrastra tu archivo aquí'}">Haz clic para subir o arrastra tu archivo aquí</strong>
+                            <span class="text-text-secondary text-[10px] font-bold uppercase">pdf, jpg o png (máximo 5mb)</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="flex items-center justify-between">
+            <button type="button"
+                    hx-post="/matricula/paso/1"
+                    hx-include="#form-step-2"
+                    hx-target="#step-container"
+                    class="px-6 py-3 text-xs font-black text-sidebar bg-transparent hover:bg-card-green/45 rounded-lg transition-colors flex items-center gap-2">
+                <i data-lucide="arrow-left" class="size-4 stroke-[2.5]"></i>
+                <span>Anterior</span>
+            </button>
+            <button type="button"
+                    hx-post="/matricula/paso/3"
+                    hx-include="#form-step-2"
+                    hx-target="#step-container"
+                    class="px-6 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md">
+                <span>Siguiente Paso</span>
+                <i data-lucide="arrow-right" class="size-4 stroke-[2.5]"></i>
+            </button>
+        </div>
+    </div>
+</th:block>

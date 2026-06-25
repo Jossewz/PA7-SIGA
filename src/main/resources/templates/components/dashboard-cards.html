@@ -40,4 +40,42 @@
         </div>
     </article>
 
+    <section th:fragment="welcomePanel(adminName, dateText)" class="relative min-h-[clamp(126px,10vw,164px)] max-md:min-h-[150px] flex items-center justify-between p-[clamp(28px,2.4vw,42px)] max-md:p-6 rounded-xl overflow-hidden bg-sidebar text-sidebar-text">
+        <div>
+            <h1 class="mb-2.5 text-white text-[clamp(29px,2vw,40px)] max-md:text-[24px] leading-none font-black tracking-normal" th:text="'Bienvenido, ' + ${adminName} + '.'">Bienvenido, Admin.</h1>
+            <p class="text-sidebar-text/78 text-[clamp(14px,0.9vw,16px)]" th:text="${dateText}">Resumen del estado institucional para hoy, 24 de Mayo.</p>
+        </div>
+        <i data-lucide="zap" class="absolute -right-[clamp(2px,1vw,24px)] -bottom-[34px] w-[clamp(210px,16vw,310px)] h-[clamp(150px,12vw,220px)] text-[#2e802d]/65 fill-current stroke-0 -rotate-9" aria-hidden="true"></i>
+    </section>
+
+    <article th:fragment="auditCard(label, title, score, total)" class="min-h-[210px] p-[28px_30px] rounded-xl overflow-hidden bg-gradient-to-br from-card-green-gradient-from to-card-green-gradient-to shadow-soft">
+        <span class="inline-flex mb-5.5 px-3 py-1.25 rounded-full bg-sidebar text-sidebar-text text-[9px] font-black tracking-[0.7px] uppercase" th:text="${label}">Sostenibilidad</span>
+        <h3 class="text-sidebar text-[18px] font-black" th:text="${title}">Ultima Auditoria Verde</h3>
+        <div class="mt-9 text-sidebar">
+            <strong class="text-[48px] leading-[0.8] font-black" th:text="${score}">9.4</strong>
+            <small class="text-[15px] font-bold" th:text="'/ ' + ${total}">/ 10.0</small>
+        </div>
+    </article>
+
+    <article th:fragment="activityCard(title, activities)" class="min-h-[210px] p-7.5 rounded-xl bg-white shadow-soft">
+        <h2 class="flex items-center gap-2 text-sidebar text-[18px] font-black tracking-normal">
+            <i data-lucide="history" class="size-[18px]"></i>
+            <span th:text="${title}">Actividad Reciente</span>
+        </h2>
+
+        <ul class="grid gap-4.5 mt-6">
+            <li th:each="act : ${activities}" 
+                class="relative pl-4.5 before:content-[''] before:absolute before:top-1 before:left-0 before:w-[7px] before:h-[7px] before:rounded-full"
+                th:classappend="${act.alert} ? 'before:bg-dot-red' : 'before:bg-dot-green'">
+                <strong class="block text-text-primary text-[12px] font-black" th:text="${act.title}">Nueva Matricula</strong>
+                <span class="text-[#758676] text-[11px]" th:text="${act.time}">hace 15 min</span>
+            </li>
+        </ul>
+    </article>
+
+    <div th:fragment="quoteCard(title, text)" class="mt-auto pt-6">
+        <strong class="block mb-4.5 text-sidebar text-[12px] font-black tracking-[1.1px] uppercase" th:text="${title}">Inspiracion del Dia</strong>
+        <p class="text-[#426444] text-[14px] leading-[1.65]" th:text="${text}">"La educacion es el arma mas poderosa..."</p>
+    </div>
+
 </th:block>

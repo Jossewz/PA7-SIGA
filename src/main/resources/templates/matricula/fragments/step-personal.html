@@ -1,0 +1,84 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <!-- PASO 1: DATOS PERSONALES -->
+    <div th:fragment="stepPersonal" class="step-content block" data-step="1">
+        <div class="p-9 rounded-2xl bg-[#e3f7dc]/50 border border-[#c4eec0] shadow-sm mb-8">
+            <!-- Título del paso -->
+            <div class="flex gap-4 items-start mb-6">
+                <span class="w-11 h-11 grid place-items-center rounded-xl bg-sidebar text-white shrink-0">
+                    <i data-lucide="user" class="size-6 stroke-[1.75]"></i>
+                </span>
+                <div>
+                    <h2 class="text-sidebar text-[17px] font-black">Datos Personales</h2>
+                    <p class="text-text-secondary text-[11px] font-semibold leading-relaxed mt-0.5">
+                        Por favor, ingrese la información oficial tal como aparece en su documento de identidad. Esta información será validada por el sistema de registro.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Form Grid -->
+            <form id="form-step-1" class="grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5">
+                <div>
+                    <label for="student-names" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Nombres Completos</label>
+                    <input type="text" id="student-names" name="studentNames" th:value="${studentNames}"
+                           hx-post="/matricula/update-name"
+                           hx-include="#student-names, #student-surnames"
+                           hx-trigger="keyup changed delay:200ms"
+                           hx-target="#summary-student-name"
+                           class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200" placeholder="Ej: Juan Antonio">
+                </div>
+                <div>
+                    <label for="student-gender" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Género</label>
+                    <select id="student-gender" name="studentGender" class="w-full h-11 px-4 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200">
+                        <option value="">Seleccione una opción</option>
+                        <option value="M" th:selected="${studentGender == 'M'}">Masculino</option>
+                        <option value="F" th:selected="${studentGender == 'F'}">Femenino</option>
+                        <option value="O" th:selected="${studentGender == 'O'}">Otro</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="student-surnames" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Apellidos Completos</label>
+                    <input type="text" id="student-surnames" name="studentSurnames" th:value="${studentSurnames}"
+                           hx-post="/matricula/update-name"
+                           hx-include="#student-names, #student-surnames"
+                           hx-trigger="keyup changed delay:200ms"
+                           hx-target="#summary-student-name"
+                           class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200" placeholder="Ej: Pérez Rodríguez">
+                </div>
+                <div>
+                    <label for="student-phone" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Teléfono de Contacto</label>
+                    <div class="relative w-full">
+                        <input type="text" id="student-phone" name="studentPhone" th:value="${studentPhone}" class="w-full h-11 pl-4.5 pr-11 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200" placeholder="+57 300 000 0000">
+                        <i data-lucide="phone" class="absolute right-4 top-1/2 -translate-y-1/2 size-4.5 text-sidebar stroke-2"></i>
+                    </div>
+                </div>
+                <div>
+                    <label for="student-birthday" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Fecha de Nacimiento</label>
+                    <input type="date" id="student-birthday" name="studentBirthday" th:value="${studentBirthday}" class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200">
+                </div>
+                <div>
+                    <label for="student-address" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Dirección de Residencia</label>
+                    <input type="text" id="student-address" name="studentAddress" th:value="${studentAddress}" class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200" placeholder="Calle, Carrera, Barrio y Ciudad">
+                </div>
+            </form>
+
+            <!-- Footer de protección de datos -->
+            <div class="mt-8 pt-5 border-t border-[#c4eec0]/60 flex gap-2 items-center text-[10px] text-text-secondary font-bold">
+                <i data-lucide="shield-check" class="size-4 text-sidebar stroke-2"></i>
+                <span>Sus datos están protegidos bajo nuestra política de tratamiento de información institucional. <a href="#" class="underline text-sidebar font-black">Ver Políticas</a></span>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="flex items-center justify-between">
+            <button type="button" class="px-5 py-3 text-xs font-black text-sidebar bg-transparent hover:bg-card-green/45 rounded-lg transition-colors">Guardar Borrador</button>
+            <button type="button"
+                    hx-post="/matricula/paso/2"
+                    hx-include="#form-step-1"
+                    hx-target="#step-container"
+                    class="px-6 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md">
+                <span>Siguiente Paso</span>
+                <i data-lucide="arrow-right" class="size-4 stroke-[2.5]"></i>
+            </button>
+        </div>
+    </div>
+</th:block>

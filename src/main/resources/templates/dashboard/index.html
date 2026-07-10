@@ -48,12 +48,17 @@
                         </h2>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-[clamp(16px,1.2vw,24px)] mt-6">
-                            <div th:replace="~{components/dashboard-cards :: moduleCard('user-check', 'Matricula', '/matricula')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('user-plus', 'Matricula', '/matricula')}"></div>
                             <div th:replace="~{components/dashboard-cards :: moduleCard('star', 'Calificaciones', '/calificaciones')}"></div>
                             <div th:replace="~{components/dashboard-cards :: moduleCard('calendar-check', 'Asistencia', '/asistencias')}"></div>
                             <div th:replace="~{components/dashboard-cards :: moduleCard('badge-check', 'Certificados', '/certificados')}"></div>
                             <div th:replace="~{components/dashboard-cards :: moduleCard('bar-chart-3', 'Reportes', '/reportes')}"></div>
                             <div th:replace="~{components/dashboard-cards :: moduleCard('leaf', 'Modulo Ambiental', '/ambiental')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('users', 'Personal', '/personal')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('user-check', 'Estudiantes', '/estudiantes')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('graduation-cap', 'Cursos', '/clases')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('shield-alert', 'Usuarios', '/usuarios')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('settings', 'Configuración', '/configuracion')}"></div>
                         </div>
                     </section>
 

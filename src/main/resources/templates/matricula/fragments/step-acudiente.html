@@ -17,32 +17,11 @@
 
             <!-- Form Grid -->
             <form id="form-step-2" class="grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5 mb-6">
-                <div class="col-span-2 max-md:col-span-1">
-                    <label for="parent-name" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Nombres Completos</label>
-                    <input type="text" id="parent-name" name="parentName" th:value="${parentName}" class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200" placeholder="Ej: Martha Cecilia Rodríguez">
-                </div>
-                <div>
-                    <label for="parent-relation" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Parentesco</label>
-                    <select id="parent-relation" name="parentRelation" class="w-full h-11 px-4 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200">
-                        <option value="">Seleccione una opción</option>
-                        <option value="madre" th:selected="${parentRelation == 'madre'}">Madre</option>
-                        <option value="padre" th:selected="${parentRelation == 'padre'}">Padre</option>
-                        <option value="tutor" th:selected="${parentRelation == 'tutor'}">Tutor Legal</option>
-                        <option value="otro" th:selected="${parentRelation == 'otro'}">Otro</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="parent-id" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Número de Identificación</label>
-                    <input type="text" id="parent-id" name="parentId" th:value="${parentId}" class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200" placeholder="CC / NIT">
-                </div>
-                <div>
-                    <label for="parent-phone" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Teléfono de Contacto</label>
-                    <input type="text" id="parent-phone" name="parentPhone" th:value="${parentPhone}" class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200" placeholder="+57 300 000 0000">
-                </div>
-                <div>
-                    <label for="parent-address" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Dirección de Residencia</label>
-                    <input type="text" id="parent-address" name="parentAddress" th:value="${parentAddress}" class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200" placeholder="Calle, Carrera, Barrio">
-                </div>
+                <div class="col-span-2 max-md:col-span-1" th:replace="~{components/form-components :: fieldInput('Nombres Completos', 'parent-name', 'parentName', ${parentName}, 'Ej: Martha Cecilia Rodríguez', true, 'text', null, null, null, null)}"></div>
+                <div th:replace="~{components/form-components :: fieldSelect('Parentesco', 'parent-relation', 'parentRelation', ${parentRelation}, ${ { 'madre': 'Madre', 'padre': 'Padre', 'tutor': 'Tutor Legal', 'otro': 'Otro' } }, true)}"></div>
+                <div th:replace="~{components/form-components :: fieldInput('Número de Identificación', 'parent-id', 'parentId', ${parentId}, 'CC / NIT', true, 'text', null, null, null, null)}"></div>
+                <div th:replace="~{components/form-components :: fieldPhone('Teléfono de Contacto', 'parent-phone', 'parentPhone', ${parentPhone}, '+57 300 000 0000', true)}"></div>
+                <div th:replace="~{components/form-components :: fieldInput('Dirección de Residencia', 'parent-address', 'parentAddress', ${parentAddress}, 'Calle, Carrera, Barrio', true, 'text', null, null, null, null)}"></div>
             </form>
 
             <!-- Upload Section -->

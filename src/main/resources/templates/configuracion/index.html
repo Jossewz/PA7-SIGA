@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/base :: html(~{::content})}">
+<head>
+    <title>Configuración General – IEACI</title>
+</head>
+<body>
+
+<th:block th:fragment="content">
+    <div class="flex flex-col gap-6">
+        <!-- Header -->
+        <div>
+            <h1 class="text-text-primary text-[28px] font-black tracking-tight leading-none mb-1.5">Configuración General</h1>
+            <p class="text-text-secondary text-sm font-semibold">Parámetros globales del sistema, información de la institución y políticas de acceso.</p>
+        </div>
+
+        <!-- Settings Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6 items-start">
+            
+            <!-- Side Navigation Links -->
+            <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-4 flex flex-col gap-1 shrink-0">
+                <button type="button" class="cfg-tab-btn w-full text-left px-4 py-3 rounded-lg text-[11px] font-black uppercase tracking-wider text-sidebar bg-[#f1fbe4] transition-all" onclick="switchConfigTab(this, 'cfg-institucion')">
+                    <span class="flex items-center gap-2.5">
+                        <i data-lucide="building" class="size-4 stroke-2"></i> Institución
+                    </span>
+                </button>
+                <button type="button" class="cfg-tab-btn w-full text-left px-4 py-3 rounded-lg text-[11px] font-black uppercase tracking-wider text-text-secondary hover:bg-[#fcfdfb] transition-all" onclick="switchConfigTab(this, 'cfg-calendario')">
+                    <span class="flex items-center gap-2.5">
+                        <i data-lucide="calendar" class="size-4 stroke-2"></i> Calendario Académico
+                    </span>
+                </button>
+                <button type="button" class="cfg-tab-btn w-full text-left px-4 py-3 rounded-lg text-[11px] font-black uppercase tracking-wider text-text-secondary hover:bg-[#fcfdfb] transition-all" onclick="switchConfigTab(this, 'cfg-roles')">
+                    <span class="flex items-center gap-2.5">
+                        <i data-lucide="shield" class="size-4 stroke-2"></i> Roles y Permisos
+                    </span>
+                </button>
+                <button type="button" class="cfg-tab-btn w-full text-left px-4 py-3 rounded-lg text-[11px] font-black uppercase tracking-wider text-text-secondary hover:bg-[#fcfdfb] transition-all" onclick="switchConfigTab(this, 'cfg-parametros')">
+                    <span class="flex items-center gap-2.5">
+                        <i data-lucide="sliders" class="size-4 stroke-2"></i> Parámetros del Sistema
+                    </span>
+                </button>
+            </div>
+
+            <!-- Main Config Panel -->
+            <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-8 min-h-[460px]">
+                
+                <!-- TAB 1: INSTITUCIÓN -->
+                <div id="cfg-institucion" class="config-tab-content flex flex-col gap-6">
+                    <h3 class="text-sidebar text-base font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Información Institucional</h3>
+                    
+                    <form class="grid grid-cols-2 max-sm:grid-cols-1 gap-5">
+                        <div class="col-span-2 max-sm:col-span-1" th:replace="~{components/form-components :: fieldInput('Nombre de la Institución', 'inst-name', 'nombreInst', ${nombreInst}, 'Nombre', true, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/form-components :: fieldInput('NIT', 'inst-nit', 'nit', ${nit}, 'NIT', true, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/form-components :: fieldInput('Teléfono', 'inst-phone', 'telefonoInst', ${telefonoInst}, 'Teléfono', true, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/form-components :: fieldInput('Correo de Contacto', 'inst-email', 'correoInst', ${correoInst}, 'Correo', true, 'email', null, null, null, null)}"></div>
+                        <div th:replace="~{components/form-components :: fieldInput('Dirección Sede Principal', 'inst-address', 'direccionInst', ${direccionInst}, 'Dirección', true, 'text', null, null, null, null)}"></div>
+                        
+                        <div class="col-span-2 max-sm:col-span-1 border-t border-[#c4eec0]/30 pt-5 mt-2 flex justify-end">
+                            <button type="button" class="px-5 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all shadow-md">
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- TAB 2: CALENDARIO -->
+                <div id="cfg-calendario" class="config-tab-content hidden flex flex-col gap-6">
+                    <h3 class="text-sidebar text-base font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Calendario Académico</h3>
+                    
+                    <form class="grid grid-cols-2 max-sm:grid-cols-1 gap-5">
+                        <div th:replace="~{components/form-components :: fieldInput('Año Lectivo Activo', 'cal-year', 'añoLectivo', ${añoLectivo}, '2026', true, 'number', null, null, null, null)}"></div>
+                        <div></div> <!-- Empty block to align -->
+                        
+                        <div class="col-span-2 max-sm:col-span-1">
+                            <h4 class="text-sidebar text-[11px] font-black uppercase tracking-wider mb-4 border-b border-[#c4eec0]/20 pb-1">Periodos Académicos</h4>
+                            <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5">
+                                <div th:replace="~{components/form-components :: fieldInput('Inicio Primer Periodo', 'period-1-start', 'period1Start', '2026-02-01', null, true, 'date', null, null, null, null)}"></div>
+                                <div th:replace="~{components/form-components :: fieldInput('Cierre Primer Periodo', 'period-1-end', 'period1End', '2026-06-15', null, true, 'date', null, null, null, null)}"></div>
+                                <div th:replace="~{components/form-components :: fieldInput('Inicio Segundo Periodo', 'period-2-start', 'period2Start', '2026-07-15', null, true, 'date', null, null, null, null)}"></div>
+                                <div th:replace="~{components/form-components :: fieldInput('Cierre Segundo Periodo', 'period-2-end', 'period2End', '2026-11-30', null, true, 'date', null, null, null, null)}"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-span-2 max-sm:col-span-1 border-t border-[#c4eec0]/30 pt-5 mt-2 flex justify-end">
+                            <button type="button" class="px-5 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all shadow-md">
+                                Guardar Calendario
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- TAB 3: ROLES Y PERMISOS -->
+                <div id="cfg-roles" class="config-tab-content hidden flex flex-col gap-6">
+                    <div class="flex justify-between items-center border-b border-[#c4eec0]/30 pb-2">
+                        <h3 class="text-sidebar text-base font-black uppercase tracking-wide">Roles del Sistema</h3>
+                        <button type="button" class="px-3.5 py-1.5 text-[10px] font-black text-sidebar bg-[#f1fbe4] border border-sidebar/20 rounded-lg flex items-center gap-1">
+                            <i data-lucide="plus" class="size-3.5 stroke-[2.5]"></i> Nuevo Rol
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-[200px_1fr] max-md:grid-cols-1 gap-6">
+                        <!-- List of Roles -->
+                        <div class="flex flex-col gap-1 border-r border-[#c4eec0]/30 pr-4 max-md:border-r-0 max-md:pr-0">
+                            <button type="button" class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-wider text-sidebar bg-[#f1fbe4] rounded-lg">Administrador</button>
+                            <button type="button" class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-wider text-text-secondary hover:bg-[#fcfdfb] rounded-lg">Coordinador</button>
+                            <button type="button" class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-wider text-text-secondary hover:bg-[#fcfdfb] rounded-lg">Docente</button>
+                            <button type="button" class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-wider text-text-secondary hover:bg-[#fcfdfb] rounded-lg">Secretaría</button>
+                        </div>
+
+                        <!-- Role Permissions Checklist -->
+                        <div class="flex flex-col gap-4">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-text-primary text-[13px] font-black">Permisos del Rol: Administrador</h4>
+                                <span class="text-[#758676] text-[10px] font-bold">Acceso Total</span>
+                            </div>
+                            
+                            <div class="grid gap-3.5 text-[11px] font-bold text-text-secondary">
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" checked class="rounded border-[#c5ecd4] text-sidebar focus:ring-sidebar/20 size-4" />
+                                    <span>Gestión total de matrículas y expedientes académicos</span>
+                                </label>
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" checked class="rounded border-[#c5ecd4] text-sidebar focus:ring-sidebar/20 size-4" />
+                                    <span>Gestión del cuerpo de Personal y edición de contratos</span>
+                                </label>
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" checked class="rounded border-[#c5ecd4] text-sidebar focus:ring-sidebar/20 size-4" />
+                                    <span>Modificación de calendarios lectivos y periodos</span>
+                                </label>
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" checked class="rounded border-[#c5ecd4] text-sidebar focus:ring-sidebar/20 size-4" />
+                                    <span>Control de usuarios, asignación de roles y bloqueos</span>
+                                </label>
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" checked class="rounded border-[#c5ecd4] text-sidebar focus:ring-sidebar/20 size-4" />
+                                    <span>Consulta y generación de reportes y estadísticas globales</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: PARÁMETROS -->
+                <div id="cfg-parametros" class="config-tab-content hidden flex flex-col gap-6">
+                    <h3 class="text-sidebar text-base font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Parámetros del Sistema</h3>
+                    
+                    <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-6 text-[12px]">
+                        <!-- Param Item 1 -->
+                        <div class="p-4 rounded-xl border border-[#c4eec0]/40 bg-[#f9fbf8]/50 flex flex-col gap-3">
+                            <div class="flex justify-between items-center">
+                                <strong class="text-text-primary font-black text-xs">Escala de Calificaciones</strong>
+                                <button type="button" class="text-sidebar hover:underline font-black text-[10px]">Editar</button>
+                            </div>
+                            <div class="text-[10.5px] font-semibold text-text-secondary grid gap-1.5">
+                                <div class="flex justify-between"><span>Desempeño Superior:</span><span class="text-text-primary font-bold">4.6 - 5.0</span></div>
+                                <div class="flex justify-between"><span>Desempeño Alto:</span><span class="text-text-primary font-bold">4.0 - 4.5</span></div>
+                                <div class="flex justify-between"><span>Desempeño Básico:</span><span class="text-text-primary font-bold">3.0 - 3.9</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Param Item 2 -->
+                        <div class="p-4 rounded-xl border border-[#c4eec0]/40 bg-[#f9fbf8]/50 flex flex-col gap-3">
+                            <div class="flex justify-between items-center">
+                                <strong class="text-text-primary font-black text-xs">Tipos de Certificado</strong>
+                                <button type="button" class="text-sidebar hover:underline font-black text-[10px]">Gestionar</button>
+                            </div>
+                            <div class="text-[10.5px] font-semibold text-text-secondary flex flex-wrap gap-1.5">
+                                <span class="px-2 py-0.5 rounded bg-white border border-[#c5ecd4] text-[9.5px]">Certificado de Estudios</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-[#c5ecd4] text-[9.5px]">Boletín de Notas</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-[#c5ecd4] text-[9.5px]">Certificado de Conducta</span>
+                            </div>
+                        </div>
+
+                        <!-- Param Item 3 -->
+                        <div class="p-4 rounded-xl border border-[#c4eec0]/40 bg-[#f9fbf8]/50 flex flex-col gap-3">
+                            <div class="flex justify-between items-center">
+                                <strong class="text-text-primary font-black text-xs">Jornadas Autorizadas</strong>
+                                <button type="button" class="text-sidebar hover:underline font-black text-[10px]">Configurar</button>
+                            </div>
+                            <div class="text-[10.5px] font-semibold text-text-secondary flex flex-col gap-1">
+                                <div class="flex justify-between"><span>Mañana:</span><span class="text-text-primary font-bold">06:30 AM - 01:30 PM</span></div>
+                                <div class="flex justify-between"><span>Tarde:</span><span class="text-text-primary font-bold">12:30 PM - 06:30 PM</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Param Item 4 -->
+                        <div class="p-4 rounded-xl border border-[#c4eec0]/40 bg-[#f9fbf8]/50 flex flex-col gap-3">
+                            <div class="flex justify-between items-center">
+                                <strong class="text-text-primary font-black text-xs">Cargos de Nómina</strong>
+                                <button type="button" class="text-sidebar hover:underline font-black text-[10px]">Administrar</button>
+                            </div>
+                            <div class="text-[10.5px] font-semibold text-text-secondary flex flex-wrap gap-1.5">
+                                <span class="px-2 py-0.5 rounded bg-white border border-[#c5ecd4] text-[9.5px]">Docente</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-[#c5ecd4] text-[9.5px]">Coordinador</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-[#c5ecd4] text-[9.5px]">Rector</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-[#c5ecd4] text-[9.5px]">Psicólogo</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE CONFIGURACIÓN -->
+    <script>
+        function switchConfigTab(btn, tabId) {
+            document.querySelectorAll('.config-tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            
+            document.querySelectorAll('.cfg-tab-btn').forEach(b => {
+                b.classList.remove('bg-[#f1fbe4]', 'text-sidebar');
+                b.classList.add('text-text-secondary', 'hover:bg-[#fcfdfb]');
+            });
+            btn.classList.add('bg-[#f1fbe4]', 'text-sidebar');
+            btn.classList.remove('text-text-secondary', 'hover:bg-[#fcfdfb]');
+        }
+    </script>
+</th:block>
+
+</body>
+</html>

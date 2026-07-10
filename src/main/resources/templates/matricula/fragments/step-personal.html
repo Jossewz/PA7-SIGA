@@ -17,48 +17,12 @@
 
             <!-- Form Grid -->
             <form id="form-step-1" class="grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5">
-                <div>
-                    <label for="student-names" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Nombres Completos</label>
-                    <input type="text" id="student-names" name="studentNames" th:value="${studentNames}"
-                           hx-post="/matricula/update-name"
-                           hx-include="#student-names, #student-surnames"
-                           hx-trigger="keyup changed delay:200ms"
-                           hx-target="#summary-student-name"
-                           class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200" placeholder="Ej: Juan Antonio">
-                </div>
-                <div>
-                    <label for="student-gender" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Género</label>
-                    <select id="student-gender" name="studentGender" class="w-full h-11 px-4 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200">
-                        <option value="">Seleccione una opción</option>
-                        <option value="M" th:selected="${studentGender == 'M'}">Masculino</option>
-                        <option value="F" th:selected="${studentGender == 'F'}">Femenino</option>
-                        <option value="O" th:selected="${studentGender == 'O'}">Otro</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="student-surnames" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Apellidos Completos</label>
-                    <input type="text" id="student-surnames" name="studentSurnames" th:value="${studentSurnames}"
-                           hx-post="/matricula/update-name"
-                           hx-include="#student-names, #student-surnames"
-                           hx-trigger="keyup changed delay:200ms"
-                           hx-target="#summary-student-name"
-                           class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200" placeholder="Ej: Pérez Rodríguez">
-                </div>
-                <div>
-                    <label for="student-phone" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Teléfono de Contacto</label>
-                    <div class="relative w-full">
-                        <input type="text" id="student-phone" name="studentPhone" th:value="${studentPhone}" class="w-full h-11 pl-4.5 pr-11 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200" placeholder="+57 300 000 0000">
-                        <i data-lucide="phone" class="absolute right-4 top-1/2 -translate-y-1/2 size-4.5 text-sidebar stroke-2"></i>
-                    </div>
-                </div>
-                <div>
-                    <label for="student-birthday" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Fecha de Nacimiento</label>
-                    <input type="date" id="student-birthday" name="studentBirthday" th:value="${studentBirthday}" class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200">
-                </div>
-                <div>
-                    <label for="student-address" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase">Dirección de Residencia</label>
-                    <input type="text" id="student-address" name="studentAddress" th:value="${studentAddress}" class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200" placeholder="Calle, Carrera, Barrio y Ciudad">
-                </div>
+                <div th:replace="~{components/form-components :: fieldInput('Nombres Completos', 'student-names', 'studentNames', ${studentNames}, 'Ej: Juan Antonio', true, 'text', '/matricula/update-name', '#student-names, #student-surnames', 'keyup changed delay:200ms', '#summary-student-name')}"></div>
+                <div th:replace="~{components/form-components :: fieldSelect('Género', 'student-gender', 'studentGender', ${studentGender}, ${ { 'M': 'Masculino', 'F': 'Femenino', 'O': 'Otro' } }, true)}"></div>
+                <div th:replace="~{components/form-components :: fieldInput('Apellidos Completos', 'student-surnames', 'studentSurnames', ${studentSurnames}, 'Ej: Pérez Rodríguez', true, 'text', '/matricula/update-name', '#student-names, #student-surnames', 'keyup changed delay:200ms', '#summary-student-name')}"></div>
+                <div th:replace="~{components/form-components :: fieldPhone('Teléfono de Contacto', 'student-phone', 'studentPhone', ${studentPhone}, '+57 300 000 0000', true)}"></div>
+                <div th:replace="~{components/form-components :: fieldInput('Fecha de Nacimiento', 'student-birthday', 'studentBirthday', ${studentBirthday}, null, true, 'date', null, null, null, null)}"></div>
+                <div th:replace="~{components/form-components :: fieldInput('Dirección de Residencia', 'student-address', 'studentAddress', ${studentAddress}, 'Calle, Carrera, Barrio y Ciudad', true, 'text', null, null, null, null)}"></div>
             </form>
 
             <!-- Footer de protección de datos -->

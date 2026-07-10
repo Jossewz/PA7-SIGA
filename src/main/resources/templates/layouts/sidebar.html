@@ -65,6 +65,41 @@ th:fragment="sidebar(activePage, bottomText, bottomUrl)">
                 <span>Modulo Ambiental</span>
             </a>
 
+            <a th:href="@{/personal}"
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
+               th:classappend="${activePage == 'personal'} ? 'bg-white/12 text-white'">
+                <i data-lucide="users" class="size-[18px] shrink-0 stroke-2"></i>
+                <span>Personal</span>
+            </a>
+
+            <a th:href="@{/estudiantes}"
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
+               th:classappend="${activePage == 'estudiantes'} ? 'bg-white/12 text-white'">
+                <i data-lucide="user-check" class="size-[18px] shrink-0 stroke-2"></i>
+                <span>Estudiantes</span>
+            </a>
+
+            <a th:href="@{/clases}"
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
+               th:classappend="${activePage == 'clases'} ? 'bg-white/12 text-white'">
+                <i data-lucide="graduation-cap" class="size-[18px] shrink-0 stroke-2"></i>
+                <span>Cursos</span>
+            </a>
+
+            <a th:href="@{/usuarios}"
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
+               th:classappend="${activePage == 'usuarios'} ? 'bg-white/12 text-white'">
+                <i data-lucide="shield-alert" class="size-[18px] shrink-0 stroke-2"></i>
+                <span>Usuarios</span>
+            </a>
+
+            <a th:href="@{/configuracion}"
+               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
+               th:classappend="${activePage == 'configuracion'} ? 'bg-white/12 text-white'">
+                <i data-lucide="settings" class="size-[18px] shrink-0 stroke-2"></i>
+                <span>Configuración</span>
+            </a>
+
         </nav>
 
         <div class="mt-auto flex flex-col gap-3.5 max-md:hidden">

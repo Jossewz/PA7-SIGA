@@ -158,59 +158,59 @@
                     
                     <!-- TAB 1: INFORMACIÓN PERSONAL -->
                     <div id="tab-personal" class="modal-tab-content grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5">
-                        <div th:replace="~{components/form-components :: fieldInput('Primer Nombre', 'reg-first-name', 'primerNombre', null, 'Ej: Juan', true, 'text', null, null, null, null)}"></div>
-                        <div th:replace="~{components/form-components :: fieldInput('Segundo Nombre', 'reg-second-name', 'segundoNombre', null, 'Ej: Antonio', false, 'text', null, null, null, null)}"></div>
-                        <div th:replace="~{components/form-components :: fieldInput('Primer Apellido', 'reg-last-name', 'primerApellido', null, 'Ej: Pérez', true, 'text', null, null, null, null)}"></div>
-                        <div th:replace="~{components/form-components :: fieldInput('Segundo Apellido', 'reg-second-last', 'segundoApellido', null, 'Ej: Rodríguez', false, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Primer Nombre', 'reg-first-name', 'primerNombre', null, 'Ej: Juan', true, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Segundo Nombre', 'reg-second-name', 'segundoNombre', null, 'Ej: Antonio', false, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Primer Apellido', 'reg-last-name', 'primerApellido', null, 'Ej: Pérez', true, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Segundo Apellido', 'reg-second-last', 'segundoApellido', null, 'Ej: Rodríguez', false, 'text', null, null, null, null)}"></div>
                         
-                        <div th:replace="~{components/form-components :: fieldSelect('Tipo de Documento', 'reg-doc-type', 'tipoDoc', null, ${ { 'CC': 'Cédula de Ciudadanía', 'CE': 'Cédula de Extranjería', 'PA': 'Pasaporte' } }, true)}"></div>
-                        <div th:replace="~{components/form-components :: fieldInput('Número de Documento', 'reg-doc-num', 'numDoc', null, 'Ej: 10883214', true, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-select :: fieldSelect('Tipo de Documento', 'reg-doc-type', 'tipoDoc', null, ${ { 'CC': 'Cédula de Ciudadanía', 'CE': 'Cédula de Extranjería', 'PA': 'Pasaporte' } }, true)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Número de Documento', 'reg-doc-num', 'numDoc', null, 'Ej: 10883214', true, 'text', null, null, null, null)}"></div>
                         
-                        <div th:replace="~{components/form-components :: fieldInput('Fecha de Nacimiento', 'reg-birth', 'fechaNac', null, null, true, 'date', null, null, null, null)}"></div>
-                        <div th:replace="~{components/form-components :: fieldSelect('Sexo', 'reg-sex', 'sexo', null, ${ { 'M': 'Masculino', 'F': 'Femenino', 'O': 'Otro' } }, true)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Fecha de Nacimiento', 'reg-birth', 'fechaNac', null, null, true, 'date', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-select :: fieldSelect('Sexo', 'reg-sex', 'sexo', null, ${ { 'M': 'Masculino', 'F': 'Femenino', 'O': 'Otro' } }, true)}"></div>
                         
-                        <div th:replace="~{components/form-components :: fieldSelect('Estado Civil', 'reg-civil', 'estadoCivil', null, ${ { 'soltero': 'Soltero/a', 'casado': 'Casado/a', 'union': 'Unión Libre', 'divorciado': 'Divorciado/a' } }, true)}"></div>
-                        <div th:replace="~{components/form-components :: fieldInput('Nacionalidad', 'reg-nacionalidad', 'nacionalidad', 'Colombiana', 'Ej: Colombiana', true, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-select :: fieldSelect('Estado Civil', 'reg-civil', 'estadoCivil', null, ${ { 'soltero': 'Soltero/a', 'casado': 'Casado/a', 'union': 'Unión Libre', 'divorciado': 'Divorciado/a' } }, true)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Nacionalidad', 'reg-nacionalidad', 'nacionalidad', 'Colombiana', 'Ej: Colombiana', true, 'text', null, null, null, null)}"></div>
                         
                         <div class="col-span-2 max-md:col-span-1 border-t border-[#c4eec0]/40 pt-4.5 mt-2.5">
                             <h4 class="text-sidebar text-[11px] font-black uppercase tracking-wider mb-4">Información de Contacto</h4>
                         </div>
-                        <div th:replace="~{components/form-components :: fieldInput('Correo Electrónico', 'reg-email', 'correo', null, 'Ej: correo@siga.com', true, 'email', null, null, null, null)}"></div>
-                        <div th:replace="~{components/form-components :: fieldPhone('Teléfono', 'reg-phone', 'telefono', null, null, true)}"></div>
-                        <div th:replace="~{components/form-components :: fieldInput('Dirección', 'reg-address', 'direccion', null, 'Calle, Carrera, Barrio', true, 'text', null, null, null, null)}"></div>
-                        <div th:replace="~{components/form-components :: fieldInput('Ciudad', 'reg-city', 'ciudad', 'Cartagena', 'Ej: Cartagena', true, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Correo Electrónico', 'reg-email', 'correo', null, 'Ej: correo@siga.com', true, 'email', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-phone :: fieldPhone('Teléfono', 'reg-phone', 'telefono', null, null, true)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Dirección', 'reg-address', 'direccion', null, 'Calle, Carrera, Barrio', true, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Ciudad', 'reg-city', 'ciudad', 'Cartagena', 'Ej: Cartagena', true, 'text', null, null, null, null)}"></div>
                     </div>
 
                     <!-- TAB 2: INFORMACIÓN LABORAL -->
                     <div id="tab-laboral" class="modal-tab-content hidden grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5">
-                        <div th:replace="~{components/form-components :: fieldSelect('Cargo', 'reg-cargo', 'cargo', null, ${ { 'Docente': 'Docente', 'Coordinador': 'Coordinador', 'Secretario': 'Secretario', 'Administrador': 'Administrador', 'Rector': 'Rector', 'Psicologo': 'Psicólogo', 'Orientador': 'Orientador', 'Bibliotecario': 'Bibliotecario', 'Auxiliar': 'Auxiliar Administrativo', 'Otro': 'Otro' } }, true)}"></div>
-                        <div th:replace="~{components/form-components :: fieldSelect('Área', 'reg-area', 'area', null, ${ { 'Academica': 'Académica', 'Administrativa': 'Administrativa', 'Financiera': 'Financiera', 'Bienestar': 'Bienestar', 'Tecnologia': 'Tecnología', 'Secretaria': 'Secretaría' } }, true)}"></div>
+                        <div th:replace="~{components/forms/field-select :: fieldSelect('Cargo', 'reg-cargo', 'cargo', null, ${ { 'Docente': 'Docente', 'Coordinador': 'Coordinador', 'Secretario': 'Secretario', 'Administrador': 'Administrador', 'Rector': 'Rector', 'Psicologo': 'Psicólogo', 'Orientador': 'Orientador', 'Bibliotecario': 'Bibliotecario', 'Auxiliar': 'Auxiliar Administrativo', 'Otro': 'Otro' } }, true)}"></div>
+                        <div th:replace="~{components/forms/field-select :: fieldSelect('Área', 'reg-area', 'area', null, ${ { 'Academica': 'Académica', 'Administrativa': 'Administrativa', 'Financiera': 'Financiera', 'Bienestar': 'Bienestar', 'Tecnologia': 'Tecnología', 'Secretaria': 'Secretaría' } }, true)}"></div>
                         
-                        <div th:replace="~{components/form-components :: fieldInput('Fecha de Ingreso', 'reg-entry', 'fechaIngreso', null, null, true, 'date', null, null, null, null)}"></div>
-                        <div th:replace="~{components/form-components :: fieldSelect('Tipo de Contrato', 'reg-contract', 'tipoContrato', null, ${ { 'indefinido': 'Término Indefinido', 'fijo': 'Término Fijo', 'obra': 'Obra o Labor', 'prestacion': 'Prestación de Servicios' } }, true)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Fecha de Ingreso', 'reg-entry', 'fechaIngreso', null, null, true, 'date', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-select :: fieldSelect('Tipo de Contrato', 'reg-contract', 'tipoContrato', null, ${ { 'indefinido': 'Término Indefinido', 'fijo': 'Término Fijo', 'obra': 'Obra o Labor', 'prestacion': 'Prestación de Servicios' } }, true)}"></div>
                         
-                        <div th:replace="~{components/form-components :: fieldSelect('Jornada', 'reg-jornada', 'jornada', null, ${ { 'Mañana': 'Jornada Mañana', 'Tarde': 'Jornada Tarde', 'Completa': 'Jornada Completa' } }, true)}"></div>
-                        <div th:replace="~{components/form-components :: fieldInput('Salario (Opcional)', 'reg-salary', 'salario', null, '$ 0.00', false, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-select :: fieldSelect('Jornada', 'reg-jornada', 'jornada', null, ${ { 'Mañana': 'Jornada Mañana', 'Tarde': 'Jornada Tarde', 'Completa': 'Jornada Completa' } }, true)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Salario (Opcional)', 'reg-salary', 'salario', null, '$ 0.00', false, 'text', null, null, null, null)}"></div>
                     </div>
 
                     <!-- TAB 3: INFORMACIÓN PROFESIONAL -->
                     <div id="tab-profesional" class="modal-tab-content hidden grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5">
-                        <div th:replace="~{components/form-components :: fieldInput('Profesión', 'reg-profession', 'profesion', null, 'Ej: Licenciado en Lenguas', true, 'text', null, null, null, null)}"></div>
-                        <div th:replace="~{components/form-components :: fieldInput('Especialidad', 'reg-specialty', 'especialidad', null, 'Ej: Literatura y Gramática', false, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Profesión', 'reg-profession', 'profesion', null, 'Ej: Licenciado en Lenguas', true, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Especialidad', 'reg-specialty', 'especialidad', null, 'Ej: Literatura y Gramática', false, 'text', null, null, null, null)}"></div>
                         
-                        <div th:replace="~{components/form-components :: fieldSelect('Nivel Educativo Máximo', 'reg-edu-level', 'nivelEducativo', null, ${ { 'pregrado': 'Pregrado / Universitario', 'especializacion': 'Especialización', 'maestria': 'Maestría', 'doctorado': 'Doctorado' } }, true)}"></div>
-                        <div th:replace="~{components/form-components :: fieldInput('Universidad', 'reg-university', 'universidad', null, 'Ej: Universidad Pedagógica', true, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-select :: fieldSelect('Nivel Educativo Máximo', 'reg-edu-level', 'nivelEducativo', null, ${ { 'pregrado': 'Pregrado / Universitario', 'especializacion': 'Especialización', 'maestria': 'Maestría', 'doctorado': 'Doctorado' } }, true)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Universidad', 'reg-university', 'universidad', null, 'Ej: Universidad Pedagógica', true, 'text', null, null, null, null)}"></div>
                         
-                        <div class="col-span-2 max-md:col-span-1" th:replace="~{components/form-components :: fieldInput('Tarjeta Profesional (si aplica)', 'reg-pro-card', 'tarjetaProfesional', null, 'Ej: TP-12345', false, 'text', null, null, null, null)}"></div>
+                        <div class="col-span-2 max-md:col-span-1" th:replace="~{components/forms/field-input :: fieldInput('Tarjeta Profesional (si aplica)', 'reg-pro-card', 'tarjetaProfesional', null, 'Ej: TP-12345', false, 'text', null, null, null, null)}"></div>
                     </div>
 
                     <!-- TAB 4: DOCUMENTOS -->
                     <div id="tab-documentos" class="modal-tab-content hidden flex flex-col gap-5">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div th:replace="~{components/form-components :: fieldFileUploader('Hoja de vida', 'reg-file-cv', 'fileCv', null, 'file-text', true, null, null, null)}"></div>
-                            <div th:replace="~{components/form-components :: fieldFileUploader('Documento de Identidad', 'reg-file-doc', 'fileDoc', null, 'credit-card', true, null, null, null)}"></div>
-                            <div th:replace="~{components/form-components :: fieldFileUploader('Certificados Académicos', 'reg-file-cert', 'fileCert', null, 'graduation-cap', false, null, null, null)}"></div>
-                            <div th:replace="~{components/form-components :: fieldFileUploader('Contrato Firmado', 'reg-file-contract', 'fileContract', null, 'briefcase', false, null, null, null)}"></div>
+                            <div th:replace="~{components/forms/field-file-uploader :: fieldFileUploader('Hoja de vida', 'reg-file-cv', 'fileCv', null, 'file-text', true, null, null, null)}"></div>
+                            <div th:replace="~{components/forms/field-file-uploader :: fieldFileUploader('Documento de Identidad', 'reg-file-doc', 'fileDoc', null, 'credit-card', true, null, null, null)}"></div>
+                            <div th:replace="~{components/forms/field-file-uploader :: fieldFileUploader('Certificados Académicos', 'reg-file-cert', 'fileCert', null, 'graduation-cap', false, null, null, null)}"></div>
+                            <div th:replace="~{components/forms/field-file-uploader :: fieldFileUploader('Contrato Firmado', 'reg-file-contract', 'fileContract', null, 'briefcase', false, null, null, null)}"></div>
                         </div>
                     </div>
 
@@ -228,10 +228,10 @@
                         </div>
 
                         <div id="user-account-fields" class="hidden grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5 border-t border-[#c4eec0]/40 pt-6">
-                            <div th:replace="~{components/form-components :: fieldInput('Nombre de Usuario', 'reg-user-username', 'username', null, 'Ej: c.mendoza', true, 'text', null, null, null, null)}"></div>
-                            <div th:replace="~{components/form-components :: fieldSelect('Rol del Sistema', 'reg-user-role', 'role', null, ${ { 'ROLE_ADMIN': 'Administrador', 'ROLE_COORDINADOR': 'Coordinador', 'ROLE_DOCENTE': 'Docente', 'ROLE_SECRETARIA': 'Secretaría' } }, true)}"></div>
-                            <div th:replace="~{components/form-components :: fieldInput('Correo de Registro', 'reg-user-email', 'userEmail', null, 'carlos.mendoza@ieaci.edu.co', true, 'email', null, null, null, null)}"></div>
-                            <div th:replace="~{components/form-components :: fieldInput('Contraseña Temporal', 'reg-user-password', 'passwordTemp', 'IEACI2026*', 'Ej: IEACI2026*', true, 'text', null, null, null, null)}"></div>
+                            <div th:replace="~{components/forms/field-input :: fieldInput('Nombre de Usuario', 'reg-user-username', 'username', null, 'Ej: c.mendoza', true, 'text', null, null, null, null)}"></div>
+                            <div th:replace="~{components/forms/field-select :: fieldSelect('Rol del Sistema', 'reg-user-role', 'role', null, ${ { 'ROLE_ADMIN': 'Administrador', 'ROLE_COORDINADOR': 'Coordinador', 'ROLE_DOCENTE': 'Docente', 'ROLE_SECRETARIA': 'Secretaría' } }, true)}"></div>
+                            <div th:replace="~{components/forms/field-input :: fieldInput('Correo de Registro', 'reg-user-email', 'userEmail', null, 'carlos.mendoza@ieaci.edu.co', true, 'email', null, null, null, null)}"></div>
+                            <div th:replace="~{components/forms/field-input :: fieldInput('Contraseña Temporal', 'reg-user-password', 'passwordTemp', 'IEACI2026*', 'Ej: IEACI2026*', true, 'text', null, null, null, null)}"></div>
                         </div>
                     </div>
 

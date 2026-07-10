@@ -1,0 +1,146 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <!-- TARJETA LATERAL DE RESUMEN DE REGISTRO -->
+    <div th:fragment="stepSummary" class="p-6.5 rounded-xl bg-white shadow-soft flex flex-col gap-5 flex-1 h-full min-h-0">
+        <h2 class="flex items-center gap-2 text-sidebar text-[14px] font-black tracking-normal">
+            <i data-lucide="clipboard-list" class="size-[18px]"></i>
+            Resumen de Registro
+        </h2>
+
+        <!-- Ficha del estudiante -->
+        <div class="p-3 rounded-lg bg-card-green-light flex items-center justify-between gap-2.5">
+            <div class="flex items-center gap-3">
+                <img class="w-9 h-9 rounded-full border border-sidebar object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&q=80" alt="Estudiante">
+                <div>
+                    <small class="block text-[8px] font-black tracking-wider text-text-secondary uppercase leading-none mb-1">Estudiante</small>
+                    <strong class="block text-text-primary text-[11px] font-black leading-tight" id="summary-student-name" th:text="${studentNames != null || studentSurnames != null ? (studentNames ?: '') + ' ' + (studentSurnames ?: '') : 'Julián Andrés Gómez'}">Julián Andrés Gómez</strong>
+                </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-pill-green text-sidebar text-[8px] font-black uppercase shrink-0 leading-none">En Revisión</span>
+        </div>
+
+        <!-- Datos del Formulario -->
+        <div class="flex-1 flex flex-col gap-4 text-[10.5px] font-bold overflow-y-auto pr-1 min-h-0">
+            <!-- SECCIÓN: DATOS ESTUDIANTE -->
+            <div class="border-b border-[#c4eec0]/40 pb-3">
+                <span class="block text-[8px] font-black text-sidebar uppercase tracking-wider mb-2">Datos del Estudiante</span>
+                <div class="grid gap-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-text-secondary font-medium">Género:</span>
+                        <span class="text-text-primary font-black" th:text="${studentGender != null ? (studentGender == 'M' ? 'Masculino' : studentGender == 'F' ? 'Femenino' : 'Otro') : '—'}">—</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-text-secondary font-medium">Teléfono:</span>
+                        <span class="text-text-primary font-black" th:text="${studentPhone != null && !studentPhone.isEmpty() ? studentPhone : '—'}">—</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-text-secondary font-medium">F. Nacimiento:</span>
+                        <span class="text-text-primary font-black" th:text="${studentBirthday != null && !studentBirthday.isEmpty() ? studentBirthday : '—'}">—</span>
+                    </div>
+                    <div class="flex justify-between items-start gap-2">
+                        <span class="text-text-secondary font-medium shrink-0">Dirección:</span>
+                        <span class="text-text-primary font-black text-right line-clamp-2" th:text="${studentAddress != null && !studentAddress.isEmpty() ? studentAddress : '—'}">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: ACUDIENTE -->
+            <div class="border-b border-[#c4eec0]/40 pb-3">
+                <span class="block text-[8px] font-black text-sidebar uppercase tracking-wider mb-2">Acudiente / Responsable</span>
+                <div class="grid gap-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-text-secondary font-medium">Nombre:</span>
+                        <span class="text-text-primary font-black text-right line-clamp-1" th:text="${parentName != null && !parentName.isEmpty() ? parentName : '—'}">—</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-text-secondary font-medium">Parentesco:</span>
+                        <span class="text-text-primary font-black uppercase text-[10px]" th:text="${parentRelation != null && !parentRelation.isEmpty() ? (parentRelation == 'madre' ? 'Madre' : parentRelation == 'padre' ? 'Padre' : parentRelation == 'tutor' ? 'Tutor Legal' : 'Otro') : '—'}">—</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-text-secondary font-medium">Identificación:</span>
+                        <span class="text-text-primary font-black" th:text="${parentId != null && !parentId.isEmpty() ? parentId : '—'}">—</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-text-secondary font-medium">Teléfono:</span>
+                        <span class="text-text-primary font-black" th:text="${parentPhone != null && !parentPhone.isEmpty() ? parentPhone : '—'}">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: ACADÉMICO -->
+            <div class="border-b border-[#c4eec0]/40 pb-3">
+                <span class="block text-[8px] font-black text-sidebar uppercase tracking-wider mb-2">Ubicación y Grado</span>
+                <div class="grid gap-2">
+                    <div class="flex justify-between items-start gap-2">
+                        <span class="text-text-secondary font-medium shrink-0">Sede:</span>
+                        <span class="text-text-primary font-black text-right line-clamp-2" th:text="${sede == 'Sede Principal' || sede == null ? 'San José de los Campanos (Mz 32#9-Av4)' : (sede ?: 'San José de los Campanos (Mz 32#9-Av4)')}">San José de los Campanos (Mz 32#9-Av4)</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-text-secondary font-medium">Grado:</span>
+                        <span class="text-text-primary font-black" th:text="${(grado == '1°' || grado == '2°' || grado == '3°' || grado == '4°' || grado == '5°') ? grado + ' de Primaria' : (grado ?: '9°') + ' de Bachillerato'}">9° de Bachillerato</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-text-secondary font-medium">Jornada:</span>
+                        <span class="text-text-primary font-black" th:text="${jornada ?: 'Mañana'}">Mañana</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN: DOCUMENTACIÓN -->
+            <div>
+                <span class="block text-[8px] font-black text-sidebar uppercase tracking-wider mb-2">Estado de Documentos</span>
+                <div class="grid gap-2 text-[10px]">
+                    <div class="flex justify-between items-center">
+                        <span class="text-text-secondary font-medium flex items-center gap-1">
+                            <i data-lucide="file-text" class="size-3.5 text-sidebar"></i> Registro Civil
+                        </span>
+                        <span class="px-1.5 py-0.5 rounded font-black text-[8px] uppercase" 
+                              th:classappend="${civilDocName != null} ? 'bg-[#a0f399]/40 text-[#145f22]' : 'bg-red-50 text-red-700'"
+                              th:text="${civilDocName != null} ? '✓ Cargado' : 'Pendiente'">Pendiente</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-text-secondary font-medium flex items-center gap-1">
+                            <i data-lucide="image" class="size-3.5 text-sidebar"></i> Fotos 3x4
+                        </span>
+                        <span class="px-1.5 py-0.5 rounded font-black text-[8px] uppercase" 
+                              th:classappend="${fotoFileName != null} ? 'bg-[#a0f399]/40 text-[#145f22]' : 'bg-red-50 text-red-700'"
+                              th:text="${fotoFileName != null} ? '✓ Cargado' : 'Pendiente'">Pendiente</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-text-secondary font-medium flex items-center gap-1">
+                            <i data-lucide="heart-pulse" class="size-3.5 text-sidebar"></i> Certificado Salud
+                        </span>
+                        <span class="px-1.5 py-0.5 rounded font-black text-[8px] uppercase" 
+                              th:classappend="${saludFileName != null} ? 'bg-[#a0f399]/40 text-[#145f22]' : 'bg-red-50 text-red-700'"
+                              th:text="${saludFileName != null} ? '✓ Cargado' : 'Pendiente'">Pendiente</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-text-secondary font-medium flex items-center gap-1">
+                            <i data-lucide="folder" class="size-3.5 text-sidebar"></i> Historial Académico
+                        </span>
+                        <span class="px-1.5 py-0.5 rounded font-black text-[8px] uppercase" 
+                              th:classappend="${historialFileName != null} ? 'bg-[#a0f399]/40 text-[#145f22]' : 'bg-red-50 text-red-700'"
+                              th:text="${historialFileName != null} ? '✓ Cargado' : 'Pendiente'">Pendiente</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-text-secondary font-medium flex items-center gap-1">
+                            <i data-lucide="user-check" class="size-3.5 text-sidebar"></i> Doc. Acudiente
+                        </span>
+                        <span class="px-1.5 py-0.5 rounded font-black text-[8px] uppercase" 
+                              th:classappend="${parentDocName != null} ? 'bg-[#a0f399]/40 text-[#145f22]' : 'bg-red-50 text-red-700'"
+                              th:text="${parentDocName != null} ? '✓ Cargado' : 'Pendiente'">Pendiente</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cuadro informativo complementario -->
+        <div class="p-3 rounded-lg bg-[#f4faf2] border border-[#d3ecd0] flex gap-2.5 mt-auto">
+            <i data-lucide="info" class="size-4.5 text-sidebar shrink-0 stroke-2"></i>
+            <p class="text-[9.5px] text-text-secondary font-bold leading-normal">
+                Verifique que todos los datos coincidan exactamente con la documentación oficial antes de enviar la matrícula.
+            </p>
+        </div>
+    </div>
+
+</th:block>

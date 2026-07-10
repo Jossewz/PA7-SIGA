@@ -83,17 +83,17 @@
             <div class="p-6 overflow-y-auto flex-1 bg-white">
                 <form id="form-register-curso" class="grid grid-cols-2 gap-x-5 gap-y-4">
                     
-                    <div class="col-span-2" th:replace="~{components/form-components :: fieldSelect('Nombre del Curso / Grado', 'c-grade', 'curso', null, ${ { '1°': '1° de Primaria', '2°': '2° de Primaria', '3°': '3° de Primaria', '4°': '4° de Primaria', '5°': '5° de Primaria', '6°': '6° de Bachillerato', '7°': '7° de Bachillerato', '8°': '8° de Bachillerato', '9°': '9° de Bachillerato', '10°': '10° de Bachillerato', '11°': '11° de Bachillerato' } }, true)}"></div>
+                    <div class="col-span-2" th:replace="~{components/forms/field-select :: fieldSelect('Nombre del Curso / Grado', 'c-grade', 'curso', null, ${ { '1°': '1° de Primaria', '2°': '2° de Primaria', '3°': '3° de Primaria', '4°': '4° de Primaria', '5°': '5° de Primaria', '6°': '6° de Bachillerato', '7°': '7° de Bachillerato', '8°': '8° de Bachillerato', '9°': '9° de Bachillerato', '10°': '10° de Bachillerato', '11°': '11° de Bachillerato' } }, true)}"></div>
                     
-                    <div th:replace="~{components/form-components :: fieldInput('Grupo', 'c-group', 'grupo', null, 'Ej: A', true, 'text', null, null, null, null)}"></div>
-                    <div th:replace="~{components/form-components :: fieldSelect('Jornada', 'c-jornada', 'jornada', null, ${ { 'Mañana': 'Mañana', 'Tarde': 'Tarde' } }, true)}"></div>
+                    <div th:replace="~{components/forms/field-input :: fieldInput('Grupo', 'c-group', 'grupo', null, 'Ej: A', true, 'text', null, null, null, null)}"></div>
+                    <div th:replace="~{components/forms/field-select :: fieldSelect('Jornada', 'c-jornada', 'jornada', null, ${ { 'Mañana': 'Mañana', 'Tarde': 'Tarde' } }, true)}"></div>
                     
-                    <div class="col-span-2" th:replace="~{components/form-components :: fieldSelect('Director de Grupo', 'c-director', 'director', null, ${ { '1': 'Carlos Mendoza (Docente)', '2': 'Ana María Sánchez (Docente)', '3': 'Luis Felipe Gómez (Docente)' } }, true)}"></div>
+                    <div class="col-span-2" th:replace="~{components/forms/field-select :: fieldSelect('Director de Grupo', 'c-director', 'director', null, ${ { '1': 'Carlos Mendoza (Docente)', '2': 'Ana María Sánchez (Docente)', '3': 'Luis Felipe Gómez (Docente)' } }, true)}"></div>
                     
-                    <div th:replace="~{components/form-components :: fieldInput('Cupos Máximos', 'c-cupos', 'cuposMaximos', '35', 'Ej: 35', true, 'number', null, null, null, null)}"></div>
-                    <div th:replace="~{components/form-components :: fieldInput('Salón / Aula', 'c-room', 'salon', null, 'Ej: Aula 102', true, 'text', null, null, null, null)}"></div>
+                    <div th:replace="~{components/forms/field-input :: fieldInput('Cupos Máximos', 'c-cupos', 'cuposMaximos', '35', 'Ej: 35', true, 'number', null, null, null, null)}"></div>
+                    <div th:replace="~{components/forms/field-input :: fieldInput('Salón / Aula', 'c-room', 'salon', null, 'Ej: Aula 102', true, 'text', null, null, null, null)}"></div>
                     
-                    <div class="col-span-2" th:replace="~{components/form-components :: fieldInput('Año Lectivo', 'c-year', 'año', '2026', 'Ej: 2026', true, 'number', null, null, null, null)}"></div>
+                    <div class="col-span-2" th:replace="~{components/forms/field-input :: fieldInput('Año Lectivo', 'c-year', 'año', '2026', 'Ej: 2026', true, 'number', null, null, null, null)}"></div>
 
                 </form>
             </div>

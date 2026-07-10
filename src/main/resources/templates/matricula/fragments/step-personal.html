@@ -17,12 +17,12 @@
 
             <!-- Form Grid -->
             <form id="form-step-1" class="grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5">
-                <div th:replace="~{components/form-components :: fieldInput('Nombres Completos', 'student-names', 'studentNames', ${studentNames}, 'Ej: Juan Antonio', true, 'text', '/matricula/update-name', '#student-names, #student-surnames', 'keyup changed delay:200ms', '#summary-student-name')}"></div>
-                <div th:replace="~{components/form-components :: fieldSelect('Género', 'student-gender', 'studentGender', ${studentGender}, ${ { 'M': 'Masculino', 'F': 'Femenino', 'O': 'Otro' } }, true)}"></div>
-                <div th:replace="~{components/form-components :: fieldInput('Apellidos Completos', 'student-surnames', 'studentSurnames', ${studentSurnames}, 'Ej: Pérez Rodríguez', true, 'text', '/matricula/update-name', '#student-names, #student-surnames', 'keyup changed delay:200ms', '#summary-student-name')}"></div>
-                <div th:replace="~{components/form-components :: fieldPhone('Teléfono de Contacto', 'student-phone', 'studentPhone', ${studentPhone}, '+57 300 000 0000', true)}"></div>
-                <div th:replace="~{components/form-components :: fieldInput('Fecha de Nacimiento', 'student-birthday', 'studentBirthday', ${studentBirthday}, null, true, 'date', null, null, null, null)}"></div>
-                <div th:replace="~{components/form-components :: fieldInput('Dirección de Residencia', 'student-address', 'studentAddress', ${studentAddress}, 'Calle, Carrera, Barrio y Ciudad', true, 'text', null, null, null, null)}"></div>
+                <div th:replace="~{components/forms/field-input :: fieldInput('Nombres Completos', 'student-names', 'studentNames', ${studentNames}, 'Ej: Juan Antonio', true, 'text', '/matricula/update-name', '#student-names, #student-surnames', 'keyup changed delay:200ms', '#summary-student-name')}"></div>
+                <div th:replace="~{components/forms/field-select :: fieldSelect('Género', 'student-gender', 'studentGender', ${studentGender}, ${ { 'M': 'Masculino', 'F': 'Femenino', 'O': 'Otro' } }, true)}"></div>
+                <div th:replace="~{components/forms/field-input :: fieldInput('Apellidos Completos', 'student-surnames', 'studentSurnames', ${studentSurnames}, 'Ej: Pérez Rodríguez', true, 'text', '/matricula/update-name', '#student-names, #student-surnames', 'keyup changed delay:200ms', '#summary-student-name')}"></div>
+                <div th:replace="~{components/forms/field-phone :: fieldPhone('Teléfono de Contacto', 'student-phone', 'studentPhone', ${studentPhone}, '+57 300 000 0000', true)}"></div>
+                <div th:replace="~{components/forms/field-input :: fieldInput('Fecha de Nacimiento', 'student-birthday', 'studentBirthday', ${studentBirthday}, null, true, 'date', null, null, null, null)}"></div>
+                <div th:replace="~{components/forms/field-input :: fieldInput('Dirección de Residencia', 'student-address', 'studentAddress', ${studentAddress}, 'Calle, Carrera, Barrio y Ciudad', true, 'text', null, null, null, null)}"></div>
             </form>
 
             <!-- Footer de protección de datos -->

@@ -113,7 +113,7 @@
                 <div class="flex flex-col">
                     <div th:fragment="saludFileContainer" id="salud-file-container" class="flex-1 flex flex-col justify-end">
                         <p class="text-text-secondary text-[9px] font-bold leading-normal mb-3 min-h-[27px]">Certificado médico vigente (no mayor a 30 días) que acredite aptitud física.</p>
-                        <div th:replace="~{components/form-components :: fieldFileUploader('Certificado Salud', 'salud-file', 'saludFile', ${saludFileName}, 'heart-pulse', true, '/matricula/upload-file', '/matricula/delete-file', '#salud-file-container')}"></div>
+                        <div th:replace="~{components/forms/field-file-uploader :: fieldFileUploader('Certificado Salud', 'salud-file', 'saludFile', ${saludFileName}, 'heart-pulse', true, '/matricula/upload-file', '/matricula/delete-file', '#salud-file-container')}"></div>
                     </div>
                 </div>
 
@@ -121,7 +121,7 @@
                 <div class="flex flex-col">
                     <div th:fragment="historialFileContainer" id="historial-file-container" class="flex-1 flex flex-col justify-end">
                         <p class="text-text-secondary text-[9px] font-bold leading-normal mb-3 min-h-[27px]">Historial escolar completo de años anteriores para validar el expediente académico.</p>
-                        <div th:replace="~{components/form-components :: fieldFileUploader('Historial Académico', 'historial-file', 'historialFile', ${historialFileName}, 'folder', true, '/matricula/upload-file', '/matricula/delete-file', '#historial-file-container')}"></div>
+                        <div th:replace="~{components/forms/field-file-uploader :: fieldFileUploader('Historial Académico', 'historial-file', 'historialFile', ${historialFileName}, 'folder', true, '/matricula/upload-file', '/matricula/delete-file', '#historial-file-container')}"></div>
                     </div>
                 </div>
             </div>

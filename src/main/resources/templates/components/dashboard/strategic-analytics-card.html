@@ -1,0 +1,61 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <!-- ANALÍTICA ESTRATÉGICA -->
+    <article th:fragment="strategicAnalyticsCard()" 
+             class="p-6 rounded-xl bg-white border border-[#c4eec0]/40 shadow-soft flex flex-col h-full">
+        <h3 class="flex items-center gap-2 text-sidebar text-base font-black uppercase tracking-wider mb-5">
+            <i data-lucide="trending-up" class="size-[18px] stroke-[2.2]"></i>
+            Indicadores Estratégicos
+        </h3>
+
+        <div class="grid gap-4.5 flex-1">
+            <!-- Barra deserción -->
+            <div>
+                <div class="flex justify-between text-[11px] font-extrabold text-text-primary mb-1">
+                    <span>Tasa de Deserción Escolar (Meta: &lt; 3%)</span>
+                    <span class="text-alert-red">2.4%</span>
+                </div>
+                <div class="w-full bg-[#f1f5f1] h-2 rounded-full overflow-hidden">
+                    <div class="bg-[#c82333] h-full rounded-full" style="width: 24%"></div>
+                </div>
+            </div>
+
+            <!-- Barra repitencia -->
+            <div>
+                <div class="flex justify-between text-[11px] font-extrabold text-text-primary mb-1">
+                    <span>Tasa de Repitencia (Meta: &lt; 2%)</span>
+                    <span class="text-text-secondary">1.8%</span>
+                </div>
+                <div class="w-full bg-[#f1f5f1] h-2 rounded-full overflow-hidden">
+                    <div class="bg-sidebar/70 h-full rounded-full" style="width: 18%"></div>
+                </div>
+            </div>
+
+            <!-- Listado Detallado -->
+            <div class="grid grid-cols-2 gap-x-4 gap-y-3.5 mt-2 pt-2 border-t border-[#c4eec0]/30 text-xs">
+                <div class="flex justify-between items-center py-1">
+                    <span class="text-text-secondary font-bold">Aprobación</span>
+                    <span class="font-extrabold text-sidebar bg-[#eafbe4] px-2 py-0.5 rounded">96%</span>
+                </div>
+                <div class="flex justify-between items-center py-1">
+                    <span class="text-text-secondary font-bold">Reprobación</span>
+                    <span class="font-extrabold text-alert-red bg-red-50 px-2 py-0.5 rounded">4%</span>
+                </div>
+                <div class="flex justify-between items-center py-1">
+                    <span class="text-text-secondary font-bold">Graduación</span>
+                    <span class="font-extrabold text-sidebar bg-[#eafbe4] px-2 py-0.5 rounded">98%</span>
+                </div>
+                <div class="flex justify-between items-center py-1">
+                    <span class="text-text-secondary font-bold">Matrículas</span>
+                    <span class="font-extrabold text-sidebar bg-[#eafbe4] px-2 py-0.5 rounded text-[10px]">+48 nuevas</span>
+                </div>
+            </div>
+            
+            <div class="p-3 bg-[#eafbe4]/20 border border-[#c4eec0]/30 rounded-lg text-[11px] text-text-muted mt-auto">
+                <i data-lucide="info" class="inline-block size-3.5 text-text-secondary mr-1 -mt-0.5"></i>
+                Última actualización de cohorte escolar: hace 2 días.
+            </div>
+        </div>
+    </article>
+
+</th:block>

@@ -17,11 +17,11 @@
 
             <!-- Form Grid -->
             <form id="form-step-2" class="grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5 mb-6">
-                <div class="col-span-2 max-md:col-span-1" th:replace="~{components/form-components :: fieldInput('Nombres Completos', 'parent-name', 'parentName', ${parentName}, 'Ej: Martha Cecilia Rodríguez', true, 'text', null, null, null, null)}"></div>
-                <div th:replace="~{components/form-components :: fieldSelect('Parentesco', 'parent-relation', 'parentRelation', ${parentRelation}, ${ { 'madre': 'Madre', 'padre': 'Padre', 'tutor': 'Tutor Legal', 'otro': 'Otro' } }, true)}"></div>
-                <div th:replace="~{components/form-components :: fieldInput('Número de Identificación', 'parent-id', 'parentId', ${parentId}, 'CC / NIT', true, 'text', null, null, null, null)}"></div>
-                <div th:replace="~{components/form-components :: fieldPhone('Teléfono de Contacto', 'parent-phone', 'parentPhone', ${parentPhone}, '+57 300 000 0000', true)}"></div>
-                <div th:replace="~{components/form-components :: fieldInput('Dirección de Residencia', 'parent-address', 'parentAddress', ${parentAddress}, 'Calle, Carrera, Barrio', true, 'text', null, null, null, null)}"></div>
+                <div class="col-span-2 max-md:col-span-1" th:replace="~{components/forms/field-input :: fieldInput('Nombres Completos', 'parent-name', 'parentName', ${parentName}, 'Ej: Martha Cecilia Rodríguez', true, 'text', null, null, null, null)}"></div>
+                <div th:replace="~{components/forms/field-select :: fieldSelect('Parentesco', 'parent-relation', 'parentRelation', ${parentRelation}, ${ { 'madre': 'Madre', 'padre': 'Padre', 'tutor': 'Tutor Legal', 'otro': 'Otro' } }, true)}"></div>
+                <div th:replace="~{components/forms/field-input :: fieldInput('Número de Identificación', 'parent-id', 'parentId', ${parentId}, 'CC / NIT', true, 'text', null, null, null, null)}"></div>
+                <div th:replace="~{components/forms/field-phone :: fieldPhone('Teléfono de Contacto', 'parent-phone', 'parentPhone', ${parentPhone}, '+57 300 000 0000', true)}"></div>
+                <div th:replace="~{components/forms/field-input :: fieldInput('Dirección de Residencia', 'parent-address', 'parentAddress', ${parentAddress}, 'Calle, Carrera, Barrio', true, 'text', null, null, null, null)}"></div>
             </form>
 
             <!-- Upload Section -->

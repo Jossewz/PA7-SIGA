@@ -1,0 +1,38 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <!-- PANEL DE GRÁFICOS (ASISTENCIA Y DISTRIBUCIÓN) -->
+    <article th:fragment="chartsCard()" 
+             class="col-span-full grid grid-cols-1 lg:grid-cols-3 gap-6 p-6 rounded-xl bg-white border border-[#c4eec0]/40 shadow-soft">
+        
+        <!-- Gráfico Asistencia (Líneas / Área) -->
+        <div class="lg:col-span-2 flex flex-col justify-between border-r border-[#c4eec0]/25 pr-0 lg:pr-6">
+            <div class="flex items-center justify-between gap-4 mb-4">
+                <div>
+                    <h3 class="text-sidebar text-base font-black uppercase tracking-wider">Histórico de Asistencia</h3>
+                    <p class="text-[10px] text-text-secondary font-bold uppercase tracking-wider mt-0.5">Últimos 30 días lectivos</p>
+                </div>
+                <span class="text-xs font-black text-sidebar bg-pill-green px-2.5 py-1 rounded-md">Promedio: 93.7%</span>
+            </div>
+            <div class="relative w-full h-[220px]">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Gráfico Distribución de Estudiantes (Dona) -->
+        <div class="flex flex-col justify-between pl-0 lg:pl-6">
+            <div class="mb-4">
+                <h3 class="text-sidebar text-base font-black uppercase tracking-wider">Distribución Alumnos</h3>
+                <p class="text-[10px] text-text-secondary font-bold uppercase tracking-wider mt-0.5">Por Nivel Educativo</p>
+            </div>
+            <div class="relative w-full h-[180px] flex items-center justify-center">
+                <canvas id="distributionChart"></canvas>
+            </div>
+            <div class="flex flex-wrap items-center justify-around text-[10px] font-bold text-text-secondary mt-2 pt-2 border-t border-[#c4eec0]/10 gap-x-3 gap-y-1">
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#145f22]"></span> Primaria (45%)</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#34a853]"></span> Secundaria (40%)</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#aacf7f]"></span> Media (15%)</span>
+            </div>
+        </div>
+    </article>
+
+</th:block>

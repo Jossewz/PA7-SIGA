@@ -48,11 +48,11 @@
                     <h3 class="text-sidebar text-base font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Información Institucional</h3>
                     
                     <form class="grid grid-cols-2 max-sm:grid-cols-1 gap-5">
-                        <div class="col-span-2 max-sm:col-span-1" th:replace="~{components/form-components :: fieldInput('Nombre de la Institución', 'inst-name', 'nombreInst', ${nombreInst}, 'Nombre', true, 'text', null, null, null, null)}"></div>
-                        <div th:replace="~{components/form-components :: fieldInput('NIT', 'inst-nit', 'nit', ${nit}, 'NIT', true, 'text', null, null, null, null)}"></div>
-                        <div th:replace="~{components/form-components :: fieldInput('Teléfono', 'inst-phone', 'telefonoInst', ${telefonoInst}, 'Teléfono', true, 'text', null, null, null, null)}"></div>
-                        <div th:replace="~{components/form-components :: fieldInput('Correo de Contacto', 'inst-email', 'correoInst', ${correoInst}, 'Correo', true, 'email', null, null, null, null)}"></div>
-                        <div th:replace="~{components/form-components :: fieldInput('Dirección Sede Principal', 'inst-address', 'direccionInst', ${direccionInst}, 'Dirección', true, 'text', null, null, null, null)}"></div>
+                        <div class="col-span-2 max-sm:col-span-1" th:replace="~{components/forms/field-input :: fieldInput('Nombre de la Institución', 'inst-name', 'nombreInst', ${nombreInst}, 'Nombre', true, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('NIT', 'inst-nit', 'nit', ${nit}, 'NIT', true, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Teléfono', 'inst-phone', 'telefonoInst', ${telefonoInst}, 'Teléfono', true, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Correo de Contacto', 'inst-email', 'correoInst', ${correoInst}, 'Correo', true, 'email', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Dirección Sede Principal', 'inst-address', 'direccionInst', ${direccionInst}, 'Dirección', true, 'text', null, null, null, null)}"></div>
                         
                         <div class="col-span-2 max-sm:col-span-1 border-t border-[#c4eec0]/30 pt-5 mt-2 flex justify-end">
                             <button type="button" class="px-5 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all shadow-md">
@@ -67,16 +67,16 @@
                     <h3 class="text-sidebar text-base font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Calendario Académico</h3>
                     
                     <form class="grid grid-cols-2 max-sm:grid-cols-1 gap-5">
-                        <div th:replace="~{components/form-components :: fieldInput('Año Lectivo Activo', 'cal-year', 'añoLectivo', ${añoLectivo}, '2026', true, 'number', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Año Lectivo Activo', 'cal-year', 'añoLectivo', ${añoLectivo}, '2026', true, 'number', null, null, null, null)}"></div>
                         <div></div> <!-- Empty block to align -->
                         
                         <div class="col-span-2 max-sm:col-span-1">
                             <h4 class="text-sidebar text-[11px] font-black uppercase tracking-wider mb-4 border-b border-[#c4eec0]/20 pb-1">Periodos Académicos</h4>
                             <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5">
-                                <div th:replace="~{components/form-components :: fieldInput('Inicio Primer Periodo', 'period-1-start', 'period1Start', '2026-02-01', null, true, 'date', null, null, null, null)}"></div>
-                                <div th:replace="~{components/form-components :: fieldInput('Cierre Primer Periodo', 'period-1-end', 'period1End', '2026-06-15', null, true, 'date', null, null, null, null)}"></div>
-                                <div th:replace="~{components/form-components :: fieldInput('Inicio Segundo Periodo', 'period-2-start', 'period2Start', '2026-07-15', null, true, 'date', null, null, null, null)}"></div>
-                                <div th:replace="~{components/form-components :: fieldInput('Cierre Segundo Periodo', 'period-2-end', 'period2End', '2026-11-30', null, true, 'date', null, null, null, null)}"></div>
+                                <div th:replace="~{components/forms/field-input :: fieldInput('Inicio Primer Periodo', 'period-1-start', 'period1Start', '2026-02-01', null, true, 'date', null, null, null, null)}"></div>
+                                <div th:replace="~{components/forms/field-input :: fieldInput('Cierre Primer Periodo', 'period-1-end', 'period1End', '2026-06-15', null, true, 'date', null, null, null, null)}"></div>
+                                <div th:replace="~{components/forms/field-input :: fieldInput('Inicio Segundo Periodo', 'period-2-start', 'period2Start', '2026-07-15', null, true, 'date', null, null, null, null)}"></div>
+                                <div th:replace="~{components/forms/field-input :: fieldInput('Cierre Segundo Periodo', 'period-2-end', 'period2End', '2026-11-30', null, true, 'date', null, null, null, null)}"></div>
                             </div>
                         </div>
 

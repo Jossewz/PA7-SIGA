@@ -1,0 +1,54 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <!-- ESTUDIANTES QUE REQUIEREN ATENCIÓN -->
+    <article th:fragment="attentionListCard()" 
+             class="p-6 rounded-xl bg-white border border-[#c4eec0]/40 shadow-soft flex flex-col h-full">
+        <div class="flex justify-between items-center mb-5">
+            <h3 class="flex items-center gap-2 text-sidebar text-base font-black uppercase tracking-wider">
+                <i data-lucide="alert-circle" class="size-[18px] text-alert-red stroke-[2.2]"></i>
+                Requieren Atención
+            </h3>
+            <span class="px-2 py-0.5 rounded-full bg-red-100 text-alert-red text-[10px] font-black">Críticos</span>
+        </div>
+
+        <div class="overflow-x-auto flex-1">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="border-b border-[#c4eec0]/30 text-text-secondary font-bold">
+                        <th class="pb-2 font-black">Estudiante</th>
+                        <th class="pb-2 font-black">Motivo</th>
+                        <th class="pb-2 text-right font-black">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#c4eec0]/20">
+                    <tr class="hover:bg-[#fcfdfa]/50 transition-colors">
+                        <td class="py-3 font-extrabold text-text-primary">Juan Pérez</td>
+                        <td class="py-3 text-text-muted">7 inasistencias consecutivas</td>
+                        <td class="py-3 text-right">
+                            <span class="px-2 py-0.5 rounded bg-pill-red text-alert-red font-black text-[9px]">Llamar</span>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-[#fcfdfa]/50 transition-colors">
+                        <td class="py-3 font-extrabold text-text-primary">María Gómez</td>
+                        <td class="py-3 text-text-muted">Bajo rendimiento (Prom: 2.8)</td>
+                        <td class="py-3 text-right">
+                            <span class="px-2 py-0.5 rounded bg-[#fff2e8] text-[#c93831] font-black text-[9px]">Tutoría</span>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-[#fcfdfa]/50 transition-colors">
+                        <td class="py-3 font-extrabold text-text-primary">Pedro Ruiz</td>
+                        <td class="py-3 text-text-muted">Riesgo alto de deserción</td>
+                        <td class="py-3 text-right">
+                            <span class="px-2 py-0.5 rounded bg-pill-red text-alert-red font-black text-[9px]">Psicología</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <a th:href="@{/estudiantes}" class="w-full mt-4 py-2 text-center rounded-lg bg-[#eafbe4] text-sidebar text-xs font-black transition-colors hover:bg-pill-green block">
+            Ver Todos los Alumnos
+        </a>
+    </article>
+
+</th:block>

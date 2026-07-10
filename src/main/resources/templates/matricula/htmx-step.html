@@ -1,0 +1,21 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <!-- Swaps the main step container content -->
+    <th:block th:switch="${currentStep}">
+        <th:block th:case="1"><div th:replace="~{matricula/fragments/step-personal :: stepPersonal}"></div></th:block>
+        <th:block th:case="2"><div th:replace="~{matricula/fragments/step-acudiente :: stepAcudiente}"></div></th:block>
+        <th:block th:case="3"><div th:replace="~{matricula/fragments/step-grado :: stepGrado}"></div></th:block>
+        <th:block th:case="4"><div th:replace="~{matricula/fragments/step-documentos :: stepDocumentos}"></div></th:block>
+    </th:block>
+
+    <!-- Out of band swap for progress bar -->
+    <div id="progress-bar-container" hx-swap-oob="true">
+        <div th:replace="~{components/form-components :: progressBar(${currentStep})}"></div>
+    </div>
+
+    <!-- Out of band swap for summary card -->
+    <div id="summary-container" hx-swap-oob="true" class="flex-1 flex flex-col h-full min-h-0">
+        <div th:replace="~{components/form-components :: stepSummary}"></div>
+    </div>
+
+</th:block>

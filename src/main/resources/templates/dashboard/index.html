@@ -1,1 +1,101 @@
-﻿<!DOCTYPE html>\n<html xmlns:th='http://www.thymeleaf.org'>\n<body>\n    <section th:fragment='content'>Index dashboard</section>\n</body>\n</html>
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title th:text="${title ?: 'Dashboard'}">Dashboard</title>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" th:href="@{/css/output.css}">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+<div class="flex min-h-screen bg-page-bg max-md:flex-col">
+
+    <aside th:replace="~{layouts/sidebar :: sidebar('dashboard', 'Soporte Tecnico', '/soporte')}"></aside>
+
+    <main class="flex-1 min-w-0 flex flex-col">
+
+        <header th:replace="~{layouts/navbar :: navbar}"></header>
+
+        <section class="flex-1 pt-5 px-8 pb-8 max-md:p-5">
+
+            <section class="w-full grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(300px,360px)] gap-[clamp(24px,2vw,36px)] m-0 items-stretch">
+
+                <div class="col-span-full">
+
+                    <div th:replace="~{components/dashboard-cards :: welcomePanel('Admin', 'Resumen del estado institucional para hoy, 24 de Mayo.')}"></div>
+
+                    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[clamp(18px,1.5vw,28px)] mt-7.5" aria-label="Indicadores institucionales">
+                        <div th:replace="~{components/dashboard-cards :: statCard('users', 'Total Estudiantes', '1,284', null, '+4%', 'success')}"></div>
+                        <div th:replace="~{components/dashboard-cards :: statCard('clipboard-check', 'Asistencia Hoy %', '94.2%', null, 'Optimo', 'success')}"></div>
+                        <div th:replace="~{components/dashboard-cards :: statCard('badge-check', 'Certificados', '45', 'esta semana', 'Meta: 60', 'success')}"></div>
+                        <div th:replace="~{components/dashboard-cards :: statCard('triangle-alert', 'Alertas', '12', null, 'Revisar', 'warning')}"></div>
+                    </section>
+
+                </div>
+
+                <div class="min-w-0">
+
+                    <section class="mt-0">
+                        <h2 class="flex items-center gap-2 text-sidebar text-[18px] font-black tracking-normal">
+                            <i data-lucide="layout-grid" class="size-[18px]"></i>
+                            Modulos de Gestion
+                        </h2>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-[clamp(16px,1.2vw,24px)] mt-6">
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('user-check', 'Matricula', '/matricula')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('star', 'Calificaciones', '/calificaciones')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('calendar-check', 'Asistencia', '/asistencias')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('badge-check', 'Certificados', '/certificados')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('bar-chart-3', 'Reportes', '/reportes')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: moduleCard('leaf', 'Modulo Ambiental', '/ambiental')}"></div>
+                        </div>
+                    </section>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 min-[1500px]:grid-cols-[minmax(360px,0.8fr)_minmax(460px,1.2fr)] gap-[clamp(20px,1.5vw,28px)] mt-7">
+                        <div th:replace="~{components/dashboard-cards :: auditCard('Sostenibilidad', 'Ultima Auditoria Verde', '9.4', '10.0')}"></div>
+
+                        <div th:replace="~{components/dashboard-cards :: activityCard('Actividad Reciente', ${ {
+                            {title: 'Nueva Matricula: Mateo Silva', time: 'hace 15 min', alert: false},
+                            {title: 'Certificado Generado', time: 'hace 2 hrs', alert: false},
+                            {title: 'Alerta de Asistencia', time: 'hace 4 hrs', alert: true}
+                        } })}"></div>
+                    </div>
+
+                </div>
+
+                <aside class="flex flex-col gap-[clamp(24px,1.8vw,34px)] xl:pt-10.5 pt-0 xl:h-full">
+                     <section class="p-9.5 rounded-xl bg-card-green-light shadow-soft xl:h-full flex flex-col">
+                        <h2 class="flex items-center gap-2 text-sidebar text-[18px] font-black tracking-normal">
+                            <i data-lucide="calendar-days" class="size-[18px]"></i>
+                            Proximos Eventos
+                        </h2>
+
+                        <div class="grid gap-4 mt-7 [&>article:nth-child(2)_time]:bg-action-btn [&>article:nth-child(2)_time]:text-sidebar">
+                            <div th:replace="~{components/dashboard-cards :: eventCard('25', 'MAY', 'Reunion de Coordinadores', '09:00 AM - Sala de Juntas')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: eventCard('28', 'MAY', 'Cierre de Calificaciones', 'Todo el dia - Portal Digital')}"></div>
+                            <div th:replace="~{components/dashboard-cards :: eventCard('02', 'JUN', 'Taller Huerto Escolar', '11:30 AM - Zona Verde')}"></div>
+                        </div>
+
+                        <div th:replace="~{components/dashboard-cards :: quoteCard('Inspiracion del Dia', 'La educacion es el arma mas poderosa para cambiar el mundo y preservar nuestra naturaleza.')}"></div>
+                    </section>
+
+                </aside>
+
+            </section>
+
+        </section>
+    </main>
+
+</div>
+
+<script>
+    lucide.createIcons();
+</script>
+</body>
+</html>

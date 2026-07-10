@@ -1,0 +1,207 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <!-- PASO 4: CARGA DE DOCUMENTACIÓN -->
+    <div th:fragment="stepDocumentos" class="step-content block" data-step="4">
+        <div class="p-9 rounded-2xl bg-[#e3f7dc]/50 border border-[#c4eec0] shadow-sm mb-8">
+            <!-- Título del paso -->
+            <div class="flex gap-4 items-start mb-6 max-sm:flex-col">
+                <span class="w-11 h-11 grid place-items-center rounded-xl bg-sidebar text-white shrink-0">
+                    <i data-lucide="file-text" class="size-6 stroke-[1.75]"></i>
+                </span>
+                <div class="flex-1">
+                    <h2 class="text-sidebar text-[17px] font-black">Carga de Documentación</h2>
+                    <p class="text-text-secondary text-[11px] font-semibold leading-relaxed mt-0.5">
+                        Paso final para completar su vinculación académica. Por favor, asegúrese de que los archivos sean legibles y estén en formato PDF o JPG.
+                    </p>
+                </div>
+                <div class="text-right shrink-0 max-sm:text-left">
+                    <span class="block text-[10px] font-black text-[#0d4117]">Paso 4 de 4 — Finalizado al 90%</span>
+                    <div class="w-36 h-1.5 bg-[#c6edbe] rounded-full overflow-hidden mt-1.5 max-sm:w-full">
+                        <div class="h-full bg-sidebar w-[90%] rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Banner -->
+            <div th:if="${error != null}" class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex gap-3 items-center text-red-800 text-xs font-bold">
+                <i data-lucide="alert-circle" class="size-5 shrink-0 text-red-600"></i>
+                <span th:text="${error}">Error message</span>
+            </div>
+
+            <!-- Grid de documentos -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Registro civil -->
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-1.5 text-text-primary text-[10px] font-black tracking-wider uppercase mb-2">
+                        <span>Registro Civil</span>
+                        <span class="px-1.5 py-0.5 rounded bg-sidebar text-white text-[7px] font-black">REQUERIDO</span>
+                    </div>
+                    <p class="text-text-secondary text-[9px] font-bold leading-normal mb-3 min-h-[27px]">Copia auténtica del registro civil de nacimiento del estudiante. Asegúrese de que todos los sellos notariales sean visibles.</p>
+                    <div th:fragment="civilDocContainer" id="civil-doc-container" class="flex-1 flex flex-col">
+                        <!-- If not uploaded: large dashed box -->
+                        <label th:if="${civilDocName == null}" for="civil-doc-file" class="w-full flex-1 border-2 border-dashed border-[#b7f3ae] bg-[#f1fbe4]/60 rounded-xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-[#e6f7d5]/60 transition-colors block">
+                            <input type="file" class="hidden file-input" id="civil-doc-file" name="file" accept="application/pdf,image/*"
+                                   hx-post="/matricula/upload-file"
+                                   hx-vals='{"fieldName": "civilDoc"}'
+                                   hx-encoding="multipart/form-data"
+                                   hx-target="#civil-doc-container"
+                                   hx-swap="outerHTML">
+                            <i data-lucide="file-up" class="size-10 text-sidebar-border stroke-[1.5]"></i>
+                            <div class="text-center">
+                                <strong class="block text-text-primary text-[12px] font-black">Arrastrar archivo o clic para buscar</strong>
+                                <span class="text-text-secondary text-[10px] font-bold uppercase">pdf, jpg hasta 5mb</span>
+                            </div>
+                        </label>
+
+                        <!-- If uploaded: large dashed box with file icon and delete button -->
+                        <div th:if="${civilDocName != null}" class="w-full flex-1 border-2 border-dashed border-sidebar bg-[#f1fbe4]/60 rounded-xl p-8 flex flex-col items-center justify-center gap-3 relative">
+                            <span class="w-12 h-12 rounded-lg bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0">
+                                <i data-lucide="file-check" class="size-6 stroke-2"></i>
+                            </span>
+                            <div class="text-center">
+                                <strong class="block text-text-primary text-[12px] font-black" th:text="${civilDocName}">documento.pdf</strong>
+                                <span class="text-[#0d4117] text-[10px] font-bold uppercase">Archivo seleccionado</span>
+                            </div>
+                            <button type="button" class="absolute top-3 right-3 text-alert-red hover:text-red-700 transition-colors p-1 cursor-pointer"
+                                    hx-post="/matricula/delete-file" hx-vals='{"fieldName": "civilDoc"}' hx-target="#civil-doc-container" hx-swap="outerHTML">
+                                <i data-lucide="trash-2" class="size-5 stroke-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fotos 3x4 -->
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-1.5 text-text-primary text-[10px] font-black tracking-wider uppercase mb-2">
+                        <span>Fotos 3×4</span>
+                        <span class="px-1.5 py-0.5 rounded bg-sidebar text-white text-[7px] font-black">REQUERIDO</span>
+                    </div>
+                    <p class="text-text-secondary text-[9px] font-bold leading-normal mb-3 min-h-[27px]">Dos fotos recientes con fondo blanco. Rostro descubierto y centrado en la toma.</p>
+                    <div th:fragment="fotoFileContainer" id="foto-file-container" class="flex-1 flex flex-col">
+                        <!-- If not uploaded: large dashed box -->
+                        <label th:if="${fotoFileName == null}" for="foto-file" class="w-full flex-1 border-2 border-dashed border-[#b7f3ae] bg-[#f1fbe4]/60 rounded-xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-[#e6f7d5]/60 transition-colors block">
+                            <input type="file" class="hidden file-input" id="foto-file" name="file" accept="image/*"
+                                   hx-post="/matricula/upload-file"
+                                   hx-vals='{"fieldName": "fotoFile"}'
+                                   hx-encoding="multipart/form-data"
+                                   hx-target="#foto-file-container"
+                                   hx-swap="outerHTML">
+                            <i data-lucide="image" class="size-10 text-sidebar-border stroke-[1.5]"></i>
+                            <div class="text-center">
+                                <strong class="block text-text-primary text-[12px] font-black">Arrastrar foto o clic para buscar</strong>
+                                <span class="text-text-secondary text-[10px] font-bold uppercase">jpg, png hasta 5mb</span>
+                            </div>
+                        </label>
+
+                        <!-- If uploaded: large dashed box showing selection or miniature preview -->
+                        <div th:if="${fotoFileName != null}" class="w-full flex-1 border-2 border-dashed border-sidebar bg-[#f1fbe4]/60 rounded-xl p-8 flex flex-col items-center justify-center gap-3 relative">
+                            <span class="w-16 h-16 rounded-full bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0 overflow-hidden border border-sidebar">
+                                <img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&q=80" alt="Foto">
+                            </span>
+                            <div class="text-center">
+                                <strong class="block text-text-primary text-[12px] font-black" th:text="${fotoFileName}">Foto_01.jpg</strong>
+                                <span class="text-[#0d4117] text-[10px] font-bold uppercase">Listo para cargar</span>
+                            </div>
+                            <button type="button" class="absolute top-3 right-3 text-alert-red hover:text-red-700 transition-colors p-1 cursor-pointer"
+                                    hx-post="/matricula/delete-file" hx-vals='{"fieldName": "fotoFile"}' hx-target="#foto-file-container" hx-swap="outerHTML">
+                                <i data-lucide="trash-2" class="size-5 stroke-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certificado Salud -->
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-1.5 text-text-primary text-[10px] font-black tracking-wider uppercase mb-2">
+                        <span>Certificado Salud</span>
+                        <span class="px-1.5 py-0.5 rounded bg-sidebar text-white text-[7px] font-black">REQUERIDO</span>
+                    </div>
+                    <p class="text-text-secondary text-[9px] font-bold leading-normal mb-3 min-h-[27px]">Certificado médico vigente (no mayor a 30 días) que acredite aptitud física.</p>
+                    <div th:fragment="saludFileContainer" id="salud-file-container" class="flex-1">
+                        <div class="relative">
+                            <label for="salud-file" class="file-uploader-box flex items-center justify-between p-4 bg-white border border-[#c5ecd4] rounded-xl cursor-pointer hover:bg-[#f1fbe4]/60 transition-colors"
+                                   th:classappend="${saludFileName != null} ? 'border-sidebar bg-[#f1fbe4]/20' : ''">
+                                <input type="file" class="hidden file-input" id="salud-file" name="file" accept="application/pdf,image/*"
+                                       hx-post="/matricula/upload-file"
+                                       hx-vals='{"fieldName": "saludFile"}'
+                                       hx-encoding="multipart/form-data"
+                                       hx-target="#salud-file-container"
+                                       hx-swap="outerHTML">
+                                <div class="flex items-center gap-3 min-w-0 mr-2">
+                                    <span class="w-8 h-8 rounded-lg bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0">
+                                        <i data-lucide="heart-pulse" class="size-4.5 stroke-2"></i>
+                                    </span>
+                                    <strong class="text-text-primary text-[11px] font-black text-ellipsis overflow-hidden whitespace-nowrap" th:text="${saludFileName != null ? saludFileName : 'Certificado de Salud.pdf'}">Certificado de Salud.pdf</strong>
+                                </div>
+                                <span class="px-4 py-2 bg-sidebar text-white text-[10px] font-black rounded-lg hover:brightness-97 transition-all flex items-center gap-1 shrink-0">
+                                    <i data-lucide="upload" class="size-3 stroke-2"></i>
+                                    <span th:text="${saludFileName != null ? 'Cambiar' : 'Subir Archivo'}">Subir Archivo</span>
+                                </span>
+                            </label>
+                            <button th:if="${saludFileName != null}" type="button" class="block w-full text-center text-alert-red hover:text-red-700 transition-colors text-[9px] font-bold mt-2 underline cursor-pointer"
+                                    hx-post="/matricula/delete-file" hx-vals='{"fieldName": "saludFile"}' hx-target="#salud-file-container" hx-swap="outerHTML">
+                                Eliminar certificado
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historial Académico -->
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-1.5 text-text-primary text-[10px] font-black tracking-wider uppercase mb-2">
+                        <span>Historial Académico</span>
+                        <span class="px-1.5 py-0.5 rounded bg-sidebar text-white text-[7px] font-black">REQUERIDO</span>
+                    </div>
+                    <p class="text-text-secondary text-[9px] font-bold leading-normal mb-3 min-h-[27px]">Historial escolar completo de años anteriores para validar el expediente académico.</p>
+                    <div th:fragment="historialFileContainer" id="historial-file-container" class="flex-1">
+                        <div class="relative">
+                            <label for="historial-file" class="file-uploader-box flex items-center justify-between p-4 bg-white border border-[#c5ecd4] rounded-xl cursor-pointer hover:bg-[#f1fbe4]/60 transition-colors"
+                                   th:classappend="${historialFileName != null} ? 'border-sidebar bg-[#f1fbe4]/20' : ''">
+                                <input type="file" class="hidden file-input" id="historial-file" name="file" accept="application/pdf,image/*"
+                                       hx-post="/matricula/upload-file"
+                                       hx-vals='{"fieldName": "historialFile"}'
+                                       hx-encoding="multipart/form-data"
+                                       hx-target="#historial-file-container"
+                                       hx-swap="outerHTML">
+                                <div class="flex items-center gap-3 min-w-0 mr-2">
+                                    <span class="w-8 h-8 rounded-lg bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0">
+                                        <i data-lucide="folder" class="size-4.5 stroke-2"></i>
+                                    </span>
+                                    <strong class="text-text-primary text-[11px] font-black text-ellipsis overflow-hidden whitespace-nowrap" th:text="${historialFileName != null ? historialFileName : 'Historial Escolar.pdf'}">Historial Escolar.pdf</strong>
+                                </div>
+                                <span class="px-4 py-2 bg-sidebar text-white text-[10px] font-black rounded-lg hover:brightness-97 transition-all flex items-center gap-1 shrink-0">
+                                    <i data-lucide="upload" class="size-3 stroke-2"></i>
+                                    <span th:text="${historialFileName != null ? 'Cambiar' : 'Subir Archivo'}">Subir Archivo</span>
+                                </span>
+                            </label>
+                            <button th:if="${historialFileName != null}" type="button" class="block w-full text-center text-alert-red hover:text-red-700 transition-colors text-[9px] font-bold mt-2 underline cursor-pointer"
+                                    hx-post="/matricula/delete-file" hx-vals='{"fieldName": "historialFile"}' hx-target="#historial-file-container" hx-swap="outerHTML">
+                                Eliminar boletín
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="flex items-center justify-between max-sm:flex-col max-sm:gap-4">
+            <button type="button"
+                    hx-post="/matricula/paso/3"
+                    hx-target="#step-container"
+                    class="px-6 py-3 text-xs font-black text-sidebar bg-transparent hover:bg-card-green/45 rounded-lg transition-colors flex items-center gap-2 max-sm:w-full max-sm:justify-center">
+                <i data-lucide="arrow-left" class="size-4 stroke-[2.5]"></i>
+                <span>Anterior: Información Familiar</span>
+            </button>
+            <div class="flex gap-4 items-center max-sm:w-full">
+                <span class="text-[9px] font-bold text-text-secondary max-sm:hidden">Al finalizar, recibirá un correo de confirmación.</span>
+                <button type="button"
+                        hx-post="/matricula/paso/finalizar"
+                        hx-target="#step-container"
+                        class="px-6 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md max-sm:w-full max-sm:justify-center">
+                    <span>Finalizar Matrícula</span>
+                    <i data-lucide="check" class="size-4 stroke-[2.5]"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</th:block>

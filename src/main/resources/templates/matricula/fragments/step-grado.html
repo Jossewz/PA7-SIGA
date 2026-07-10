@@ -16,173 +16,134 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-[1fr_240px] max-lg:grid-cols-1 gap-8 items-start">
-                <div class="flex flex-col gap-7">
-                    <!-- Sede selection -->
-                    <div>
-                        <div class="flex items-center gap-2 text-text-primary text-xs font-black mb-3">
-                            <i data-lucide="map-pin" class="size-4.5 text-sidebar stroke-2"></i>
-                            <span>Sede Institucional</span>
-                        </div>
-                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-4">
-                            <!-- Sede Principal -->
-                            <div class="card-sede p-4 rounded-xl border-2 cursor-pointer transition-all flex gap-3.5 shadow-sm"
-                                 th:classappend="${sede == 'Sede Principal' || sede == null} ? 'border-sidebar ring-2 ring-sidebar/20 bg-white' : 'border-[#c4eec0] bg-white/80'"
-                                 hx-post="/matricula/paso/3/selection" hx-vals='{"sede": "Sede Principal"}' hx-target="#step-container">
-                                <span class="w-10 h-10 rounded-lg bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0">
-                                    <i data-lucide="building-2" class="size-5 stroke-2"></i>
-                                </span>
-                                <div>
-                                    <strong class="block text-text-primary text-[12px] font-black">San José de los Campanos (Mz 32#9-Av4)</strong>
-                                    <p class="text-text-secondary text-[9px] font-bold leading-normal mt-1">Ubicación central con laboratorios especializados de ciencia.</p>
-                                </div>
-                            </div>
-                            <!-- Sede Campestre (Deshabilitada/Próximamente) -->
-                            <div class="card-sede p-4 rounded-xl border-2 border-dashed border-[#c4eec0]/60 bg-white/40 flex gap-3.5 shadow-sm opacity-60 cursor-not-allowed select-none">
-                                <span class="w-10 h-10 rounded-lg bg-gray-100 text-gray-400 flex items-center justify-center shrink-0">
-                                    <i data-lucide="trees" class="size-5 stroke-2"></i>
-                                </span>
-                                <div class="flex-1">
-                                    <div class="flex items-center justify-between gap-1.5">
-                                        <strong class="block text-text-muted text-[12px] font-black leading-none">Sede Campestre</strong>
-                                        <span class="px-1.5 py-0.5 rounded bg-gray-200/80 text-gray-500 text-[8px] font-black tracking-wider uppercase leading-none">Próximamente</span>
-                                    </div>
-                                    <p class="text-text-muted text-[9px] font-bold leading-normal mt-1">Entorno natural para formación ambiental y deportiva.</p>
-                                </div>
-                            </div>
-                        </div>
+            <div class="flex flex-col gap-8">
+                <!-- Sede selection -->
+                <div>
+                    <div class="flex items-center gap-2 text-text-primary text-xs font-black mb-3">
+                        <i data-lucide="map-pin" class="size-4.5 text-sidebar stroke-2"></i>
+                        <span>Sede Institucional</span>
                     </div>
-
-                    <!-- Grado selection -->
-                    <div>
-                        <div class="flex items-center gap-2 text-text-primary text-xs font-black mb-3">
-                            <i data-lucide="graduation-cap" class="size-4.5 text-sidebar stroke-2"></i>
-                            <span>Grado Académico</span>
-                        </div>
-                        
-                        <!-- Primaria -->
-                        <div class="mb-4">
-                            <span class="block text-[9px] font-black text-text-secondary uppercase tracking-wider mb-2">Primaria</span>
-                            <div class="grid grid-cols-5 max-sm:grid-cols-3 gap-2">
-                                <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
-                                        th:classappend="${grado == '1°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
-                                        hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "1°"}' hx-target="#step-container">1°</button>
-                                <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
-                                        th:classappend="${grado == '2°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
-                                        hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "2°"}' hx-target="#step-container">2°</button>
-                                <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
-                                        th:classappend="${grado == '3°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
-                                        hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "3°"}' hx-target="#step-container">3°</button>
-                                <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
-                                        th:classappend="${grado == '4°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
-                                        hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "4°"}' hx-target="#step-container">4°</button>
-                                <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
-                                        th:classappend="${grado == '5°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
-                                        hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "5°"}' hx-target="#step-container">5°</button>
+                    <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-4">
+                        <!-- Sede Principal -->
+                        <div class="card-sede p-4 rounded-xl border-2 cursor-pointer transition-all flex gap-3.5 shadow-sm"
+                             th:classappend="${sede == 'Sede Principal' || sede == null} ? 'border-sidebar ring-2 ring-sidebar/20 bg-white' : 'border-[#c4eec0] bg-white/80'"
+                             hx-post="/matricula/paso/3/selection" hx-vals='{"sede": "Sede Principal"}' hx-target="#step-container">
+                            <span class="w-10 h-10 rounded-lg bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0">
+                                <i data-lucide="building-2" class="size-5 stroke-2"></i>
+                            </span>
+                            <div>
+                                <strong class="block text-text-primary text-[12px] font-black">San José de los Campanos (Mz 32#9-Av4)</strong>
+                                <p class="text-text-secondary text-[9px] font-bold leading-normal mt-1">Ubicación central con laboratorios especializados de ciencia.</p>
                             </div>
                         </div>
-
-                        <!-- Bachillerato -->
-                        <div>
-                            <span class="block text-[9px] font-black text-text-secondary uppercase tracking-wider mb-2">Bachillerato</span>
-                            <div class="grid grid-cols-6 max-sm:grid-cols-3 gap-2">
-                                <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
-                                        th:classappend="${grado == '6°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
-                                        hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "6°"}' hx-target="#step-container">6°</button>
-                                <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
-                                        th:classappend="${grado == '7°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
-                                        hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "7°"}' hx-target="#step-container">7°</button>
-                                <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
-                                        th:classappend="${grado == '8°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
-                                        hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "8°"}' hx-target="#step-container">8°</button>
-                                <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
-                                        th:classappend="${grado == '9°' || grado == null} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
-                                        hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "9°"}' hx-target="#step-container">9°</button>
-                                <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
-                                        th:classappend="${grado == '10°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
-                                        hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "10°"}' hx-target="#step-container">10°</button>
-                                <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
-                                        th:classappend="${grado == '11°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
-                                        hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "11°"}' hx-target="#step-container">11°</button>
+                        <!-- Sede Campestre (Deshabilitada/Próximamente) -->
+                        <div class="card-sede p-4 rounded-xl border-2 border-dashed border-[#c4eec0]/60 bg-white/40 flex gap-3.5 shadow-sm opacity-60 cursor-not-allowed select-none">
+                            <span class="w-10 h-10 rounded-lg bg-gray-100 text-gray-400 flex items-center justify-center shrink-0">
+                                <i data-lucide="trees" class="size-5 stroke-2"></i>
+                            </span>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between gap-1.5">
+                                    <strong class="block text-text-muted text-[12px] font-black leading-none">Sede Campestre</strong>
+                                    <span class="px-1.5 py-0.5 rounded bg-gray-200/80 text-gray-500 text-[8px] font-black tracking-wider uppercase leading-none">Próximamente</span>
+                                </div>
+                                <p class="text-text-muted text-[9px] font-bold leading-normal mt-1">Entorno natural para formación ambiental y deportiva.</p>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Info Box -->
-                    <div class="p-4 rounded-lg bg-[#f4faf2] border border-[#d3ecd0] flex gap-3">
-                        <i data-lucide="info" class="size-4.5 text-sidebar shrink-0 stroke-2"></i>
-                        <p class="text-[10px] text-text-secondary font-bold leading-relaxed">
-                            Nota: El grado se selecciona automáticamente basado en tu rendimiento académico previo. Si consideras que hay un error, contacta a secretaría.
-                        </p>
                     </div>
                 </div>
 
-                <!-- Column 2 (Jornada y Resumen Temporal) -->
-                <div class="flex flex-col gap-6 w-full">
-                    <!-- Jornada selection -->
-                    <div>
-                        <div class="flex items-center gap-2 text-text-primary text-xs font-black mb-3">
-                            <i data-lucide="clock" class="size-4.5 text-sidebar stroke-2"></i>
-                            <span>Jornada Escolar</span>
-                        </div>
-                        <div class="flex flex-col gap-3">
-                            <!-- Jornada Mañana -->
-                            <div class="card-jornada p-3 rounded-lg border-2 cursor-pointer transition-all flex gap-3 items-center shadow-sm"
-                                 th:classappend="${jornada == 'Mañana'} ? 'border-sidebar ring-2 ring-sidebar/20 bg-white' : 'border-[#c4eec0] bg-white/80'"
-                                 hx-post="/matricula/paso/3/selection" hx-vals='{"jornada": "Mañana"}' hx-target="#step-container">
-                                <span class="w-8 h-8 rounded bg-[#fff7e6] text-[#ff8c00] flex items-center justify-center shrink-0">
-                                    <i data-lucide="sun" class="size-4.5 stroke-2"></i>
-                                </span>
-                                <div>
-                                    <strong class="block text-text-primary text-[11px] font-black">Mañana</strong>
-                                    <p class="text-text-secondary text-[8px] font-bold mt-0.5">06:30 AM - 01:30 PM</p>
+                <!-- Grado y Jornada side-by-side -->
+                <div class="grid grid-cols-[1fr_240px] max-lg:grid-cols-1 gap-8 items-start">
+                    <div class="flex flex-col gap-7">
+                        <!-- Grado selection -->
+                        <div>
+                            <div class="flex items-center gap-2 text-text-primary text-xs font-black mb-3">
+                                <i data-lucide="graduation-cap" class="size-4.5 text-sidebar stroke-2"></i>
+                                <span>Grado Académico</span>
+                            </div>
+                            
+                            <!-- Primaria -->
+                            <div class="mb-4">
+                                <span class="block text-[9px] font-black text-text-secondary uppercase tracking-wider mb-2">Primaria</span>
+                                <div class="grid grid-cols-5 max-sm:grid-cols-3 gap-2">
+                                    <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
+                                            th:classappend="${grado == '1°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
+                                            hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "1°"}' hx-target="#step-container">1°</button>
+                                    <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
+                                            th:classappend="${grado == '2°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
+                                            hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "2°"}' hx-target="#step-container">2°</button>
+                                    <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
+                                            th:classappend="${grado == '3°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
+                                            hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "3°"}' hx-target="#step-container">3°</button>
+                                    <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
+                                            th:classappend="${grado == '4°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
+                                            hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "4°"}' hx-target="#step-container">4°</button>
+                                    <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
+                                            th:classappend="${grado == '5°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
+                                            hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "5°"}' hx-target="#step-container">5°</button>
                                 </div>
                             </div>
-                            <!-- Jornada Tarde -->
-                            <div class="card-jornada p-3 rounded-lg border-2 cursor-pointer transition-all flex gap-3 items-center shadow-sm"
-                                 th:classappend="${jornada == 'Tarde'} ? 'border-sidebar ring-2 ring-sidebar/20 bg-white' : 'border-[#c4eec0] bg-white/80'"
-                                 hx-post="/matricula/paso/3/selection" hx-vals='{"jornada": "Tarde"}' hx-target="#step-container">
-                                <span class="w-8 h-8 rounded bg-[#e6f2ff] text-[#0066cc] flex items-center justify-center shrink-0">
-                                    <i data-lucide="moon-star" class="size-4.5 stroke-2"></i>
-                                </span>
-                                <div>
-                                    <strong class="block text-text-primary text-[11px] font-black">Tarde</strong>
-                                    <p class="text-text-secondary text-[8px] font-bold mt-0.5">12:30 PM - 06:30 PM</p>
+
+                            <!-- Bachillerato -->
+                            <div>
+                                <span class="block text-[9px] font-black text-text-secondary uppercase tracking-wider mb-2">Bachillerato</span>
+                                <div class="grid grid-cols-6 max-sm:grid-cols-3 gap-2">
+                                    <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
+                                            th:classappend="${grado == '6°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
+                                            hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "6°"}' hx-target="#step-container">6°</button>
+                                    <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
+                                            th:classappend="${grado == '7°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
+                                            hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "7°"}' hx-target="#step-container">7°</button>
+                                    <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
+                                            th:classappend="${grado == '8°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
+                                            hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "8°"}' hx-target="#step-container">8°</button>
+                                    <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
+                                            th:classappend="${grado == '9°' || grado == null} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
+                                            hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "9°"}' hx-target="#step-container">9°</button>
+                                    <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
+                                            th:classappend="${grado == '10°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
+                                            hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "10°"}' hx-target="#step-container">10°</button>
+                                    <button type="button" class="btn-grado h-11 rounded-lg font-black text-sm shadow-sm transition-colors"
+                                            th:classappend="${grado == '11°'} ? 'bg-sidebar text-white shadow-md' : 'bg-white border border-[#c5ecd4] text-sidebar hover:bg-[#f1fbe4]'"
+                                            hx-post="/matricula/paso/3/selection" hx-vals='{"grado": "11°"}' hx-target="#step-container">11°</button>
                                 </div>
                             </div>
                         </div>
+
                     </div>
 
-                    <!-- Resumen Temporal -->
-                    <div class="p-5 rounded-xl bg-sidebar text-white shadow-md flex flex-col gap-4">
-                        <strong class="block text-xs font-black tracking-wider uppercase opacity-80">Resumen Temporal</strong>
-                        
-                        <div class="grid gap-2.5 text-[10px] font-bold border-b border-white/10 pb-4">
-                            <div class="flex items-center justify-between">
-                                <span class="opacity-70">Grado:</span>
-                                <span class="font-black" th:text="${(grado == '1°' || grado == '2°' || grado == '3°' || grado == '4°' || grado == '5°') ? grado + ' de Primaria' : (grado ?: '9°') + ' de Bachillerato'}">Grado 9° de Bachillerato</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="opacity-70">Sede:</span>
-                                <span class="font-black" th:text="${sede == 'Sede Principal' || sede == null ? 'San José de los Campanos (Mz 32#9-Av4)' : (sede ?: 'San José de los Campanos (Mz 32#9-Av4)')}">San José de los Campanos (Mz 32#9-Av4)</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="opacity-70">Periodo:</span>
-                                <span class="font-black">2024-II</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="opacity-70">Jornada:</span>
-                                <span class="font-black" th:text="${jornada ?: 'Mañana'}">Mañana</span>
-                            </div>
-                        </div>
-
+                    <!-- Jornada selection -->
+                    <div class="flex flex-col gap-6 w-full">
                         <div>
-                            <div class="flex items-center justify-between text-[9px] font-bold mb-1.5 opacity-80">
-                                <span>CUPOS DISPONIBLES</span>
-                                <span class="font-black">26 Libres</span>
+                            <div class="flex items-center gap-2 text-text-primary text-xs font-black mb-3">
+                                <i data-lucide="clock" class="size-4.5 text-sidebar stroke-2"></i>
+                                <span>Jornada Escolar</span>
                             </div>
-                            <div class="h-1.5 rounded-full bg-white/20 overflow-hidden">
-                                <div class="h-full bg-action-btn w-[40%] rounded-full"></div>
+                            <div class="flex flex-col gap-3">
+                                <!-- Jornada Mañana -->
+                                <div class="card-jornada p-3 rounded-lg border-2 cursor-pointer transition-all flex gap-3 items-center shadow-sm"
+                                     th:classappend="${jornada == 'Mañana'} ? 'border-sidebar ring-2 ring-sidebar/20 bg-white' : 'border-[#c4eec0] bg-white/80'"
+                                     hx-post="/matricula/paso/3/selection" hx-vals='{"jornada": "Mañana"}' hx-target="#step-container">
+                                    <span class="w-8 h-8 rounded bg-[#fff7e6] text-[#ff8c00] flex items-center justify-center shrink-0">
+                                        <i data-lucide="sun" class="size-4.5 stroke-2"></i>
+                                    </span>
+                                    <div>
+                                        <strong class="block text-text-primary text-[11px] font-black">Mañana</strong>
+                                        <p class="text-text-secondary text-[8px] font-bold mt-0.5">06:30 AM - 01:30 PM</p>
+                                    </div>
+                                </div>
+                                <!-- Jornada Tarde -->
+                                <div class="card-jornada p-3 rounded-lg border-2 cursor-pointer transition-all flex gap-3 items-center shadow-sm"
+                                     th:classappend="${jornada == 'Tarde'} ? 'border-sidebar ring-2 ring-sidebar/20 bg-white' : 'border-[#c4eec0] bg-white/80'"
+                                     hx-post="/matricula/paso/3/selection" hx-vals='{"jornada": "Tarde"}' hx-target="#step-container">
+                                    <span class="w-8 h-8 rounded bg-[#e6f2ff] text-[#0066cc] flex items-center justify-center shrink-0">
+                                        <i data-lucide="moon-star" class="size-4.5 stroke-2"></i>
+                                    </span>
+                                    <div>
+                                        <strong class="block text-text-primary text-[11px] font-black">Tarde</strong>
+                                        <p class="text-text-secondary text-[8px] font-bold mt-0.5">12:30 PM - 06:30 PM</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

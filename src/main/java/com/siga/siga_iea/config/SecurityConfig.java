@@ -31,6 +31,7 @@ public class SecurityConfig {
                                 "/usuarios/**",
                                 "/configuracion",
                                 "/configuracion/**",
+                                "/storage/public/**",
                                 "/css/**",
                                 "/js/**",
                                 "/img/**"

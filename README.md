@@ -9,6 +9,7 @@ Sistema de Gestión IEA desarrollado con Spring Boot, PostgreSQL, Thymeleaf y Do
 - Spring Boot 3.5.x
 - Maven Wrapper
 - PostgreSQL 18.3
+- MinIO (Object Storage)
 - Docker + Docker Compose
 - Thymeleaf
 - Spring Security
@@ -167,6 +168,8 @@ Servicios:
 Backend: http://localhost:8080
 PostgreSQL: localhost:5433
 Vite: http://localhost:5173
+MinIO Console: http://localhost:9001
+MinIO API: http://localhost:9000
 ```
 
 ## Comandos útiles
@@ -231,6 +234,37 @@ Username: postgres
 Password: siga
 
 Importante: si pgAdmin corre en Docker, el host debe ser db y no localhost, ya que ambos contenedores se comunican por la red interna de Docker.
+```
+
+## MinIO (Almacenamiento de Archivos)
+
+MinIO es un servidor de almacenamiento de objetos compatible con Amazon S3. Se utiliza para guardar fotos de perfil, documentos de matrícula, boletines, etc.
+
+El bucket `siga` se crea **automáticamente** al arrancar la aplicación si no existe.
+
+Acceder a la consola web desde el navegador:
+
+```text
+http://localhost:9001
+```
+
+Credenciales de acceso:
+
+```text
+Usuario (Root User): admin
+Contraseña (Root Password): admin123
+```
+
+Puertos y conexión:
+
+```text
+MinIO API (desde la app o backend):
+Host dentro de Docker: http://minio:9000
+Host desde tu PC (IDE/local): http://localhost:9000
+
+MinIO Console (consola web en navegador):
+Host: http://localhost:9001
+```
 
 ## Notas
 

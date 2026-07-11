@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html
 lang="es"
-xmlns:th="http://www.thymeleaf.org">
+xmlns:th="http://www.thymeleaf.org"
+th:fragment="html(content)">
 
 <head>
 
@@ -38,7 +39,7 @@ xmlns:th="http://www.thymeleaf.org">
     <aside
       th:replace="
       ~{layouts/sidebar :: sidebar(
-        activePage='dashboard',
+        activePage=${activePage ?: 'dashboard'},
         bottomUrl='/soporte',
         bottomText='Soporte Técnico'
       )}">

@@ -30,6 +30,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: siga
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+      MINIO_URL: http://minio:9000
+      MINIO_ACCESS_KEY: admin
+      MINIO_SECRET_KEY: admin123
+      MINIO_BUCKET: siga
     ports:
       - "8080:8080"
     volumes:
@@ -52,6 +56,19 @@ services:
     volumes:
       - siga_pgadmin_data:/var/lib/pgadmin
 
+  minio:
+    image: minio/minio
+    container_name: siga-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin123
+    command: server /data --console-address ":9001"
+    volumes:
+      - siga_minio_data:/data
+
   frontend:
     image: node:22-alpine
     container_name: siga-vite
@@ -70,3 +87,4 @@ volumes:
   siga_maven_cache:
   siga_node_modules:
   siga_pgadmin_data:
+  siga_minio_data:

@@ -1,0 +1,14 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <!-- COMPONENTE: TELÉFONO -->
+    <div th:fragment="fieldPhone(label, id, name, value, placeholder, required)" class="w-full">
+        <label th:for="${id}" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase" th:text="${label}">Etiqueta</label>
+        <div class="relative w-full">
+            <input type="text" th:id="${id}" th:name="${name}" th:value="${value}" th:placeholder="${placeholder ?: '+57 300 000 0000'}"
+                   th:required="${required}"
+                   class="w-full h-11 pl-4.5 pr-11 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200">
+            <i data-lucide="phone" class="absolute right-4 top-1/2 -translate-y-1/2 size-4.5 text-sidebar stroke-2"></i>
+        </div>
+    </div>
+
+</th:block>

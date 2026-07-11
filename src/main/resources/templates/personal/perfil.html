@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/base :: html(~{::content})}">
+<head>
+    <title>Perfil de Personal – IEACI</title>
+</head>
+<body>
+
+<th:block th:fragment="content">
+    <div class="flex flex-col gap-6">
+        <!-- Back Button & Breadcrumbs -->
+        <div class="flex items-center gap-2">
+            <a th:href="@{/personal}" class="p-2 hover:bg-white rounded-lg transition-colors text-sidebar flex items-center justify-center shrink-0 border border-[#c4eec0]/40 shadow-sm">
+                <i data-lucide="arrow-left" class="size-4.5 stroke-[2.5]"></i>
+            </a>
+            <div>
+                <small class="block text-[8px] font-black uppercase tracking-wider text-text-secondary">Personal › Ficha de Registro</small>
+                <h1 class="text-text-primary text-[20px] font-black tracking-tight leading-none mt-0.5" th:text="${staff.nombreCompleto}">Carlos Mendoza</h1>
+            </div>
+        </div>
+
+        <!-- Layout Grid: Profile Card on left/top, Tabs content on right/bottom -->
+        <div class="grid grid-cols-1 xl:grid-cols-[280px_1fr] gap-6 items-start">
+            
+            <!-- Left Panel: Ficha Card -->
+            <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-6 flex flex-col items-center text-center gap-5">
+                <div class="relative size-24">
+                    <img th:src="${staff.foto != null ? staff.foto : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80'}" 
+                         alt="Foto de perfil" class="w-full h-full rounded-full object-cover border-2 border-sidebar shadow-md">
+                    <span class="absolute bottom-1 right-1 size-5 rounded-full border-2 border-white flex items-center justify-center shrink-0"
+                          th:classappend="${staff.estado == 'Activo'} ? 'bg-sidebar' : 'bg-alert-red'"
+                          title="Estado">
+                        <i th:data-lucide="${staff.estado == 'Activo' ? 'check' : 'x'}" class="size-2.5 text-white stroke-[3]"></i>
+                    </span>
+                </div>
+
+                <div>
+                    <h2 class="text-text-primary text-base font-black leading-tight" th:text="${staff.nombreCompleto}">Carlos Mendoza</h2>
+                    <span class="block text-text-secondary text-[11px] font-bold mt-1" th:text="${staff.cargo}">Docente</span>
+                    <span class="block text-[10px] text-[#677768] font-semibold mt-0.5" th:text="${staff.area}">Área Académica</span>
+                </div>
+
+                <div class="w-full h-px bg-[#c4eec0]/30"></div>
+
+                <div class="w-full grid gap-2.5 text-left text-[11px] font-bold text-text-secondary">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="mail" class="size-4 text-sidebar stroke-2"></i>
+                        <span class="text-text-primary text-ellipsis overflow-hidden" th:text="${staff.correo}">carlos@ieaci.edu.co</span>
+                    </div>
+                    <div class="flex items-center gap-2" th:if="${staff.telefono != null}">
+                        <i data-lucide="phone" class="size-4 text-sidebar stroke-2"></i>
+                        <span class="text-text-primary" th:text="${staff.telefono}">300 123 4567</span>
+                    </div>
+                    <div class="flex items-center gap-2" th:if="${staff.ciudad != null}">
+                        <i data-lucide="map-pin" class="size-4 text-sidebar stroke-2"></i>
+                        <span class="text-text-primary" th:text="${staff.ciudad}">Cartagena</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Tabs Content -->
+            <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft flex flex-col overflow-hidden min-h-[460px]">
+                
+                <!-- Tabs Bar -->
+                <div class="flex border-b border-[#c4eec0]/40 px-6 bg-[#f7fcf6] overflow-x-auto gap-2 scrollbar-none">
+                    <button type="button" class="tab-btn-p px-4 py-4 text-[10px] font-black uppercase tracking-wider text-sidebar border-b-2 border-sidebar whitespace-nowrap" onclick="switchProfileTab(this, 'tab-info')">Información</button>
+                    <button type="button" class="tab-btn-p px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchProfileTab(this, 'tab-laboral-p')">Laboral</button>
+                    <button type="button" class="tab-btn-p px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchProfileTab(this, 'tab-asignaciones')">Asignaciones</button>
+                    <button type="button" class="tab-btn-p px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchProfileTab(this, 'tab-cuenta-p')">Cuenta</button>
+                    <button type="button" class="tab-btn-p px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchProfileTab(this, 'tab-historial')">Historial</button>
+                    <button type="button" class="tab-btn-p px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchProfileTab(this, 'tab-documentos-p')">Documentos</button>
+                </div>
+
+                <!-- Tab Body Content -->
+                <div class="p-8 flex-1">
+                    
+                    <!-- TAB 1: INFORMACIÓN -->
+                    <div id="tab-info" class="profile-tab-content flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Información Personal</h3>
+                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5 text-[11px] font-bold">
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Nombre Completo</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.primerNombre + ' ' + (staff.segundoNombre ?: '') + ' ' + staff.primerApellido + ' ' + (staff.segundoApellido ?: '')}">Carlos Mendoza</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Documento de Identidad</span>
+                                <span class="text-text-primary text-xs" th:text="${(staff.tipoDoc ?: 'CC') + ' - ' + (staff.numDoc ?: '123456')}">CC - 1088123456</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Fecha de Nacimiento</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.fechaNac ?: '1985-05-12'}">1985-05-12</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Sexo</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.sexo ?: 'Masculino'}">Masculino</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Estado Civil</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.estadoCivil ?: 'Soltero'}">Soltero</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Nacionalidad</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.nacionalidad ?: 'Colombiana'}">Colombiana</span>
+                            </div>
+                        </div>
+
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2 mt-4">Ficha de Contacto</h3>
+                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5 text-[11px] font-bold">
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Correo Electrónico</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.correo}">carlos.mendoza@ieaci.edu.co</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Teléfono de contacto</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.telefono ?: '300 123 4567'}">300 123 4567</span>
+                            </div>
+                            <div class="col-span-2 max-sm:col-span-1 grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Dirección residencial</span>
+                                <span class="text-text-primary text-xs" th:text="${(staff.direccion ?: 'San José') + ', ' + (staff.ciudad ?: 'Cartagena')}">Manzana A Lote 5, San José, Cartagena</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: LABORAL -->
+                    <div id="tab-laboral-p" class="profile-tab-content hidden flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Información Laboral</h3>
+                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5 text-[11px] font-bold">
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Cargo Ocupado</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.cargo}">Docente</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Área / Departamento</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.area}">Académica</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Tipo de Contrato</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.tipoContrato}">Término Fijo</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Jornada Laboral</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.jornada}">Mañana</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Fecha de Ingreso</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.fechaIngreso}">2021-02-01</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Salario Registrado</span>
+                                <span class="text-text-primary text-xs text-sidebar font-extrabold" th:text="${staff.salario ?: '$ 2.200.000'}">$ 2.200.000</span>
+                            </div>
+                        </div>
+
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2 mt-4">Información Profesional</h3>
+                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5 text-[11px] font-bold">
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Profesión</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.profesion}">Licenciado en Matemáticas</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Especialidad</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.especialidad ?: 'Ninguna'}">Álgebra y Cálculo</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Nivel de Educación Máximo</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.nivelEducativo}">Especialización</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Universidad egresada</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.universidad}">Universidad del Atlántico</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: ASIGNACIONES -->
+                    <div id="tab-asignaciones" class="profile-tab-content hidden flex flex-col gap-6">
+                        <div class="flex justify-between items-center border-b border-[#c4eec0]/30 pb-2">
+                            <h3 class="text-sidebar text-sm font-black uppercase tracking-wide">Cursos y Cargas Académicas</h3>
+                            <button type="button" class="px-3.5 py-1.5 text-[10px] font-black text-sidebar bg-[#f1fbe4] hover:bg-sidebar hover:text-white rounded-lg transition-colors border border-sidebar/20 flex items-center gap-1.5" th:if="${staff.cargo == 'Docente'}">
+                                <i data-lucide="plus" class="size-3.5 stroke-[2.5]"></i> Asignar Curso
+                            </button>
+                        </div>
+                        
+                        <div class="flex flex-col items-center justify-center p-12 text-center text-text-secondary" th:if="${staff.cargo != 'Docente'}">
+                            <i data-lucide="ban" class="size-12 text-text-muted mb-3 opacity-60"></i>
+                            <strong class="text-[13px] font-black text-text-primary">Asignación no aplicable</strong>
+                            <p class="text-[11px] mt-1">Este miembro del personal no tiene cargo docente, por lo que no cuenta con asignaciones escolares directas.</p>
+                        </div>
+
+                        <div class="grid gap-4.5" th:if="${staff.cargo == 'Docente'}">
+                            <!-- Mock Cursos Asignados -->
+                            <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-[#f9fbf8]/50 flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-10 h-10 rounded-lg bg-card-green text-sidebar flex items-center justify-center shrink-0 font-black text-[15px]">9A</span>
+                                    <div>
+                                        <strong class="block text-text-primary text-[12px] font-black">Grado 9° - Grupo A</strong>
+                                        <span class="block text-text-secondary text-[10px] font-medium mt-0.5">Asignatura: Álgebra y Geometría</span>
+                                    </div>
+                                </div>
+                                <span class="px-2.5 py-1 rounded bg-[#f1fbe4] text-sidebar text-[9px] font-black uppercase shrink-0">Director de Grupo</span>
+                            </div>
+                            <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-[#f9fbf8]/50 flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-10 h-10 rounded-lg bg-[#f1f5f1] text-[#677768] flex items-center justify-center shrink-0 font-black text-[15px]">10B</span>
+                                    <div>
+                                        <strong class="block text-text-primary text-[12px] font-black">Grado 10° - Grupo B</strong>
+                                        <span class="block text-text-secondary text-[10px] font-medium mt-0.5">Asignatura: Cálculo Diferencial</span>
+                                    </div>
+                                </div>
+                                <span class="px-2.5 py-1 rounded bg-[#f1f5f1] text-[#677768] text-[9px] font-black uppercase shrink-0">Docente Cátedra</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: CUENTA -->
+                    <div id="tab-cuenta-p" class="profile-tab-content hidden flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Cuenta de Acceso al Sistema</h3>
+                        
+                        <div class="p-5 rounded-xl border border-[#c4eec0]/40 bg-[#fbfdfa] flex flex-col gap-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <strong class="block text-text-primary text-xs font-black">c.mendoza</strong>
+                                    <span class="text-text-secondary text-[10px] font-medium">Nombre de usuario registrado</span>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full bg-pill-green text-sidebar text-[9px] font-black uppercase leading-none">Activo</span>
+                            </div>
+                            <div class="h-px bg-[#c4eec0]/20 w-full"></div>
+                            <div class="grid grid-cols-2 gap-4 text-[11px] font-semibold text-text-secondary">
+                                <div class="flex flex-col gap-1">
+                                    <span>Rol Asignado:</span>
+                                    <strong class="text-text-primary font-black text-xs">DOCENTE</strong>
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <span>Último ingreso registrado:</span>
+                                    <strong class="text-text-primary font-black text-xs">Ayer, 04:32 PM</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4.5 mt-2">
+                            <button type="button" class="px-5 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all shadow-md">
+                                Reestablecer Contraseña
+                            </button>
+                            <button type="button" class="px-5 py-3 text-xs font-black text-alert-red bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
+                                Bloquear Cuenta
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- TAB 5: HISTORIAL -->
+                    <div id="tab-historial" class="profile-tab-content hidden flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Historial de Registro</h3>
+                        
+                        <!-- Timeline -->
+                        <div class="relative border-l-2 border-[#c4eec0]/60 pl-6 ml-3 flex flex-col gap-6 mt-2">
+                            <!-- Item 1 -->
+                            <div class="relative">
+                                <span class="absolute -left-[31px] top-0 size-4.5 rounded-full bg-[#a0f399] border-4 border-white flex items-center justify-center shrink-0 shadow-sm"></span>
+                                <strong class="block text-text-primary text-[12px] font-black">Ficha Laboral Modificada</strong>
+                                <span class="block text-text-secondary text-[10px] font-medium mt-0.5">Se actualizó la información salarial y tipo de contrato.</span>
+                                <time class="block text-[#758676] text-[9px] font-semibold mt-1">15 de Mayo, 2026 - 10:15 AM</time>
+                            </div>
+                            <!-- Item 2 -->
+                            <div class="relative">
+                                <span class="absolute -left-[31px] top-0 size-4.5 rounded-full bg-[#a0f399] border-4 border-white flex items-center justify-center shrink-0 shadow-sm"></span>
+                                <strong class="block text-text-primary text-[12px] font-black">Cuenta Creada</strong>
+                                <span class="block text-text-secondary text-[10px] font-medium mt-0.5">Se habilitaron credenciales en el sistema con el rol "Docente".</span>
+                                <time class="block text-[#758676] text-[9px] font-semibold mt-1">01 de Febrero, 2021 - 08:30 AM</time>
+                            </div>
+                            <!-- Item 3 -->
+                            <div class="relative">
+                                <span class="absolute -left-[31px] top-0 size-4.5 rounded-full bg-[#a0f399] border-4 border-white flex items-center justify-center shrink-0 shadow-sm"></span>
+                                <strong class="block text-text-primary text-[12px] font-black">Registro de Personal Completo</strong>
+                                <span class="block text-text-secondary text-[10px] font-medium mt-0.5">Ingreso inicial a la plataforma realizado por el Administrador.</span>
+                                <time class="block text-[#758676] text-[9px] font-semibold mt-1">01 de Febrero, 2021 - 08:00 AM</time>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 6: DOCUMENTOS -->
+                    <div id="tab-documentos-p" class="profile-tab-content hidden flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Documentos Expedientes</h3>
+                        
+                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-4.5 text-[11px] font-bold text-text-secondary">
+                            <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-white flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-9 h-9 rounded bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0">
+                                        <i data-lucide="file-text" class="size-4.5 stroke-2"></i>
+                                    </span>
+                                    <div>
+                                        <strong class="block text-text-primary text-[12px] font-black">Hoja_de_Vida.pdf</strong>
+                                        <span class="block text-text-secondary text-[9.5px] font-semibold mt-0.5">Cargado: 01/02/2021 (1.2 MB)</span>
+                                    </div>
+                                </div>
+                                <a href="#" class="p-2 hover:bg-[#f1fbe4] text-sidebar rounded-lg transition-colors border border-sidebar/10 shadow-sm">
+                                    <i data-lucide="download" class="size-4 stroke-2"></i>
+                                </a>
+                            </div>
+
+                            <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-white flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-9 h-9 rounded bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0">
+                                        <i data-lucide="credit-card" class="size-4.5 stroke-2"></i>
+                                    </span>
+                                    <div>
+                                        <strong class="block text-text-primary text-[12px] font-black">Documento_Identidad.pdf</strong>
+                                        <span class="block text-text-secondary text-[9.5px] font-semibold mt-0.5">Cargado: 01/02/2021 (850 KB)</span>
+                                    </div>
+                                </div>
+                                <a href="#" class="p-2 hover:bg-[#f1fbe4] text-sidebar rounded-lg transition-colors border border-sidebar/10 shadow-sm">
+                                    <i data-lucide="download" class="size-4 stroke-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TAB SWITCHING SCRIPT -->
+    <script>
+        function switchProfileTab(btn, tabId) {
+            document.querySelectorAll('.profile-tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-btn-p').forEach(b => {
+                b.classList.remove('border-sidebar', 'text-sidebar');
+                b.classList.add('border-transparent', 'text-text-secondary');
+            });
+            btn.classList.remove('border-transparent', 'text-text-secondary');
+            btn.classList.add('border-sidebar', 'text-sidebar');
+        }
+    </script>
+</th:block>
+
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/base :: html(~{::content})}">
+<head>
+    <title>Gestión de Estudiantes – IEACI</title>
+</head>
+<body>
+
+<th:block th:fragment="content">
+    <div class="flex flex-col gap-6">
+        <!-- Header -->
+        <div>
+            <h1 class="text-text-primary text-[28px] font-black tracking-tight leading-none mb-1.5">Gestión de Estudiantes</h1>
+            <p class="text-text-secondary text-sm font-semibold">Listado de alumnos matriculados, asignación de cursos y expedientes escolares.</p>
+        </div>
+
+        <!-- Filters Box -->
+        <div class="p-5 rounded-xl bg-white border border-[#c4eec0]/40 shadow-soft">
+            <form class="grid grid-cols-4 max-lg:grid-cols-2 max-sm:grid-cols-1 gap-4 items-end">
+                <div class="col-span-1 max-lg:col-span-2 max-sm:col-span-1">
+                    <label for="search-student" class="block mb-1.5 text-[9px] font-black text-text-secondary uppercase tracking-wider">Buscar por nombre o código</label>
+                    <div class="relative">
+                        <input type="text" id="search-student" placeholder="Buscar estudiante..." 
+                               class="w-full h-10 pl-4 pr-10 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all">
+                        <i data-lucide="search" class="absolute right-3.5 top-1/2 -translate-y-1/2 size-4 text-text-secondary stroke-2"></i>
+                    </div>
+                </div>
+                <div>
+                    <label for="filter-grade" class="block mb-1.5 text-[9px] font-black text-text-secondary uppercase tracking-wider">Grado / Curso</label>
+                    <select id="filter-grade" class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all">
+                        <option value="">Todos los grados</option>
+                        <option value="9°">9°</option>
+                        <option value="10°">10°</option>
+                        <option value="11°">11°</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-jornada" class="block mb-1.5 text-[9px] font-black text-text-secondary uppercase tracking-wider">Jornada</label>
+                    <select id="filter-jornada" class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all">
+                        <option value="">Todas las jornadas</option>
+                        <option value="Mañana">Mañana</option>
+                        <option value="Tarde">Tarde</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filter-status" class="block mb-1.5 text-[9px] font-black text-text-secondary uppercase tracking-wider">Estado</label>
+                    <select id="filter-status" class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all">
+                        <option value="">Todos los estados</option>
+                        <option value="Activo">Activo</option>
+                        <option value="Retirado">Retirado</option>
+                        <option value="Graduado">Graduado</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-[12px]">
+                    <thead>
+                        <tr class="bg-[#f7fcf6] border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
+                            <th class="p-4.5 pl-6">Código</th>
+                            <th class="p-4.5">Nombre Completo</th>
+                            <th class="p-4.5">Curso / Grado</th>
+                            <th class="p-4.5">Estado</th>
+                            <th class="p-4.5 pr-6 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]">
+                        <tr th:each="s : ${estudiantesList}" class="hover:bg-[#fcfdfb] transition-colors">
+                            <td class="p-4.5 pl-6 font-bold text-sidebar" th:text="${s.codigo}">2026001</td>
+                            <td class="p-4.5 font-bold" th:text="${s.nombreCompleto}">Santiago Alejandro Gómez Pérez</td>
+                            <td class="p-4.5 font-semibold text-text-secondary" th:text="${s.curso}">9° - A</td>
+                            <td class="p-4.5">
+                                <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wide leading-none"
+                                      th:classappend="${s.estado == 'Activo'} ? 'bg-pill-green text-sidebar' : 'bg-pill-red text-alert-red'"
+                                      th:text="${s.estado}">Activo</span>
+                            </td>
+                            <td class="p-4.5 pr-6 text-right relative">
+                                <div class="inline-block text-left" onclick="event.stopPropagation()">
+                                    <button type="button" class="p-1.5 hover:bg-[#f1fbe4] rounded-lg transition-colors text-text-secondary" onclick="toggleEstMenu(this)">
+                                        <i data-lucide="more-vertical" class="size-4.5 stroke-[2.2]"></i>
+                                    </button>
+                                    
+                                    <!-- Dropdown menu -->
+                                    <div class="hidden absolute right-6 mt-1 w-44 rounded-lg bg-white border border-[#c4eec0] shadow-lg py-1.5 z-30 text-left action-menu-dropdown">
+                                        <a th:href="@{'/estudiantes/perfil/' + ${s.id}}" class="flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold">
+                                            <i data-lucide="eye" class="size-4 text-sidebar stroke-2"></i> Ver perfil
+                                        </a>
+                                        <button type="button" class="w-full flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold text-left">
+                                            <i data-lucide="edit-3" class="size-4 text-sidebar stroke-2"></i> Editar datos
+                                        </button>
+                                        <button type="button" class="w-full flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold text-left">
+                                            <i data-lucide="graduation-cap" class="size-4 text-sidebar stroke-2"></i> Cambiar curso
+                                        </button>
+                                        <button type="button" class="w-full flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold text-left">
+                                            <i data-lucide="file-text" class="size-4 text-sidebar stroke-2"></i> Generar boletín
+                                        </button>
+                                        <div class="h-px bg-[#c4eec0]/40 my-1"></div>
+                                        <button type="button" class="w-full flex items-center gap-2 px-3.5 py-2 text-alert-red hover:bg-red-50 transition-colors font-bold text-left" th:if="${s.estado == 'Activo'}">
+                                            <i data-lucide="user-minus" class="size-4 stroke-2"></i> Retirar alumno
+                                        </button>
+                                        <button type="button" class="w-full flex items-center gap-2 px-3.5 py-2 text-sidebar hover:bg-[#f1fbe4] transition-colors font-bold text-left" th:if="${s.estado == 'Retirado'}">
+                                            <i data-lucide="user-plus" class="size-4 stroke-2"></i> Reingresar alumno
+                                        </button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE COMPORTAMIENTO -->
+    <script>
+        window.addEventListener('click', function() {
+            document.querySelectorAll('.action-menu-dropdown').forEach(el => el.classList.add('hidden'));
+        });
+
+        function toggleEstMenu(btn) {
+            event.stopPropagation();
+            const targetMenu = btn.nextElementSibling;
+            const isHidden = targetMenu.classList.contains('hidden');
+            document.querySelectorAll('.action-menu-dropdown').forEach(el => el.classList.add('hidden'));
+            if (isHidden) {
+                targetMenu.classList.remove('hidden');
+            }
+        }
+    </script>
+</th:block>
+
+</body>
+</html>

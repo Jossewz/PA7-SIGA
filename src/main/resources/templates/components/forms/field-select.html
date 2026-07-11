@@ -1,0 +1,16 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <!-- COMPONENTE: SELECT DROPDOWN -->
+    <div th:fragment="fieldSelect(label, id, name, selectedValue, options, required)" class="w-full">
+        <label th:for="${id}" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase" th:text="${label}">Etiqueta</label>
+        <select th:id="${id}" th:name="${name}" th:required="${required}"
+                class="w-full h-11 px-4 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200">
+            <option value="">Seleccione una opción</option>
+            <option th:each="opt : ${options}" 
+                    th:value="${opt.key}" 
+                    th:text="${opt.value}" 
+                    th:selected="${opt.key == selectedValue}"></option>
+        </select>
+    </div>
+
+</th:block>

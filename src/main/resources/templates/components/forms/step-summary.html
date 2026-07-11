@@ -1,65 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org">
 
-    <!-- BARRA DE PROGRESO DE PASOS -->
-    <div th:fragment="progressBar(currentStep)" class="w-full flex items-center justify-between relative mb-10 max-md:grid max-md:grid-cols-2 max-md:gap-4">
-        <!-- Línea conectora trasera -->
-        <div class="absolute top-5 left-0 right-0 h-0.5 bg-[#c6edbe] -translate-y-1/2 max-md:hidden z-0">
-            <div id="progress-line" class="h-full bg-[#0d4117] transition-all duration-500 absolute left-[12.5%]"
-                 th:style="'width: ' + (${(currentStep - 1) * 25}) + '%'"></div>
-        </div>
-
-        <!-- Paso 1 -->
-        <div class="step-indicator w-full md:flex-1 flex flex-col items-center gap-2 cursor-pointer group" data-step="1"
-             hx-post="/matricula/paso/1" hx-target="#step-container">
-            <div class="step-circle size-10 rounded-full flex items-center justify-center font-black transition-all duration-300 relative z-10"
-                 th:classappend="${currentStep > 1} ? 'bg-[#a0f399] border-2 border-[#0d4117] text-[#0d4117] shadow-sm' : (${currentStep == 1} ? 'bg-[#0d4117] text-white shadow-md ring-4 ring-[#0d4117]/20' : 'bg-[#c6edbe] text-[#0d4117]')">
-                <i data-lucide="check" class="size-5" th:classappend="${currentStep > 1} ? '' : 'hidden'"></i>
-                <span class="step-number" th:classappend="${currentStep > 1} ? 'hidden' : ''">1</span>
-            </div>
-            <span class="step-label text-[10px] font-black uppercase tracking-wider transition-all duration-300 text-center"
-                  th:classappend="${currentStep > 1} ? 'text-[#0d4117]' : (${currentStep == 1} ? 'text-[#0d4117] font-extrabold' : 'text-text-secondary')">Datos Personales</span>
-        </div>
-
-        <!-- Paso 2 -->
-        <div class="step-indicator w-full md:flex-1 flex flex-col items-center gap-2 cursor-pointer group" data-step="2"
-             hx-post="/matricula/paso/2" hx-target="#step-container">
-            <div class="step-circle size-10 rounded-full flex items-center justify-center font-black transition-all duration-300 relative z-10"
-                 th:classappend="${currentStep > 2} ? 'bg-[#a0f399] border-2 border-[#0d4117] text-[#0d4117] shadow-sm' : (${currentStep == 2} ? 'bg-[#0d4117] text-white shadow-md ring-4 ring-[#0d4117]/20' : 'bg-[#c6edbe] text-[#0d4117]')">
-                <i data-lucide="check" class="size-5" th:classappend="${currentStep > 2} ? '' : 'hidden'"></i>
-                <span class="step-number" th:classappend="${currentStep > 2} ? 'hidden' : ''">2</span>
-            </div>
-            <span class="step-label text-[10px] font-black uppercase tracking-wider transition-all duration-300 text-center"
-                  th:classappend="${currentStep > 2} ? 'text-[#0d4117]' : (${currentStep == 2} ? 'text-[#0d4117] font-extrabold' : 'text-text-secondary')">Acudiente</span>
-        </div>
-
-        <!-- Paso 3 -->
-        <div class="step-indicator w-full md:flex-1 flex flex-col items-center gap-2 cursor-pointer group" data-step="3"
-             hx-post="/matricula/paso/3" hx-target="#step-container">
-            <div class="step-circle size-10 rounded-full flex items-center justify-center font-black transition-all duration-300 relative z-10"
-                 th:classappend="${currentStep > 3} ? 'bg-[#a0f399] border-2 border-[#0d4117] text-[#0d4117] shadow-sm' : (${currentStep == 3} ? 'bg-[#0d4117] text-white shadow-md ring-4 ring-[#0d4117]/20' : 'bg-[#c6edbe] text-[#0d4117]')">
-                <i data-lucide="check" class="size-5" th:classappend="${currentStep > 3} ? '' : 'hidden'"></i>
-                <span class="step-number" th:classappend="${currentStep > 3} ? 'hidden' : ''">3</span>
-            </div>
-            <span class="step-label text-[10px] font-black uppercase tracking-wider transition-all duration-300 text-center"
-                  th:classappend="${currentStep > 3} ? 'text-[#0d4117]' : (${currentStep == 3} ? 'text-[#0d4117] font-extrabold' : 'text-text-secondary')">Grado y Jornada</span>
-        </div>
-
-        <!-- Paso 4 -->
-        <div class="step-indicator w-full md:flex-1 flex flex-col items-center gap-2 cursor-pointer group" data-step="4"
-             hx-post="/matricula/paso/4" hx-target="#step-container">
-            <div class="step-circle size-10 rounded-full flex items-center justify-center font-black transition-all duration-300 relative z-10"
-                 th:classappend="${currentStep > 4} ? 'bg-[#a0f399] border-2 border-[#0d4117] text-[#0d4117] shadow-sm' : (${currentStep == 4} ? 'bg-[#0d4117] text-white shadow-md ring-4 ring-[#0d4117]/20' : 'bg-[#c6edbe] text-[#0d4117]')">
-                <i data-lucide="check" class="size-5" th:classappend="${currentStep > 4} ? '' : 'hidden'"></i>
-                <span class="step-number" th:classappend="${currentStep > 4} ? 'hidden' : ''">4</span>
-            </div>
-            <span class="step-label text-[10px] font-black uppercase tracking-wider transition-all duration-300 text-center"
-                  th:classappend="${currentStep > 4} ? 'text-[#0d4117]' : (${currentStep == 4} ? 'text-[#0d4117] font-extrabold' : 'text-text-secondary')">Documentación</span>
-        </div>
-    </div>
-    </div>
-
-
-
     <!-- TARJETA LATERAL DE RESUMEN DE REGISTRO -->
     <div th:fragment="stepSummary" class="p-6.5 rounded-xl bg-white shadow-soft flex flex-col gap-5 flex-1 h-full min-h-0">
         <h2 class="flex items-center gap-2 text-sidebar text-[14px] font-black tracking-normal">
@@ -200,16 +140,6 @@
             <p class="text-[9.5px] text-text-secondary font-bold leading-normal">
                 Verifique que todos los datos coincidan exactamente con la documentación oficial antes de enviar la matrícula.
             </p>
-        </div>
-    </div>
-
-    <!-- TARJETA LATERAL DE MISIÓN AMBIENTAL -->
-    <div th:fragment="misionAmbiental" class="relative min-h-[182px] overflow-hidden rounded-xl text-white shadow-soft group">
-        <div class="absolute inset-0 bg-gradient-to-t from-[#0d4117]/86 to-[#0d4117]/5 z-10 transition-all duration-300 group-hover:from-[#0d4117]/90"></div>
-        <img class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80" alt="Misión Ambiental">
-        <div class="absolute bottom-5 left-6 right-6 z-20">
-            <span class="inline-flex mb-1.5 px-2 py-0.5 rounded bg-sidebar/80 text-[8px] font-black tracking-wider uppercase">Misión Ambiental</span>
-            <strong class="block text-sm font-black leading-snug">Preservando el futuro desde la educación integral</strong>
         </div>
     </div>
 

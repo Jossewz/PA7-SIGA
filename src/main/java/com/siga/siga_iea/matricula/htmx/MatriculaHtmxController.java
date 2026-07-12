@@ -10,15 +10,25 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/matricula")
 public class MatriculaHtmxController {
 
+    private final com.siga.siga_iea.usuarios.service.UsuarioService usuarioService;
+    private final com.siga.siga_iea.matricula.service.MatriculaService matriculaService;
+
+    public MatriculaHtmxController(com.siga.siga_iea.usuarios.service.UsuarioService usuarioService,
+            com.siga.siga_iea.matricula.service.MatriculaService matriculaService) {
+        this.usuarioService = usuarioService;
+        this.matriculaService = matriculaService;
+    }
+
     @PostMapping("/update-name")
     @ResponseBody
     public String updateName(
             @RequestParam(value = "studentNames", required = false) String names,
             @RequestParam(value = "studentSurnames", required = false) String surnames,
-            HttpSession session
-    ) {
-        if (names != null) session.setAttribute("studentNames", names.trim());
-        if (surnames != null) session.setAttribute("studentSurnames", surnames.trim());
+            HttpSession session) {
+        if (names != null)
+            session.setAttribute("studentNames", names.trim());
+        if (surnames != null)
+            session.setAttribute("studentSurnames", surnames.trim());
 
         String fNames = (String) session.getAttribute("studentNames");
         String fSurnames = (String) session.getAttribute("studentSurnames");
@@ -32,11 +42,13 @@ public class MatriculaHtmxController {
             @RequestParam(value = "grado", required = false) String grado,
             @RequestParam(value = "jornada", required = false) String jornada,
             HttpSession session,
-            Model model
-    ) {
-        if (sede != null) session.setAttribute("sede", sede);
-        if (grado != null) session.setAttribute("grado", grado);
-        if (jornada != null) session.setAttribute("jornada", jornada);
+            Model model) {
+        if (sede != null)
+            session.setAttribute("sede", sede);
+        if (grado != null)
+            session.setAttribute("grado", grado);
+        if (jornada != null)
+            session.setAttribute("jornada", jornada);
 
         populateModelFromSession(session, model);
         model.addAttribute("currentStep", 3);
@@ -59,21 +71,31 @@ public class MatriculaHtmxController {
             @RequestParam(value = "parentPhone", required = false) String parentPhone,
             @RequestParam(value = "parentAddress", required = false) String parentAddress,
             HttpSession session,
-            Model model
-    ) {
+            Model model) {
         // Save form parameters from previous steps into the session
-        if (studentNames != null) session.setAttribute("studentNames", studentNames);
-        if (studentSurnames != null) session.setAttribute("studentSurnames", studentSurnames);
-        if (studentGender != null) session.setAttribute("studentGender", studentGender);
-        if (studentPhone != null) session.setAttribute("studentPhone", studentPhone);
-        if (studentBirthday != null) session.setAttribute("studentBirthday", studentBirthday);
-        if (studentAddress != null) session.setAttribute("studentAddress", studentAddress);
+        if (studentNames != null)
+            session.setAttribute("studentNames", studentNames);
+        if (studentSurnames != null)
+            session.setAttribute("studentSurnames", studentSurnames);
+        if (studentGender != null)
+            session.setAttribute("studentGender", studentGender);
+        if (studentPhone != null)
+            session.setAttribute("studentPhone", studentPhone);
+        if (studentBirthday != null)
+            session.setAttribute("studentBirthday", studentBirthday);
+        if (studentAddress != null)
+            session.setAttribute("studentAddress", studentAddress);
 
-        if (parentName != null) session.setAttribute("parentName", parentName);
-        if (parentRelation != null) session.setAttribute("parentRelation", parentRelation);
-        if (parentId != null) session.setAttribute("parentId", parentId);
-        if (parentPhone != null) session.setAttribute("parentPhone", parentPhone);
-        if (parentAddress != null) session.setAttribute("parentAddress", parentAddress);
+        if (parentName != null)
+            session.setAttribute("parentName", parentName);
+        if (parentRelation != null)
+            session.setAttribute("parentRelation", parentRelation);
+        if (parentId != null)
+            session.setAttribute("parentId", parentId);
+        if (parentPhone != null)
+            session.setAttribute("parentPhone", parentPhone);
+        if (parentAddress != null)
+            session.setAttribute("parentAddress", parentAddress);
 
         // Populate model
         populateModelFromSession(session, model);
@@ -87,8 +109,7 @@ public class MatriculaHtmxController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("fieldName") String fieldName,
             HttpSession session,
-            Model model
-    ) {
+            Model model) {
         if (!file.isEmpty()) {
             session.setAttribute(fieldName + "Name", file.getOriginalFilename());
         }
@@ -108,8 +129,7 @@ public class MatriculaHtmxController {
     public String deleteFile(
             @RequestParam("fieldName") String fieldName,
             HttpSession session,
-            Model model
-    ) {
+            Model model) {
         session.removeAttribute(fieldName + "Name");
         populateModelFromSession(session, model);
 
@@ -137,7 +157,40 @@ public class MatriculaHtmxController {
             return "matricula/htmx-step";
         }
 
-        // Clear all form attributes from session after completion
+        // 1. Guardar Estudiante (Usuario) en la Base de Datos
+        com.siga.siga_iea.usuarios.entity.Usuario estudiante = new com.siga.siga_iea.usuarios.entity.Usuario();
+        String nombres = (String) session.getAttribute("studentNames");
+        String apellidos = (String) session.getAttribute("studentSurnames");
+
+        estudiante.setNombres(nombres != null ? nombres : "Estudiante Sin Nombre");
+        estudiante.setApellidos(apellidos != null ? apellidos : "");
+        estudiante.setRol("ESTUDIANTE");
+
+        // Generamos un correo dummy único ya que la vista aún no pide email pero la BD
+        // lo exige
+        estudiante.setEmail("estudiante_" + java.util.UUID.randomUUID().toString().substring(0, 8) + "@ieaci.edu.co");
+
+        // Guardamos el acudiente/documentos temporalmente en los campos libres o
+        // creamos otras entidades a futuro
+        estudiante.setTipoDocumento("TI");
+
+        usuarioService.guardar(estudiante);
+
+        // 2. Guardar Matrícula en la Base de Datos
+        com.siga.siga_iea.matricula.entity.Matricula nuevaMatricula = new com.siga.siga_iea.matricula.entity.Matricula();
+        nuevaMatricula.setEstudiante(estudiante);
+
+        String grado = (String) session.getAttribute("grado");
+        nuevaMatricula.setGrado(grado != null ? grado : "No Asignado");
+
+        nuevaMatricula.setAnoLectivo(String.valueOf(java.time.Year.now().getValue()));
+        nuevaMatricula.setEstado("PENDIENTE_DE_REVISION");
+        nuevaMatricula.setFechaMatricula(java.time.LocalDate.now());
+
+        matriculaService.guardar(nuevaMatricula);
+
+        // 3. Clear all form attributes from session after completion
+
         session.removeAttribute("studentNames");
         session.removeAttribute("studentSurnames");
         session.removeAttribute("studentGender");

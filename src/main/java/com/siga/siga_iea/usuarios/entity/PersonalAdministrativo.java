@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "estudiantes")
-public class Estudiante {
+@Table(name = "personal_administrativo")
+public class PersonalAdministrativo {
 
     @Id
     @Column(name = "id")
@@ -16,10 +16,10 @@ public class Estudiante {
     @JoinColumn(name = "id")
     private Usuario usuario;
 
-    public Estudiante() {
+    public PersonalAdministrativo() {
     }
 
-    public Estudiante(Usuario usuario) {
+    public PersonalAdministrativo(Usuario usuario) {
         this.usuario = usuario;
     }
 

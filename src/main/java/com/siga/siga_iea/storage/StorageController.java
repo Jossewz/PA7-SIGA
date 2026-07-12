@@ -28,6 +28,22 @@ public class StorageController {
 
     private final StorageService storageService;
 
+    @GetMapping("/view")
+    public ResponseEntity<InputStreamResource> viewFile(@org.springframework.web.bind.annotation.RequestParam("key") String key) {
+        try {
+            InputStream stream = storageService.download(key);
+            String contentType = URLConnection.guessContentTypeFromName(key);
+            if (contentType == null) {
+                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+            }
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, contentType)
+                    .body(new InputStreamResource(stream));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     /**
      * Serves a public file from the "institucion/" folder of the bucket.
      * The path after /storage/public/ maps to the object key under "institucion/".

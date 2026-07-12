@@ -5,9 +5,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpSession;
+import com.siga.siga_iea.storage.service.DocumentoService;
 
 @Controller
 public class MatriculaController {
+
+    private final DocumentoService documentoService;
+
+    public MatriculaController(DocumentoService documentoService) {
+        this.documentoService = documentoService;
+    }
 
     @GetMapping("/matricula")
     public String index(Model model, HttpSession session) {
@@ -42,6 +49,11 @@ public class MatriculaController {
         model.addAttribute("saludFileName", session.getAttribute("saludFileName"));
         model.addAttribute("fotoFileName", session.getAttribute("fotoFileName"));
         model.addAttribute("historialFileName", session.getAttribute("historialFileName"));
+
+        String fotoKey = (String) session.getAttribute("fotoFileKey");
+        if (fotoKey != null) {
+            model.addAttribute("fotoFileUrl", "/storage/public/view?key=" + fotoKey);
+        }
 
         model.addAttribute("currentStep", 1);
         model.addAttribute("title", "Formulario de Matrícula – IEACI");

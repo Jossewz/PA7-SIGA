@@ -1,0 +1,34 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <!-- COMPONENTE: CARGADOR DE ARCHIVOS -->
+    <div th:fragment="fieldFileUploader(label, id, name, currentFileName, iconName, required, hxPostUpload, hxPostDelete, hxTarget)" class="w-full flex flex-col">
+        <div class="flex items-center gap-1.5 text-text-primary text-[10px] font-black tracking-wider uppercase mb-2">
+            <span th:text="${label}">Etiqueta</span>
+            <span th:if="${required}" class="px-1.5 py-0.5 rounded bg-sidebar text-white text-[7px] font-black">REQUERIDO</span>
+        </div>
+        <div class="relative w-full">
+            <label th:for="${id}" class="file-uploader-box flex items-center justify-between p-4 bg-white border border-[#c5ecd4] rounded-xl cursor-pointer hover:bg-[#f1fbe4]/60 transition-colors"
+                   th:classappend="${currentFileName != null} ? 'border-sidebar bg-[#f1fbe4]/20' : ''">
+                <input type="file" class="hidden file-input" th:id="${id}" name="file" accept="application/pdf,image/*"
+                       th:attr="hx-post=${hxPostUpload}, hx-vals='{&quot;fieldName&quot;: &quot;' + ${name} + '&quot;}', hx-target=${hxTarget}"
+                       hx-encoding="multipart/form-data"
+                       hx-swap="outerHTML">
+                <div class="flex items-center gap-3 min-w-0 mr-2">
+                    <span class="w-8 h-8 rounded-lg bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0">
+                        <i th:attr="data-lucide=${iconName ?: 'file-text'}" class="size-4.5 stroke-2"></i>
+                    </span>
+                    <strong class="text-text-primary text-[11px] font-black text-ellipsis overflow-hidden whitespace-nowrap" th:text="${currentFileName != null ? currentFileName : label + '.pdf'}">Archivo.pdf</strong>
+                </div>
+                <span class="px-4 py-2 bg-sidebar text-white text-[10px] font-black rounded-lg hover:brightness-97 transition-all flex items-center gap-1 shrink-0">
+                    <i data-lucide="upload" class="size-3 stroke-2"></i>
+                    <span th:text="${currentFileName != null ? 'Cambiar' : 'Subir Archivo'}">Subir Archivo</span>
+                </span>
+            </label>
+            <button th:if="${currentFileName != null}" type="button" class="block w-full text-center text-alert-red hover:text-red-700 transition-colors text-[9px] font-bold mt-2 underline cursor-pointer"
+                    th:attr="hx-post=${hxPostDelete}, hx-vals='{&quot;fieldName&quot;: &quot;' + ${name} + '&quot;}', hx-target=${hxTarget}" hx-swap="outerHTML">
+                Eliminar archivo
+            </button>
+        </div>
+    </div>
+
+</th:block>

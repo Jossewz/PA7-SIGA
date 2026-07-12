@@ -1,1 +1,106 @@
-﻿<!DOCTYPE html>\n<html xmlns:th='http://www.thymeleaf.org'>\n<body>\n    <section th:fragment='content'>Index usuarios</section>\n</body>\n</html>
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/base :: html(~{::content})}">
+<head>
+    <title>Usuarios del Sistema – IEACI</title>
+</head>
+<body>
+
+<th:block th:fragment="content">
+    <div class="flex flex-col gap-6">
+        <!-- Header -->
+        <div>
+            <h1 class="text-text-primary text-[28px] font-black tracking-tight leading-none mb-1.5">Usuarios del Sistema</h1>
+            <p class="text-text-secondary text-sm font-semibold">Administración y control de credenciales, accesos y asignación de roles de seguridad.</p>
+        </div>
+
+        <!-- Warning Alert -->
+        <div class="p-4 rounded-xl bg-card-warning border border-card-border flex gap-3 text-[11px] font-bold text-text-secondary">
+            <i data-lucide="shield-alert" class="size-5 shrink-0 text-alert-red stroke-2"></i>
+            <div>
+                <strong class="block text-text-primary font-black mb-0.5">Control de Seguridad Institucional</strong>
+                <span>Los cambios realizados en esta sección afectan directamente el acceso y privilegios de los empleados. La desactivación o bloqueo de cuentas cerrará inmediatamente cualquier sesión activa en el sistema.</span>
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-[12px]">
+                    <thead>
+                        <tr class="bg-[#f7fcf6] border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
+                            <th class="p-4.5 pl-6">Usuario</th>
+                            <th class="p-4.5">Persona Asignada</th>
+                            <th class="p-4.5">Rol de Seguridad</th>
+                            <th class="p-4.5">Último Acceso</th>
+                            <th class="p-4.5">Estado</th>
+                            <th class="p-4.5 pr-6 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]">
+                        <tr th:each="u : ${usuariosList}" class="hover:bg-[#fcfdfb] transition-colors">
+                            <td class="p-4.5 pl-6 font-bold text-sidebar text-[13px]" th:text="${u.username}">c.mendoza</td>
+                            <td class="p-4.5 font-bold" th:text="${u.persona}">Carlos Mendoza</td>
+                            <td class="p-4.5">
+                                <span class="px-2 py-0.5 rounded bg-[#f1f5f1] text-text-primary font-extrabold text-[10px] tracking-wide" th:text="${u.rol}">DOCENTE</span>
+                            </td>
+                            <td class="p-4.5 font-semibold text-text-secondary" th:text="${u.ultimoAcceso}">Ayer, 04:32 PM</td>
+                            <td class="p-4.5">
+                                <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wide leading-none"
+                                      th:classappend="${u.estado == 'Activo'} ? 'bg-pill-green text-sidebar' : 'bg-pill-red text-alert-red'"
+                                      th:text="${u.estado}">Activo</span>
+                            </td>
+                            <td class="p-4.5 pr-6 text-right relative">
+                                <div class="inline-block text-left" onclick="event.stopPropagation()">
+                                    <button type="button" class="p-1.5 hover:bg-[#f1fbe4] rounded-lg transition-colors text-text-secondary" onclick="toggleUserActionMenu(this)">
+                                        <i data-lucide="more-vertical" class="size-4.5 stroke-[2.2]"></i>
+                                    </button>
+                                    
+                                    <!-- Dropdown menu -->
+                                    <div class="hidden absolute right-6 mt-1 w-48 rounded-lg bg-white border border-[#c4eec0] shadow-lg py-1.5 z-30 text-left action-menu-dropdown">
+                                        <button type="button" class="w-full flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold text-left">
+                                            <i data-lucide="key-round" class="size-4 text-sidebar stroke-2"></i> Cambiar contraseña
+                                        </button>
+                                        <button type="button" class="w-full flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold text-left">
+                                            <i data-lucide="user-cog" class="size-4 text-sidebar stroke-2"></i> Cambiar rol
+                                        </button>
+                                        <button type="button" class="w-full flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold text-left" th:if="${u.estado == 'Activo'}">
+                                            <i data-lucide="lock" class="size-4 text-[#d9534f] stroke-2"></i> Bloquear acceso
+                                        </button>
+                                        <button type="button" class="w-full flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold text-left" th:if="${u.estado == 'Bloqueado'}">
+                                            <i data-lucide="unlock" class="size-4 text-sidebar stroke-2"></i> Activar acceso
+                                        </button>
+                                        <div class="h-px bg-[#c4eec0]/40 my-1"></div>
+                                        <button type="button" class="w-full flex items-center gap-2 px-3.5 py-2 text-alert-red hover:bg-red-50 transition-colors font-bold text-left">
+                                            <i data-lucide="trash-2" class="size-4 stroke-2"></i> Eliminar cuenta
+                                        </button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE COMPORTAMIENTO -->
+    <script>
+        // Cerrar dropdown al hacer click fuera
+        window.addEventListener('click', function() {
+            document.querySelectorAll('.action-menu-dropdown').forEach(el => el.classList.add('hidden'));
+        });
+
+        function toggleUserActionMenu(btn) {
+            event.stopPropagation();
+            const targetMenu = btn.nextElementSibling;
+            const isHidden = targetMenu.classList.contains('hidden');
+            document.querySelectorAll('.action-menu-dropdown').forEach(el => el.classList.add('hidden'));
+            if (isHidden) {
+                targetMenu.classList.remove('hidden');
+            }
+        }
+    </script>
+</th:block>
+
+</body>
+</html>

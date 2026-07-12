@@ -1,1 +1,140 @@
-﻿<!DOCTYPE html>\n<html xmlns:th='http://www.thymeleaf.org'>\n<body>\n    <section th:fragment='content'>Index clases</section>\n</body>\n</html>
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/base :: html(~{::content})}">
+<head>
+    <title>Gestión de Cursos – IEACI</title>
+</head>
+<body>
+
+<th:block th:fragment="content">
+    <div class="flex flex-col gap-6">
+        <!-- Header -->
+        <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
+            <div>
+                <h1 class="text-text-primary text-[28px] font-black tracking-tight leading-none mb-1.5">Gestión de Cursos</h1>
+                <p class="text-text-secondary text-sm font-semibold">Configuración de grados, aulas, directores de grupo y asignación de cupos.</p>
+            </div>
+            <button type="button" onclick="openCursoModal()"
+                    class="px-5 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md shrink-0">
+                <i data-lucide="plus-circle" class="size-4 stroke-[2.5]"></i>
+                <span>Nuevo Curso</span>
+            </button>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-[12px]">
+                    <thead>
+                        <tr class="bg-[#f7fcf6] border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
+                            <th class="p-4.5 pl-6">Curso</th>
+                            <th class="p-4.5">Grupo</th>
+                            <th class="p-4.5">Director de Grupo</th>
+                            <th class="p-4.5">Cupos Totales</th>
+                            <th class="p-4.5">Estudiantes</th>
+                            <th class="p-4.5">Estado</th>
+                            <th class="p-4.5 pr-6 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]">
+                        <tr th:each="c : ${cursosList}" class="hover:bg-[#fcfdfb] transition-colors">
+                            <td class="p-4.5 pl-6 font-black text-sidebar text-[13px]" th:text="${c.curso}">9°</td>
+                            <td class="p-4.5 font-bold" th:text="${c.grupo}">A</td>
+                            <td class="p-4.5 font-semibold text-text-secondary" th:text="${c.director}">Carlos Mendoza</td>
+                            <td class="p-4.5 font-semibold text-text-secondary" th:text="${c.cuposMaximos}">35</td>
+                            <td class="p-4.5 font-semibold text-text-secondary" th:text="${c.estudiantes}">26</td>
+                            <td class="p-4.5">
+                                <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wide leading-none"
+                                      th:classappend="${c.estado == 'Activo'} ? 'bg-pill-green text-sidebar' : 'bg-pill-red text-alert-red'"
+                                      th:text="${c.estado}">Activo</span>
+                            </td>
+                            <td class="p-4.5 pr-6 text-right">
+                                <div class="flex justify-end gap-1.5">
+                                    <button type="button" class="p-1.5 hover:bg-[#f1fbe4] rounded-lg transition-colors text-sidebar" title="Editar curso">
+                                        <i data-lucide="edit-3" class="size-4 stroke-[2]"></i>
+                                    </button>
+                                    <button type="button" class="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-alert-red" title="Eliminar curso">
+                                        <i data-lucide="trash-2" class="size-4 stroke-[2]"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL REGISTRAR CURSO -->
+    <div id="curso-modal" class="hidden fixed inset-0 bg-[#0d4117]/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-[#c4eec0] shadow-xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden transition-all scale-95 opacity-0 duration-300" id="curso-modal-dialog">
+            
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-[#c4eec0]/40 flex justify-between items-center bg-white shrink-0">
+                <div>
+                    <h3 class="text-sidebar text-[18px] font-black">Crear Nuevo Curso</h3>
+                    <p class="text-text-secondary text-[11px] font-bold">Configure un nuevo grado y grupo en el sistema.</p>
+                </div>
+                <button type="button" onclick="closeCursoModal()" class="p-1 hover:bg-red-50 text-text-secondary hover:text-alert-red rounded-lg transition-colors">
+                    <i data-lucide="x" class="size-5 stroke-2"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content (Forms) -->
+            <div class="p-6 overflow-y-auto flex-1 bg-white">
+                <form id="form-register-curso" class="grid grid-cols-2 gap-x-5 gap-y-4">
+                    
+                    <div class="col-span-2" th:replace="~{components/forms/field-select :: fieldSelect('Nombre del Curso / Grado', 'c-grade', 'curso', null, ${ { '1°': '1° de Primaria', '2°': '2° de Primaria', '3°': '3° de Primaria', '4°': '4° de Primaria', '5°': '5° de Primaria', '6°': '6° de Bachillerato', '7°': '7° de Bachillerato', '8°': '8° de Bachillerato', '9°': '9° de Bachillerato', '10°': '10° de Bachillerato', '11°': '11° de Bachillerato' } }, true)}"></div>
+                    
+                    <div th:replace="~{components/forms/field-input :: fieldInput('Grupo', 'c-group', 'grupo', null, 'Ej: A', true, 'text', null, null, null, null)}"></div>
+                    <div th:replace="~{components/forms/field-select :: fieldSelect('Jornada', 'c-jornada', 'jornada', null, ${ { 'Mañana': 'Mañana', 'Tarde': 'Tarde' } }, true)}"></div>
+                    
+                    <div class="col-span-2" th:replace="~{components/forms/field-select :: fieldSelect('Director de Grupo', 'c-director', 'director', null, ${ { '1': 'Carlos Mendoza (Docente)', '2': 'Ana María Sánchez (Docente)', '3': 'Luis Felipe Gómez (Docente)' } }, true)}"></div>
+                    
+                    <div th:replace="~{components/forms/field-input :: fieldInput('Cupos Máximos', 'c-cupos', 'cuposMaximos', '35', 'Ej: 35', true, 'number', null, null, null, null)}"></div>
+                    <div th:replace="~{components/forms/field-input :: fieldInput('Salón / Aula', 'c-room', 'salon', null, 'Ej: Aula 102', true, 'text', null, null, null, null)}"></div>
+                    
+                    <div class="col-span-2" th:replace="~{components/forms/field-input :: fieldInput('Año Lectivo', 'c-year', 'año', '2026', 'Ej: 2026', true, 'number', null, null, null, null)}"></div>
+
+                </form>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-6 border-t border-[#c4eec0]/40 flex justify-between items-center bg-[#f7fcf6] shrink-0">
+                <button type="button" onclick="closeCursoModal()" class="px-5 py-3 text-xs font-black text-text-secondary bg-transparent hover:bg-red-50 hover:text-alert-red rounded-lg transition-all">
+                    Cancelar
+                </button>
+                <button type="submit" form="form-register-curso" class="px-6 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md">
+                    <i data-lucide="check" class="size-4 stroke-[2.5]"></i>
+                    <span>Crear Curso</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SCRIPT DE COMPORTAMIENTO -->
+    <script>
+        function openCursoModal() {
+            const modal = document.getElementById('curso-modal');
+            const dialog = document.getElementById('curso-modal-dialog');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                dialog.classList.remove('scale-95', 'opacity-0');
+                dialog.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeCursoModal() {
+            const modal = document.getElementById('curso-modal');
+            const dialog = document.getElementById('curso-modal-dialog');
+            dialog.classList.remove('scale-100', 'opacity-100');
+            dialog.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+    </script>
+</th:block>
+
+</body>
+</html>

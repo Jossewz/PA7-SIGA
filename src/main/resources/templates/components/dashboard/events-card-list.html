@@ -1,0 +1,47 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <!-- PRÓXIMOS EVENTOS -->
+    <article th:fragment="eventsCardList()" 
+             class="p-6 rounded-xl bg-[#eafbe4]/40 border border-[#c4eec0]/40 shadow-soft flex flex-col h-full">
+        <h3 class="flex items-center gap-2 text-sidebar text-base font-black uppercase tracking-wider mb-5">
+            <i data-lucide="calendar-days" class="size-[18px] stroke-[2.2]"></i>
+            Próximos Eventos
+        </h3>
+
+        <div class="grid gap-3.5 flex-1">
+            <div class="flex items-center gap-4 p-3.5 rounded-lg bg-white border border-[#c4eec0]/20 shadow-soft">
+                <time class="w-11 h-11 flex flex-col items-center justify-center rounded-lg bg-sidebar text-white shrink-0 font-bold">
+                    <span class="text-sm leading-none">25</span>
+                    <span class="text-[8px] font-black uppercase tracking-wider mt-0.5">MAY</span>
+                </time>
+                <div>
+                    <h4 class="text-xs font-black text-text-primary leading-tight">Reunión de Coordinadores</h4>
+                    <p class="text-[10px] text-text-secondary mt-1">09:00 AM - Sala de Juntas</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 p-3.5 rounded-lg bg-white border border-[#c4eec0]/20 shadow-soft">
+                <time class="w-11 h-11 flex flex-col items-center justify-center rounded-lg bg-action-btn text-sidebar shrink-0 font-bold">
+                    <span class="text-sm leading-none">28</span>
+                    <span class="text-[8px] font-black uppercase tracking-wider mt-0.5">MAY</span>
+                </time>
+                <div>
+                    <h4 class="text-xs font-black text-text-primary leading-tight">Cierre de Calificaciones</h4>
+                    <p class="text-[10px] text-text-secondary mt-1">Todo el día - Portal Digital</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 p-3.5 rounded-lg bg-white border border-[#c4eec0]/20 shadow-soft">
+                <time class="w-11 h-11 flex flex-col items-center justify-center rounded-lg bg-sidebar text-white shrink-0 font-bold">
+                    <span class="text-sm leading-none">02</span>
+                    <span class="text-[8px] font-black uppercase tracking-wider mt-0.5">JUN</span>
+                </time>
+                <div>
+                    <h4 class="text-xs font-black text-text-primary leading-tight">Taller Huerto Escolar</h4>
+                    <p class="text-[10px] text-text-secondary mt-1">11:30 AM - Zona Verde</p>
+                </div>
+            </div>
+        </div>
+    </article>
+
+</th:block>

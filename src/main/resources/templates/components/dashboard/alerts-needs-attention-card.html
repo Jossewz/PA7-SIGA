@@ -1,0 +1,59 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <!-- ALERTAS OPERATIVAS (NECESITA ATENCIÓN) -->
+    <article th:fragment="alertsNeedsAttentionCard()" 
+             class="p-6 rounded-xl bg-white border border-[#c4eec0]/40 shadow-soft flex flex-col h-full">
+        <h3 class="flex items-center gap-2 text-sidebar text-base font-black uppercase tracking-wider mb-5">
+            <i data-lucide="bell" class="size-[18px] text-alert-red stroke-[2.2]"></i>
+            Necesita Atención
+        </h3>
+
+        <div class="grid gap-3 flex-1 overflow-y-auto max-h-[340px] pr-1">
+            <div class="flex items-start gap-3 p-3 bg-red-50/50 border border-[#ffc2c4]/45 rounded-lg text-xs">
+                <i data-lucide="alert-triangle" class="size-4.5 text-alert-red shrink-0 stroke-[2] mt-0.5"></i>
+                <div class="flex-1">
+                    <p class="font-extrabold text-text-primary">5 estudiantes con riesgo alto de deserción</p>
+                    <p class="text-[10px] text-text-muted mt-0.5">Reportado por tutoría y psicología escolar</p>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3 p-3 bg-amber-50/50 border border-amber-200/40 rounded-lg text-xs">
+                <i data-lucide="clock" class="size-4.5 text-[#e6a100] shrink-0 stroke-[2] mt-0.5"></i>
+                <div class="flex-1">
+                    <p class="font-extrabold text-text-primary">3 docentes no han cargado notas periódicas</p>
+                    <p class="text-[10px] text-text-muted mt-0.5">Vencimiento del plazo oficial: hoy a las 11:59 PM</p>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3 p-3 bg-[#eafbe4]/30 border border-[#c4eec0]/40 rounded-lg text-xs">
+                <i data-lucide="file-warning" class="size-4.5 text-sidebar shrink-0 stroke-[2] mt-0.5"></i>
+                <div class="flex-1">
+                    <p class="font-extrabold text-text-primary">12 certificados de matrícula pendientes de firma</p>
+                    <p class="text-[10px] text-text-muted mt-0.5">Bandeja de Rectoría pendiente de aprobación digital</p>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3 p-3 bg-red-50/50 border border-[#ffc2c4]/45 rounded-lg text-xs">
+                <i data-lucide="alert-triangle" class="size-4.5 text-alert-red shrink-0 stroke-[2] mt-0.5"></i>
+                <div class="flex-1">
+                    <p class="font-extrabold text-text-primary">18 estudiantes con más de 5 faltas injustificadas</p>
+                    <p class="text-[10px] text-text-muted mt-0.5">Requiere llamado telefónico urgente a acudientes</p>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3 p-3 bg-amber-50/50 border border-amber-200/40 rounded-lg text-xs">
+                <i data-lucide="user-x" class="size-4.5 text-[#e6a100] shrink-0 stroke-[2] mt-0.5"></i>
+                <div class="flex-1">
+                    <p class="font-extrabold text-text-primary">2 cursos sin director de grupo asignado</p>
+                    <p class="text-[10px] text-text-muted mt-0.5">Grados afectados: Grado 9-A y Grado 11-B</p>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" 
+                class="w-full mt-4 py-2 bg-sidebar text-white text-xs font-black rounded-lg transition-all hover:bg-opacity-90 shadow-soft cursor-pointer">
+            Revisar Todos las Alertas
+        </button>
+    </article>
+
+</th:block>

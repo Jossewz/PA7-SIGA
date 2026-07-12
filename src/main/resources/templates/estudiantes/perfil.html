@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/base :: html(~{::content})}">
+<head>
+    <title>Perfil del Estudiante – IEACI</title>
+</head>
+<body>
+
+<th:block th:fragment="content">
+    <div class="flex flex-col gap-6">
+        <!-- Back Button & Breadcrumbs -->
+        <div class="flex items-center gap-2">
+            <a th:href="@{/estudiantes}" class="p-2 hover:bg-white rounded-lg transition-colors text-sidebar flex items-center justify-center shrink-0 border border-[#c4eec0]/40 shadow-sm">
+                <i data-lucide="arrow-left" class="size-4.5 stroke-[2.5]"></i>
+            </a>
+            <div>
+                <small class="block text-[8px] font-black uppercase tracking-wider text-text-secondary">Estudiantes › Expediente Académico</small>
+                <h1 class="text-text-primary text-[20px] font-black tracking-tight leading-none mt-0.5" th:text="${student.nombreCompleto}">Santiago Alejandro Gómez Pérez</h1>
+            </div>
+        </div>
+
+        <!-- Layout Grid -->
+        <div class="grid grid-cols-1 xl:grid-cols-[280px_1fr] gap-6 items-start">
+            
+            <!-- Left Panel: Student Card -->
+            <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-6 flex flex-col items-center text-center gap-5">
+                <div class="relative size-24">
+                    <span class="w-full h-full rounded-full bg-sidebar/10 text-sidebar flex items-center justify-center border border-sidebar/20 shadow-inner">
+                        <i data-lucide="user" class="size-12 stroke-[1.5]"></i>
+                    </span>
+                    <span class="absolute bottom-1 right-1 size-5 rounded-full border-2 border-white flex items-center justify-center shrink-0"
+                          th:classappend="${student.estado == 'Activo'} ? 'bg-sidebar' : 'bg-alert-red'"
+                          title="Estado">
+                        <i th:data-lucide="${student.estado == 'Activo' ? 'check' : 'x'}" class="size-2.5 text-white stroke-[3]"></i>
+                    </span>
+                </div>
+
+                <div>
+                    <h2 class="text-text-primary text-base font-black leading-tight" th:text="${student.nombreCompleto}">Santiago Gómez</h2>
+                    <span class="block text-text-secondary text-[11px] font-black mt-1" th:text="'Código: ' + ${student.codigo}">Código: 2026001</span>
+                    <span class="block text-[10px] text-[#677768] font-bold mt-0.5" th:text="'Grado: ' + ${student.curso}">Grado: 9° - A</span>
+                </div>
+
+                <div class="w-full h-px bg-[#c4eec0]/30"></div>
+
+                <div class="w-full grid gap-2.5 text-left text-[11px] font-bold text-text-secondary">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="shield-check" class="size-4 text-sidebar stroke-2"></i>
+                        <span class="text-text-primary">Matrícula Validada</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="calendar" class="size-4 text-sidebar stroke-2"></i>
+                        <span class="text-text-primary">Año Lectivo: 2026</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Tabs Content -->
+            <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft flex flex-col overflow-hidden min-h-[460px]">
+                
+                <!-- Tabs Bar -->
+                <div class="flex border-b border-[#c4eec0]/40 px-6 bg-[#f7fcf6] overflow-x-auto gap-2 scrollbar-none">
+                    <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-sidebar border-b-2 border-sidebar whitespace-nowrap" onclick="switchStudentTab(this, 'st-info')">Información</button>
+                    <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchStudentTab(this, 'st-acudiente')">Acudiente</button>
+                    <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchStudentTab(this, 'st-salud')">Salud</button>
+                    <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchStudentTab(this, 'st-academico')">Académico</button>
+                    <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchStudentTab(this, 'st-calificaciones')">Notas</button>
+                    <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchStudentTab(this, 'st-documentos')">Archivos</button>
+                </div>
+
+                <!-- Tab Body Content -->
+                <div class="p-8 flex-1">
+                    
+                    <!-- TAB 1: INFORMACIÓN -->
+                    <div id="st-info" class="student-tab-content flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Datos del Estudiante</h3>
+                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5 text-[11px] font-bold">
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Nombres Completos</span>
+                                <span class="text-text-primary text-xs" th:text="${student.nombres}">Santiago Alejandro</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Apellidos Completos</span>
+                                <span class="text-text-primary text-xs" th:text="${student.apellidos}">Gómez Pérez</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Documento de Identidad</span>
+                                <span class="text-text-primary text-xs" th:text="${student.documento}">TI - 1088456123</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Fecha de Nacimiento</span>
+                                <span class="text-text-primary text-xs" th:text="${student.fechaNac}">2011-08-25</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Edad Registrada</span>
+                                <span class="text-text-primary text-xs" th:text="${student.edad}">14 años</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Sexo</span>
+                                <span class="text-text-primary text-xs" th:text="${student.sexo}">Masculino</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: ACUDIENTE -->
+                    <div id="st-acudiente" class="student-tab-content hidden flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Información del Acudiente</h3>
+                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5 text-[11px] font-bold">
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Nombre del Acudiente</span>
+                                <span class="text-text-primary text-xs" th:text="${student.acudienteNombre}">Felipe Gómez Rivas</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Parentesco</span>
+                                <span class="text-text-primary text-xs" th:text="${student.acudienteParentesco}">Padre</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Documento de Identidad</span>
+                                <span class="text-text-primary text-xs" th:text="${student.acudienteDoc}">CC - 73.123.456</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Teléfono de Contacto</span>
+                                <span class="text-text-primary text-xs" th:text="${student.acudienteTel}">300 123 4567</span>
+                            </div>
+                            <div class="col-span-2 max-sm:col-span-1 grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Dirección de Residencia</span>
+                                <span class="text-text-primary text-xs" th:text="${student.acudienteDir}">Manzana A Lote 5, San José</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: SALUD -->
+                    <div id="st-salud" class="student-tab-content hidden flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Ficha Médica</h3>
+                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5 text-[11px] font-bold">
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">EPS Afiliada</span>
+                                <span class="text-text-primary text-xs" th:text="${student.saludEps}">Coosalud</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Grupo Sanguíneo (RH)</span>
+                                <span class="text-text-primary text-xs font-black text-alert-red" th:text="${student.saludRh}">A+</span>
+                            </div>
+                            <div class="col-span-2 max-sm:col-span-1 grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Alergias y Condiciones</span>
+                                <span class="text-text-primary text-xs" th:text="${student.saludAlergias}">Polen y Acaros</span>
+                            </div>
+                            <div class="col-span-2 max-sm:col-span-1 grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Observaciones Médicas</span>
+                                <span class="text-text-primary text-xs" th:text="${student.saludObs}">Ninguna</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: ACADÉMICO -->
+                    <div id="st-academico" class="student-tab-content hidden flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Historial de Matrículas</h3>
+                        
+                        <div class="grid gap-4">
+                            <div class="p-4 rounded-xl border border-[#c4eec0]/40 bg-[#f9fbf8]/50 flex justify-between items-center text-[11px] font-bold">
+                                <div>
+                                    <strong class="block text-text-primary text-xs font-black">Grado 9° - Grupo A</strong>
+                                    <span class="block text-text-secondary text-[9px] mt-0.5">Año Lectivo: 2026</span>
+                                </div>
+                                <span class="px-2.5 py-1 rounded bg-[#f1fbe4] text-sidebar text-[9px] font-black uppercase">Vigente</span>
+                            </div>
+                            <div class="p-4 rounded-xl border border-gray-200 bg-[#fbfdfa] flex justify-between items-center text-[11px] font-bold opacity-75">
+                                <div>
+                                    <strong class="block text-text-primary text-xs font-black">Grado 8° - Grupo A</strong>
+                                    <span class="block text-text-secondary text-[9px] mt-0.5">Año Lectivo: 2025</span>
+                                </div>
+                                <span class="px-2.5 py-1 rounded bg-gray-100 text-text-secondary text-[9px] font-black uppercase">Finalizado</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 5: CALIFICACIONES -->
+                    <div id="st-calificaciones" class="student-tab-content hidden flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Calificaciones Periodo Actual</h3>
+                        
+                        <div class="grid gap-3 text-[11px] font-bold">
+                            <!-- Subject 1 -->
+                            <div class="flex justify-between items-center p-3 border border-[#c4eec0]/30 rounded-lg">
+                                <span class="text-text-primary">Álgebra y Matemáticas</span>
+                                <span class="px-2 py-0.5 rounded bg-sidebar text-white font-black">4.5</span>
+                            </div>
+                            <!-- Subject 2 -->
+                            <div class="flex justify-between items-center p-3 border border-[#c4eec0]/30 rounded-lg">
+                                <span class="text-text-primary">Ciencias Naturales y Química</span>
+                                <span class="px-2 py-0.5 rounded bg-sidebar text-white font-black">3.8</span>
+                            </div>
+                            <!-- Subject 3 -->
+                            <div class="flex justify-between items-center p-3 border border-[#c4eec0]/30 rounded-lg">
+                                <span class="text-text-primary">Lengua Castellana</span>
+                                <span class="px-2 py-0.5 rounded bg-sidebar text-white font-black">4.2</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 6: DOCUMENTOS -->
+                    <div id="st-documentos" class="student-tab-content hidden flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Documentos Expediente Escolar</h3>
+                        
+                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-4.5 text-[11px] font-bold text-text-secondary">
+                            <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-white flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-9 h-9 rounded bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0">
+                                        <i data-lucide="file-text" class="size-4.5 stroke-2"></i>
+                                    </span>
+                                    <div>
+                                        <strong class="block text-text-primary text-[12px] font-black">Registro_Civil.pdf</strong>
+                                        <span class="block text-text-secondary text-[9.5px] font-semibold mt-0.5">Tipo: Registro Civil</span>
+                                    </div>
+                                </div>
+                                <a href="#" class="p-2 hover:bg-[#f1fbe4] text-sidebar rounded-lg transition-colors border border-sidebar/10 shadow-sm">
+                                    <i data-lucide="download" class="size-4 stroke-2"></i>
+                                </a>
+                            </div>
+
+                            <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-white flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-9 h-9 rounded bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0">
+                                        <i data-lucide="credit-card" class="size-4.5 stroke-2"></i>
+                                    </span>
+                                    <div>
+                                        <strong class="block text-text-primary text-[12px] font-black">Documento_Identidad.pdf</strong>
+                                        <span class="block text-text-secondary text-[9.5px] font-semibold mt-0.5">Tipo: Tarjeta Identidad</span>
+                                    </div>
+                                </div>
+                                <a href="#" class="p-2 hover:bg-[#f1fbe4] text-sidebar rounded-lg transition-colors border border-sidebar/10 shadow-sm">
+                                    <i data-lucide="download" class="size-4 stroke-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TAB SWITCHING SCRIPT -->
+    <script>
+        function switchStudentTab(btn, tabId) {
+            document.querySelectorAll('.student-tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-btn-s').forEach(b => {
+                b.classList.remove('border-sidebar', 'text-sidebar');
+                b.classList.add('border-transparent', 'text-text-secondary');
+            });
+            btn.classList.remove('border-transparent', 'text-text-secondary');
+            btn.classList.add('border-sidebar', 'text-sidebar');
+        }
+    </script>
+</th:block>
+
+</body>
+</html>

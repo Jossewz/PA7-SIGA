@@ -111,73 +111,17 @@
 
                 <!-- Certificado Salud -->
                 <div class="flex flex-col">
-                    <div class="flex items-center gap-1.5 text-text-primary text-[10px] font-black tracking-wider uppercase mb-2">
-                        <span>Certificado Salud</span>
-                        <span class="px-1.5 py-0.5 rounded bg-sidebar text-white text-[7px] font-black">REQUERIDO</span>
-                    </div>
-                    <p class="text-text-secondary text-[9px] font-bold leading-normal mb-3 min-h-[27px]">Certificado médico vigente (no mayor a 30 días) que acredite aptitud física.</p>
-                    <div th:fragment="saludFileContainer" id="salud-file-container" class="flex-1">
-                        <div class="relative">
-                            <label for="salud-file" class="file-uploader-box flex items-center justify-between p-4 bg-white border border-[#c5ecd4] rounded-xl cursor-pointer hover:bg-[#f1fbe4]/60 transition-colors"
-                                   th:classappend="${saludFileName != null} ? 'border-sidebar bg-[#f1fbe4]/20' : ''">
-                                <input type="file" class="hidden file-input" id="salud-file" name="file" accept="application/pdf,image/*"
-                                       hx-post="/matricula/upload-file"
-                                       hx-vals='{"fieldName": "saludFile"}'
-                                       hx-encoding="multipart/form-data"
-                                       hx-target="#salud-file-container"
-                                       hx-swap="outerHTML">
-                                <div class="flex items-center gap-3 min-w-0 mr-2">
-                                    <span class="w-8 h-8 rounded-lg bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0">
-                                        <i data-lucide="heart-pulse" class="size-4.5 stroke-2"></i>
-                                    </span>
-                                    <strong class="text-text-primary text-[11px] font-black text-ellipsis overflow-hidden whitespace-nowrap" th:text="${saludFileName != null ? saludFileName : 'Certificado de Salud.pdf'}">Certificado de Salud.pdf</strong>
-                                </div>
-                                <span class="px-4 py-2 bg-sidebar text-white text-[10px] font-black rounded-lg hover:brightness-97 transition-all flex items-center gap-1 shrink-0">
-                                    <i data-lucide="upload" class="size-3 stroke-2"></i>
-                                    <span th:text="${saludFileName != null ? 'Cambiar' : 'Subir Archivo'}">Subir Archivo</span>
-                                </span>
-                            </label>
-                            <button th:if="${saludFileName != null}" type="button" class="block w-full text-center text-alert-red hover:text-red-700 transition-colors text-[9px] font-bold mt-2 underline cursor-pointer"
-                                    hx-post="/matricula/delete-file" hx-vals='{"fieldName": "saludFile"}' hx-target="#salud-file-container" hx-swap="outerHTML">
-                                Eliminar certificado
-                            </button>
-                        </div>
+                    <div th:fragment="saludFileContainer" id="salud-file-container" class="flex-1 flex flex-col justify-end">
+                        <p class="text-text-secondary text-[9px] font-bold leading-normal mb-3 min-h-[27px]">Certificado médico vigente (no mayor a 30 días) que acredite aptitud física.</p>
+                        <div th:replace="~{components/forms/field-file-uploader :: fieldFileUploader('Certificado Salud', 'salud-file', 'saludFile', ${saludFileName}, 'heart-pulse', true, '/matricula/upload-file', '/matricula/delete-file', '#salud-file-container')}"></div>
                     </div>
                 </div>
 
                 <!-- Historial Académico -->
                 <div class="flex flex-col">
-                    <div class="flex items-center gap-1.5 text-text-primary text-[10px] font-black tracking-wider uppercase mb-2">
-                        <span>Historial Académico</span>
-                        <span class="px-1.5 py-0.5 rounded bg-sidebar text-white text-[7px] font-black">REQUERIDO</span>
-                    </div>
-                    <p class="text-text-secondary text-[9px] font-bold leading-normal mb-3 min-h-[27px]">Historial escolar completo de años anteriores para validar el expediente académico.</p>
-                    <div th:fragment="historialFileContainer" id="historial-file-container" class="flex-1">
-                        <div class="relative">
-                            <label for="historial-file" class="file-uploader-box flex items-center justify-between p-4 bg-white border border-[#c5ecd4] rounded-xl cursor-pointer hover:bg-[#f1fbe4]/60 transition-colors"
-                                   th:classappend="${historialFileName != null} ? 'border-sidebar bg-[#f1fbe4]/20' : ''">
-                                <input type="file" class="hidden file-input" id="historial-file" name="file" accept="application/pdf,image/*"
-                                       hx-post="/matricula/upload-file"
-                                       hx-vals='{"fieldName": "historialFile"}'
-                                       hx-encoding="multipart/form-data"
-                                       hx-target="#historial-file-container"
-                                       hx-swap="outerHTML">
-                                <div class="flex items-center gap-3 min-w-0 mr-2">
-                                    <span class="w-8 h-8 rounded-lg bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0">
-                                        <i data-lucide="folder" class="size-4.5 stroke-2"></i>
-                                    </span>
-                                    <strong class="text-text-primary text-[11px] font-black text-ellipsis overflow-hidden whitespace-nowrap" th:text="${historialFileName != null ? historialFileName : 'Historial Escolar.pdf'}">Historial Escolar.pdf</strong>
-                                </div>
-                                <span class="px-4 py-2 bg-sidebar text-white text-[10px] font-black rounded-lg hover:brightness-97 transition-all flex items-center gap-1 shrink-0">
-                                    <i data-lucide="upload" class="size-3 stroke-2"></i>
-                                    <span th:text="${historialFileName != null ? 'Cambiar' : 'Subir Archivo'}">Subir Archivo</span>
-                                </span>
-                            </label>
-                            <button th:if="${historialFileName != null}" type="button" class="block w-full text-center text-alert-red hover:text-red-700 transition-colors text-[9px] font-bold mt-2 underline cursor-pointer"
-                                    hx-post="/matricula/delete-file" hx-vals='{"fieldName": "historialFile"}' hx-target="#historial-file-container" hx-swap="outerHTML">
-                                Eliminar boletín
-                            </button>
-                        </div>
+                    <div th:fragment="historialFileContainer" id="historial-file-container" class="flex-1 flex flex-col justify-end">
+                        <p class="text-text-secondary text-[9px] font-bold leading-normal mb-3 min-h-[27px]">Historial escolar completo de años anteriores para validar el expediente académico.</p>
+                        <div th:replace="~{components/forms/field-file-uploader :: fieldFileUploader('Historial Académico', 'historial-file', 'historialFile', ${historialFileName}, 'folder', true, '/matricula/upload-file', '/matricula/delete-file', '#historial-file-container')}"></div>
                     </div>
                 </div>
             </div>

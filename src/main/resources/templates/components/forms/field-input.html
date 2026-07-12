@@ -1,0 +1,12 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <!-- COMPONENTE: INPUT GENÉRICO -->
+    <div th:fragment="fieldInput(label, id, name, value, placeholder, required, type, hxPost, hxInclude, hxTrigger, hxTarget)" class="w-full">
+        <label th:for="${id}" class="block mb-2 text-[10px] font-black tracking-wider text-text-secondary uppercase" th:text="${label}">Etiqueta</label>
+        <input th:type="${type ?: 'text'}" th:id="${id}" th:name="${name}" th:value="${value}" th:placeholder="${placeholder}"
+               th:required="${required}"
+               th:attr="hx-post=${hxPost}, hx-include=${hxInclude}, hx-trigger=${hxTrigger}, hx-target=${hxTarget}"
+               class="w-full h-11 px-4.5 rounded-lg bg-white border border-[#c5ecd4] text-[13px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all duration-200">
+    </div>
+
+</th:block>

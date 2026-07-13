@@ -95,7 +95,7 @@
                         <!-- If uploaded: large dashed box showing selection or miniature preview -->
                         <div th:if="${fotoFileName != null}" class="w-full flex-1 border-2 border-dashed border-sidebar bg-[#f1fbe4]/60 rounded-xl p-8 flex flex-col items-center justify-center gap-3 relative">
                             <span class="w-16 h-16 rounded-full bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0 overflow-hidden border border-sidebar">
-                                <img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&q=80" alt="Foto">
+                                <img class="w-full h-full object-cover" th:src="${fotoFileUrl != null ? fotoFileUrl : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=96&q=80'}" alt="Foto">
                             </span>
                             <div class="text-center">
                                 <strong class="block text-text-primary text-[12px] font-black" th:text="${fotoFileName}">Foto_01.jpg</strong>
@@ -148,4 +148,32 @@
             </div>
         </div>
     </div>
+
+    <th:block th:fragment="civilDocResponse">
+        <div th:replace="~{matricula/fragments/step-documentos :: civilDocContainer}"></div>
+        <div id="summary-container" hx-swap-oob="true" class="flex-1 flex flex-col h-full min-h-0">
+            <div th:replace="~{components/forms/step-summary :: stepSummary}"></div>
+        </div>
+    </th:block>
+
+    <th:block th:fragment="fotoFileResponse">
+        <div th:replace="~{matricula/fragments/step-documentos :: fotoFileContainer}"></div>
+        <div id="summary-container" hx-swap-oob="true" class="flex-1 flex flex-col h-full min-h-0">
+            <div th:replace="~{components/forms/step-summary :: stepSummary}"></div>
+        </div>
+    </th:block>
+
+    <th:block th:fragment="saludFileResponse">
+        <div th:replace="~{matricula/fragments/step-documentos :: saludFileContainer}"></div>
+        <div id="summary-container" hx-swap-oob="true" class="flex-1 flex flex-col h-full min-h-0">
+            <div th:replace="~{components/forms/step-summary :: stepSummary}"></div>
+        </div>
+    </th:block>
+
+    <th:block th:fragment="historialFileResponse">
+        <div th:replace="~{matricula/fragments/step-documentos :: historialFileContainer}"></div>
+        <div id="summary-container" hx-swap-oob="true" class="flex-1 flex flex-col h-full min-h-0">
+            <div th:replace="~{components/forms/step-summary :: stepSummary}"></div>
+        </div>
+    </th:block>
 </th:block>

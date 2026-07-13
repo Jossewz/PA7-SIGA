@@ -65,4 +65,11 @@
             </button>
         </div>
     </div>
+
+    <th:block th:fragment="parentDocResponse">
+        <div th:replace="~{matricula/fragments/step-acudiente :: parentDocContainer}"></div>
+        <div id="summary-container" hx-swap-oob="true" class="flex-1 flex flex-col h-full min-h-0">
+            <div th:replace="~{components/forms/step-summary :: stepSummary}"></div>
+        </div>
+    </th:block>
 </th:block>

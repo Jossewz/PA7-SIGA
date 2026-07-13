@@ -2,20 +2,30 @@ package com.siga.siga_iea.matricula.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpSession;
+import com.siga.siga_iea.storage.service.DocumentoService;
 
 @Controller
 public class MatriculaController {
 
+    private final DocumentoService documentoService;
+
+    public MatriculaController(DocumentoService documentoService) {
+        this.documentoService = documentoService;
+    }
+
     @GetMapping("/matricula")
     public String index(Model model, HttpSession session) {
-        // Initialize default selections if not present
-        if (session.getAttribute("sede") == null) session.setAttribute("sede", "Sede Principal");
-        if (session.getAttribute("grado") == null) session.setAttribute("grado", "9°");
-        if (session.getAttribute("jornada") == null) session.setAttribute("jornada", "Mañana");
 
-        // Pass session attributes to model
+        if (session.getAttribute("sede") == null)
+            session.setAttribute("sede", "Sede Principal");
+        if (session.getAttribute("grado") == null)
+            session.setAttribute("grado", "9°");
+        if (session.getAttribute("jornada") == null)
+            session.setAttribute("jornada", "Mañana");
+
         model.addAttribute("studentNames", session.getAttribute("studentNames"));
         model.addAttribute("studentSurnames", session.getAttribute("studentSurnames"));
         model.addAttribute("studentGender", session.getAttribute("studentGender"));
@@ -39,6 +49,11 @@ public class MatriculaController {
         model.addAttribute("saludFileName", session.getAttribute("saludFileName"));
         model.addAttribute("fotoFileName", session.getAttribute("fotoFileName"));
         model.addAttribute("historialFileName", session.getAttribute("historialFileName"));
+
+        String fotoKey = (String) session.getAttribute("fotoFileKey");
+        if (fotoKey != null) {
+            model.addAttribute("fotoFileUrl", "/storage/public/view?key=" + fotoKey);
+        }
 
         model.addAttribute("currentStep", 1);
         model.addAttribute("title", "Formulario de Matrícula – IEACI");

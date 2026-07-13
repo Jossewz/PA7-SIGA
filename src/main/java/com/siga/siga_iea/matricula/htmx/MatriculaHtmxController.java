@@ -5,20 +5,38 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.siga.siga_iea.storage.service.DocumentoService;
+import com.siga.siga_iea.usuarios.repository.EstudianteRepository;
 
 @Controller
 @RequestMapping("/matricula")
 public class MatriculaHtmxController {
+
+    private final com.siga.siga_iea.usuarios.service.UsuarioService usuarioService;
+    private final com.siga.siga_iea.matricula.service.MatriculaService matriculaService;
+    private final DocumentoService documentoService;
+    private final EstudianteRepository estudianteRepository;
+
+    public MatriculaHtmxController(com.siga.siga_iea.usuarios.service.UsuarioService usuarioService,
+            com.siga.siga_iea.matricula.service.MatriculaService matriculaService,
+            DocumentoService documentoService,
+            EstudianteRepository estudianteRepository) {
+        this.usuarioService = usuarioService;
+        this.matriculaService = matriculaService;
+        this.documentoService = documentoService;
+        this.estudianteRepository = estudianteRepository;
+    }
 
     @PostMapping("/update-name")
     @ResponseBody
     public String updateName(
             @RequestParam(value = "studentNames", required = false) String names,
             @RequestParam(value = "studentSurnames", required = false) String surnames,
-            HttpSession session
-    ) {
-        if (names != null) session.setAttribute("studentNames", names.trim());
-        if (surnames != null) session.setAttribute("studentSurnames", surnames.trim());
+            HttpSession session) {
+        if (names != null)
+            session.setAttribute("studentNames", names.trim());
+        if (surnames != null)
+            session.setAttribute("studentSurnames", surnames.trim());
 
         String fNames = (String) session.getAttribute("studentNames");
         String fSurnames = (String) session.getAttribute("studentSurnames");
@@ -32,11 +50,13 @@ public class MatriculaHtmxController {
             @RequestParam(value = "grado", required = false) String grado,
             @RequestParam(value = "jornada", required = false) String jornada,
             HttpSession session,
-            Model model
-    ) {
-        if (sede != null) session.setAttribute("sede", sede);
-        if (grado != null) session.setAttribute("grado", grado);
-        if (jornada != null) session.setAttribute("jornada", jornada);
+            Model model) {
+        if (sede != null)
+            session.setAttribute("sede", sede);
+        if (grado != null)
+            session.setAttribute("grado", grado);
+        if (jornada != null)
+            session.setAttribute("jornada", jornada);
 
         populateModelFromSession(session, model);
         model.addAttribute("currentStep", 3);
@@ -59,21 +79,31 @@ public class MatriculaHtmxController {
             @RequestParam(value = "parentPhone", required = false) String parentPhone,
             @RequestParam(value = "parentAddress", required = false) String parentAddress,
             HttpSession session,
-            Model model
-    ) {
+            Model model) {
         // Save form parameters from previous steps into the session
-        if (studentNames != null) session.setAttribute("studentNames", studentNames);
-        if (studentSurnames != null) session.setAttribute("studentSurnames", studentSurnames);
-        if (studentGender != null) session.setAttribute("studentGender", studentGender);
-        if (studentPhone != null) session.setAttribute("studentPhone", studentPhone);
-        if (studentBirthday != null) session.setAttribute("studentBirthday", studentBirthday);
-        if (studentAddress != null) session.setAttribute("studentAddress", studentAddress);
+        if (studentNames != null)
+            session.setAttribute("studentNames", studentNames);
+        if (studentSurnames != null)
+            session.setAttribute("studentSurnames", studentSurnames);
+        if (studentGender != null)
+            session.setAttribute("studentGender", studentGender);
+        if (studentPhone != null)
+            session.setAttribute("studentPhone", studentPhone);
+        if (studentBirthday != null)
+            session.setAttribute("studentBirthday", studentBirthday);
+        if (studentAddress != null)
+            session.setAttribute("studentAddress", studentAddress);
 
-        if (parentName != null) session.setAttribute("parentName", parentName);
-        if (parentRelation != null) session.setAttribute("parentRelation", parentRelation);
-        if (parentId != null) session.setAttribute("parentId", parentId);
-        if (parentPhone != null) session.setAttribute("parentPhone", parentPhone);
-        if (parentAddress != null) session.setAttribute("parentAddress", parentAddress);
+        if (parentName != null)
+            session.setAttribute("parentName", parentName);
+        if (parentRelation != null)
+            session.setAttribute("parentRelation", parentRelation);
+        if (parentId != null)
+            session.setAttribute("parentId", parentId);
+        if (parentPhone != null)
+            session.setAttribute("parentPhone", parentPhone);
+        if (parentAddress != null)
+            session.setAttribute("parentAddress", parentAddress);
 
         // Populate model
         populateModelFromSession(session, model);
@@ -87,19 +117,26 @@ public class MatriculaHtmxController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("fieldName") String fieldName,
             HttpSession session,
-            Model model
-    ) {
+            Model model) {
         if (!file.isEmpty()) {
+            String[] extensions = fieldName.equals("fotoFile")
+                ? new String[]{"jpg", "jpeg", "png"}
+                : new String[]{"pdf", "jpg", "jpeg", "png"};
+
+            String storageKey = documentoService.subirTemporal(file, session.getId(), extensions);
+            session.setAttribute(fieldName + "Key", storageKey);
             session.setAttribute(fieldName + "Name", file.getOriginalFilename());
+            session.setAttribute(fieldName + "ContentType", file.getContentType());
+            session.setAttribute(fieldName + "Size", file.getSize());
         }
         populateModelFromSession(session, model);
 
         return switch (fieldName) {
-            case "parentDoc" -> "matricula/fragments/step-acudiente :: parentDocContainer";
-            case "civilDoc" -> "matricula/fragments/step-documentos :: civilDocContainer";
-            case "saludFile" -> "matricula/fragments/step-documentos :: saludFileContainer";
-            case "fotoFile" -> "matricula/fragments/step-documentos :: fotoFileContainer";
-            case "historialFile" -> "matricula/fragments/step-documentos :: historialFileContainer";
+            case "parentDoc" -> "matricula/fragments/step-acudiente :: parentDocResponse";
+            case "civilDoc" -> "matricula/fragments/step-documentos :: civilDocResponse";
+            case "saludFile" -> "matricula/fragments/step-documentos :: saludFileResponse";
+            case "fotoFile" -> "matricula/fragments/step-documentos :: fotoFileResponse";
+            case "historialFile" -> "matricula/fragments/step-documentos :: historialFileResponse";
             default -> "matricula/htmx-step";
         };
     }
@@ -108,22 +145,29 @@ public class MatriculaHtmxController {
     public String deleteFile(
             @RequestParam("fieldName") String fieldName,
             HttpSession session,
-            Model model
-    ) {
+            Model model) {
+        String storageKey = (String) session.getAttribute(fieldName + "Key");
+        if (storageKey != null) {
+            documentoService.eliminarTemporal(storageKey);
+        }
+        session.removeAttribute(fieldName + "Key");
         session.removeAttribute(fieldName + "Name");
+        session.removeAttribute(fieldName + "ContentType");
+        session.removeAttribute(fieldName + "Size");
         populateModelFromSession(session, model);
 
         return switch (fieldName) {
-            case "parentDoc" -> "matricula/fragments/step-acudiente :: parentDocContainer";
-            case "civilDoc" -> "matricula/fragments/step-documentos :: civilDocContainer";
-            case "saludFile" -> "matricula/fragments/step-documentos :: saludFileContainer";
-            case "fotoFile" -> "matricula/fragments/step-documentos :: fotoFileContainer";
-            case "historialFile" -> "matricula/fragments/step-documentos :: historialFileContainer";
+            case "parentDoc" -> "matricula/fragments/step-acudiente :: parentDocResponse";
+            case "civilDoc" -> "matricula/fragments/step-documentos :: civilDocResponse";
+            case "saludFile" -> "matricula/fragments/step-documentos :: saludFileResponse";
+            case "fotoFile" -> "matricula/fragments/step-documentos :: fotoFileResponse";
+            case "historialFile" -> "matricula/fragments/step-documentos :: historialFileResponse";
             default -> "matricula/htmx-step";
         };
     }
 
     @PostMapping("/paso/finalizar")
+    @org.springframework.transaction.annotation.Transactional
     public String handleFinalize(HttpSession session, Model model) {
         String civil = (String) session.getAttribute("civilDocName");
         String salud = (String) session.getAttribute("saludFileName");
@@ -137,7 +181,63 @@ public class MatriculaHtmxController {
             return "matricula/htmx-step";
         }
 
-        // Clear all form attributes from session after completion
+        // 1. Guardar Estudiante (Usuario) en la Base de Datos
+        com.siga.siga_iea.usuarios.entity.Usuario usuario = new com.siga.siga_iea.usuarios.entity.Usuario();
+        String nombres = (String) session.getAttribute("studentNames");
+        String apellidos = (String) session.getAttribute("studentSurnames");
+
+        usuario.setNombres(nombres != null ? nombres : "Estudiante Sin Nombre");
+        usuario.setApellidos(apellidos != null ? apellidos : "");
+        usuario.setRol("ESTUDIANTE");
+
+        // Generamos un correo dummy único ya que la vista aún no pide email pero la BD lo exige
+        usuario.setEmail("estudiante_" + java.util.UUID.randomUUID().toString().substring(0, 8) + "@ieaci.edu.co");
+        usuario.setTipoDocumento("TI");
+
+        usuario = usuarioService.guardar(usuario);
+
+        // Crear y guardar la entidad Estudiante vinculada al Usuario
+        com.siga.siga_iea.usuarios.entity.Estudiante estudiante = new com.siga.siga_iea.usuarios.entity.Estudiante(usuario);
+        estudiante = estudianteRepository.save(estudiante);
+
+        // 2. Guardar Matrícula en la Base de Datos
+        com.siga.siga_iea.matricula.entity.Matricula nuevaMatricula = new com.siga.siga_iea.matricula.entity.Matricula();
+        nuevaMatricula.setEstudiante(estudiante);
+
+        String grado = (String) session.getAttribute("grado");
+        nuevaMatricula.setGrado(grado != null ? grado : "No Asignado");
+
+        nuevaMatricula.setAnoLectivo(String.valueOf(java.time.Year.now().getValue()));
+        nuevaMatricula.setEstado("PENDIENTE_DE_REVISION");
+        nuevaMatricula.setFechaMatricula(java.time.LocalDate.now());
+
+        matriculaService.guardar(nuevaMatricula);
+
+        // 3. Vincular documentos temporales a la matrícula
+        java.util.Map<String, com.siga.siga_iea.storage.entity.TipoDocumento> fieldToTipo = java.util.Map.of(
+            "parentDoc",    com.siga.siga_iea.storage.entity.TipoDocumento.DOCUMENTO_ACUDIENTE,
+            "civilDoc",     com.siga.siga_iea.storage.entity.TipoDocumento.REGISTRO_CIVIL,
+            "saludFile",    com.siga.siga_iea.storage.entity.TipoDocumento.CERTIFICADO_SALUD,
+            "fotoFile",     com.siga.siga_iea.storage.entity.TipoDocumento.FOTO_ESTUDIANTE,
+            "historialFile", com.siga.siga_iea.storage.entity.TipoDocumento.HISTORIAL_ACADEMICO
+        );
+
+        for (var entry : fieldToTipo.entrySet()) {
+            String field = entry.getKey();
+            String tempKey = (String) session.getAttribute(field + "Key");
+            if (tempKey != null) {
+                documentoService.vincularAMatricula(
+                    tempKey,
+                    nuevaMatricula,
+                    entry.getValue(),
+                    (String) session.getAttribute(field + "Name"),
+                    (String) session.getAttribute(field + "ContentType"),
+                    (Long) session.getAttribute(field + "Size")
+                );
+            }
+        }
+
+        // 4. Clear all form attributes from session after completion
         session.removeAttribute("studentNames");
         session.removeAttribute("studentSurnames");
         session.removeAttribute("studentGender");
@@ -154,6 +254,12 @@ public class MatriculaHtmxController {
         session.removeAttribute("saludFileName");
         session.removeAttribute("fotoFileName");
         session.removeAttribute("historialFileName");
+
+        for (String field : java.util.List.of("parentDoc", "civilDoc", "saludFile", "fotoFile", "historialFile")) {
+            session.removeAttribute(field + "Key");
+            session.removeAttribute(field + "ContentType");
+            session.removeAttribute(field + "Size");
+        }
 
         return "matricula/fragments/success-step";
     }
@@ -182,5 +288,10 @@ public class MatriculaHtmxController {
         model.addAttribute("saludFileName", session.getAttribute("saludFileName"));
         model.addAttribute("fotoFileName", session.getAttribute("fotoFileName"));
         model.addAttribute("historialFileName", session.getAttribute("historialFileName"));
+
+        String fotoKey = (String) session.getAttribute("fotoFileKey");
+        if (fotoKey != null) {
+            model.addAttribute("fotoFileUrl", "/storage/public/view?key=" + fotoKey);
+        }
     }
 }

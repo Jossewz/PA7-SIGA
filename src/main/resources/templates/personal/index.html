@@ -6,7 +6,17 @@
 <body>
 
 <th:block th:fragment="content">
-    <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-6 flex-1">
+        <!-- Flash Messages -->
+        <div th:if="${mensajeExito}" class="p-4 rounded-xl bg-[#e3f7dc] border border-[#c4eec0] flex gap-3 text-xs font-bold text-sidebar">
+            <i data-lucide="check-circle-2" class="size-5 shrink-0 stroke-2"></i>
+            <span th:text="${mensajeExito}"></span>
+        </div>
+        <div th:if="${mensajeError}" class="p-4 rounded-xl bg-red-50 border border-red-200 flex gap-3 text-xs font-bold text-alert-red">
+            <i data-lucide="alert-circle" class="size-5 shrink-0 stroke-2"></i>
+            <span th:text="${mensajeError}"></span>
+        </div>
+
         <!-- Header -->
         <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
             <div>
@@ -22,108 +32,149 @@
 
         <!-- Filters Box -->
         <div class="p-5 rounded-xl bg-white border border-[#c4eec0]/40 shadow-soft">
-            <form class="grid grid-cols-4 max-lg:grid-cols-2 max-sm:grid-cols-1 gap-4 items-end">
-                <div class="col-span-1 max-lg:col-span-2 max-sm:col-span-1">
+            <form th:action="@{/personal}" method="get" class="grid grid-cols-5 max-lg:grid-cols-2 max-sm:grid-cols-1 gap-4 items-end">
+                <div class="col-span-2 max-lg:col-span-2 max-sm:col-span-1">
                     <label for="search-staff" class="block mb-1.5 text-[9px] font-black text-text-secondary uppercase tracking-wider">Buscar por nombre o documento</label>
                     <div class="relative">
-                        <input type="text" id="search-staff" placeholder="Buscar..." 
+                        <input type="text" id="search-staff" name="search" th:value="${search}" placeholder="Buscar..." 
                                class="w-full h-10 pl-4 pr-10 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all">
                         <i data-lucide="search" class="absolute right-3.5 top-1/2 -translate-y-1/2 size-4 text-text-secondary stroke-2"></i>
                     </div>
                 </div>
                 <div>
                     <label for="filter-cargo" class="block mb-1.5 text-[9px] font-black text-text-secondary uppercase tracking-wider">Cargo</label>
-                    <select id="filter-cargo" class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all">
+                    <select id="filter-cargo" name="cargo" th:value="${cargo}" onchange="this.form.submit()" class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all">
                         <option value="">Todos los cargos</option>
-                        <option value="Docente">Docente</option>
-                        <option value="Coordinador">Coordinador</option>
-                        <option value="Secretario">Secretario</option>
-                        <option value="Rector">Rector</option>
-                        <option value="Bibliotecario">Bibliotecario</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="filter-area" class="block mb-1.5 text-[9px] font-black text-text-secondary uppercase tracking-wider">Área</label>
-                    <select id="filter-area" class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all">
-                        <option value="">Todas las áreas</option>
-                        <option value="Académica">Académica</option>
-                        <option value="Administrativa">Administrativa</option>
-                        <option value="Secretaría">Secretaría</option>
-                        <option value="Tecnología">Tecnología</option>
+                        <option value="Docente" th:selected="${cargo == 'Docente'}">Docente</option>
+                        <option value="Coordinador" th:selected="${cargo == 'Coordinador'}">Coordinador</option>
+                        <option value="Secretario" th:selected="${cargo == 'Secretario'}">Secretario</option>
+                        <option value="Rector" th:selected="${cargo == 'Rector'}">Rector</option>
                     </select>
                 </div>
                 <div>
                     <label for="filter-estado" class="block mb-1.5 text-[9px] font-black text-text-secondary uppercase tracking-wider">Estado</label>
-                    <select id="filter-estado" class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all">
+                    <select id="filter-estado" name="estado" th:value="${estado}" onchange="this.form.submit()" class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all">
                         <option value="">Todos los estados</option>
-                        <option value="Activo">Activos</option>
-                        <option value="Inactivo">Inactivos</option>
+                        <option value="Activo" th:selected="${estado == 'Activo'}">Activo</option>
+                        <option value="Inactivo" th:selected="${estado == 'Inactivo'}">Inactivo</option>
                     </select>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="h-10 px-4 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="filter" class="size-4 stroke-2"></i>
+                        <span>Filtrar</span>
+                    </button>
+                    <a th:href="@{/personal}" class="h-10 px-4 text-xs font-black text-text-secondary bg-[#f1f5f1] hover:bg-[#e4ede4] rounded-lg transition-all flex items-center justify-center">
+                        Limpiar
+                    </a>
                 </div>
             </form>
         </div>
 
-        <!-- Table Container -->
-        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-[12px]">
+        <!-- ======================== TABLE (Desktop lg+) ======================== -->
+        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft flex-1 flex-col min-h-[300px] overflow-hidden hidden lg:flex">
+            <div class="overflow-x-auto flex-1">
+                <table class="w-full text-left border-collapse text-[13.5px] table-fixed">
                     <thead>
-                        <tr class="bg-[#f7fcf6] border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
-                            <th class="p-4.5 pl-6">Foto</th>
-                            <th class="p-4.5">Nombre</th>
-                            <th class="p-4.5">Cargo</th>
-                            <th class="p-4.5">Área</th>
-                            <th class="p-4.5">Estado</th>
-                            <th class="p-4.5 pr-6 text-right">Acciones</th>
+                        <tr class="bg-[#f7fcf6] border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[11px]">
+                            <th class="py-4 px-4 text-center">Foto</th>
+                            <th class="py-4 px-4 text-center">Nombre Completo</th>
+                            <th class="py-4 px-4 text-center">Documento</th>
+                            <th class="py-4 px-4 text-center">Cargo</th>
+                            <th class="py-4 px-4 text-center">Cuenta Acceso</th>
+                            <th class="py-4 px-4 text-center">Estado</th>
+                            <th class="py-4 px-4 text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]">
-                        <tr th:each="staff : ${personalList}" class="hover:bg-[#fcfdfb] transition-colors">
-                            <td class="p-4.5 pl-6">
-                                <img th:src="${staff.foto != null ? staff.foto : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80'}" 
-                                     alt="Foto" class="size-9 rounded-full object-cover border border-sidebar/20">
+                        <tr th:if="${#lists.isEmpty(personalList)}">
+                            <td colspan="7" class="p-8 text-center text-text-secondary font-semibold">
+                                No se encontraron registros de personal.
                             </td>
-                            <td class="p-4.5 font-bold" th:text="${staff.nombreCompleto}">Carlos Mendoza</td>
-                            <td class="p-4.5 font-semibold text-text-secondary" th:text="${staff.cargo}">Docente</td>
-                            <td class="p-4.5 font-semibold text-text-secondary" th:text="${staff.area}">Académica</td>
-                            <td class="p-4.5">
-                                <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wide leading-none"
-                                      th:classappend="${staff.estado == 'Activo'} ? 'bg-pill-green text-sidebar' : 'bg-pill-red text-alert-red'"
+                        </tr>
+                        <tr th:each="staff : ${personalList}" class="hover:bg-[#fcfdfb] transition-colors">
+                            <td class="py-3.5 px-4 text-center">
+                                <span class="size-10 rounded-full bg-sidebar/10 text-sidebar inline-flex items-center justify-center border border-sidebar/20 overflow-hidden shadow-sm">
+                                    <img th:if="${staff.foto != null}" th:src="${staff.foto}" alt="Foto" class="size-10 object-cover">
+                                    <i th:unless="${staff.foto != null}" data-lucide="user" class="size-5.5 stroke-2"></i>
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 font-bold text-[#1a331e] text-[14px] text-center" th:text="${staff.nombreCompleto}">Carlos Mendoza</td>
+                            <td class="py-3.5 px-4 font-semibold text-text-secondary text-[13.5px] text-center" th:text="${staff.numeroDocumento}">1088123456</td>
+                            <td class="py-3.5 px-4 font-extrabold text-sidebar text-[13.5px] text-center" th:text="${staff.cargo}">Docente</td>
+                            <td class="py-3.5 px-4 text-center">
+                                <span th:if="${staff.tieneCuenta}" class="inline-block px-3 py-1 rounded-md bg-[#e3f7dc] text-sidebar font-extrabold text-[11px] tracking-wide border border-[#c4eec0]" th:text="${staff.correo}">carlos@ieaci.edu.co</span>
+                                <span th:unless="${staff.tieneCuenta}" class="inline-block px-3 py-1 rounded-md bg-[#f1f5f1] text-text-secondary font-semibold text-[11px]">Sin cuenta</span>
+                            </td>
+                            <td class="py-3.5 px-4 text-center">
+                                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider leading-none inline-block shadow-sm"
+                                      th:classappend="${staff.estado == 'Activo'} ? 'bg-pill-green text-sidebar border border-[#a8e8a0]' : 'bg-pill-red text-alert-red border border-red-200'"
                                       th:text="${staff.estado}">Activo</span>
                             </td>
-                            <td class="p-4.5 pr-6 text-right relative">
-                                <div class="inline-block text-left" onclick="event.stopPropagation()">
-                                    <button type="button" class="p-1.5 hover:bg-[#f1fbe4] rounded-lg transition-colors text-text-secondary" onclick="toggleActionMenu(this)">
-                                        <i data-lucide="more-vertical" class="size-4.5 stroke-[2.2]"></i>
+                            <td class="py-3.5 px-4 text-center relative">
+                                <div class="inline-block text-left relative" onclick="event.stopPropagation()">
+                                    <button type="button" class="p-2 hover:bg-[#f1fbe4] rounded-lg transition-colors text-text-secondary" onclick="toggleActionMenu(this)">
+                                        <i data-lucide="more-vertical" class="size-5 stroke-[2.2]"></i>
                                     </button>
                                     
                                     <!-- Dropdown menu -->
-                                    <div class="hidden absolute right-6 mt-1 w-44 rounded-lg bg-white border border-[#c4eec0] shadow-lg py-1.5 z-30 text-left action-menu-dropdown">
-                                        <a th:href="@{'/personal/perfil/' + ${staff.id}}" class="flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold">
+                                    <div class="hidden absolute right-0 mt-1 w-44 rounded-lg bg-white border border-[#c4eec0] shadow-lg py-1.5 z-30 text-left action-menu-dropdown">
+                                        <a th:href="@{'/personal/perfil/' + ${staff.id}}" class="flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold text-[13px]">
                                             <i data-lucide="eye" class="size-4 text-sidebar stroke-2"></i> Ver perfil
                                         </a>
-                                        <button type="button" class="w-full flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold text-left">
-                                            <i data-lucide="edit-3" class="size-4 text-sidebar stroke-2"></i> Editar datos
-                                        </button>
-                                        <button type="button" class="w-full flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold text-left" th:if="${staff.estado == 'Activo'}">
-                                            <i data-lucide="user-x" class="size-4 text-[#d9534f] stroke-2"></i> Desactivar
-                                        </button>
-                                        <button type="button" class="w-full flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold text-left" th:if="${staff.estado == 'Inactivo'}">
-                                            <i data-lucide="user-check" class="size-4 text-sidebar stroke-2"></i> Activar
-                                        </button>
-                                        <button type="button" class="w-full flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold text-left">
-                                            <i data-lucide="key-round" class="size-4 text-sidebar stroke-2"></i> Reestablecer clave
-                                        </button>
-                                        <div class="h-px bg-[#c4eec0]/40 my-1"></div>
-                                        <button type="button" class="w-full flex items-center gap-2 px-3.5 py-2 text-alert-red hover:bg-red-50 transition-colors font-bold text-left">
-                                            <i data-lucide="trash-2" class="size-4 stroke-2"></i> Eliminar
-                                        </button>
+                                        <a th:href="@{'/personal/perfil/' + ${staff.id}}" class="flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold text-[13px]">
+                                            <i data-lucide="key-round" class="size-4 text-sidebar stroke-2"></i> Gestionar usuario
+                                        </a>
                                     </div>
                                 </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- ======================== CARDS (Mobile / Tablet < lg) ======================== -->
+        <div class="flex flex-col gap-3 lg:hidden">
+            <div th:if="${#lists.isEmpty(personalList)}" class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-8 text-center text-text-secondary font-semibold">
+                No se encontraron registros de personal.
+            </div>
+            <div th:each="staff : ${personalList}" class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-5 hover:shadow-md transition-shadow">
+                <!-- Card Header: Avatar + Name + Status -->
+                <div class="flex items-center gap-4 mb-4 pb-4 border-b border-[#c4eec0]/30">
+                    <span class="size-12 rounded-full bg-sidebar/10 text-sidebar inline-flex items-center justify-center border border-sidebar/20 overflow-hidden shadow-sm shrink-0">
+                        <img th:if="${staff.foto != null}" th:src="${staff.foto}" alt="Foto" class="size-12 object-cover">
+                        <i th:unless="${staff.foto != null}" data-lucide="user" class="size-6 stroke-2"></i>
+                    </span>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-[15px] font-black text-[#1a331e] truncate" th:text="${staff.nombreCompleto}">Carlos Mendoza</h3>
+                        <p class="text-[12px] font-extrabold text-sidebar mt-0.5" th:text="${staff.cargo}">Docente</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider leading-none inline-block shadow-sm shrink-0"
+                          th:classappend="${staff.estado == 'Activo'} ? 'bg-pill-green text-sidebar border border-[#a8e8a0]' : 'bg-pill-red text-alert-red border border-red-200'"
+                          th:text="${staff.estado}">Activo</span>
+                </div>
+                <!-- Card Body -->
+                <div class="grid grid-cols-2 max-[480px]:grid-cols-1 gap-x-6 gap-y-3 text-[13px]">
+                    <div>
+                        <span class="block text-[9px] font-black text-text-secondary uppercase tracking-wider mb-0.5">Documento</span>
+                        <span class="font-semibold text-text-secondary" th:text="${staff.numeroDocumento}">1088123456</span>
+                    </div>
+                    <div>
+                        <span class="block text-[9px] font-black text-text-secondary uppercase tracking-wider mb-0.5">Cuenta Acceso</span>
+                        <span th:if="${staff.tieneCuenta}" class="inline-block px-3 py-1 rounded-md bg-[#e3f7dc] text-sidebar font-extrabold text-[11px] tracking-wide border border-[#c4eec0]" th:text="${staff.correo}">carlos@ieaci.edu.co</span>
+                        <span th:unless="${staff.tieneCuenta}" class="inline-block px-3 py-1 rounded-md bg-[#f1f5f1] text-text-secondary font-semibold text-[11px]">Sin cuenta</span>
+                    </div>
+                </div>
+                <!-- Card Footer: Actions -->
+                <div class="flex gap-2 mt-4 pt-4 border-t border-[#c4eec0]/30">
+                    <a th:href="@{'/personal/perfil/' + ${staff.id}}" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#f1fbe4] hover:bg-[#e3f7dc] text-sidebar font-bold text-[12px] rounded-lg transition-colors border border-[#c4eec0]/40">
+                        <i data-lucide="eye" class="size-4 stroke-2"></i> Ver perfil
+                    </a>
+                    <a th:href="@{'/personal/perfil/' + ${staff.id}}" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#f1f5f1] hover:bg-[#e4ede4] text-text-secondary font-bold text-[12px] rounded-lg transition-colors border border-[#c4eec0]/40">
+                        <i data-lucide="key-round" class="size-4 stroke-2"></i> Gestionar usuario
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -147,14 +198,12 @@
             <div class="flex border-b border-[#c4eec0]/40 px-6 bg-[#f7fcf6] overflow-x-auto shrink-0 scrollbar-none gap-2">
                 <button type="button" class="tab-btn px-4 py-3.5 text-[10px] font-black uppercase tracking-wider text-sidebar border-b-2 border-sidebar whitespace-nowrap" onclick="switchModalTab(this, 'tab-personal')">Personal</button>
                 <button type="button" class="tab-btn px-4 py-3.5 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchModalTab(this, 'tab-laboral')">Laboral</button>
-                <button type="button" class="tab-btn px-4 py-3.5 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchModalTab(this, 'tab-profesional')">Profesional</button>
-                <button type="button" class="tab-btn px-4 py-3.5 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchModalTab(this, 'tab-documentos')">Documentos</button>
                 <button type="button" class="tab-btn px-4 py-3.5 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchModalTab(this, 'tab-cuenta')">Cuenta</button>
             </div>
 
             <!-- Modal Content (Forms) -->
             <div class="p-6 overflow-y-auto flex-1 bg-white">
-                <form id="form-register-personal" class="flex flex-col gap-6">
+                <form id="form-register-personal" th:action="@{/personal/registrar}" method="post" enctype="multipart/form-data" class="flex flex-col gap-6">
                     
                     <!-- TAB 1: INFORMACIÓN PERSONAL -->
                     <div id="tab-personal" class="modal-tab-content grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5">
@@ -166,57 +215,27 @@
                         <div th:replace="~{components/forms/field-select :: fieldSelect('Tipo de Documento', 'reg-doc-type', 'tipoDoc', null, ${ { 'CC': 'Cédula de Ciudadanía', 'CE': 'Cédula de Extranjería', 'PA': 'Pasaporte' } }, true)}"></div>
                         <div th:replace="~{components/forms/field-input :: fieldInput('Número de Documento', 'reg-doc-num', 'numDoc', null, 'Ej: 10883214', true, 'text', null, null, null, null)}"></div>
                         
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Fecha de Nacimiento', 'reg-birth', 'fechaNac', null, null, true, 'date', null, null, null, null)}"></div>
                         <div th:replace="~{components/forms/field-select :: fieldSelect('Sexo', 'reg-sex', 'sexo', null, ${ { 'M': 'Masculino', 'F': 'Femenino', 'O': 'Otro' } }, true)}"></div>
-                        
-                        <div th:replace="~{components/forms/field-select :: fieldSelect('Estado Civil', 'reg-civil', 'estadoCivil', null, ${ { 'soltero': 'Soltero/a', 'casado': 'Casado/a', 'union': 'Unión Libre', 'divorciado': 'Divorciado/a' } }, true)}"></div>
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Nacionalidad', 'reg-nacionalidad', 'nacionalidad', 'Colombiana', 'Ej: Colombiana', true, 'text', null, null, null, null)}"></div>
-                        
-                        <div class="col-span-2 max-md:col-span-1 border-t border-[#c4eec0]/40 pt-4.5 mt-2.5">
-                            <h4 class="text-sidebar text-[11px] font-black uppercase tracking-wider mb-4">Información de Contacto</h4>
-                        </div>
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Correo Electrónico', 'reg-email', 'correo', null, 'Ej: correo@siga.com', true, 'email', null, null, null, null)}"></div>
                         <div th:replace="~{components/forms/field-phone :: fieldPhone('Teléfono', 'reg-phone', 'telefono', null, null, true)}"></div>
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Dirección', 'reg-address', 'direccion', null, 'Calle, Carrera, Barrio', true, 'text', null, null, null, null)}"></div>
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Ciudad', 'reg-city', 'ciudad', 'Cartagena', 'Ej: Cartagena', true, 'text', null, null, null, null)}"></div>
+                        <div class="col-span-2" th:replace="~{components/forms/field-input :: fieldInput('Dirección', 'reg-address', 'direccion', null, 'Calle, Carrera, Barrio', true, 'text', null, null, null, null)}"></div>
+                        <div class="col-span-2">
+                            <label for="reg-foto" class="block mb-1.5 text-[9px] font-black text-text-secondary uppercase tracking-wider">Foto de Perfil (Opcional - JPG/PNG)</label>
+                            <input type="file" id="reg-foto" name="fotoFile" accept="image/png, image/jpeg, image/jpg"
+                                   class="w-full h-10 px-3 py-1.5 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-black file:bg-[#f1fbe4] file:text-sidebar hover:file:bg-[#e3f7dc] transition-all cursor-pointer">
+                        </div>
                     </div>
 
                     <!-- TAB 2: INFORMACIÓN LABORAL -->
                     <div id="tab-laboral" class="modal-tab-content hidden grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5">
-                        <div th:replace="~{components/forms/field-select :: fieldSelect('Cargo', 'reg-cargo', 'cargo', null, ${ { 'Docente': 'Docente', 'Coordinador': 'Coordinador', 'Secretario': 'Secretario', 'Administrador': 'Administrador', 'Rector': 'Rector', 'Psicologo': 'Psicólogo', 'Orientador': 'Orientador', 'Bibliotecario': 'Bibliotecario', 'Auxiliar': 'Auxiliar Administrativo', 'Otro': 'Otro' } }, true)}"></div>
-                        <div th:replace="~{components/forms/field-select :: fieldSelect('Área', 'reg-area', 'area', null, ${ { 'Academica': 'Académica', 'Administrativa': 'Administrativa', 'Financiera': 'Financiera', 'Bienestar': 'Bienestar', 'Tecnologia': 'Tecnología', 'Secretaria': 'Secretaría' } }, true)}"></div>
-                        
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Fecha de Ingreso', 'reg-entry', 'fechaIngreso', null, null, true, 'date', null, null, null, null)}"></div>
-                        <div th:replace="~{components/forms/field-select :: fieldSelect('Tipo de Contrato', 'reg-contract', 'tipoContrato', null, ${ { 'indefinido': 'Término Indefinido', 'fijo': 'Término Fijo', 'obra': 'Obra o Labor', 'prestacion': 'Prestación de Servicios' } }, true)}"></div>
-                        
-                        <div th:replace="~{components/forms/field-select :: fieldSelect('Jornada', 'reg-jornada', 'jornada', null, ${ { 'Mañana': 'Jornada Mañana', 'Tarde': 'Jornada Tarde', 'Completa': 'Jornada Completa' } }, true)}"></div>
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Salario (Opcional)', 'reg-salary', 'salario', null, '$ 0.00', false, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-select :: fieldSelect('Cargo', 'reg-cargo', 'cargo', null, ${ { 'Docente': 'Docente', 'Coordinador': 'Coordinador', 'Secretario': 'Secretario', 'Administrador': 'Administrador', 'Rector': 'Rector' } }, true)}"></div>
+                        <div th:replace="~{components/forms/field-select :: fieldSelect('Área', 'reg-area', 'area', null, ${ { 'Academica': 'Académica', 'Administrativa': 'Administrativa', 'Secretaria': 'Secretaría' } }, true)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Profesión / Título', 'reg-profession', 'profesion', null, 'Ej: Licenciado en Matemáticas', false, 'text', null, null, null, null)}"></div>
+                        <div th:replace="~{components/forms/field-input :: fieldInput('Especialidad', 'reg-specialty', 'especialidad', null, 'Ej: Álgebra y Geometría', false, 'text', null, null, null, null)}"></div>
                     </div>
 
-                    <!-- TAB 3: INFORMACIÓN PROFESIONAL -->
-                    <div id="tab-profesional" class="modal-tab-content hidden grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5">
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Profesión', 'reg-profession', 'profesion', null, 'Ej: Licenciado en Lenguas', true, 'text', null, null, null, null)}"></div>
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Especialidad', 'reg-specialty', 'especialidad', null, 'Ej: Literatura y Gramática', false, 'text', null, null, null, null)}"></div>
-                        
-                        <div th:replace="~{components/forms/field-select :: fieldSelect('Nivel Educativo Máximo', 'reg-edu-level', 'nivelEducativo', null, ${ { 'pregrado': 'Pregrado / Universitario', 'especializacion': 'Especialización', 'maestria': 'Maestría', 'doctorado': 'Doctorado' } }, true)}"></div>
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Universidad', 'reg-university', 'universidad', null, 'Ej: Universidad Pedagógica', true, 'text', null, null, null, null)}"></div>
-                        
-                        <div class="col-span-2 max-md:col-span-1" th:replace="~{components/forms/field-input :: fieldInput('Tarjeta Profesional (si aplica)', 'reg-pro-card', 'tarjetaProfesional', null, 'Ej: TP-12345', false, 'text', null, null, null, null)}"></div>
-                    </div>
-
-                    <!-- TAB 4: DOCUMENTOS -->
-                    <div id="tab-documentos" class="modal-tab-content hidden flex flex-col gap-5">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div th:replace="~{components/forms/field-file-uploader :: fieldFileUploader('Hoja de vida', 'reg-file-cv', 'fileCv', null, 'file-text', true, null, null, null)}"></div>
-                            <div th:replace="~{components/forms/field-file-uploader :: fieldFileUploader('Documento de Identidad', 'reg-file-doc', 'fileDoc', null, 'credit-card', true, null, null, null)}"></div>
-                            <div th:replace="~{components/forms/field-file-uploader :: fieldFileUploader('Certificados Académicos', 'reg-file-cert', 'fileCert', null, 'graduation-cap', false, null, null, null)}"></div>
-                            <div th:replace="~{components/forms/field-file-uploader :: fieldFileUploader('Contrato Firmado', 'reg-file-contract', 'fileContract', null, 'briefcase', false, null, null, null)}"></div>
-                        </div>
-                    </div>
-
-                    <!-- TAB 5: CUENTA DEL SISTEMA -->
+                    <!-- TAB 3: CUENTA DEL SISTEMA -->
                     <div id="tab-cuenta" class="modal-tab-content hidden flex flex-col gap-6">
-                        <div class="p-4.5 rounded-xl bg-card-green-light border border-card-border flex items-center justify-between">
+                        <div class="p-4.5 rounded-xl bg-[#f1fbe4] border border-[#c4eec0] flex items-center justify-between">
                             <div>
                                 <strong class="block text-text-primary text-xs font-black">Crear cuenta de acceso al sistema</strong>
                                 <span class="text-text-secondary text-[10px] font-semibold">Habilita credenciales de ingreso para el empleado de manera inmediata.</span>
@@ -228,10 +247,9 @@
                         </div>
 
                         <div id="user-account-fields" class="hidden grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5 border-t border-[#c4eec0]/40 pt-6">
-                            <div th:replace="~{components/forms/field-input :: fieldInput('Nombre de Usuario', 'reg-user-username', 'username', null, 'Ej: c.mendoza', true, 'text', null, null, null, null)}"></div>
-                            <div th:replace="~{components/forms/field-select :: fieldSelect('Rol del Sistema', 'reg-user-role', 'role', null, ${ { 'ROLE_ADMIN': 'Administrador', 'ROLE_COORDINADOR': 'Coordinador', 'ROLE_DOCENTE': 'Docente', 'ROLE_SECRETARIA': 'Secretaría' } }, true)}"></div>
-                            <div th:replace="~{components/forms/field-input :: fieldInput('Correo de Registro', 'reg-user-email', 'userEmail', null, 'carlos.mendoza@ieaci.edu.co', true, 'email', null, null, null, null)}"></div>
-                            <div th:replace="~{components/forms/field-input :: fieldInput('Contraseña Temporal', 'reg-user-password', 'passwordTemp', 'IEACI2026*', 'Ej: IEACI2026*', true, 'text', null, null, null, null)}"></div>
+                            <div th:replace="~{components/forms/field-select :: fieldSelect('Rol del Sistema', 'reg-user-role', 'role', null, ${ { 'DOCENTE': 'Docente', 'ADMIN': 'Administrador', 'COORDINADOR': 'Coordinador', 'SECRETARIA': 'Secretaría' } }, true)}"></div>
+                            <div th:replace="~{components/forms/field-input :: fieldInput('Correo Institucional (Dejar vacío para auto-generar)', 'reg-user-email', 'userEmail', null, 'ej: nombre.apellido@ieaci.edu.co', false, 'email', null, null, null, null)}"></div>
+                            <div class="col-span-2" th:replace="~{components/forms/field-input :: fieldInput('Contraseña Temporal', 'reg-user-password', 'passwordTemp', 'IEACI2026*', 'Ej: IEACI2026*', false, 'text', null, null, null, null)}"></div>
                         </div>
                     </div>
 
@@ -254,7 +272,6 @@
 
     <!-- SCRIPT DE COMPORTAMIENTO -->
     <script>
-        // Cerrar dropdown al hacer click fuera
         window.addEventListener('click', function() {
             document.querySelectorAll('.action-menu-dropdown').forEach(el => el.classList.add('hidden'));
         });
@@ -269,7 +286,6 @@
             }
         }
 
-        // Abrir/Cerrar Modal
         function openRegisterModal() {
             const modal = document.getElementById('register-modal');
             const dialog = document.getElementById('register-modal-dialog');
@@ -290,7 +306,6 @@
             }, 300);
         }
 
-        // Navegación de pestañas del modal
         function switchModalTab(btn, tabId) {
             document.querySelectorAll('.modal-tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
@@ -303,18 +318,14 @@
             btn.classList.add('border-sidebar', 'text-sidebar');
         }
 
-        // Mostrar u ocultar campos de cuenta de usuario
         function toggleUserAccountSection(checkbox) {
             const section = document.getElementById('user-account-fields');
-            const inputs = section.querySelectorAll('input, select');
             if (checkbox.checked) {
                 section.classList.remove('hidden');
                 section.classList.add('grid');
-                inputs.forEach(i => i.setAttribute('required', 'required'));
             } else {
                 section.classList.remove('grid');
                 section.classList.add('hidden');
-                inputs.forEach(i => i.removeAttribute('required'));
             }
         }
     </script>

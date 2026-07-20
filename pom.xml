@@ -20,6 +20,7 @@
 
     <properties>
         <java.version>21</java.version>
+        <tailwind.phase>compile</tailwind.phase>
     </properties>
 
     <dependencies>
@@ -155,6 +156,7 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <phase>${tailwind.phase}</phase>
                         <goals>
                             <goal>compile</goal>
                         </goals>

@@ -24,6 +24,9 @@ public class Matricula {
     @Column(columnDefinition = "VARCHAR", nullable = false)
     private String grado;
 
+    @Column(columnDefinition = "VARCHAR")
+    private String salon = "01";
+
     @Column(columnDefinition = "VARCHAR", nullable = false)
     private String anoLectivo;
 
@@ -33,7 +36,7 @@ public class Matricula {
     @Column(name = "fecha_matricula")
     private LocalDate fechaMatricula;
 
-    @OneToMany(mappedBy = "matricula", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "matricula", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Documento> documentos = new ArrayList<>();
 
     public Matricula() {
@@ -61,6 +64,14 @@ public class Matricula {
 
     public void setGrado(String grado) {
         this.grado = grado;
+    }
+
+    public String getSalon() {
+        return salon != null ? salon : "01";
+    }
+
+    public void setSalon(String salon) {
+        this.salon = salon;
     }
 
     public String getAnoLectivo() {

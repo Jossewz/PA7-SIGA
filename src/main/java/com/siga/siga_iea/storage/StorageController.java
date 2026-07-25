@@ -34,7 +34,11 @@ public class StorageController {
             InputStream stream = storageService.download(key);
             String contentType = URLConnection.guessContentTypeFromName(key);
             if (contentType == null) {
-                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+                String lower = key.toLowerCase();
+                if (lower.endsWith(".png")) contentType = "image/png";
+                else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) contentType = "image/jpeg";
+                else if (lower.endsWith(".pdf")) contentType = "application/pdf";
+                else contentType = "image/jpeg";
             }
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, contentType)

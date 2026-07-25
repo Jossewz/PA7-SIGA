@@ -39,7 +39,7 @@ services:
     volumes:
       - .:/workspace
       - siga_maven_cache:/root/.m2
-    command: sh ./mvnw spring-boot:run
+    command: sh ./mvnw spring-boot:run -Dtailwind.phase=none
 
   pgadmin:
     image: dpage/pgadmin4

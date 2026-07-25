@@ -17,11 +17,13 @@
 
             <!-- Form Grid -->
             <form id="form-step-2" class="grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5 mb-6">
-                <div class="col-span-2 max-md:col-span-1" th:replace="~{components/forms/field-input :: fieldInput('Nombres Completos', 'parent-name', 'parentName', ${parentName}, 'Ej: Martha Cecilia Rodríguez', true, 'text', null, null, null, null)}"></div>
+                <div th:replace="~{components/forms/field-input :: fieldInput('Nombres Completos', 'parent-names', 'parentNames', ${parentNames}, 'Ej: Martha Cecilia', true, 'text', null, null, null, null)}"></div>
+                <div th:replace="~{components/forms/field-input :: fieldInput('Apellidos Completos', 'parent-surnames', 'parentSurnames', ${parentSurnames}, 'Ej: Rodríguez Silva', true, 'text', null, null, null, null)}"></div>
+                <div th:replace="~{components/forms/field-select :: fieldSelect('Tipo de Documento', 'parent-doc-type', 'parentDocType', ${parentDocType}, ${ { 'CC': 'Cédula de Ciudadanía', 'CE': 'Cédula de Extranjería', 'PA': 'Pasaporte', 'TI': 'Tarjeta de Identidad' } }, true)}"></div>
+                <div th:replace="~{components/forms/field-input :: fieldInput('Número de Identificación', 'parent-id', 'parentId', ${parentId}, 'CC / CE / Nit', true, 'text', null, null, null, null)}"></div>
                 <div th:replace="~{components/forms/field-select :: fieldSelect('Parentesco', 'parent-relation', 'parentRelation', ${parentRelation}, ${ { 'madre': 'Madre', 'padre': 'Padre', 'tutor': 'Tutor Legal', 'otro': 'Otro' } }, true)}"></div>
-                <div th:replace="~{components/forms/field-input :: fieldInput('Número de Identificación', 'parent-id', 'parentId', ${parentId}, 'CC / NIT', true, 'text', null, null, null, null)}"></div>
                 <div th:replace="~{components/forms/field-phone :: fieldPhone('Teléfono de Contacto', 'parent-phone', 'parentPhone', ${parentPhone}, '+57 300 000 0000', true)}"></div>
-                <div th:replace="~{components/forms/field-input :: fieldInput('Dirección de Residencia', 'parent-address', 'parentAddress', ${parentAddress}, 'Calle, Carrera, Barrio', true, 'text', null, null, null, null)}"></div>
+                <div class="col-span-2 max-md:col-span-1" th:replace="~{components/forms/field-input :: fieldInput('Dirección de Residencia', 'parent-address', 'parentAddress', ${parentAddress}, 'Calle, Carrera, Barrio', true, 'text', null, null, null, null)}"></div>
             </form>
 
             <!-- Upload Section -->

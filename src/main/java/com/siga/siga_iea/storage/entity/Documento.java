@@ -1,7 +1,6 @@
 package com.siga.siga_iea.storage.entity;
 
 import com.siga.siga_iea.matricula.entity.Matricula;
-import com.siga.siga_iea.usuarios.entity.Usuario;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
 import com.siga.siga_iea.usuarios.entity.Docente;
 import com.siga.siga_iea.usuarios.entity.PersonalAdministrativo;

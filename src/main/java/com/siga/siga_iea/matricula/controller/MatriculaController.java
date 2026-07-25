@@ -28,12 +28,17 @@ public class MatriculaController {
 
         model.addAttribute("studentNames", session.getAttribute("studentNames"));
         model.addAttribute("studentSurnames", session.getAttribute("studentSurnames"));
+        model.addAttribute("studentDocType", session.getAttribute("studentDocType"));
+        model.addAttribute("studentDocNumber", session.getAttribute("studentDocNumber"));
         model.addAttribute("studentGender", session.getAttribute("studentGender"));
         model.addAttribute("studentPhone", session.getAttribute("studentPhone"));
         model.addAttribute("studentBirthday", session.getAttribute("studentBirthday"));
         model.addAttribute("studentAddress", session.getAttribute("studentAddress"));
 
-        model.addAttribute("parentName", session.getAttribute("parentName"));
+        model.addAttribute("parentNames", session.getAttribute("parentNames"));
+        model.addAttribute("parentSurnames", session.getAttribute("parentSurnames"));
+        model.addAttribute("parentDocType", session.getAttribute("parentDocType"));
+        model.addAttribute("parentName", session.getAttribute("parentNames")); // fallback
         model.addAttribute("parentRelation", session.getAttribute("parentRelation"));
         model.addAttribute("parentId", session.getAttribute("parentId"));
         model.addAttribute("parentPhone", session.getAttribute("parentPhone"));

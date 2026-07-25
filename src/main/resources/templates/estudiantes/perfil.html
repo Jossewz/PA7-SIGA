@@ -7,6 +7,16 @@
 
 <th:block th:fragment="content">
     <div class="flex flex-col gap-6">
+        <!-- Flash Messages -->
+        <div th:if="${mensajeExito}" class="p-4 rounded-xl bg-[#e3f7dc] border border-[#c4eec0] flex gap-3 text-xs font-bold text-sidebar">
+            <i data-lucide="check-circle-2" class="size-5 shrink-0 stroke-2"></i>
+            <span th:text="${mensajeExito}"></span>
+        </div>
+        <div th:if="${mensajeError}" class="p-4 rounded-xl bg-red-50 border border-red-200 flex gap-3 text-xs font-bold text-alert-red">
+            <i data-lucide="alert-circle" class="size-5 shrink-0 stroke-2"></i>
+            <span th:text="${mensajeError}"></span>
+        </div>
+
         <!-- Back Button & Breadcrumbs -->
         <div class="flex items-center gap-2">
             <a th:href="@{/estudiantes}" class="p-2 hover:bg-white rounded-lg transition-colors text-sidebar flex items-center justify-center shrink-0 border border-[#c4eec0]/40 shadow-sm">
@@ -24,8 +34,9 @@
             <!-- Left Panel: Student Card -->
             <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-6 flex flex-col items-center text-center gap-5">
                 <div class="relative size-24">
-                    <span class="w-full h-full rounded-full bg-sidebar/10 text-sidebar flex items-center justify-center border border-sidebar/20 shadow-inner">
-                        <i data-lucide="user" class="size-12 stroke-[1.5]"></i>
+                    <span class="w-full h-full rounded-full bg-sidebar/10 text-sidebar flex items-center justify-center border border-sidebar/20 shadow-inner overflow-hidden">
+                        <img th:if="${student.foto != null and !#strings.isEmpty(student.foto)}" th:src="${student.foto}" class="w-full h-full object-cover">
+                        <i th:unless="${student.foto != null and !#strings.isEmpty(student.foto)}" data-lucide="user" class="size-12 stroke-[1.5]"></i>
                     </span>
                     <span class="absolute bottom-1 right-1 size-5 rounded-full border-2 border-white flex items-center justify-center shrink-0"
                           th:classappend="${student.estado == 'Activo'} ? 'bg-sidebar' : 'bg-alert-red'"
@@ -45,13 +56,21 @@
                 <div class="w-full grid gap-2.5 text-left text-[11px] font-bold text-text-secondary">
                     <div class="flex items-center gap-2">
                         <i data-lucide="shield-check" class="size-4 text-sidebar stroke-2"></i>
-                        <span class="text-text-primary">Matrícula Validada</span>
+                        <span class="text-text-primary">Matrícula Registrada</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <i data-lucide="calendar" class="size-4 text-sidebar stroke-2"></i>
-                        <span class="text-text-primary">Año Lectivo: 2026</span>
+                        <i data-lucide="key" class="size-4 stroke-2" th:classappend="${student.tieneCuenta} ? 'text-sidebar' : 'text-gray-400'"></i>
+                        <span class="text-text-primary" th:text="${student.tieneCuenta} ? 'Cuenta Activa: ' + ${student.usuarioEmail} : 'Sin Cuenta de Acceso'">Sin Cuenta</span>
                     </div>
                 </div>
+
+                <form th:action="@{'/estudiantes/' + ${student.id} + '/toggle-estado'}" method="post" class="w-full mt-2">
+                    <button type="submit" class="w-full py-2.5 px-3 text-xs font-black rounded-lg transition-colors border flex items-center justify-center gap-2"
+                            th:classappend="${student.estado == 'Activo'} ? 'border-red-200 text-alert-red hover:bg-red-50' : 'border-[#c4eec0] text-sidebar hover:bg-[#f1fbe4]'">
+                        <i th:data-lucide="${student.estado == 'Activo' ? 'user-minus' : 'user-check'}" class="size-4 stroke-2"></i>
+                        <span th:text="${student.estado == 'Activo' ? 'Retirar Estudiante' : 'Activar Estudiante'}">Cambiar Estado</span>
+                    </button>
+                </form>
             </div>
 
             <!-- Right Panel: Tabs Content -->
@@ -61,10 +80,8 @@
                 <div class="flex border-b border-[#c4eec0]/40 px-6 bg-[#f7fcf6] overflow-x-auto gap-2 scrollbar-none">
                     <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-sidebar border-b-2 border-sidebar whitespace-nowrap" onclick="switchStudentTab(this, 'st-info')">Información</button>
                     <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchStudentTab(this, 'st-acudiente')">Acudiente</button>
-                    <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchStudentTab(this, 'st-salud')">Salud</button>
+                    <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchStudentTab(this, 'st-cuenta')">Cuenta Acceso</button>
                     <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchStudentTab(this, 'st-academico')">Académico</button>
-                    <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchStudentTab(this, 'st-calificaciones')">Notas</button>
-                    <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchStudentTab(this, 'st-documentos')">Archivos</button>
                 </div>
 
                 <!-- Tab Body Content -->
@@ -72,7 +89,7 @@
                     
                     <!-- TAB 1: INFORMACIÓN -->
                     <div id="st-info" class="student-tab-content flex flex-col gap-6">
-                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Datos del Estudiante</h3>
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Datos Personales del Estudiante</h3>
                         <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5 text-[11px] font-bold">
                             <div class="grid gap-1">
                                 <span class="text-text-secondary uppercase text-[9px] tracking-wider">Nombres Completos</span>
@@ -91,12 +108,16 @@
                                 <span class="text-text-primary text-xs" th:text="${student.fechaNac}">2011-08-25</span>
                             </div>
                             <div class="grid gap-1">
-                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Edad Registrada</span>
-                                <span class="text-text-primary text-xs" th:text="${student.edad}">14 años</span>
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Género</span>
+                                <span class="text-text-primary text-xs" th:text="${student.genero}">Masculino</span>
                             </div>
                             <div class="grid gap-1">
-                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Sexo</span>
-                                <span class="text-text-primary text-xs" th:text="${student.sexo}">Masculino</span>
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Teléfono de Contacto</span>
+                                <span class="text-text-primary text-xs" th:text="${student.telefono}">300 123 4567</span>
+                            </div>
+                            <div class="col-span-2 max-sm:col-span-1 grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Dirección de Residencia</span>
+                                <span class="text-text-primary text-xs" th:text="${student.direccion}">Manzana A Lote 5</span>
                             </div>
                         </div>
                     </div>
@@ -123,112 +144,64 @@
                             </div>
                             <div class="col-span-2 max-sm:col-span-1 grid gap-1">
                                 <span class="text-text-secondary uppercase text-[9px] tracking-wider">Dirección de Residencia</span>
-                                <span class="text-text-primary text-xs" th:text="${student.acudienteDir}">Manzana A Lote 5, San José</span>
+                                <span class="text-text-primary text-xs" th:text="${student.acudienteDir}">Manzana A Lote 5</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- TAB 3: SALUD -->
-                    <div id="st-salud" class="student-tab-content hidden flex flex-col gap-6">
-                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Ficha Médica</h3>
-                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5 text-[11px] font-bold">
-                            <div class="grid gap-1">
-                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">EPS Afiliada</span>
-                                <span class="text-text-primary text-xs" th:text="${student.saludEps}">Coosalud</span>
+                    <!-- TAB 3: CUENTA DE ACCESO -->
+                    <div id="st-cuenta" class="student-tab-content hidden flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Cuenta de Acceso al Sistema</h3>
+                        
+                        <div th:if="${student.tieneCuenta}" class="p-5 rounded-xl border border-[#c4eec0] bg-[#f1fbe4]/50 flex flex-col gap-4">
+                            <div class="flex items-center gap-3">
+                                <span class="w-10 h-10 rounded-full bg-sidebar text-white grid place-items-center shrink-0">
+                                    <i data-lucide="user-check" class="size-5 stroke-2"></i>
+                                </span>
+                                <div>
+                                    <strong class="block text-text-primary text-sm font-black" th:text="${student.usuarioEmail}">estudiante@ieaci.edu.co</strong>
+                                    <span class="text-text-secondary text-[11px] font-semibold">Rol: <span class="uppercase font-bold" th:text="${student.usuarioRol}">ESTUDIANTE</span> | Estado: <span class="font-bold text-sidebar" th:text="${student.usuarioEstado}">Activo</span></span>
+                                </div>
                             </div>
-                            <div class="grid gap-1">
-                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Grupo Sanguíneo (RH)</span>
-                                <span class="text-text-primary text-xs font-black text-alert-red" th:text="${student.saludRh}">A+</span>
-                            </div>
-                            <div class="col-span-2 max-sm:col-span-1 grid gap-1">
-                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Alergias y Condiciones</span>
-                                <span class="text-text-primary text-xs" th:text="${student.saludAlergias}">Polen y Acaros</span>
-                            </div>
-                            <div class="col-span-2 max-sm:col-span-1 grid gap-1">
-                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Observaciones Médicas</span>
-                                <span class="text-text-primary text-xs" th:text="${student.saludObs}">Ninguna</span>
-                            </div>
+                            <p class="text-text-secondary text-xs font-semibold">Esta cuenta permite ingresar al portal de calificaciones y seguimiento académico.</p>
+                        </div>
+
+                        <div class="p-5 rounded-xl border border-[#c4eec0]/60 bg-white shadow-sm flex flex-col gap-4">
+                            <h4 class="text-sidebar text-xs font-black uppercase tracking-wider" th:text="${student.tieneCuenta} ? 'Actualizar Credenciales' : 'Generar Cuenta de Acceso'">Generar Cuenta</h4>
+                            <p class="text-text-secondary text-[11px] font-semibold">El correo electrónico se genera automáticamente combinando el nombre y apellido del estudiante. Puede personalizarlo si lo requiere.</p>
+                            
+                            <form th:action="@{'/estudiantes/' + ${student.id} + '/crear-cuenta'}" method="post" class="grid grid-cols-2 max-sm:grid-cols-1 gap-4">
+                                <div>
+                                    <label class="block mb-1 text-[9px] font-black text-text-secondary uppercase">Correo Institucional</label>
+                                    <input type="email" name="email" th:value="${student.tieneCuenta ? student.usuarioEmail : student.emailSugerido}" required
+                                           class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-xs font-bold text-text-primary focus:ring-2 focus:ring-sidebar/20">
+                                </div>
+                                <div>
+                                    <label class="block mb-1 text-[9px] font-black text-text-secondary uppercase">Contraseña</label>
+                                    <input type="text" name="password" placeholder="Contraseña o dejar en blanco" 
+                                           class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-xs font-bold text-text-primary focus:ring-2 focus:ring-sidebar/20">
+                                </div>
+                                <div class="col-span-2 max-sm:col-span-1 flex justify-end">
+                                    <button type="submit" class="px-5 py-2.5 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md">
+                                        <i data-lucide="key-round" class="size-4 stroke-2"></i>
+                                        <span th:text="${student.tieneCuenta} ? 'Guardar Cambios' : 'Generar Cuenta de Acceso'">Generar Cuenta</span>
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
 
                     <!-- TAB 4: ACADÉMICO -->
                     <div id="st-academico" class="student-tab-content hidden flex flex-col gap-6">
-                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Historial de Matrículas</h3>
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Información Académica</h3>
                         
                         <div class="grid gap-4">
                             <div class="p-4 rounded-xl border border-[#c4eec0]/40 bg-[#f9fbf8]/50 flex justify-between items-center text-[11px] font-bold">
                                 <div>
-                                    <strong class="block text-text-primary text-xs font-black">Grado 9° - Grupo A</strong>
-                                    <span class="block text-text-secondary text-[9px] mt-0.5">Año Lectivo: 2026</span>
+                                    <strong class="block text-text-primary text-xs font-black" th:text="'Grado ' + ${student.curso}">Grado 9°</strong>
+                                    <span class="block text-text-secondary text-[9px] mt-0.5" th:text="'Año Lectivo: ' + ${student.anoLectivo}">Año Lectivo: 2026</span>
                                 </div>
-                                <span class="px-2.5 py-1 rounded bg-[#f1fbe4] text-sidebar text-[9px] font-black uppercase">Vigente</span>
-                            </div>
-                            <div class="p-4 rounded-xl border border-gray-200 bg-[#fbfdfa] flex justify-between items-center text-[11px] font-bold opacity-75">
-                                <div>
-                                    <strong class="block text-text-primary text-xs font-black">Grado 8° - Grupo A</strong>
-                                    <span class="block text-text-secondary text-[9px] mt-0.5">Año Lectivo: 2025</span>
-                                </div>
-                                <span class="px-2.5 py-1 rounded bg-gray-100 text-text-secondary text-[9px] font-black uppercase">Finalizado</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- TAB 5: CALIFICACIONES -->
-                    <div id="st-calificaciones" class="student-tab-content hidden flex flex-col gap-6">
-                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Calificaciones Periodo Actual</h3>
-                        
-                        <div class="grid gap-3 text-[11px] font-bold">
-                            <!-- Subject 1 -->
-                            <div class="flex justify-between items-center p-3 border border-[#c4eec0]/30 rounded-lg">
-                                <span class="text-text-primary">Álgebra y Matemáticas</span>
-                                <span class="px-2 py-0.5 rounded bg-sidebar text-white font-black">4.5</span>
-                            </div>
-                            <!-- Subject 2 -->
-                            <div class="flex justify-between items-center p-3 border border-[#c4eec0]/30 rounded-lg">
-                                <span class="text-text-primary">Ciencias Naturales y Química</span>
-                                <span class="px-2 py-0.5 rounded bg-sidebar text-white font-black">3.8</span>
-                            </div>
-                            <!-- Subject 3 -->
-                            <div class="flex justify-between items-center p-3 border border-[#c4eec0]/30 rounded-lg">
-                                <span class="text-text-primary">Lengua Castellana</span>
-                                <span class="px-2 py-0.5 rounded bg-sidebar text-white font-black">4.2</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- TAB 6: DOCUMENTOS -->
-                    <div id="st-documentos" class="student-tab-content hidden flex flex-col gap-6">
-                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Documentos Expediente Escolar</h3>
-                        
-                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-4.5 text-[11px] font-bold text-text-secondary">
-                            <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-white flex items-center justify-between gap-4">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-9 h-9 rounded bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0">
-                                        <i data-lucide="file-text" class="size-4.5 stroke-2"></i>
-                                    </span>
-                                    <div>
-                                        <strong class="block text-text-primary text-[12px] font-black">Registro_Civil.pdf</strong>
-                                        <span class="block text-text-secondary text-[9.5px] font-semibold mt-0.5">Tipo: Registro Civil</span>
-                                    </div>
-                                </div>
-                                <a href="#" class="p-2 hover:bg-[#f1fbe4] text-sidebar rounded-lg transition-colors border border-sidebar/10 shadow-sm">
-                                    <i data-lucide="download" class="size-4 stroke-2"></i>
-                                </a>
-                            </div>
-
-                            <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-white flex items-center justify-between gap-4">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-9 h-9 rounded bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0">
-                                        <i data-lucide="credit-card" class="size-4.5 stroke-2"></i>
-                                    </span>
-                                    <div>
-                                        <strong class="block text-text-primary text-[12px] font-black">Documento_Identidad.pdf</strong>
-                                        <span class="block text-text-secondary text-[9.5px] font-semibold mt-0.5">Tipo: Tarjeta Identidad</span>
-                                    </div>
-                                </div>
-                                <a href="#" class="p-2 hover:bg-[#f1fbe4] text-sidebar rounded-lg transition-colors border border-sidebar/10 shadow-sm">
-                                    <i data-lucide="download" class="size-4 stroke-2"></i>
-                                </a>
+                                <span class="px-2.5 py-1 rounded bg-[#f1fbe4] text-sidebar text-[9px] font-black uppercase" th:text="${student.estadoMatricula}">Vigente</span>
                             </div>
                         </div>
                     </div>

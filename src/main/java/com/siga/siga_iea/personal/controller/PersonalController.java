@@ -132,7 +132,7 @@ public class PersonalController {
                 storageService.validateSize(fotoFile, 10 * 1024 * 1024);
                 storageService.validateExtension(fotoFile, "jpg", "jpeg", "png");
                 UploadResult result = storageService.upload(fotoFile, StorageFolder.DOCENTES, numDoc);
-                uploadedFotoKey = result.getStorageKey();
+                uploadedFotoKey = result.getKey();
             }
 
             if ("Docente".equalsIgnoreCase(cargo)) {

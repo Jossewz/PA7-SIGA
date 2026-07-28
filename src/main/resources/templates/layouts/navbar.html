@@ -20,13 +20,12 @@
 
             <div class="flex items-center gap-2.5 text-text-primary text-right">
                 <span class="grid gap-[1px]">
-                    <strong class="text-[11px] leading-[1.1] font-extrabold">Admin Usuario</strong>
-                    <small class="text-text-secondary text-[9px] leading-[1.1] font-semibold">Coordinacion General</small>
+                    <strong class="text-[11px] leading-[1.1] font-extrabold" th:text="${currentUser != null ? currentUser.email : 'Usuario'}">Usuario</strong>
+                    <small class="text-text-secondary text-[9px] leading-[1.1] font-semibold" th:text="${currentRoleName ?: 'Acceso'}">Rol</small>
                 </span>
-                <img
-                    class="w-9 h-9 border-[2px] border-[#0f6a3d] rounded-full object-cover"
-                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=96&q=80"
-                    alt="Admin Usuario">
+                <div class="w-9 h-9 border-[2px] border-[#0f6a3d] rounded-full bg-[#145f22] text-white flex items-center justify-center text-xs font-black uppercase">
+                    <span th:text="${currentUser != null && currentUser.email != null ? #strings.substring(currentUser.email,0,1) : 'U'}">U</span>
+                </div>
             </div>
         </div>
     </header>

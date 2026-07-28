@@ -28,7 +28,7 @@
                         <i data-lucide="calendar" class="size-4 stroke-2"></i> Calendario Académico
                     </span>
                 </button>
-                <button type="button" class="cfg-tab-btn w-full text-left px-4 py-3 rounded-lg text-[11px] font-black uppercase tracking-wider text-text-secondary hover:bg-[#fcfdfb] transition-all" onclick="switchConfigTab(this, 'cfg-roles')">
+                <button type="button" sec:authorize="hasRole('ADMIN')" class="cfg-tab-btn w-full text-left px-4 py-3 rounded-lg text-[11px] font-black uppercase tracking-wider text-text-secondary hover:bg-[#fcfdfb] transition-all" onclick="switchConfigTab(this, 'cfg-roles')">
                     <span class="flex items-center gap-2.5">
                         <i data-lucide="shield" class="size-4 stroke-2"></i> Roles y Permisos
                     </span>
@@ -89,7 +89,7 @@
                 </div>
 
                 <!-- TAB 3: ROLES Y PERMISOS -->
-                <div id="cfg-roles" class="config-tab-content hidden flex flex-col gap-6">
+                <div id="cfg-roles" sec:authorize="hasRole('ADMIN')" class="config-tab-content hidden flex flex-col gap-6">
                     <div class="flex justify-between items-center border-b border-[#c4eec0]/30 pb-2">
                         <h3 class="text-sidebar text-base font-black uppercase tracking-wide">Roles del Sistema</h3>
                         <button type="button" class="px-3.5 py-1.5 text-[10px] font-black text-sidebar bg-[#f1fbe4] border border-sidebar/20 rounded-lg flex items-center gap-1">

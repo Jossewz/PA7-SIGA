@@ -13,9 +13,11 @@ import java.util.UUID;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository, org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<Usuario> listarTodos() {
@@ -38,6 +40,9 @@ public class UsuarioService {
 
     @Transactional
     public Usuario guardar(Usuario usuario) {
+        if (usuario.getPassword() != null && !usuario.getPassword().startsWith("$2a$") && !usuario.getPassword().startsWith("$2b$")) {
+            usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        }
         return usuarioRepository.save(usuario);
     }
 
@@ -52,7 +57,7 @@ public class UsuarioService {
     @Transactional
     public void cambiarPassword(UUID id, String nuevaPassword) {
         usuarioRepository.findById(id).ifPresent(u -> {
-            u.setPassword(nuevaPassword);
+            u.setPassword(passwordEncoder.encode(nuevaPassword));
             usuarioRepository.save(u);
         });
     }

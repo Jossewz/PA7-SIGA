@@ -1,0 +1,20 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <!-- Tabla Ajustable de Estudiantes, Notas y Asistencia (Sin scroll forzado) -->
+    <div th:fragment="tablaDetalleNotas" class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
+        <div class="w-full overflow-x-auto">
+            <table class="w-full text-left border-collapse text-[12px] table-auto" id="tabla-estudiantes-notas">
+                <thead>
+                    <tr class="bg-[#f7fcf6] border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]" id="thead-row">
+                        <th class="p-3 pl-5 w-8 text-center">#</th>
+                        <th class="p-3 min-w-[160px]">Estudiante</th>
+                        <th class="p-3 text-center w-24">Nota Final</th>
+                        <th class="p-3 pr-5 text-center w-32">Asistencia</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]" id="tbody-estudiantes">
+                    <!-- Filas generadas dinámicamente por clases-detalle.js -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</th:block>

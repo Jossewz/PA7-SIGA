@@ -28,7 +28,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/siga
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: siga
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       SPRING_DEVTOOLS_RESTART_ENABLED: "true"
       MINIO_URL: http://minio:9000
       MINIO_ACCESS_KEY: admin

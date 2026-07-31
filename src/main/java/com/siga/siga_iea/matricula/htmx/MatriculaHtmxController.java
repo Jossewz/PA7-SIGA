@@ -2,6 +2,7 @@ package com.siga.siga_iea.matricula.htmx;
 
 import com.siga.siga_iea.matricula.entity.Matricula;
 import com.siga.siga_iea.matricula.service.MatriculaService;
+import com.siga.siga_iea.storage.entity.Documento;
 import com.siga.siga_iea.storage.entity.TipoDocumento;
 import com.siga.siga_iea.storage.service.DocumentoService;
 import com.siga.siga_iea.usuarios.entity.Acudiente;

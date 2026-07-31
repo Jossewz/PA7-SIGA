@@ -1,27 +1,166 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/base :: html(~{::content})}">
 <head>
-    <title>Calificaciones – IEACI</title>
+    <title>Boletín de Calificaciones – IEACI</title>
 </head>
 <body>
 
 <th:block th:fragment="content">
     <div class="flex flex-col gap-6 flex-1">
         <!-- Header -->
-        <div>
-            <h1 class="text-text-primary text-[28px] font-black tracking-tight leading-none mb-1.5">Gestión de Calificaciones</h1>
-            <p class="text-text-secondary text-sm font-semibold">Registro de notas por periodo, boletines académicos y planillas de los docentes.</p>
+        <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
+            <div>
+                <h1 class="text-text-primary text-[28px] font-black tracking-tight leading-none mb-1.5">Boletín de Calificaciones</h1>
+                <p class="text-text-secondary text-sm font-semibold">Consulta institucional de rendimiento académico por asignatura y período.</p>
+            </div>
+            
+            <!-- Badge Estudiante -->
+            <div class="bg-white rounded-xl border border-[#c4eec0]/60 p-3.5 flex items-center gap-3.5 shadow-sm">
+                <div class="size-10 rounded-lg bg-sidebar/10 text-sidebar grid place-items-center shrink-0">
+                    <i data-lucide="user" class="size-5 stroke-[2.5]"></i>
+                </div>
+                <div>
+                    <h4 class="text-text-primary text-xs font-black" th:text="${estudianteNombre}">Mateo Álvarez Restrepo</h4>
+                    <div class="flex items-center gap-2 text-[11px] font-semibold text-text-secondary mt-0.5">
+                        <span th:text="${'Grado: ' + estudianteGrado}">Grado: 11° - 01</span>
+                        <span>•</span>
+                        <span th:text="${'Doc: ' + estudianteDocumento}">Doc: 1098432101</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Main Card Container -->
-        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft flex-1 p-8 flex flex-col items-center justify-center text-center">
-            <div class="size-16 rounded-2xl bg-[#f1fbe4] text-sidebar grid place-items-center mb-4 border border-[#c4eec0]">
-                <i data-lucide="star" class="size-8 stroke-2"></i>
+        <!-- Subjects & 3 Periods Table Container -->
+        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
+            <div class="p-4 border-b border-[#c4eec0]/30 bg-[#f7fcf6] flex justify-between items-center">
+                <div class="flex items-center gap-2 text-sidebar font-black text-xs uppercase tracking-wider">
+                    <i data-lucide="book-open" class="size-4 stroke-[2.5]"></i>
+                    <span>Resumen Académico de Asignaturas</span>
+                </div>
+                <div class="text-[11px] font-bold text-text-secondary">
+                    Año Lectivo 2026
+                </div>
             </div>
-            <h2 class="text-text-primary text-lg font-black">Módulo de Calificaciones</h2>
-            <p class="text-text-secondary text-xs font-semibold max-w-md mt-1.5">Seleccione el grado y asignatura desde la sección de Cursos para ingresar y consultar las notas institucionales.</p>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-[12px]">
+                    <thead>
+                        <tr class="bg-white border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
+                            <th class="p-4 pl-6">Asignatura</th>
+                            <th class="p-4">Docente</th>
+                            <th class="p-4 text-center">Periodo 1</th>
+                            <th class="p-4 text-center">Periodo 2</th>
+                            <th class="p-4 text-center">Periodo 3</th>
+                            <th class="p-4 text-center">Definitiva</th>
+                            <th class="p-4 pr-6 text-right">Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]">
+                        <th:block th:each="asig, iterStat : ${asignaturas}">
+                            <!-- Subject Row -->
+                            <tr class="hover:bg-[#fcfdfb] transition-colors cursor-pointer" th:data-index="${iterStat.index}" onclick="toggleEvaluaciones(this.dataset.index)">
+                                <td class="p-4 pl-6 font-black text-sidebar text-[13px] flex items-center gap-2.5">
+                                    <i data-lucide="chevron-right" th:id="'icon-chevron-' + ${iterStat.index}" class="size-4 stroke-[2.5] text-text-secondary transition-transform duration-200"></i>
+                                    <span th:text="${asig.nombre}">Matemáticas</span>
+                                </td>
+                                <td class="p-4 font-semibold text-text-secondary" th:text="${asig.docente}">Prof. Jorge Eliécer Rojas</td>
+                                <td class="p-4 text-center font-bold text-sidebar" th:text="${asig.p1}">4.38</td>
+                                <td class="p-4 text-center font-bold text-sidebar" th:text="${asig.p2}">4.23</td>
+                                <td class="p-4 text-center font-bold text-sidebar" th:text="${asig.p3}">4.50</td>
+                                <td class="p-4 text-center">
+                                    <span class="px-2.5 py-1 rounded-full text-[11px] font-black text-white"
+                                          th:classappend="${asig.definitiva >= 3.5} ? 'bg-sidebar' : (${asig.definitiva >= 3.0} ? 'bg-amber-500' : 'bg-alert-red')"
+                                          th:text="${asig.definitiva}">4.37</span>
+                                </td>
+                                <td class="p-4 pr-6 text-right">
+                                    <span class="text-[11px] font-bold text-sidebar underline underline-offset-2">Ver Notas</span>
+                                </td>
+                            </tr>
+
+                            <!-- Collapsible 3-Period Windows Row -->
+                            <tr th:id="'eval-row-' + ${iterStat.index}" class="hidden bg-[#f7fcf6]/60 border-b border-[#c4eec0]/40">
+                                <td colspan="7" class="p-5 pl-10 pr-8">
+                                    <div class="bg-white rounded-xl p-4 border border-[#c4eec0]/40 shadow-sm space-y-4">
+                                        <div class="flex items-center justify-between border-b border-[#c4eec0]/30 pb-3">
+                                            <h5 class="text-[11px] font-black uppercase text-sidebar tracking-wider flex items-center gap-2">
+                                                <i data-lucide="layers" class="size-4 stroke-2"></i>
+                                                <span>Notas Detalladas por Período – <span th:text="${asig.nombre}">Matemáticas</span></span>
+                                            </h5>
+                                            
+                                            <!-- Pestañas / Ventanas de Período -->
+                                            <div class="flex items-center gap-1 bg-[#f7fcf6] p-1 rounded-lg border border-[#c4eec0]/50">
+                                                <button type="button" 
+                                                        th:onclick="'switchSubPeriodo(' + ${iterStat.index} + ', 1)'" 
+                                                        th:id="'tab-' + ${iterStat.index} + '-1'" 
+                                                        class="subtab-btn px-3 py-1 rounded-md text-[11px] font-black bg-sidebar text-white shadow-2xs cursor-pointer">
+                                                    Periodo 1
+                                                </button>
+                                                <button type="button" 
+                                                        th:onclick="'switchSubPeriodo(' + ${iterStat.index} + ', 2)'" 
+                                                        th:id="'tab-' + ${iterStat.index} + '-2'" 
+                                                        class="subtab-btn px-3 py-1 rounded-md text-[11px] font-bold text-text-secondary hover:text-sidebar cursor-pointer">
+                                                    Periodo 2
+                                                </button>
+                                                <button type="button" 
+                                                        th:onclick="'switchSubPeriodo(' + ${iterStat.index} + ', 3)'" 
+                                                        th:id="'tab-' + ${iterStat.index} + '-3'" 
+                                                        class="subtab-btn px-3 py-1 rounded-md text-[11px] font-bold text-text-secondary hover:text-sidebar cursor-pointer">
+                                                    Periodo 3
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Ventana Periodo 1 -->
+                                        <div th:id="'pane-' + ${iterStat.index} + '-1'" class="subpane-window">
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                                <div th:each="ev : ${asig.evalP1}" class="p-3 rounded-lg border border-[#c4eec0]/40 bg-[#fbfdfa] flex justify-between items-center">
+                                                    <div>
+                                                        <p class="text-[11px] font-bold text-text-primary" th:text="${ev.tema}">Evaluación Escrita</p>
+                                                        <span class="text-[10px] font-semibold text-text-secondary" th:text="${'Peso: ' + ev.peso}">Peso: 25%</span>
+                                                    </div>
+                                                    <span class="px-2 py-0.5 rounded text-[11px] font-black bg-[#eafbe4] text-sidebar border border-[#c4eec0]" th:text="${ev.nota}">4.5</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Ventana Periodo 2 -->
+                                        <div th:id="'pane-' + ${iterStat.index} + '-2'" class="subpane-window hidden">
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                                <div th:each="ev : ${asig.evalP2}" class="p-3 rounded-lg border border-[#c4eec0]/40 bg-[#fbfdfa] flex justify-between items-center">
+                                                    <div>
+                                                        <p class="text-[11px] font-bold text-text-primary" th:text="${ev.tema}">Evaluación Escrita</p>
+                                                        <span class="text-[10px] font-semibold text-text-secondary" th:text="${'Peso: ' + ev.peso}">Peso: 35%</span>
+                                                    </div>
+                                                    <span class="px-2 py-0.5 rounded text-[11px] font-black bg-[#eafbe4] text-sidebar border border-[#c4eec0]" th:text="${ev.nota}">4.2</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Ventana Periodo 3 -->
+                                        <div th:id="'pane-' + ${iterStat.index} + '-3'" class="subpane-window hidden">
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                                <div th:each="ev : ${asig.evalP3}" class="p-3 rounded-lg border border-[#c4eec0]/40 bg-[#fbfdfa] flex justify-between items-center">
+                                                    <div>
+                                                        <p class="text-[11px] font-bold text-text-primary" th:text="${ev.tema}">Evaluación Escrita</p>
+                                                        <span class="text-[10px] font-semibold text-text-secondary" th:text="${'Peso: ' + ev.peso}">Peso: 50%</span>
+                                                    </div>
+                                                    <span class="px-2 py-0.5 rounded text-[11px] font-black bg-[#eafbe4] text-sidebar border border-[#c4eec0]" th:text="${ev.nota}">4.6</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        </th:block>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+
+    <!-- Script del módulo de calificaciones -->
+    <script th:src="@{/js/calificaciones.js}"></script>
 </th:block>
 
 </body>

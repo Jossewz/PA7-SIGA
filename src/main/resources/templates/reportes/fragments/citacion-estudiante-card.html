@@ -1,0 +1,62 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <!-- VISTA ROL ESTUDIANTE: Visualización de Citación a Dirección -->
+    <div th:fragment="citacionEstudianteCard" id="vista-estudiante" class="hidden space-y-6">
+        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-6 space-y-6">
+            <div class="flex items-center justify-between pb-4 border-b border-[#c4eec0]/40">
+                <div class="flex items-center gap-3">
+                    <div class="size-10 rounded-xl bg-sidebar text-white grid place-items-center shadow-md">
+                        <i data-lucide="user-check" class="size-5 stroke-[2.5]"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sidebar text-lg font-black">Citaciones y Observaciones del Estudiante</h3>
+                        <p class="text-text-secondary text-xs font-semibold">Notificaciones de citación oficial a Dirección o Coordinación.</p>
+                    </div>
+                </div>
+                <span class="px-3 py-1 bg-[#eafbe4] text-sidebar border border-[#c4eec0] rounded-md font-bold text-xs">Estudiante: Mateo Álvarez Restrepo</span>
+            </div>
+
+            <!-- Tarjeta de Citación Activa -->
+            <div id="tarjeta-citacion-estudiante" class="p-6 rounded-2xl bg-[#f7fcf6] border-2 border-[#8ce383] shadow-md space-y-4">
+                <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
+                    <div class="flex items-center gap-3">
+                        <div class="size-12 rounded-xl bg-sidebar text-white grid place-items-center shadow-md shrink-0">
+                            <i data-lucide="calendar-clock" class="size-6 stroke-[2.5]"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sidebar text-base font-black">¡Tiene una Citación Oficial a Dirección!</h4>
+                            <p class="text-text-secondary text-xs font-semibold">Debe presentarse en la oficina de Coordinación Académica en la fecha programada.</p>
+                        </div>
+                    </div>
+
+                    <!-- Badge Indicador de Acudiente -->
+                    <div id="badge-acudiente-req" class="px-4 py-2 bg-pill-red text-alert-red border border-red-300 rounded-xl text-xs font-black flex items-center gap-2 shadow-2xs shrink-0">
+                        <i data-lucide="users" class="size-4 stroke-[2.5]"></i>
+                        <span>CITACIÓN CON ACUDIENTE / PADRE DE FAMILIA</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-[#c4eec0]/60">
+                    <div class="p-3 bg-white rounded-xl border border-[#c4eec0]/40">
+                        <span class="text-[10px] font-black uppercase text-text-secondary block">Fecha y Hora de la Cita</span>
+                        <strong class="text-sidebar text-sm font-black" id="est-fecha-citacion">Martes, 04 de Agosto - 08:30 AM</strong>
+                    </div>
+                    <div class="p-3 bg-white rounded-xl border border-[#c4eec0]/40">
+                        <span class="text-[10px] font-black uppercase text-text-secondary block">Motivo del Reporte</span>
+                        <strong class="text-text-primary text-xs font-bold" id="est-motivo-reporte">Bajo rendimiento (Razones Académicas)</strong>
+                    </div>
+                    <div class="p-3 bg-white rounded-xl border border-[#c4eec0]/40">
+                        <span class="text-[10px] font-black uppercase text-text-secondary block">Reportado Por</span>
+                        <strong class="text-text-primary text-xs font-bold" id="est-docente-emisor">Prof. Jorge Eliécer Rojas</strong>
+                    </div>
+                </div>
+
+                <div class="p-3.5 bg-white rounded-xl border border-[#c4eec0]/40">
+                    <span class="text-[10px] font-black uppercase text-sidebar block mb-1">Observaciones e Indicaciones de Dirección:</span>
+                    <p class="text-text-primary text-xs font-semibold leading-relaxed" id="est-obs-admin">
+                        Se requiere presencia obligatoria del acudiente por bajo desempeño acumulado en el 2° periodo para la firma de compromisos pedagógicos.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>

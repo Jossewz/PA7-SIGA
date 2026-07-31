@@ -21,13 +21,16 @@ public class PersonalService {
     private final DocenteRepository docenteRepository;
     private final PersonalAdministrativoRepository personalAdministrativoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     public PersonalService(DocenteRepository docenteRepository,
                            PersonalAdministrativoRepository personalAdministrativoRepository,
-                           UsuarioRepository usuarioRepository) {
+                           UsuarioRepository usuarioRepository,
+                           org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.docenteRepository = docenteRepository;
         this.personalAdministrativoRepository = personalAdministrativoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<Docente> listarDocentes() {
@@ -90,18 +93,22 @@ public class PersonalService {
         String doc = numeroDocumento.trim();
         Optional<Usuario> usuarioOpt = usuarioRepository.findByNumeroDocumento(doc);
 
+        String encodedPassword = (password != null && !password.isBlank())
+                ? (password.startsWith("$2a$") || password.startsWith("$2b$") ? password : passwordEncoder.encode(password))
+                : null;
+
         Usuario usuario;
         if (usuarioOpt.isPresent()) {
             usuario = usuarioOpt.get();
             if (email != null && !email.isBlank()) usuario.setEmail(email.trim());
-            if (password != null && !password.isBlank()) usuario.setPassword(password);
+            if (encodedPassword != null) usuario.setPassword(encodedPassword);
             if (rol != null && !rol.isBlank()) usuario.setRol(rol.trim());
         } else {
             String targetEmail = (email != null && !email.isBlank())
                     ? email.trim()
                     : generarEmailSugerido(nombres, apellidos);
 
-            usuario = new Usuario(targetEmail, password, rol != null ? rol : "DOCENTE", doc);
+            usuario = new Usuario(targetEmail, encodedPassword, rol != null ? rol : "DOCENTE", doc);
         }
 
         return usuarioRepository.save(usuario);

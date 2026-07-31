@@ -6,126 +6,96 @@
 <body>
 
 <th:block th:fragment="content">
-    <div class="flex flex-col gap-6 flex-1">
-        <!-- Flash Messages -->
-        <div th:if="${mensajeExito}" class="p-4 rounded-xl bg-[#e3f7dc] border border-[#c4eec0] flex gap-3 text-xs font-bold text-sidebar">
-            <i data-lucide="check-circle-2" class="size-5 shrink-0 stroke-2"></i>
-            <span th:text="${mensajeExito}"></span>
-        </div>
-        <div th:if="${mensajeError}" class="p-4 rounded-xl bg-red-50 border border-red-200 flex gap-3 text-xs font-bold text-alert-red">
-            <i data-lucide="alert-circle" class="size-5 shrink-0 stroke-2"></i>
-            <span th:text="${mensajeError}"></span>
-        </div>
-
+    <div class="flex flex-col gap-6">
         <!-- Header -->
         <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
             <div>
-                <h1 class="text-text-primary text-[28px] font-black tracking-tight leading-none mb-1.5">Gestión de Personal</h1>
-                <p class="text-text-secondary text-sm font-semibold">Administración y control del cuerpo docente y administrativo institucional.</p>
+                <h1 class="text-text-primary text-[28px] font-black tracking-tight leading-none mb-1.5">Directorio de Personal</h1>
+                <p class="text-text-secondary text-sm font-semibold">Registro institucional de docentes, administrativos y directivos de la IEACI.</p>
             </div>
-            <button type="button" onclick="openRegisterModal()"
-                    class="px-5 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md shrink-0">
+            
+            <button type="button" onclick="openModalPersonal()" class="px-5 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md shrink-0 cursor-pointer">
                 <i data-lucide="user-plus" class="size-4 stroke-[2.5]"></i>
-                <span>Nuevo Personal</span>
+                <span>Nuevo Miembro</span>
             </button>
         </div>
 
-        <!-- Filters Box -->
-        <div class="p-5 rounded-xl bg-white border border-[#c4eec0]/40 shadow-soft">
-            <form th:action="@{/personal}" method="get" class="grid grid-cols-5 max-lg:grid-cols-2 max-sm:grid-cols-1 gap-4 items-end">
-                <div class="col-span-2 max-lg:col-span-2 max-sm:col-span-1">
-                    <label for="search-staff" class="block mb-1.5 text-[9px] font-black text-text-secondary uppercase tracking-wider">Buscar por nombre o documento</label>
-                    <div class="relative">
-                        <input type="text" id="search-staff" name="search" th:value="${search}" placeholder="Buscar..." 
-                               class="w-full h-10 pl-4 pr-10 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all">
-                        <i data-lucide="search" class="absolute right-3.5 top-1/2 -translate-y-1/2 size-4 text-text-secondary stroke-2"></i>
-                    </div>
-                </div>
-                <div>
-                    <label for="filter-cargo" class="block mb-1.5 text-[9px] font-black text-text-secondary uppercase tracking-wider">Cargo</label>
-                    <select id="filter-cargo" name="cargo" th:value="${cargo}" onchange="this.form.submit()" class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all">
-                        <option value="">Todos los cargos</option>
-                        <option value="Docente" th:selected="${cargo == 'Docente'}">Docente</option>
-                        <option value="Coordinador" th:selected="${cargo == 'Coordinador'}">Coordinador</option>
-                        <option value="Secretario" th:selected="${cargo == 'Secretario'}">Secretario</option>
-                        <option value="Rector" th:selected="${cargo == 'Rector'}">Rector</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="filter-estado" class="block mb-1.5 text-[9px] font-black text-text-secondary uppercase tracking-wider">Estado</label>
-                    <select id="filter-estado" name="estado" th:value="${estado}" onchange="this.form.submit()" class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all">
-                        <option value="">Todos los estados</option>
-                        <option value="Activo" th:selected="${estado == 'Activo'}">Activo</option>
-                        <option value="Inactivo" th:selected="${estado == 'Inactivo'}">Inactivo</option>
-                    </select>
-                </div>
-                <div class="flex gap-2">
-                    <button type="submit" class="h-10 px-4 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center justify-center gap-2">
-                        <i data-lucide="filter" class="size-4 stroke-2"></i>
-                        <span>Filtrar</span>
+        <!-- Filtros y Tabla -->
+        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
+            <div class="p-4 border-b border-[#c4eec0]/30 bg-[#f7fcf6] flex items-center justify-between gap-4 flex-wrap">
+                <!-- Tabs de Filtro por Tipo -->
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="filtrarPersonal('todos')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-sidebar bg-[#eafbe4] border border-[#c4eec0]">
+                        Todos
                     </button>
-                    <a th:href="@{/personal}" class="h-10 px-4 text-xs font-black text-text-secondary bg-[#f1f5f1] hover:bg-[#e4ede4] rounded-lg transition-all flex items-center justify-center">
-                        Limpiar
-                    </a>
+                    <button type="button" onclick="filtrarPersonal('DOCENTE')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-text-secondary hover:text-sidebar hover:bg-white transition-colors">
+                        Docentes
+                    </button>
+                    <button type="button" onclick="filtrarPersonal('ADMINISTRATIVO')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-text-secondary hover:text-sidebar hover:bg-white transition-colors">
+                        Administrativos
+                    </button>
                 </div>
-            </form>
-        </div>
 
-        <!-- ======================== TABLE (Desktop lg+) ======================== -->
-        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft flex-1 flex-col min-h-[300px] overflow-hidden hidden lg:flex">
-            <div class="overflow-x-auto flex-1">
-                <table class="w-full text-left border-collapse text-[13.5px] table-fixed">
+                <div class="text-xs font-bold text-text-secondary">
+                    Total Registrados: <span class="font-black text-sidebar" th:text="${personalList != null ? #lists.size(personalList) : 0}">4</span>
+                </div>
+            </div>
+
+            <!-- Tabla de Personal -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-[12px]">
                     <thead>
-                        <tr class="bg-[#f7fcf6] border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[11px]">
-                            <th class="py-4 px-4 text-center">Foto</th>
-                            <th class="py-4 px-4 text-center">Nombre Completo</th>
-                            <th class="py-4 px-4 text-center">Documento</th>
-                            <th class="py-4 px-4 text-center">Cargo</th>
-                            <th class="py-4 px-4 text-center">Cuenta Acceso</th>
-                            <th class="py-4 px-4 text-center">Estado</th>
-                            <th class="py-4 px-4 text-center">Acciones</th>
+                        <tr class="bg-white border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
+                            <th class="p-4 pl-6">Funcionario</th>
+                            <th class="p-4">Cargo / Asignatura</th>
+                            <th class="p-4">Rol / Categoría</th>
+                            <th class="p-4">Contacto</th>
+                            <th class="p-4 pr-6 text-right">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]">
-                        <tr th:if="${#lists.isEmpty(personalList)}">
-                            <td colspan="7" class="p-8 text-center text-text-secondary font-semibold">
-                                No se encontraron registros de personal.
-                            </td>
-                        </tr>
-                        <tr th:each="staff : ${personalList}" class="hover:bg-[#fcfdfb] transition-colors">
-                            <td class="py-3.5 px-4 text-center">
-                                <span class="size-10 rounded-full bg-sidebar/10 text-sidebar inline-flex items-center justify-center border border-sidebar/20 overflow-hidden shadow-sm">
-                                    <img th:if="${staff.foto != null}" th:src="${staff.foto}" alt="Foto" class="size-10 object-cover">
-                                    <i th:unless="${staff.foto != null}" data-lucide="user" class="size-5.5 stroke-2"></i>
-                                </span>
-                            </td>
-                            <td class="py-3.5 px-4 font-bold text-[#1a331e] text-[14px] text-center" th:text="${staff.nombreCompleto}">Carlos Mendoza</td>
-                            <td class="py-3.5 px-4 font-semibold text-text-secondary text-[13.5px] text-center" th:text="${staff.numeroDocumento}">1088123456</td>
-                            <td class="py-3.5 px-4 font-extrabold text-sidebar text-[13.5px] text-center" th:text="${staff.cargo}">Docente</td>
-                            <td class="py-3.5 px-4 text-center">
-                                <span th:if="${staff.tieneCuenta}" class="inline-block px-3 py-1 rounded-md bg-[#e3f7dc] text-sidebar font-extrabold text-[11px] tracking-wide border border-[#c4eec0]" th:text="${staff.correo}">carlos@ieaci.edu.co</span>
-                                <span th:unless="${staff.tieneCuenta}" class="inline-block px-3 py-1 rounded-md bg-[#f1f5f1] text-text-secondary font-semibold text-[11px]">Sin cuenta</span>
-                            </td>
-                            <td class="py-3.5 px-4 text-center">
-                                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider leading-none inline-block shadow-sm"
-                                      th:classappend="${staff.estado == 'Activo'} ? 'bg-pill-green text-sidebar border border-[#a8e8a0]' : 'bg-pill-red text-alert-red border border-red-200'"
-                                      th:text="${staff.estado}">Activo</span>
-                            </td>
-                            <td class="py-3.5 px-4 text-center relative">
-                                <div class="inline-block text-left relative" onclick="event.stopPropagation()">
-                                    <button type="button" class="p-2 hover:bg-[#f1fbe4] rounded-lg transition-colors text-text-secondary" onclick="toggleActionMenu(this)">
-                                        <i data-lucide="more-vertical" class="size-5 stroke-[2.2]"></i>
-                                    </button>
-                                    
-                                    <!-- Dropdown menu -->
-                                    <div class="hidden absolute right-0 mt-1 w-44 rounded-lg bg-white border border-[#c4eec0] shadow-lg py-1.5 z-30 text-left action-menu-dropdown">
-                                        <a th:href="@{'/personal/perfil/' + ${staff.id}}" class="flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold text-[13px]">
-                                            <i data-lucide="eye" class="size-4 text-sidebar stroke-2"></i> Ver perfil
-                                        </a>
-                                        <a th:href="@{'/personal/perfil/' + ${staff.id}}" class="flex items-center gap-2 px-3.5 py-2 text-text-primary hover:bg-[#f1fbe4] transition-colors font-bold text-[13px]">
-                                            <i data-lucide="key-round" class="size-4 text-sidebar stroke-2"></i> Gestionar usuario
-                                        </a>
+                        <tr th:each="p : ${personalList}" 
+                            class="hover:bg-[#fcfdfb] transition-colors personal-row"
+                            th:data-tipo="${p.tipo != null ? p.tipo : 'DOCENTE'}">
+                            
+                            <!-- Nombre y Documento -->
+                            <td class="p-4 pl-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="size-9 rounded-full bg-[#f1fbe4] text-sidebar font-black grid place-items-center border border-[#c4eec0] text-xs">
+                                        <span th:text="${p.nombres != null ? #strings.substring(p.nombres, 0, 1) : (p.nombreCompleto != null ? #strings.substring(p.nombreCompleto, 0, 1) : 'P')}">C</span>
                                     </div>
+                                    <div>
+                                        <a th:href="@{'/personal/perfil/' + ${p.id}}" class="font-black text-sidebar text-[13px] hover:underline" th:text="${p.nombreCompleto != null ? p.nombreCompleto : (p.nombres + ' ' + p.apellidos)}">Carlos Mendoza</a>
+                                        <div class="text-[10px] font-semibold text-text-secondary" th:text="${(p.tipoDocumento != null ? p.tipoDocumento : 'CC') + ': ' + (p.numeroDocumento != null ? p.numeroDocumento : '')}">CC: 1088123456</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Cargo -->
+                            <td class="p-4 font-bold text-text-primary" th:text="${p.cargo != null ? p.cargo : 'Docente'}">Docente de Matemáticas</td>
+
+                            <!-- Tipo / Rol Badge -->
+                            <td class="p-4">
+                                <span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border"
+                                      th:classappend="${p.tipo == 'DOCENTE'} ? 'bg-pill-green text-sidebar border-[#8ce383]' : 'bg-blue-50 text-blue-800 border-blue-200'"
+                                      th:text="${p.tipo != null ? p.tipo : 'DOCENTE'}">DOCENTE</span>
+                            </td>
+
+                            <!-- Contacto -->
+                            <td class="p-4">
+                                <div class="font-semibold text-text-primary text-[11px]" th:text="${p.email != null ? p.email : (p.correo != null ? p.correo : 'carlos.mendoza@ieaci.edu.co')}">carlos.mendoza@ieaci.edu.co</div>
+                                <div class="text-[10px] text-text-secondary font-semibold" th:text="${p.telefono != null ? p.telefono : '3001234567'}">3001234567</div>
+                            </td>
+
+                            <!-- Acciones -->
+                            <td class="p-4 pr-6 text-right">
+                                <div class="flex justify-end gap-1">
+                                    <a th:href="@{'/personal/perfil/' + ${p.id}}" class="p-1.5 hover:bg-[#eafbe4] rounded-lg transition-colors text-sidebar" title="Ver hoja de vida">
+                                        <i data-lucide="eye" class="size-4 stroke-[2]"></i>
+                                    </a>
+                                    <button type="button" class="p-1.5 hover:bg-[#f1fbe4] rounded-lg transition-colors text-sidebar" title="Editar datos">
+                                        <i data-lucide="edit-3" class="size-4 stroke-[2]"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -133,202 +103,13 @@
                 </table>
             </div>
         </div>
-
-        <!-- ======================== CARDS (Mobile / Tablet < lg) ======================== -->
-        <div class="flex flex-col gap-3 lg:hidden">
-            <div th:if="${#lists.isEmpty(personalList)}" class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-8 text-center text-text-secondary font-semibold">
-                No se encontraron registros de personal.
-            </div>
-            <div th:each="staff : ${personalList}" class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-5 hover:shadow-md transition-shadow">
-                <!-- Card Header: Avatar + Name + Status -->
-                <div class="flex items-center gap-4 mb-4 pb-4 border-b border-[#c4eec0]/30">
-                    <span class="size-12 rounded-full bg-sidebar/10 text-sidebar inline-flex items-center justify-center border border-sidebar/20 overflow-hidden shadow-sm shrink-0">
-                        <img th:if="${staff.foto != null}" th:src="${staff.foto}" alt="Foto" class="size-12 object-cover">
-                        <i th:unless="${staff.foto != null}" data-lucide="user" class="size-6 stroke-2"></i>
-                    </span>
-                    <div class="flex-1 min-w-0">
-                        <h3 class="text-[15px] font-black text-[#1a331e] truncate" th:text="${staff.nombreCompleto}">Carlos Mendoza</h3>
-                        <p class="text-[12px] font-extrabold text-sidebar mt-0.5" th:text="${staff.cargo}">Docente</p>
-                    </div>
-                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider leading-none inline-block shadow-sm shrink-0"
-                          th:classappend="${staff.estado == 'Activo'} ? 'bg-pill-green text-sidebar border border-[#a8e8a0]' : 'bg-pill-red text-alert-red border border-red-200'"
-                          th:text="${staff.estado}">Activo</span>
-                </div>
-                <!-- Card Body -->
-                <div class="grid grid-cols-2 max-[480px]:grid-cols-1 gap-x-6 gap-y-3 text-[13px]">
-                    <div>
-                        <span class="block text-[9px] font-black text-text-secondary uppercase tracking-wider mb-0.5">Documento</span>
-                        <span class="font-semibold text-text-secondary" th:text="${staff.numeroDocumento}">1088123456</span>
-                    </div>
-                    <div>
-                        <span class="block text-[9px] font-black text-text-secondary uppercase tracking-wider mb-0.5">Cuenta Acceso</span>
-                        <span th:if="${staff.tieneCuenta}" class="inline-block px-3 py-1 rounded-md bg-[#e3f7dc] text-sidebar font-extrabold text-[11px] tracking-wide border border-[#c4eec0]" th:text="${staff.correo}">carlos@ieaci.edu.co</span>
-                        <span th:unless="${staff.tieneCuenta}" class="inline-block px-3 py-1 rounded-md bg-[#f1f5f1] text-text-secondary font-semibold text-[11px]">Sin cuenta</span>
-                    </div>
-                </div>
-                <!-- Card Footer: Actions -->
-                <div class="flex gap-2 mt-4 pt-4 border-t border-[#c4eec0]/30">
-                    <a th:href="@{'/personal/perfil/' + ${staff.id}}" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#f1fbe4] hover:bg-[#e3f7dc] text-sidebar font-bold text-[12px] rounded-lg transition-colors border border-[#c4eec0]/40">
-                        <i data-lucide="eye" class="size-4 stroke-2"></i> Ver perfil
-                    </a>
-                    <a th:href="@{'/personal/perfil/' + ${staff.id}}" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#f1f5f1] hover:bg-[#e4ede4] text-text-secondary font-bold text-[12px] rounded-lg transition-colors border border-[#c4eec0]/40">
-                        <i data-lucide="key-round" class="size-4 stroke-2"></i> Gestionar usuario
-                    </a>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- MODAL REGISTRAR PERSONAL -->
-    <div id="register-modal" class="hidden fixed inset-0 bg-[#0d4117]/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl border border-[#c4eec0] shadow-xl max-w-4xl w-full max-h-[85vh] flex flex-col overflow-hidden transition-all scale-95 opacity-0 duration-300" id="register-modal-dialog">
-            
-            <!-- Modal Header -->
-            <div class="p-6 border-b border-[#c4eec0]/40 flex justify-between items-center bg-white shrink-0">
-                <div>
-                    <h3 class="text-sidebar text-[18px] font-black">Registrar Nuevo Personal</h3>
-                    <p class="text-text-secondary text-[11px] font-bold">Ingrese los datos para dar de alta al empleado en el sistema.</p>
-                </div>
-                <button type="button" onclick="closeRegisterModal()" class="p-1 hover:bg-red-50 text-text-secondary hover:text-alert-red rounded-lg transition-colors">
-                    <i data-lucide="x" class="size-5 stroke-2"></i>
-                </button>
-            </div>
+    <!-- Fragmento Modal Registrar Personal -->
+    <div th:replace="~{personal/fragments/modal-personal :: modalPersonal}"></div>
 
-            <!-- Tabs Bar -->
-            <div class="flex border-b border-[#c4eec0]/40 px-6 bg-[#f7fcf6] overflow-x-auto shrink-0 scrollbar-none gap-2">
-                <button type="button" class="tab-btn px-4 py-3.5 text-[10px] font-black uppercase tracking-wider text-sidebar border-b-2 border-sidebar whitespace-nowrap" onclick="switchModalTab(this, 'tab-personal')">Personal</button>
-                <button type="button" class="tab-btn px-4 py-3.5 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchModalTab(this, 'tab-laboral')">Laboral</button>
-                <button type="button" class="tab-btn px-4 py-3.5 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchModalTab(this, 'tab-cuenta')">Cuenta</button>
-            </div>
-
-            <!-- Modal Content (Forms) -->
-            <div class="p-6 overflow-y-auto flex-1 bg-white">
-                <form id="form-register-personal" th:action="@{/personal/registrar}" method="post" enctype="multipart/form-data" class="flex flex-col gap-6">
-                    
-                    <!-- TAB 1: INFORMACIÓN PERSONAL -->
-                    <div id="tab-personal" class="modal-tab-content grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5">
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Primer Nombre', 'reg-first-name', 'primerNombre', null, 'Ej: Juan', true, 'text', null, null, null, null)}"></div>
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Segundo Nombre', 'reg-second-name', 'segundoNombre', null, 'Ej: Antonio', false, 'text', null, null, null, null)}"></div>
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Primer Apellido', 'reg-last-name', 'primerApellido', null, 'Ej: Pérez', true, 'text', null, null, null, null)}"></div>
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Segundo Apellido', 'reg-second-last', 'segundoApellido', null, 'Ej: Rodríguez', false, 'text', null, null, null, null)}"></div>
-                        
-                        <div th:replace="~{components/forms/field-select :: fieldSelect('Tipo de Documento', 'reg-doc-type', 'tipoDoc', null, ${ { 'CC': 'Cédula de Ciudadanía', 'CE': 'Cédula de Extranjería', 'PA': 'Pasaporte' } }, true)}"></div>
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Número de Documento', 'reg-doc-num', 'numDoc', null, 'Ej: 10883214', true, 'text', null, null, null, null)}"></div>
-                        
-                        <div th:replace="~{components/forms/field-select :: fieldSelect('Sexo', 'reg-sex', 'sexo', null, ${ { 'M': 'Masculino', 'F': 'Femenino', 'O': 'Otro' } }, true)}"></div>
-                        <div th:replace="~{components/forms/field-phone :: fieldPhone('Teléfono', 'reg-phone', 'telefono', null, null, true)}"></div>
-                        <div class="col-span-2" th:replace="~{components/forms/field-input :: fieldInput('Dirección', 'reg-address', 'direccion', null, 'Calle, Carrera, Barrio', true, 'text', null, null, null, null)}"></div>
-                        <div class="col-span-2">
-                            <label for="reg-foto" class="block mb-1.5 text-[9px] font-black text-text-secondary uppercase tracking-wider">Foto de Perfil (Opcional - JPG/PNG)</label>
-                            <input type="file" id="reg-foto" name="fotoFile" accept="image/png, image/jpeg, image/jpg"
-                                   class="w-full h-10 px-3 py-1.5 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-black file:bg-[#f1fbe4] file:text-sidebar hover:file:bg-[#e3f7dc] transition-all cursor-pointer">
-                        </div>
-                    </div>
-
-                    <!-- TAB 2: INFORMACIÓN LABORAL -->
-                    <div id="tab-laboral" class="modal-tab-content hidden grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5">
-                        <div th:replace="~{components/forms/field-select :: fieldSelect('Cargo', 'reg-cargo', 'cargo', null, ${ { 'Docente': 'Docente', 'Coordinador': 'Coordinador', 'Secretario': 'Secretario', 'Administrador': 'Administrador', 'Rector': 'Rector' } }, true)}"></div>
-                        <div th:replace="~{components/forms/field-select :: fieldSelect('Área', 'reg-area', 'area', null, ${ { 'Academica': 'Académica', 'Administrativa': 'Administrativa', 'Secretaria': 'Secretaría' } }, true)}"></div>
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Profesión / Título', 'reg-profession', 'profesion', null, 'Ej: Licenciado en Matemáticas', false, 'text', null, null, null, null)}"></div>
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Especialidad', 'reg-specialty', 'especialidad', null, 'Ej: Álgebra y Geometría', false, 'text', null, null, null, null)}"></div>
-                    </div>
-
-                    <!-- TAB 3: CUENTA DEL SISTEMA -->
-                    <div id="tab-cuenta" class="modal-tab-content hidden flex flex-col gap-6">
-                        <div class="p-4.5 rounded-xl bg-[#f1fbe4] border border-[#c4eec0] flex items-center justify-between">
-                            <div>
-                                <strong class="block text-text-primary text-xs font-black">Crear cuenta de acceso al sistema</strong>
-                                <span class="text-text-secondary text-[10px] font-semibold">Habilita credenciales de ingreso para el empleado de manera inmediata.</span>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer select-none">
-                                <input type="checkbox" id="reg-create-user" name="createUser" value="true" class="sr-only peer" onchange="toggleUserAccountSection(this)">
-                                <div class="w-11 h-6 bg-[#c6edbe] rounded-full peer peer-focus:ring-2 peer-focus:ring-sidebar/20 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sidebar"></div>
-                            </label>
-                        </div>
-
-                        <div id="user-account-fields" class="hidden grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5 border-t border-[#c4eec0]/40 pt-6">
-                            <div th:replace="~{components/forms/field-select :: fieldSelect('Rol del Sistema', 'reg-user-role', 'role', null, ${ { 'DOCENTE': 'Docente', 'ADMIN': 'Administrador', 'COORDINADOR': 'Coordinador', 'SECRETARIA': 'Secretaría' } }, true)}"></div>
-                            <div th:replace="~{components/forms/field-input :: fieldInput('Correo Institucional (Dejar vacío para auto-generar)', 'reg-user-email', 'userEmail', null, 'ej: nombre.apellido@ieaci.edu.co', false, 'email', null, null, null, null)}"></div>
-                            <div class="col-span-2" th:replace="~{components/forms/field-input :: fieldInput('Contraseña Temporal', 'reg-user-password', 'passwordTemp', 'IEACI2026*', 'Ej: IEACI2026*', false, 'text', null, null, null, null)}"></div>
-                        </div>
-                    </div>
-
-                </form>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="p-6 border-t border-[#c4eec0]/40 flex justify-between items-center bg-[#f7fcf6] shrink-0">
-                <button type="button" onclick="closeRegisterModal()" class="px-5 py-3 text-xs font-black text-text-secondary bg-transparent hover:bg-red-50 hover:text-alert-red rounded-lg transition-all">
-                    Cancelar
-                </button>
-                <button type="submit" form="form-register-personal" class="px-6 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md">
-                    <i data-lucide="check" class="size-4 stroke-[2.5]"></i>
-                    <span>Registrar Personal</span>
-                </button>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- SCRIPT DE COMPORTAMIENTO -->
-    <script>
-        window.addEventListener('click', function() {
-            document.querySelectorAll('.action-menu-dropdown').forEach(el => el.classList.add('hidden'));
-        });
-
-        function toggleActionMenu(btn) {
-            event.stopPropagation();
-            const targetMenu = btn.nextElementSibling;
-            const isHidden = targetMenu.classList.contains('hidden');
-            document.querySelectorAll('.action-menu-dropdown').forEach(el => el.classList.add('hidden'));
-            if (isHidden) {
-                targetMenu.classList.remove('hidden');
-            }
-        }
-
-        function openRegisterModal() {
-            const modal = document.getElementById('register-modal');
-            const dialog = document.getElementById('register-modal-dialog');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                dialog.classList.remove('scale-95', 'opacity-0');
-                dialog.classList.add('scale-100', 'opacity-100');
-            }, 10);
-        }
-
-        function closeRegisterModal() {
-            const modal = document.getElementById('register-modal');
-            const dialog = document.getElementById('register-modal-dialog');
-            dialog.classList.remove('scale-100', 'opacity-100');
-            dialog.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
-
-        function switchModalTab(btn, tabId) {
-            document.querySelectorAll('.modal-tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(tabId).classList.remove('hidden');
-            
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                b.classList.remove('border-sidebar', 'text-sidebar');
-                b.classList.add('border-transparent', 'text-text-secondary');
-            });
-            btn.classList.remove('border-transparent', 'text-text-secondary');
-            btn.classList.add('border-sidebar', 'text-sidebar');
-        }
-
-        function toggleUserAccountSection(checkbox) {
-            const section = document.getElementById('user-account-fields');
-            if (checkbox.checked) {
-                section.classList.remove('hidden');
-                section.classList.add('grid');
-            } else {
-                section.classList.remove('grid');
-                section.classList.add('hidden');
-            }
-        }
-    </script>
+    <!-- Script del módulo personal -->
+    <script th:src="@{/js/personal.js}"></script>
 </th:block>
 
 </body>

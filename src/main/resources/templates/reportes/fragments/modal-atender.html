@@ -1,0 +1,84 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <!-- MODAL: ATENDER / RESPONDER REPORTE (VISTA PERSONAL ADMINISTRATIVO) -->
+    <div th:fragment="modalAtender" id="modal-atender-reporte" class="hidden fixed inset-0 bg-[#0d4117]/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-[#c4eec0] shadow-xl max-w-lg w-full flex flex-col overflow-hidden transition-all scale-95 opacity-0 duration-300" id="dialog-atender-reporte">
+            <!-- Modal Header -->
+            <div class="p-5 border-b border-[#c4eec0]/40 flex justify-between items-center bg-white shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="size-10 rounded-xl bg-[#eafbe4] text-sidebar grid place-items-center border border-[#c4eec0]">
+                        <i data-lucide="user-check" class="size-5 stroke-[2.5]"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sidebar text-base font-black">Procesar Reporte de Estudiante</h3>
+                        <span class="text-[10px] font-bold text-text-secondary" id="ar-codigo">REP-2026-001</span>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModalAtenderReporte()" class="p-1 hover:bg-red-50 text-text-secondary hover:text-alert-red rounded-lg transition-colors cursor-pointer">
+                    <i data-lucide="x" class="size-5 stroke-2"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <form id="form-atender-reporte" onsubmit="handleFormAtender(event)" class="p-6 space-y-4 bg-white">
+                <input type="hidden" id="ar-reporte-id">
+
+                <!-- Resumen del Reporte -->
+                <div class="p-4 rounded-xl bg-[#f7fcf6] border border-[#c4eec0]/60 space-y-1.5">
+                    <div class="flex justify-between items-center">
+                        <strong class="text-sidebar text-xs font-black" id="ar-estudiante-nombre">Mateo Álvarez Restrepo</strong>
+                        <span class="text-[10px] font-bold text-text-secondary" id="ar-grado-txt">11° - 01</span>
+                    </div>
+                    <div class="text-[11px] font-bold text-text-primary">
+                        Razón: <span id="ar-razon-txt" class="text-alert-red">Bajo rendimiento</span>
+                    </div>
+                    <p class="text-[11px] font-semibold text-text-secondary italic" id="ar-detalles-txt">
+                        "El estudiante presentó 1.8 en la última evaluación y acumula 3 faltas de entrega..."
+                    </p>
+                </div>
+
+                <!-- Decisión Administrativa -->
+                <div>
+                    <label for="ar-decision-select" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Decisión de Dirección</label>
+                    <select id="ar-decision-select" required onchange="toggleCamposCitacion(this.value)" class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-sidebar focus:outline-none">
+                        <option value="Aceptado">Aceptar Reporte y Citar al Estudiante</option>
+                        <option value="Rechazado">Rechazar / Archivar Reporte</option>
+                    </select>
+                </div>
+
+                <!-- Campos de Citación (Si es Aceptado) -->
+                <div id="seccion-citacion" class="space-y-3 p-4 rounded-xl border border-[#c4eec0] bg-[#f1fbe4]/30">
+                    <div>
+                        <label for="ar-fecha-citacion" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Fecha y Hora de la Citación a Dirección <span class="text-alert-red">*</span></label>
+                        <input type="text" id="ar-fecha-citacion" value="2026-08-04 - 08:30 AM" placeholder="Ej: 2026-08-04 - 08:30 AM" class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:outline-none">
+                    </div>
+
+                    <!-- Presencia de Acudiente Checkbox -->
+                    <div class="flex items-center gap-3 p-2.5 bg-white rounded-lg border border-[#c4eec0]">
+                        <input type="checkbox" id="ar-requiere-acudiente" checked class="size-4 text-sidebar rounded border-[#c4eec0] focus:ring-sidebar cursor-pointer">
+                        <label for="ar-requiere-acudiente" class="text-xs font-bold text-text-primary cursor-pointer">
+                            ¿Se requiere presencia del acudiente / padre de familia?
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Observaciones e Indicaciones -->
+                <div>
+                    <label for="ar-obs-txt" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Indicaciones / Observaciones de Dirección</label>
+                    <textarea id="ar-obs-txt" rows="3" required placeholder="Escriba el mensaje institucional que verá el estudiante..."
+                              class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none resize-none">Se requiere presencia obligatoria del acudiente por bajo desempeño acumulado para la firma de compromisos pedagógicos.</textarea>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="pt-3 border-t border-[#c4eec0]/40 flex justify-between items-center">
+                    <button type="button" onclick="closeModalAtenderReporte()" class="px-4 py-2 text-xs font-black text-text-secondary hover:text-alert-red cursor-pointer">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-xl transition-all flex items-center gap-1.5 shadow-md cursor-pointer">
+                        <i data-lucide="check" class="size-4 stroke-[2.5]"></i>
+                        <span>Procesar y Notificar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</th:block>

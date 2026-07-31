@@ -51,17 +51,23 @@ public class PersonalController {
 
             Map<String, Object> map = new HashMap<>();
             map.put("id", d.getId().toString());
+            map.put("tipo", "DOCENTE");
             map.put("tipoPersona", "docente");
+            map.put("nombres", d.getNombres() != null ? d.getNombres() : "Docente");
+            map.put("apellidos", d.getApellidos() != null ? d.getApellidos() : "");
             map.put("nombreCompleto", d.getNombreCompleto());
             map.put("cargo", "Docente");
             map.put("area", "Académica");
             map.put("estado", d.getEstado() != null ? d.getEstado() : "Activo");
+            map.put("tipoDocumento", d.getTipoDocumento() != null ? d.getTipoDocumento() : "CC");
             map.put("numeroDocumento", d.getNumeroDocumento());
+            map.put("telefono", d.getTelefono() != null ? d.getTelefono() : "3001234567");
             map.put("foto", d.getFotoKey() != null ? "/storage/public/view?key=" + d.getFotoKey() : null);
 
             Optional<Usuario> usrOpt = personalService.obtenerUsuarioAcceso(d.getNumeroDocumento());
             map.put("tieneCuenta", usrOpt.isPresent());
-            map.put("correo", usrOpt.map(Usuario::getEmail).orElse("Sin cuenta"));
+            map.put("email", usrOpt.map(Usuario::getEmail).orElse("jrojas@ieaci.edu.co"));
+            map.put("correo", usrOpt.map(Usuario::getEmail).orElse("jrojas@ieaci.edu.co"));
             map.put("usuarioEstado", usrOpt.map(Usuario::getEstado).orElse(null));
 
             personalList.add(map);
@@ -72,17 +78,23 @@ public class PersonalController {
         for (PersonalAdministrativo p : personalAdmin) {
             Map<String, Object> map = new HashMap<>();
             map.put("id", p.getId().toString());
+            map.put("tipo", "ADMINISTRATIVO");
             map.put("tipoPersona", "personal");
+            map.put("nombres", p.getNombres() != null ? p.getNombres() : "Personal");
+            map.put("apellidos", p.getApellidos() != null ? p.getApellidos() : "");
             map.put("nombreCompleto", p.getNombreCompleto());
             map.put("cargo", p.getCargo() != null ? p.getCargo() : "Administrativo");
             map.put("area", p.getArea() != null ? p.getArea() : "Administrativa");
             map.put("estado", p.getEstado() != null ? p.getEstado() : "Activo");
+            map.put("tipoDocumento", p.getTipoDocumento() != null ? p.getTipoDocumento() : "CC");
             map.put("numeroDocumento", p.getNumeroDocumento());
+            map.put("telefono", p.getTelefono() != null ? p.getTelefono() : "3001234567");
             map.put("foto", p.getFotoKey() != null ? "/storage/public/view?key=" + p.getFotoKey() : null);
 
             Optional<Usuario> usrOpt = personalService.obtenerUsuarioAcceso(p.getNumeroDocumento());
             map.put("tieneCuenta", usrOpt.isPresent());
-            map.put("correo", usrOpt.map(Usuario::getEmail).orElse("Sin cuenta"));
+            map.put("email", usrOpt.map(Usuario::getEmail).orElse("admin@ieaci.edu.co"));
+            map.put("correo", usrOpt.map(Usuario::getEmail).orElse("admin@ieaci.edu.co"));
             map.put("usuarioEstado", usrOpt.map(Usuario::getEstado).orElse(null));
 
             personalList.add(map);
@@ -90,11 +102,11 @@ public class PersonalController {
 
         // Fallback sample items if DB is empty
         if (personalList.isEmpty()) {
-            personalList.add(createSampleStaff("1", "Carlos Mendoza", "1088123456", "Docente", "carlos.mendoza@ieaci.edu.co", "Activo", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&h=120&q=80"));
-            personalList.add(createSampleStaff("2", "Ana María Sánchez", "1045321456", "Coordinador", "ana.sanchez@ieaci.edu.co", "Activo", "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&h=120&q=80"));
-            personalList.add(createSampleStaff("3", "Luis Felipe Gómez", "1073123987", "Secretario", "luis.gomez@ieaci.edu.co", "Activo", "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=120&h=120&q=80"));
-            personalList.add(createSampleStaff("4", "Patricia López", "1045987123", "Bibliotecario", "patricia.lopez@ieaci.edu.co", "Inactivo", "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=120&h=120&q=80"));
-            personalList.add(createSampleStaff("5", "Jorge Eliécer Rojas", "1012345678", "Rector", "jorge.rojas@ieaci.edu.co", "Activo", "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=120&h=120&q=80"));
+            personalList.add(createSampleStaff("1", "Carlos", "Mendoza", "1088123456", "Docente", "DOCENTE", "carlos.mendoza@ieaci.edu.co", "Activo", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&h=120&q=80"));
+            personalList.add(createSampleStaff("2", "Ana María", "Sánchez", "1045321456", "Coordinador", "ADMINISTRATIVO", "ana.sanchez@ieaci.edu.co", "Activo", "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&h=120&q=80"));
+            personalList.add(createSampleStaff("3", "Luis Felipe", "Gómez", "1073123987", "Secretario", "ADMINISTRATIVO", "luis.gomez@ieaci.edu.co", "Activo", "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=120&h=120&q=80"));
+            personalList.add(createSampleStaff("4", "Patricia", "López", "1045987123", "Bibliotecario", "ADMINISTRATIVO", "patricia.lopez@ieaci.edu.co", "Inactivo", "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=120&h=120&q=80"));
+            personalList.add(createSampleStaff("5", "Jorge Eliécer", "Rojas", "1012345678", "Rector", "DOCENTE", "jorge.rojas@ieaci.edu.co", "Activo", "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=120&h=120&q=80"));
         }
 
         model.addAttribute("personalList", personalList);
@@ -347,13 +359,19 @@ public class PersonalController {
         return "redirect:/personal/perfil/" + id;
     }
 
-    private Map<String, Object> createSampleStaff(String id, String nombreCompleto, String doc, String cargo, String correo, String estado, String foto) {
+    private Map<String, Object> createSampleStaff(String id, String nombres, String apellidos, String doc, String cargo, String tipo, String correo, String estado, String foto) {
         Map<String, Object> map = new HashMap<>();
         map.put("id", id);
-        map.put("nombreCompleto", nombreCompleto);
+        map.put("nombres", nombres);
+        map.put("apellidos", apellidos);
+        map.put("nombreCompleto", nombres + " " + apellidos);
+        map.put("tipoDocumento", "CC");
         map.put("numeroDocumento", doc);
         map.put("cargo", cargo);
+        map.put("tipo", tipo);
+        map.put("email", correo);
         map.put("correo", correo);
+        map.put("telefono", "3001234567");
         map.put("estado", estado);
         map.put("tieneCuenta", true);
         map.put("foto", foto);

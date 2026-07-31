@@ -44,14 +44,6 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
                 <span>Calificaciones</span>
             </a>
 
-            <!-- Asistencia: ADMIN, PERSONAL_ADMINISTRATIVO, DOCENTE -->
-            <a th:href="@{/asistencias}"
-               sec:authorize="hasAnyRole('ADMIN', 'PERSONAL_ADMINISTRATIVO', 'DOCENTE')"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
-               th:classappend="${activePage == 'asistencias'} ? 'bg-white/12 text-white'">
-                <i data-lucide="calendar-days" class="size-[18px] shrink-0 stroke-2"></i>
-                <span>Asistencia</span>
-            </a>
 
             <!-- Certificados: ADMIN, PERSONAL_ADMINISTRATIVO, ESTUDIANTE -->
             <a th:href="@{/certificados}"

@@ -1,0 +1,80 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <!-- MODAL DE ASIGNACIÓN DE HORARIO -->
+    <div th:fragment="modalHorario" id="horario-modal" class="hidden fixed inset-0 bg-[#0d4117]/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-[#c4eec0] shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden transition-all scale-95 opacity-0 duration-300" id="horario-modal-dialog">
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-[#c4eec0]/40 flex justify-between items-center bg-white shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="size-10 rounded-xl bg-[#eafbe4] text-sidebar grid place-items-center border border-[#c4eec0]">
+                        <i data-lucide="calendar" class="size-5 stroke-[2.5]"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sidebar text-[18px] font-black" id="horario-title">Asignación de Horario – Curso 11-01</h3>
+                        <p class="text-text-secondary text-[11px] font-bold">Configure las asignaturas impartidas en cada bloque lectivo.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeHorarioModal()" class="p-1 hover:bg-red-50 text-text-secondary hover:text-alert-red rounded-lg transition-colors cursor-pointer">
+                    <i data-lucide="x" class="size-5 stroke-2"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content (Schedule Grid) -->
+            <div class="p-6 overflow-y-auto flex-1 bg-white space-y-4">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-center border-collapse text-[11px]">
+                        <thead>
+                            <tr class="bg-[#f7fcf6] border-b border-[#c4eec0]/60 text-sidebar font-black uppercase text-[10px]">
+                                <th class="p-3 text-left">Hora / Bloque</th>
+                                <th class="p-3">Lunes</th>
+                                <th class="p-3">Martes</th>
+                                <th class="p-3">Miércoles</th>
+                                <th class="p-3">Jueves</th>
+                                <th class="p-3">Viernes</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#c4eec0]/20 font-semibold text-text-primary">
+                            <tr>
+                                <td class="p-3 font-bold text-left text-text-secondary">07:00 - 08:30</td>
+                                <td class="p-2"><select class="w-full p-1.5 rounded border border-[#c4eec0] bg-white text-[11px]"><option>Matemáticas</option><option>Español</option><option>Física</option></select></td>
+                                <td class="p-2"><select class="w-full p-1.5 rounded border border-[#c4eec0] bg-white text-[11px]"><option>Español</option><option>Matemáticas</option><option>Inglés</option></select></td>
+                                <td class="p-2"><select class="w-full p-1.5 rounded border border-[#c4eec0] bg-white text-[11px]"><option>Física</option><option>Sociales</option><option>Química</option></select></td>
+                                <td class="p-2"><select class="w-full p-1.5 rounded border border-[#c4eec0] bg-white text-[11px]"><option>Inglés</option><option>Español</option><option>Matemáticas</option></select></td>
+                                <td class="p-2"><select class="w-full p-1.5 rounded border border-[#c4eec0] bg-white text-[11px]"><option>Sociales</option><option>Ética</option><option>Ed. Física</option></select></td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-bold text-left text-text-secondary">08:30 - 10:00</td>
+                                <td class="p-2"><select class="w-full p-1.5 rounded border border-[#c4eec0] bg-white text-[11px]"><option>Física</option><option>Matemáticas</option><option>Sociales</option></select></td>
+                                <td class="p-2"><select class="w-full p-1.5 rounded border border-[#c4eec0] bg-white text-[11px]"><option>Inglés</option><option>Español</option><option>Biología</option></select></td>
+                                <td class="p-2"><select class="w-full p-1.5 rounded border border-[#c4eec0] bg-white text-[11px]"><option>Matemáticas</option><option>Química</option><option>Inglés</option></select></td>
+                                <td class="p-2"><select class="w-full p-1.5 rounded border border-[#c4eec0] bg-white text-[11px]"><option>Sociales</option><option>Física</option><option>Español</option></select></td>
+                                <td class="p-2"><select class="w-full p-1.5 rounded border border-[#c4eec0] bg-white text-[11px]"><option>Química</option><option>Sistemas</option><option>Artística</option></select></td>
+                            </tr>
+                            <tr class="bg-[#f7fcf6]">
+                                <td colspan="6" class="p-2 font-bold text-sidebar text-[10px] uppercase">Receso Pedagógico (10:00 - 10:30)</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-bold text-left text-text-secondary">10:30 - 12:30</td>
+                                <td class="p-2"><select class="w-full p-1.5 rounded border border-[#c4eec0] bg-white text-[11px]"><option>Química</option><option>Matemáticas</option></select></td>
+                                <td class="p-2"><select class="w-full p-1.5 rounded border border-[#c4eec0] bg-white text-[11px]"><option>Sociales</option><option>Inglés</option></select></td>
+                                <td class="p-2"><select class="w-full p-1.5 rounded border border-[#c4eec0] bg-white text-[11px]"><option>Español</option><option>Física</option></select></td>
+                                <td class="p-2"><select class="w-full p-1.5 rounded border border-[#c4eec0] bg-white text-[11px]"><option>Biología</option><option>Química</option></select></td>
+                                <td class="p-2"><select class="w-full p-1.5 rounded border border-[#c4eec0] bg-white text-[11px]"><option>Ed. Física</option><option>Artística</option></select></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-6 border-t border-[#c4eec0]/40 flex justify-between items-center bg-[#f7fcf6] shrink-0">
+                <button type="button" onclick="closeHorarioModal()" class="px-5 py-3 text-xs font-black text-text-secondary bg-transparent hover:bg-red-50 hover:text-alert-red rounded-lg transition-all cursor-pointer">
+                    Cancelar
+                </button>
+                <button type="button" onclick="closeHorarioModal()" class="px-6 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md cursor-pointer">
+                    <i data-lucide="save" class="size-4 stroke-[2.5]"></i>
+                    <span>Guardar Horario</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</th:block>

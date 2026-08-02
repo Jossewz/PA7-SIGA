@@ -28,10 +28,19 @@ public class CertificadoController {
         model.addAttribute("title", "Certificados y Constancias – IEACI");
         model.addAttribute("activePage", "certificados");
 
-        // Student Logged In Info
-        model.addAttribute("estudianteNombre", "Mateo Álvarez Restrepo");
-        model.addAttribute("estudianteGrado", "11° - 01");
-        model.addAttribute("estudianteDocumento", "1098432101");
+        List<Estudiante> todosEstudiantes = estudianteService.listarTodos();
+        if (!todosEstudiantes.isEmpty()) {
+            Estudiante primerEstudiante = todosEstudiantes.get(0);
+            model.addAttribute("estudianteNombre", primerEstudiante.getNombreCompleto());
+            model.addAttribute("estudianteGrado", "11° - 01");
+            model.addAttribute("estudianteDocumento", primerEstudiante.getNumeroDocumento());
+            model.addAttribute("estudianteId", primerEstudiante.getId());
+        } else {
+            model.addAttribute("estudianteNombre", "Sin estudiantes registrados");
+            model.addAttribute("estudianteGrado", "-");
+            model.addAttribute("estudianteDocumento", "-");
+            model.addAttribute("estudianteId", null);
+        }
 
         List<SolicitudCertificado> solicitudesDB = certificadoService.listarTodas();
         List<Map<String, Object>> solicitudesMock = new ArrayList<>();
@@ -39,8 +48,8 @@ public class CertificadoController {
         for (SolicitudCertificado s : solicitudesDB) {
             Map<String, Object> map = new HashMap<>();
             map.put("id", s.getCodigo());
-            map.put("estudiante", s.getEstudiante() != null ? s.getEstudiante().getNombreCompleto() : "Mateo Álvarez Restrepo");
-            map.put("documento", s.getEstudiante() != null ? s.getEstudiante().getNumeroDocumento() : "1098432101");
+            map.put("estudiante", s.getEstudiante() != null ? s.getEstudiante().getNombreCompleto() : "N/A");
+            map.put("documento", s.getEstudiante() != null ? s.getEstudiante().getNumeroDocumento() : "N/A");
             map.put("grado", s.getGradoReferencia() != null ? s.getGradoReferencia() : "11° - 01");
             map.put("tipo", s.getTipo());
             map.put("categoria", s.getCategoria());
@@ -51,31 +60,6 @@ public class CertificadoController {
             map.put("archivoAdjunto", s.getArchivoAdjuntoKey() != null ? "/storage/public/view?key=" + s.getArchivoAdjuntoKey() : null);
             map.put("respondidoPor", s.getRespondidoPor() != null ? s.getRespondidoPor().getNombreCompleto() : "Secretaría Académica");
             solicitudesMock.add(map);
-        }
-
-        if (solicitudesMock.isEmpty()) {
-            solicitudesMock.add(createSolicitud(
-                "CERT-2026-001", "Mateo Álvarez Restrepo", "1098432101", "11° - 01",
-                "Constancia de matrícula", "Constancias Administrativas",
-                "Trámite de subsidio familiar en Caja de Compensación", "2026-07-28", "Resuelto",
-                "Se expide la constancia de matrícula activa para el año lectivo 2026.",
-                "Constancia_Matricula_MateoAlvarez.pdf", "Coordinación Académica"
-            ));
-
-            solicitudesMock.add(createSolicitud(
-                "CERT-2026-002", "Sofia Bermúdez Castro", "1098432102", "11° - 01",
-                "Certificado de notas", "Certificados Académicos",
-                "Ingreso a procesos de selección universitaria", "2026-07-30", "Resuelto",
-                "Adjunto certificado con el historial de notas por asignaturas.",
-                "Certificado_Notas_SofiaBermudez.pdf", "Secretaría Académica"
-            ));
-
-            solicitudesMock.add(createSolicitud(
-                "CERT-2026-003", "Mateo Álvarez Restrepo", "1098432101", "11° - 01",
-                "Paz y salvo", "Constancias Administrativas",
-                "Verificación de estado de pago de pensión", "2026-07-31", "Pendiente",
-                null, null, null
-            ));
         }
 
         model.addAttribute("solicitudesMock", solicitudesMock);
@@ -98,13 +82,7 @@ public class CertificadoController {
                 if (!todos.isEmpty()) {
                     estudianteId = todos.get(0).getId();
                 } else {
-                    Estudiante est = new Estudiante();
-                    est.setNombres("Mateo");
-                    est.setApellidos("Álvarez Restrepo");
-                    est.setNumeroDocumento("1098432101");
-                    est.setTipoDocumento("CC");
-                    est = estudianteService.guardar(est);
-                    estudianteId = est.getId();
+                    throw new IllegalArgumentException("No hay estudiantes registrados para realizar la solicitud.");
                 }
             }
 
@@ -137,26 +115,11 @@ public class CertificadoController {
                 solOpt = certificadoService.buscarPorCodigo(solicitudIdStr);
             }
 
-            // If responding to a mock item not yet in DB, create it first
-            SolicitudCertificado sol;
-            if (solOpt.isPresent()) {
-                sol = solOpt.get();
-            } else {
-                List<Estudiante> todos = estudianteService.listarTodos();
-                Estudiante est;
-                if (!todos.isEmpty()) {
-                    est = todos.get(0);
-                } else {
-                    est = new Estudiante();
-                    est.setNombres("Mateo");
-                    est.setApellidos("Álvarez Restrepo");
-                    est.setNumeroDocumento("1098432101");
-                    est = estudianteService.guardar(est);
-                }
-                sol = certificadoService.crearSolicitud(est.getId(), "Certificado de estudios", "Constancias Administrativas", "Solicitud procesada", "2026", "11°");
-                sol.setCodigo(solicitudIdStr);
+            if (solOpt.isEmpty()) {
+                throw new IllegalArgumentException("No se encontró la solicitud de certificado especificada.");
             }
 
+            SolicitudCertificado sol = solOpt.get();
             certificadoService.responderSolicitud(sol.getId(), mensajeRespuesta, archivoPDF, adminId);
             redirectAttributes.addFlashAttribute("mensajeExito", "Solicitud " + sol.getCodigo() + " resuelta y documento adjuntado exitosamente.");
         } catch (Exception ex) {
@@ -164,22 +127,5 @@ public class CertificadoController {
         }
 
         return "redirect:/certificados";
-    }
-
-    private Map<String, Object> createSolicitud(String id, String estudiante, String doc, String grado, String tipo, String categoria, String motivo, String fecha, String estado, String mensajeRespuesta, String archivoAdjunto, String respondidoPor) {
-        Map<String, Object> s = new HashMap<>();
-        s.put("id", id);
-        s.put("estudiante", estudiante);
-        s.put("documento", doc);
-        s.put("grado", grado);
-        s.put("tipo", tipo);
-        s.put("categoria", categoria);
-        s.put("motivo", motivo);
-        s.put("fecha", fecha);
-        s.put("estado", estado);
-        s.put("mensajeRespuesta", mensajeRespuesta);
-        s.put("archivoAdjunto", archivoAdjunto);
-        s.put("respondidoPor", respondidoPor);
-        return s;
     }
 }

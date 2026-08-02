@@ -100,15 +100,6 @@ public class PersonalController {
             personalList.add(map);
         }
 
-        // Fallback sample items if DB is empty
-        if (personalList.isEmpty()) {
-            personalList.add(createSampleStaff("1", "Carlos", "Mendoza", "1088123456", "Docente", "DOCENTE", "carlos.mendoza@ieaci.edu.co", "Activo", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&h=120&q=80"));
-            personalList.add(createSampleStaff("2", "Ana María", "Sánchez", "1045321456", "Coordinador", "ADMINISTRATIVO", "ana.sanchez@ieaci.edu.co", "Activo", "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&h=120&q=80"));
-            personalList.add(createSampleStaff("3", "Luis Felipe", "Gómez", "1073123987", "Secretario", "ADMINISTRATIVO", "luis.gomez@ieaci.edu.co", "Activo", "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=120&h=120&q=80"));
-            personalList.add(createSampleStaff("4", "Patricia", "López", "1045987123", "Bibliotecario", "ADMINISTRATIVO", "patricia.lopez@ieaci.edu.co", "Inactivo", "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=120&h=120&q=80"));
-            personalList.add(createSampleStaff("5", "Jorge Eliécer", "Rojas", "1012345678", "Rector", "DOCENTE", "jorge.rojas@ieaci.edu.co", "Activo", "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=120&h=120&q=80"));
-        }
-
         model.addAttribute("personalList", personalList);
         return "personal/index";
     }
@@ -272,46 +263,8 @@ public class PersonalController {
                 staff.put("emailSugerido", personalService.generarEmailSugerido(p.getNombres(), p.getApellidos()));
             }
         } else {
-            // Render full sample staff profile
-            if ("2".equals(id)) {
-                staff.put("id", "2");
-                staff.put("nombreCompleto", "Ana María Sánchez");
-                staff.put("primerNombre", "Ana María");
-                staff.put("primerApellido", "Sánchez");
-                staff.put("cargo", "Coordinador");
-                staff.put("area", "Académica");
-                staff.put("tipoDoc", "CC");
-                staff.put("numDoc", "1.045.321.456");
-                staff.put("telefono", "311 456 7890");
-                staff.put("direccion", "Calle 45 # 12 - 34");
-                staff.put("profesion", "Licenciada en Educación");
-                staff.put("especialidad", "Gestión Educativa");
-                staff.put("estado", "Activo");
-                staff.put("correo", "ana.sanchez@ieaci.edu.co");
-                staff.put("tieneCuenta", true);
-                staff.put("usuarioRol", "COORDINADOR");
-                staff.put("usuarioEstado", "Activo");
-                staff.put("foto", "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&h=120&q=80");
-            } else {
-                staff.put("id", id);
-                staff.put("nombreCompleto", "Carlos Mendoza");
-                staff.put("primerNombre", "Carlos");
-                staff.put("primerApellido", "Mendoza");
-                staff.put("cargo", "Docente");
-                staff.put("area", "Académica");
-                staff.put("tipoDoc", "CC");
-                staff.put("numDoc", "1.088.123.456");
-                staff.put("telefono", "300 123 4567");
-                staff.put("direccion", "Manzana A Lote 5, San José");
-                staff.put("profesion", "Licenciado en Matemáticas");
-                staff.put("especialidad", "Álgebra y Cálculo");
-                staff.put("estado", "Activo");
-                staff.put("correo", "carlos.mendoza@ieaci.edu.co");
-                staff.put("tieneCuenta", true);
-                staff.put("usuarioRol", "DOCENTE");
-                staff.put("usuarioEstado", "Activo");
-                staff.put("foto", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&h=120&q=80");
-            }
+            redirectAttributes.addFlashAttribute("mensajeError", "Personal no encontrado.");
+            return "redirect:/personal";
         }
 
         model.addAttribute("staff", staff);
@@ -357,24 +310,5 @@ public class PersonalController {
         }
 
         return "redirect:/personal/perfil/" + id;
-    }
-
-    private Map<String, Object> createSampleStaff(String id, String nombres, String apellidos, String doc, String cargo, String tipo, String correo, String estado, String foto) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", id);
-        map.put("nombres", nombres);
-        map.put("apellidos", apellidos);
-        map.put("nombreCompleto", nombres + " " + apellidos);
-        map.put("tipoDocumento", "CC");
-        map.put("numeroDocumento", doc);
-        map.put("cargo", cargo);
-        map.put("tipo", tipo);
-        map.put("email", correo);
-        map.put("correo", correo);
-        map.put("telefono", "3001234567");
-        map.put("estado", estado);
-        map.put("tieneCuenta", true);
-        map.put("foto", foto);
-        return map;
     }
 }

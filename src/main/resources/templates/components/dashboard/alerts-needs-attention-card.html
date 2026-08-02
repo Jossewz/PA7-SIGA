@@ -9,51 +9,27 @@
         </h3>
 
         <div class="grid gap-3 flex-1 overflow-y-auto max-h-[340px] pr-1">
-            <div class="flex items-start gap-3 p-3 bg-red-50/50 border border-[#ffc2c4]/45 rounded-lg text-xs">
-                <i data-lucide="alert-triangle" class="size-4.5 text-alert-red shrink-0 stroke-[2] mt-0.5"></i>
-                <div class="flex-1">
-                    <p class="font-extrabold text-text-primary">5 estudiantes con riesgo alto de deserción</p>
-                    <p class="text-[10px] text-text-muted mt-0.5">Reportado por tutoría y psicología escolar</p>
-                </div>
+            <div th:if="${#lists.isEmpty(stats.alertasOperativas)}" class="p-6 text-center text-xs text-text-muted italic">
+                No hay alertas operativas pendientes en este momento.
             </div>
 
-            <div class="flex items-start gap-3 p-3 bg-amber-50/50 border border-amber-200/40 rounded-lg text-xs">
-                <i data-lucide="clock" class="size-4.5 text-[#e6a100] shrink-0 stroke-[2] mt-0.5"></i>
+            <div th:each="alerta : ${stats.alertasOperativas}" 
+                 class="flex items-start gap-3 p-3 rounded-lg text-xs"
+                 th:classappend="${alerta.tipo == 'alert'} ? 'bg-red-50/50 border border-[#ffc2c4]/45' : 'bg-amber-50/50 border border-amber-200/40'">
+                <i th:attr="data-lucide=${alerta.icono ?: 'alert-triangle'}" 
+                   class="size-4.5 shrink-0 stroke-[2] mt-0.5"
+                   th:classappend="${alerta.tipo == 'alert'} ? 'text-alert-red' : 'text-[#e6a100]'"></i>
                 <div class="flex-1">
-                    <p class="font-extrabold text-text-primary">3 docentes no han cargado notas periódicas</p>
-                    <p class="text-[10px] text-text-muted mt-0.5">Vencimiento del plazo oficial: hoy a las 11:59 PM</p>
-                </div>
-            </div>
-
-            <div class="flex items-start gap-3 p-3 bg-[#eafbe4]/30 border border-[#c4eec0]/40 rounded-lg text-xs">
-                <i data-lucide="file-warning" class="size-4.5 text-sidebar shrink-0 stroke-[2] mt-0.5"></i>
-                <div class="flex-1">
-                    <p class="font-extrabold text-text-primary">12 certificados de matrícula pendientes de firma</p>
-                    <p class="text-[10px] text-text-muted mt-0.5">Bandeja de Rectoría pendiente de aprobación digital</p>
-                </div>
-            </div>
-
-            <div class="flex items-start gap-3 p-3 bg-red-50/50 border border-[#ffc2c4]/45 rounded-lg text-xs">
-                <i data-lucide="alert-triangle" class="size-4.5 text-alert-red shrink-0 stroke-[2] mt-0.5"></i>
-                <div class="flex-1">
-                    <p class="font-extrabold text-text-primary">18 estudiantes con más de 5 faltas injustificadas</p>
-                    <p class="text-[10px] text-text-muted mt-0.5">Requiere llamado telefónico urgente a acudientes</p>
-                </div>
-            </div>
-
-            <div class="flex items-start gap-3 p-3 bg-amber-50/50 border border-amber-200/40 rounded-lg text-xs">
-                <i data-lucide="user-x" class="size-4.5 text-[#e6a100] shrink-0 stroke-[2] mt-0.5"></i>
-                <div class="flex-1">
-                    <p class="font-extrabold text-text-primary">2 cursos sin director de grupo asignado</p>
-                    <p class="text-[10px] text-text-muted mt-0.5">Grados afectados: Grado 9-A y Grado 11-B</p>
+                    <p class="font-extrabold text-text-primary" th:text="${alerta.titulo}">Alerta pendiente</p>
+                    <p class="text-[10px] text-text-muted mt-0.5" th:text="${alerta.subtitulo}">Detalle</p>
                 </div>
             </div>
         </div>
 
-        <button type="button" 
-                class="w-full mt-4 py-2 bg-sidebar text-white text-xs font-black rounded-lg transition-all hover:bg-opacity-90 shadow-soft cursor-pointer">
-            Revisar Todos las Alertas
-        </button>
+        <a th:href="@{/reportes}" 
+           class="w-full mt-4 py-2 bg-sidebar text-white text-xs font-black rounded-lg transition-all hover:bg-opacity-90 shadow-soft text-center block">
+            Revisar Todos los Reportes
+        </a>
     </article>
 
 </th:block>

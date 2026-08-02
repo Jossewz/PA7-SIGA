@@ -52,16 +52,6 @@ public class ClaseController {
             cursosList.add(map);
         }
 
-        // Fallback sample data if DB has no courses yet
-        if (cursosList.isEmpty()) {
-            cursosList.add(createCurso("11°", "01", "Jorge Eliécer Rojas", 30, 28, true, "Lun-Vie: 07:00 - 12:30", "Mañana"));
-            cursosList.add(createCurso("11°", "02", "Martha Cecilia Ruiz", 30, 25, false, "Sin Horario", "Mañana"));
-            cursosList.add(createCurso("10°", "01", "Ana María Sánchez", 35, 32, true, "Lun-Vie: 07:00 - 12:30", "Mañana"));
-            cursosList.add(createCurso("9°", "01", "Carlos Mendoza", 35, 26, true, "Lun-Vie: 07:00 - 12:30", "Mañana"));
-            cursosList.add(createCurso("8°", "01", "Luis Felipe Gómez", 35, 30, false, "Sin Horario", "Tarde"));
-            cursosList.add(createCurso("6°", "01", "Patricia López", 35, 15, false, "Sin Horario", "Tarde"));
-        }
-
         model.addAttribute("cursosList", cursosList);
         model.addAttribute("docentesList", personalService.listarDocentes());
         return "clases/index";
@@ -106,46 +96,16 @@ public class ClaseController {
             for (CursoEstudiante ce : estudiantesCE) {
                 estudiantesMock.add(createEstudiante(idx++, ce.getEstudiante().getNombreCompleto(), ce.getEstudiante().getNumeroDocumento(), "Presente"));
             }
-
-            if (estudiantesMock.isEmpty()) {
-                estudiantesMock = cargarEstudiantesEjemplo();
-            }
             model.addAttribute("estudiantesMock", estudiantesMock);
         } else {
             model.addAttribute("codigoCurso", codigo);
-            model.addAttribute("gradoCurso", codigo.split("-")[0] + "°");
-            model.addAttribute("directorCurso", "Jorge Eliécer Rojas");
+            model.addAttribute("gradoCurso", codigo.contains("-") ? codigo.split("-")[0] + "°" : codigo);
+            model.addAttribute("directorCurso", "Sin asignar");
             model.addAttribute("jornadaCurso", "Mañana");
-            model.addAttribute("estudiantesMock", cargarEstudiantesEjemplo());
+            model.addAttribute("estudiantesMock", Collections.emptyList());
         }
 
         return "clases/detalle";
-    }
-
-    private List<Map<String, Object>> cargarEstudiantesEjemplo() {
-        List<Map<String, Object>> list = new ArrayList<>();
-        list.add(createEstudiante(1, "Álvarez Restrepo, Mateo", "1098432101", "Presente"));
-        list.add(createEstudiante(2, "Bermúdez Castro, Sofia", "1098432102", "Presente"));
-        list.add(createEstudiante(3, "Cárdenas Morales, Juan Diego", "1098432103", "No presente"));
-        list.add(createEstudiante(4, "Díaz Gómez, Valentina", "1098432104", "Presente"));
-        list.add(createEstudiante(5, "Espinosa Vargas, Andrés Felipe", "1098432105", "Excusado"));
-        list.add(createEstudiante(6, "Franco Gutiérrez, Isabella", "1098432106", "Presente"));
-        list.add(createEstudiante(7, "Gómez Hernández, Santiago", "1098432107", "No presente"));
-        return list;
-    }
-
-    private Map<String, Object> createCurso(String grado, String grupo, String director, int cupos, int estudiantes, boolean tieneHorario, String horarioResumen, String jornada) {
-        Map<String, Object> c = new HashMap<>();
-        c.put("grado", grado);
-        c.put("grupo", grupo);
-        c.put("codigoCurso", grado + "-" + grupo);
-        c.put("director", director);
-        c.put("cuposMaximos", cupos);
-        c.put("estudiantes", estudiantes);
-        c.put("tieneHorario", tieneHorario);
-        c.put("horarioResumen", horarioResumen);
-        c.put("jornada", jornada);
-        return c;
     }
 
     private Map<String, Object> createEstudiante(int id, String nombre, String documento, String asistencia) {

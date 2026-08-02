@@ -8,7 +8,8 @@
                 <i data-lucide="alert-circle" class="size-[18px] text-alert-red stroke-[2.2]"></i>
                 Requieren Atención
             </h3>
-            <span class="px-2 py-0.5 rounded-full bg-red-100 text-alert-red text-[10px] font-black">Críticos</span>
+            <span class="px-2 py-0.5 rounded-full bg-red-100 text-alert-red text-[10px] font-black"
+                  th:text="${#lists.size(stats.estudiantesAtencion)}">0</span>
         </div>
 
         <div class="overflow-x-auto flex-1">
@@ -21,25 +22,16 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#c4eec0]/20">
-                    <tr class="hover:bg-[#fcfdfa]/50 transition-colors">
-                        <td class="py-3 font-extrabold text-text-primary">Juan Pérez</td>
-                        <td class="py-3 text-text-muted">7 inasistencias consecutivas</td>
-                        <td class="py-3 text-right">
-                            <span class="px-2 py-0.5 rounded bg-pill-red text-alert-red font-black text-[9px]">Llamar</span>
+                    <tr th:if="${#lists.isEmpty(stats.estudiantesAtencion)}">
+                        <td colspan="3" class="py-6 text-center text-text-muted italic">
+                            No hay estudiantes que requieran atención actualmente.
                         </td>
                     </tr>
-                    <tr class="hover:bg-[#fcfdfa]/50 transition-colors">
-                        <td class="py-3 font-extrabold text-text-primary">María Gómez</td>
-                        <td class="py-3 text-text-muted">Bajo rendimiento (Prom: 2.8)</td>
+                    <tr th:each="item : ${stats.estudiantesAtencion}" class="hover:bg-[#fcfdfa]/50 transition-colors">
+                        <td class="py-3 font-extrabold text-text-primary" th:text="${item.nombre}">Estudiante</td>
+                        <td class="py-3 text-text-muted" th:text="${item.motivo}">Motivo</td>
                         <td class="py-3 text-right">
-                            <span class="px-2 py-0.5 rounded bg-[#fff2e8] text-[#c93831] font-black text-[9px]">Tutoría</span>
-                        </td>
-                    </tr>
-                    <tr class="hover:bg-[#fcfdfa]/50 transition-colors">
-                        <td class="py-3 font-extrabold text-text-primary">Pedro Ruiz</td>
-                        <td class="py-3 text-text-muted">Riesgo alto de deserción</td>
-                        <td class="py-3 text-right">
-                            <span class="px-2 py-0.5 rounded bg-pill-red text-alert-red font-black text-[9px]">Psicología</span>
+                            <span class="px-2 py-0.5 rounded bg-pill-red text-alert-red font-black text-[9px]" th:text="${item.accion}">Atender</span>
                         </td>
                     </tr>
                 </tbody>

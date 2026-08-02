@@ -37,10 +37,10 @@
 
             <!-- FILA 1: KPIs GENERALES -->
             <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" aria-label="Indicadores Generales">
-                <div th:replace="~{components/dashboard/stat-card :: statCard('users', 'Estudiantes Activos', '1,284', '+12 este mes', 'success')}"></div>
-                <div th:replace="~{components/dashboard/stat-card :: statCard('graduation-cap', 'Docentes Activos', '87', '2 nuevos', 'success')}"></div>
-                <div th:replace="~{components/dashboard/stat-card :: statCard('clipboard-check', 'Asistencia Hoy', '94.2%', '▲ +1.5%', 'success')}"></div>
-                <div th:replace="~{components/dashboard/stat-card :: statCard('alert-triangle', 'Alertas del Sistema', '12', 'Atención', 'warning')}"></div>
+                <div th:replace="~{components/dashboard/stat-card :: statCard('users', 'Estudiantes Activos', ${stats.estudiantesActivos}, 'En BD', 'success')}"></div>
+                <div th:replace="~{components/dashboard/stat-card :: statCard('graduation-cap', 'Docentes Activos', ${stats.docentesActivos}, 'En BD', 'success')}"></div>
+                <div th:replace="~{components/dashboard/stat-card :: statCard('clipboard-check', 'Asistencia Hoy', ${stats.asistenciaHoy}, 'Registrada', 'success')}"></div>
+                <div th:replace="~{components/dashboard/stat-card :: statCard('alert-triangle', 'Alertas del Sistema', ${stats.alertasSistema}, 'Pendientes', ${stats.alertasSistema > 0 ? 'warning' : 'success'})}"></div>
             </section>
 
             <!-- FILA 2: INDICADORES DE DESEMPEÑO Y ANALÍTICA ESTRATÉGICA -->

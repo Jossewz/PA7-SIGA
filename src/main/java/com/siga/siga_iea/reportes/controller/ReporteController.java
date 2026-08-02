@@ -47,16 +47,6 @@ public class ReporteController {
             estudiantesList.add(map);
         }
 
-        if (estudiantesList.isEmpty()) {
-            estudiantesList.add(createEstudianteMock("1", "Álvarez Restrepo, Mateo", "11° - 01"));
-            estudiantesList.add(createEstudianteMock("2", "Bermúdez Castro, Sofia", "11° - 01"));
-            estudiantesList.add(createEstudianteMock("3", "Cárdenas Morales, Juan Diego", "11° - 01"));
-            estudiantesList.add(createEstudianteMock("4", "Díaz Gómez, Valentina", "11° - 01"));
-            estudiantesList.add(createEstudianteMock("5", "Espinosa Vargas, Andrés Felipe", "11° - 01"));
-            estudiantesList.add(createEstudianteMock("6", "Franco Gutiérrez, Isabella", "11° - 01"));
-            estudiantesList.add(createEstudianteMock("7", "Gómez Hernández, Santiago", "11° - 01"));
-        }
-
         // Fetch reports
         List<Reporte> reportesDB = reportesService.listarTodos();
         List<Map<String, Object>> reportesMock = new ArrayList<>();
@@ -77,27 +67,6 @@ public class ReporteController {
             map.put("requiereAcudiente", r.getRequiereAcudiente());
             map.put("observacionesAdmin", r.getObservacionesAdmin());
             reportesMock.add(map);
-        }
-
-        if (reportesMock.isEmpty()) {
-            reportesMock.add(createReporte(
-                "REP-2026-001", "Mateo Álvarez Restrepo", "11° - 01", "Prof. Jorge Eliécer Rojas",
-                "Razones Académicas", "Bajo rendimiento", "Notas muy bajas o pérdida constante de materias.",
-                "El estudiante presentó 1.8 en la última evaluación de matemáticas.", "2026-07-29",
-                "Aceptado", "2026-08-04 - 08:30 AM", true, "Se requiere presencia del acudiente."
-            ));
-            reportesMock.add(createReporte(
-                "REP-2026-002", "Juan Diego Cárdenas", "11° - 01", "Prof. Ana María Sánchez",
-                "Razones de Convivencia y Disciplina", "Falta de respeto", "Desobedecer reglas.",
-                "Incumplimiento reiterado de las normas de convivencia.", "2026-07-30",
-                "Aceptado", "2026-08-05 - 10:00 AM", false, "Citación individual."
-            ));
-            reportesMock.add(createReporte(
-                "REP-2026-003", "Santiago Gómez Hernández", "11° - 01", "Prof. Carlos Mendoza",
-                "Razones de Asistencia y Salud", "Ausencias", "Faltar mucho sin permiso.",
-                "Registra 4 inasistencias consecutivas no justificadas.", "2026-07-31",
-                "Pendiente", null, false, null
-            ));
         }
 
         model.addAttribute("estudiantesList", estudiantesList);
@@ -143,31 +112,5 @@ public class ReporteController {
         }
 
         return "redirect:/reportes";
-    }
-
-    private Map<String, Object> createEstudianteMock(String id, String nombre, String grado) {
-        Map<String, Object> e = new HashMap<>();
-        e.put("id", id);
-        e.put("nombre", nombre);
-        e.put("grado", grado);
-        return e;
-    }
-
-    private Map<String, Object> createReporte(String id, String estudiante, String grado, String docente, String categoria, String razon, String descripcionRazon, String detalles, String fecha, String estado, String fechaCitacion, boolean requiereAcudiente, String observacionesAdmin) {
-        Map<String, Object> r = new HashMap<>();
-        r.put("id", id);
-        r.put("estudiante", estudiante);
-        r.put("grado", grado);
-        r.put("docente", docente);
-        r.put("categoria", categoria);
-        r.put("razon", razon);
-        r.put("descripcionRazon", descripcionRazon);
-        r.put("detalles", detalles);
-        r.put("fecha", fecha);
-        r.put("estado", estado);
-        r.put("fechaCitacion", fechaCitacion);
-        r.put("requiereAcudiente", requiereAcudiente);
-        r.put("observacionesAdmin", observacionesAdmin);
-        return r;
     }
 }

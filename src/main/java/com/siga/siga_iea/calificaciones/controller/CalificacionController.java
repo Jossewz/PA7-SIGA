@@ -1,8 +1,10 @@
 package com.siga.siga_iea.calificaciones.controller;
 
+import com.siga.siga_iea.calificaciones.service.CalificacionesService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +12,12 @@ import java.util.Map;
 
 @Controller
 public class CalificacionController {
+
+    private final CalificacionesService calificacionesService;
+
+    public CalificacionController(CalificacionesService calificacionesService) {
+        this.calificacionesService = calificacionesService;
+    }
 
     @GetMapping("/calificaciones")
     public String index(Model model) {
@@ -21,12 +29,12 @@ public class CalificacionController {
         model.addAttribute("estudianteGrado", "11° - 01");
         model.addAttribute("estudianteDocumento", "1098432101");
 
-        // Mock subject list with 3 periods (P1, P2, P3) and evaluation lists for each period
+        // Subject list with 3 periods (P1, P2, P3) and evaluation lists for each period
         List<Map<String, Object>> asignaturas = new ArrayList<>();
-        
+
         asignaturas.add(createAsignatura("Matemáticas", "Prof. Jorge Eliécer Rojas", 4.38, 4.23, 4.50, 4.37,
             List.of(
-                createEvaluación("Evaluación Escrita - Ágebra", "25%", 4.5),
+                createEvaluación("Evaluación Escrita - Álgebra", "25%", 4.5),
                 createEvaluación("Taller de Funciones", "25%", 4.0),
                 createEvaluación("Trabajo de Campo", "25%", 4.8),
                 createEvaluación("Examen Parcial", "25%", 4.2)

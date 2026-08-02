@@ -19,8 +19,8 @@
             </div>
 
             <!-- Modal Content -->
-            <form id="form-responder-admin" onsubmit="handleFormResponder(event)" class="p-6 space-y-4 bg-white">
-                <input type="hidden" id="resp-solicitud-id">
+            <form id="form-responder-admin" th:action="@{/certificados/responder}" method="post" enctype="multipart/form-data" class="p-6 space-y-4 bg-white">
+                <input type="hidden" id="resp-solicitud-id" name="solicitudId">
 
                 <!-- Detalle del Estudiante -->
                 <div class="p-3.5 rounded-xl bg-[#f7fcf6] border border-[#c4eec0]/60 space-y-1">
@@ -38,7 +38,7 @@
                 <!-- Estado de la Respuesta -->
                 <div>
                     <label for="resp-estado-select" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Estado de la Respuesta</label>
-                    <select id="resp-estado-select" required class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-sidebar focus:outline-none">
+                    <select id="resp-estado-select" name="decision" required class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-sidebar focus:outline-none">
                         <option value="Resuelto">Emitir / Aprobar Certificado (Resuelto)</option>
                         <option value="Rechazado">Rechazar Solicitud</option>
                     </select>
@@ -47,15 +47,15 @@
                 <!-- Mensaje de Respuesta para el Estudiante -->
                 <div>
                     <label for="resp-mensaje-txt" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Mensaje o Respuesta para el Estudiante <span class="text-alert-red">*</span></label>
-                    <textarea id="resp-mensaje-txt" rows="3" required placeholder="Escriba aquí las indicaciones o la confirmación del trámite..."
+                    <textarea id="resp-mensaje-txt" name="mensajeRespuesta" rows="3" required placeholder="Escriba aquí las indicaciones o la confirmación del trámite..."
                               class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none resize-none"></textarea>
                 </div>
 
                 <!-- Cargador de Archivos Adjuntos -->
                 <div>
-                    <label class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1.5 block">Adjuntar Certificado Digital (PDF / Doc)</label>
+                    <label class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1.5 block">Adjuntar Certificado Digital (PDF)</label>
                     <label for="resp-file-input" class="flex items-center justify-between p-3.5 bg-white border border-[#c4eec0] rounded-xl cursor-pointer hover:bg-[#f1fbe4]/60 transition-colors">
-                        <input type="file" id="resp-file-input" class="hidden" accept="application/pdf,image/*" onchange="actualizarNombreFileAdjunto(this)">
+                        <input type="file" id="resp-file-input" name="archivoPDF" class="hidden" accept="application/pdf" onchange="actualizarNombreFileAdjunto(this)">
                         <div class="flex items-center gap-3 min-w-0">
                             <span class="size-8 rounded-lg bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0">
                                 <i data-lucide="paperclip" class="size-4 stroke-2"></i>

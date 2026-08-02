@@ -54,82 +54,33 @@ function cambiarRolSimulado(rol) {
     }
 }
 
-// Formulario Estudiante: Enviar Solicitud
-function handleFormSolicitar(e) {
-    e.preventDefault();
-    const tipo = document.getElementById('select-tipo-cert').value;
-    const motivo = document.getElementById('c-motivo').value;
-    const fechaHoy = new Date().toISOString().split('T')[0];
-    const numCod = Math.floor(100 + Math.random() * 900);
-    const codId = 'CERT-2026-' + numCod;
-
-    // Agregar a la tabla de solicitudes del estudiante
-    const tbodyEst = document.getElementById('tbody-solicitudes-estudiante');
-    const trEst = document.createElement('tr');
-    trEst.className = "hover:bg-[#fcfdfb] transition-colors";
-    trEst.innerHTML = `
-        <td class="p-3.5 pl-5 font-black text-sidebar text-[11px]">${codId}</td>
-        <td class="p-3.5">
-            <div class="font-black text-text-primary text-[12px]">${tipo}</div>
-            <div class="text-[10px] font-semibold text-text-secondary">${motivo}</div>
-        </td>
-        <td class="p-3.5 font-semibold text-text-secondary">${fechaHoy}</td>
-        <td class="p-3.5 text-center">
-            <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide bg-amber-100 text-amber-800 border border-amber-300">Pendiente</span>
-        </td>
-        <td class="p-3.5 pr-5 text-right">
-            <span class="text-[11px] font-bold text-text-secondary italic">En proceso...</span>
-        </td>
-    `;
-    tbodyEst.prepend(trEst);
-
-    // Agregar a la bandeja del Admin
-    const tbodyAdmin = document.getElementById('tbody-admin-solicitudes');
-    const trAdmin = document.createElement('tr');
-    trAdmin.className = "hover:bg-[#fcfdfb] transition-colors row-solicitud-admin";
-    trAdmin.setAttribute('data-estado', 'Pendiente');
-    trAdmin.innerHTML = `
-        <td class="p-3.5 pl-5 font-black text-sidebar text-[11px]">${codId}</td>
-        <td class="p-3.5">
-            <div class="font-black text-text-primary text-[12px]">Mateo Álvarez Restrepo</div>
-            <div class="text-[10px] font-semibold text-text-secondary">Doc: 1098432101 • 11° - 01</div>
-        </td>
-        <td class="p-3.5">
-            <div class="font-bold text-sidebar text-[12px]">${tipo}</div>
-            <div class="text-[10px] font-semibold text-text-secondary">${motivo}</div>
-        </td>
-        <td class="p-3.5 font-semibold text-text-secondary">${fechaHoy}</td>
-        <td class="p-3.5 text-center">
-            <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide bg-amber-100 text-amber-800 border border-amber-300">Pendiente</span>
-        </td>
-        <td class="p-3.5 pr-5 text-right">
-            <button type="button" 
-                    data-id="${codId}"
-                    data-estudiante="Mateo Álvarez Restrepo"
-                    data-tipo="${tipo}"
-                    data-motivo="${motivo}"
-                    data-estado="Pendiente"
-                    onclick="openModalResponder(this)"
-                    class="px-3.5 py-1.5 text-[11px] font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-1.5 ml-auto cursor-pointer shadow-2xs">
-                <i data-lucide="message-square-plus" class="size-3.5 stroke-[2.5]"></i>
-                <span>Atender Solicitud</span>
-            </button>
-        </td>
-    `;
-    tbodyAdmin.prepend(trAdmin);
-
-    document.getElementById('form-solicitar-certificado').reset();
-    if (window.lucide) lucide.createIcons();
-    alert('¡Solicitud de ' + tipo + ' enviada correctamente a Secretaría!');
-}
-
 // Modal Ver Respuesta para Estudiante
 function openModalVerRespuesta(btn) {
     document.getElementById('vr-codigo').innerText = btn.dataset.id;
     document.getElementById('vr-titulo').innerText = btn.dataset.tipo;
     document.getElementById('vr-mensaje').innerText = btn.dataset.mensaje || 'Se adjunta el certificado solicitado.';
-    document.getElementById('vr-nombre-archivo').innerText = btn.dataset.archivo || 'Certificado_Oficial.pdf';
-    
+
+    const archivoUrl = btn.dataset.archivo;
+    const cajaAdjunto = document.getElementById('caja-archivo-adjunto');
+    const btnDescargar = document.getElementById('btn-descargar-archivo');
+    const nombreArchivo = document.getElementById('vr-nombre-archivo');
+
+    if (archivoUrl && archivoUrl !== 'null' && archivoUrl !== 'undefined' && archivoUrl !== '') {
+        cajaAdjunto.classList.remove('hidden');
+        btnDescargar.href = archivoUrl;
+        btnDescargar.setAttribute('target', '_blank');
+
+        let cleanName = 'Certificado_Oficial.pdf';
+        if (archivoUrl.includes('key=')) {
+            cleanName = archivoUrl.split('key=')[1].split('/').pop();
+        } else if (archivoUrl.includes('/')) {
+            cleanName = archivoUrl.split('/').pop();
+        }
+        nombreArchivo.innerText = btn.dataset.archivoNombre || cleanName;
+    } else {
+        cajaAdjunto.classList.add('hidden');
+    }
+
     const modal = document.getElementById('modal-ver-respuesta');
     const dialog = document.getElementById('dialog-ver-respuesta');
     modal.classList.remove('hidden');
@@ -180,58 +131,6 @@ function actualizarNombreFileAdjunto(input) {
     if (input.files && input.files[0]) {
         document.getElementById('txt-file-adjunto').innerText = input.files[0].name;
     }
-}
-
-// Guardar Respuesta del Admin
-function handleFormResponder(e) {
-    e.preventDefault();
-    const id = document.getElementById('resp-solicitud-id').value;
-    const estado = document.getElementById('resp-estado-select').value;
-    const mensaje = document.getElementById('resp-mensaje-txt').value;
-    const fileInput = document.getElementById('resp-file-input');
-    const nombreArchivo = (fileInput.files && fileInput.files[0]) ? fileInput.files[0].name : 'Certificado_Firmado_IEACI.pdf';
-
-    // Actualizar la fila en la tabla de Admin
-    document.querySelectorAll('.row-solicitud-admin').forEach(tr => {
-        const btn = tr.querySelector('button');
-        if (btn && btn.dataset.id === id) {
-            tr.setAttribute('data-estado', estado);
-            const tdEstado = tr.children[4];
-            tdEstado.innerHTML = `<span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide bg-pill-green text-sidebar border border-[#8ce383]">${estado}</span>`;
-            btn.dataset.estado = estado;
-            btn.querySelector('span').innerText = 'Ver / Modificar';
-        }
-    });
-
-    // Actualizar la vista del Estudiante en tiempo real
-    document.querySelectorAll('#tbody-solicitudes-estudiante tr').forEach(tr => {
-        const tdCod = tr.children[0];
-        if (tdCod && tdCod.innerText.trim() === id) {
-            const tdEstado = tr.children[3];
-            const tdAccion = tr.children[4];
-            const tipoCert = tr.children[1].querySelector('.font-black').innerText;
-
-            tdEstado.innerHTML = `<span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide bg-pill-green text-sidebar border border-[#8ce383]">${estado}</span>`;
-            tdAccion.innerHTML = `
-                <div class="flex justify-end gap-1.5">
-                    <button type="button" 
-                            data-id="${id}"
-                            data-tipo="${tipoCert}"
-                            data-mensaje="${mensaje}"
-                            data-archivo="${nombreArchivo}"
-                            onclick="openModalVerRespuesta(this)"
-                            class="px-3 py-1.5 bg-[#eafbe4] text-sidebar border border-[#c4eec0] hover:bg-[#d8f5ce] rounded-lg text-[10px] font-black transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
-                        <i data-lucide="download" class="size-3.5 stroke-[2.5]"></i>
-                        <span>Ver y Descargar</span>
-                    </button>
-                </div>
-            `;
-        }
-    });
-
-    closeModalResponder();
-    if (window.lucide) lucide.createIcons();
-    alert('¡Respuesta enviada correctamente al estudiante!');
 }
 
 // Filtrar Solicitudes Admin

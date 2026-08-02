@@ -8,6 +8,20 @@
 <th:block th:fragment="content">
     <div class="flex flex-col gap-6 flex-1">
         
+        <!-- Banners de Notificación Flash -->
+        <div th:if="${mensajeExito}" class="p-4 rounded-xl bg-pill-green text-sidebar border border-[#8ce383] text-xs font-bold flex items-center justify-between shadow-2xs">
+            <div class="flex items-center gap-2">
+                <i data-lucide="check-circle-2" class="size-4 stroke-[2.5]"></i>
+                <span th:text="${mensajeExito}"></span>
+            </div>
+        </div>
+        <div th:if="${mensajeError}" class="p-4 rounded-xl bg-pill-red text-alert-red border border-red-300 text-xs font-bold flex items-center justify-between shadow-2xs">
+            <div class="flex items-center gap-2">
+                <i data-lucide="alert-circle" class="size-4 stroke-[2.5]"></i>
+                <span th:text="${mensajeError}"></span>
+            </div>
+        </div>
+
         <!-- Header Principal y Conmutador de Rol para Pruebas -->
         <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
             <div>
@@ -47,12 +61,12 @@
                             </div>
                         </div>
 
-                        <form id="form-solicitar-certificado" class="space-y-4" onsubmit="handleFormSolicitar(event)">
+                        <form id="form-solicitar-certificado" th:action="@{/certificados/solicitar}" method="post" class="space-y-4">
                             <div class="flex flex-col">
                                 <label for="select-tipo-cert" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1">
                                     Tipo de Certificado o Constancia <span class="text-alert-red">*</span>
                                 </label>
-                                <select id="select-tipo-cert" required onchange="actualizarDescripcionCert(this.value)"
+                                <select id="select-tipo-cert" name="tipo" required onchange="actualizarDescripcionCert(this.value)"
                                         class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
                                     <option value="" disabled selected>-- Seleccione un certificado --</option>
                                     <optgroup label="Certificados Académicos y de Notas">
@@ -79,17 +93,17 @@
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label for="c-ano" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Año Lectivo</label>
-                                    <input type="number" id="c-ano" value="2026" required class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                                    <input type="number" id="c-ano" name="anoLectivo" value="2026" required class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
                                 </div>
                                 <div>
                                     <label for="c-grado-ref" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Grado Referencia</label>
-                                    <input type="text" id="c-grado-ref" value="11°" required class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                                    <input type="text" id="c-grado-ref" name="gradoReferencia" value="11°" required class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
                                 </div>
                             </div>
 
                             <div>
                                 <label for="c-motivo" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Motivo o Entidad Destino</label>
-                                <textarea id="c-motivo" rows="3" placeholder="Ej: Trámite de subsidio en Caja de Compensación..." required
+                                <textarea id="c-motivo" name="motivo" rows="3" placeholder="Ej: Trámite de subsidio en Caja de Compensación..." required
                                           class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none resize-none"></textarea>
                             </div>
 
@@ -124,7 +138,7 @@
                             </thead>
                             <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]" id="tbody-solicitudes-estudiante">
                                 <th:block th:each="sol : ${solicitudesMock}">
-                                    <tr th:if="${sol.estudiante == 'Mateo Álvarez Restrepo'}" class="hover:bg-[#fcfdfb] transition-colors">
+                                    <tr class="hover:bg-[#fcfdfb] transition-colors">
                                         <td class="p-3.5 pl-5 font-black text-sidebar text-[11px]" th:text="${sol.id}">CERT-2026-001</td>
                                         <td class="p-3.5">
                                             <div class="font-black text-text-primary text-[12px]" th:text="${sol.tipo}">Constancia de matrícula</div>

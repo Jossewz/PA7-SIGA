@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title ?: 'Ingresar – SIGA IEACI'}">Ingresar – SIGA IEACI</title>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" th:href="@{/css/output.css}">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body class="bg-page-bg min-h-screen grid place-items-center p-4 font-sans text-text-primary">
+
+    <!-- Container Card -->
+    <div class="w-full max-w-[1000px] bg-white rounded-2xl border border-card-border shadow-soft overflow-hidden grid grid-cols-1 md:grid-cols-2 min-h-[580px]">
+
+        <!-- LEFT PANEL: Institutional Branding -->
+        <div class="relative bg-sidebar p-8 md:p-12 flex flex-col justify-between overflow-hidden text-sidebar-text max-md:hidden">
+            
+            <!-- Background Texture / Overlay Accent -->
+            <div class="absolute inset-0 bg-gradient-to-br from-sidebar via-[#0f4d1a] to-[#0a3511] opacity-95"></div>
+            <div class="absolute -bottom-20 -left-20 w-80 h-80 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none"></div>
+
+            <!-- Content relative wrapper -->
+            <div class="relative z-10 flex flex-col h-full justify-between">
+                
+                <!-- Logo & Brand Header -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 grid place-items-center">
+                        <i data-lucide="leaf" class="size-5 text-action-btn"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-base font-black tracking-tight leading-none text-white">IEACI</span>
+                        <span class="text-[9px] font-bold tracking-widest uppercase opacity-75">Editorial Archive</span>
+                    </div>
+                </div>
+
+                <!-- Central Slogan -->
+                <div class="my-auto py-10 flex flex-col gap-4">
+                    <h1 class="text-3xl lg:text-4xl font-extrabold text-white leading-tight tracking-tight">
+                        Sembrando <span class="text-action-btn font-black underline decoration-action-btn/30">Valores</span>,<br>
+                        Construyendo <span class="text-action-btn font-black">Saberes</span>.
+                    </h1>
+                    <p class="text-sm font-medium text-sidebar-text/80 leading-relaxed max-w-sm">
+                        Bienvenido a la Institución Educativa Ambientalista Cartagena de Indias. Accede a tu portal académico y administrativo.
+                    </p>
+
+                    <!-- Active System Badge -->
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 w-fit mt-2">
+                        <span class="w-2 h-2 rounded-full bg-action-btn animate-pulse"></span>
+                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-action-btn">Sistema Activo</span>
+                    </div>
+                </div>
+
+                <!-- Footer note -->
+                <div class="text-[11px] font-semibold text-sidebar-text/60">
+                    SIGA &bull; Sistema de Gestión Académica e Institucional
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: Login Form -->
+        <div class="p-8 md:p-12 flex flex-col justify-between bg-white">
+            
+            <div class="my-auto flex flex-col gap-6 max-w-md mx-auto w-full">
+                
+                <!-- Header -->
+                <div class="flex flex-col gap-1.5">
+                    <h2 class="text-2xl md:text-3xl font-black text-text-primary tracking-tight">Ingresar</h2>
+                    <p class="text-xs font-semibold text-text-secondary">
+                        Por favor, introduce tus credenciales para acceder a la plataforma.
+                    </p>
+                </div>
+
+                <!-- Alert Messages -->
+                <div th:if="${errorMessage}" class="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2.5">
+                    <i data-lucide="alert-circle" class="size-4 shrink-0 stroke-[2.5]"></i>
+                    <span th:text="${errorMessage}">Error de autenticación</span>
+                </div>
+
+                <div th:if="${logoutMessage}" class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2.5">
+                    <i data-lucide="check-circle-2" class="size-4 shrink-0 stroke-[2.5]"></i>
+                    <span th:text="${logoutMessage}">Sesión cerrada</span>
+                </div>
+
+                <!-- Form -->
+                <form th:action="@{/login}" method="post" class="flex flex-col gap-5">
+                    
+                    <!-- Username / Email Field -->
+                    <div class="flex flex-col gap-1.5">
+                        <label for="username" class="text-[11px] font-black uppercase tracking-wider text-text-secondary">
+                            Usuario (Correo electrónico)
+                        </label>
+                        <div class="relative flex items-center">
+                            <i data-lucide="user" class="absolute left-3.5 size-4 text-text-muted stroke-2 pointer-events-none"></i>
+                            <input type="email"
+                                   id="username"
+                                   name="username"
+                                   required
+                                   placeholder="p. ej. juan.perez@ieaci.edu.co"
+                                   class="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-200 bg-gray-50/50 text-xs font-medium text-text-primary placeholder:text-search-placeholder focus:bg-white focus:border-sidebar focus:ring-2 focus:ring-sidebar/20 outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="flex flex-col gap-1.5">
+                        <div class="flex justify-between items-center">
+                            <label for="password" class="text-[11px] font-black uppercase tracking-wider text-text-secondary">
+                                Contraseña
+                            </label>
+                            <button type="button"
+                                    onclick="openForgotModal()"
+                                    class="text-[10px] font-black uppercase tracking-wider text-sidebar hover:underline">
+                                ¿Olvidaste tu clave?
+                            </button>
+                        </div>
+                        <div class="relative flex items-center">
+                            <i data-lucide="lock" class="absolute left-3.5 size-4 text-text-muted stroke-2 pointer-events-none"></i>
+                            <input type="password"
+                                   id="password"
+                                   name="password"
+                                   required
+                                   placeholder="••••••••"
+                                   class="w-full h-11 pl-10 pr-10 rounded-xl border border-gray-200 bg-gray-50/50 text-xs font-medium text-text-primary placeholder:text-search-placeholder focus:bg-white focus:border-sidebar focus:ring-2 focus:ring-sidebar/20 outline-none transition-all">
+                            <button type="button"
+                                    onclick="togglePassword()"
+                                    class="absolute right-3.5 text-text-muted hover:text-text-primary transition-colors focus:outline-none"
+                                    aria-label="Ver contraseña">
+                                <i data-lucide="eye" id="eyeIcon" class="size-4 stroke-2"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Remember Me Checkbox -->
+                    <div class="flex items-center justify-between pt-1">
+                        <label class="flex items-center gap-2.5 cursor-pointer select-none">
+                            <input type="checkbox"
+                                   name="remember-me"
+                                   class="rounded border-gray-300 text-sidebar focus:ring-sidebar/20 size-4">
+                            <span class="text-xs font-semibold text-text-secondary">Mantener sesión iniciada</span>
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit"
+                            class="w-full h-12 mt-2 rounded-xl bg-sidebar text-white font-extrabold text-sm flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.99] transition-all shadow-md shadow-sidebar/20">
+                        <span>Ingresar</span>
+                        <i data-lucide="arrow-right" class="size-4 stroke-[2.5]"></i>
+                    </button>
+                </form>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-8 text-center text-[10px] font-semibold text-text-muted flex flex-col gap-0.5">
+                <span>&copy; 2026 IEACI Cartagena de Indias.</span>
+                <span>Gestión Educativa Ambiental Sostenible</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal ¿Olvidaste tu clave? -->
+    <div id="forgotModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl border border-card-border shadow-2xl max-w-md w-full p-6 flex flex-col gap-4 relative animate-in fade-in zoom-in-95 duration-200">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                <div class="flex items-center gap-2 text-sidebar font-extrabold text-sm">
+                    <i data-lucide="key-round" class="size-4 stroke-[2.5]"></i>
+                    <span>Restablecimiento de Contraseña</span>
+                </div>
+                <button type="button" onclick="closeForgotModal()" class="text-text-muted hover:text-text-primary">
+                    <i data-lucide="x" class="size-4 stroke-2"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-text-secondary leading-relaxed">
+                Por motivos de seguridad del sistema <strong>SIGA IEACI</strong>, el restablecimiento de contraseñas es gestionado directamente por la <strong>Secretaría de la Institución</strong> o el <strong>Administrador del Sistema</strong>.
+            </p>
+
+            <div class="bg-[#f1fbe4] p-3.5 rounded-xl border border-[#c4eec0] text-xs text-sidebar font-medium flex flex-col gap-1.5">
+                <div class="font-extrabold flex items-center gap-1.5">
+                    <i data-lucide="headphones" class="size-3.5"></i>
+                    <span>Contacto de Soporte:</span>
+                </div>
+                <div>Correo: <strong class="font-bold">contacto@ieaci.edu.co</strong></div>
+                <div>Teléfono: <strong class="font-bold">300 987 6543</strong></div>
+                <div>Horario: Lunes a Viernes (7:00 AM - 1:30 PM)</div>
+            </div>
+
+            <button type="button"
+                    onclick="closeForgotModal()"
+                    class="w-full py-2.5 rounded-xl bg-sidebar text-white text-xs font-bold hover:brightness-97 transition-all">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        lucide.createIcons();
+
+        function togglePassword() {
+            const pwdInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                eyeIcon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                pwdInput.type = 'password';
+                eyeIcon.setAttribute('data-lucide', 'eye');
+            }
+            lucide.createIcons();
+        }
+
+        function openForgotModal() {
+            document.getElementById('forgotModal').classList.remove('hidden');
+        }
+
+        function closeForgotModal() {
+            document.getElementById('forgotModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

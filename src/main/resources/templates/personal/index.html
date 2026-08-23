@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/base :: html(~{::content})}">
+<head>
+    <title>Gestión de Personal – IEACI</title>
+</head>
+<body>
+
+<th:block th:fragment="content">
+    <div class="flex flex-col gap-6">
+        <!-- Header -->
+        <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
+            <div>
+                <h1 class="text-text-primary text-[28px] font-black tracking-tight leading-none mb-1.5">Directorio de Personal</h1>
+                <p class="text-text-secondary text-sm font-semibold">Registro institucional de docentes, administrativos y directivos de la IEACI.</p>
+            </div>
+            
+            <button type="button" onclick="openModalPersonal()" class="px-5 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md shrink-0 cursor-pointer">
+                <i data-lucide="user-plus" class="size-4 stroke-[2.5]"></i>
+                <span>Nuevo Miembro</span>
+            </button>
+        </div>
+
+        <!-- Filtros y Tabla -->
+        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
+            <div class="p-4 border-b border-[#c4eec0]/30 bg-[#f7fcf6] flex items-center justify-between gap-4 flex-wrap">
+                <!-- Tabs de Filtro por Tipo -->
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="filtrarPersonal('todos')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-sidebar bg-[#eafbe4] border border-[#c4eec0]">
+                        Todos
+                    </button>
+                    <button type="button" onclick="filtrarPersonal('DOCENTE')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-text-secondary hover:text-sidebar hover:bg-white transition-colors">
+                        Docentes
+                    </button>
+                    <button type="button" onclick="filtrarPersonal('ADMINISTRATIVO')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-text-secondary hover:text-sidebar hover:bg-white transition-colors">
+                        Administrativos
+                    </button>
+                </div>
+
+                <div class="text-xs font-bold text-text-secondary">
+                    Total Registrados: <span class="font-black text-sidebar" th:text="${personalList != null ? #lists.size(personalList) : 0}">4</span>
+                </div>
+            </div>
+
+            <!-- Tabla de Personal -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-[12px]">
+                    <thead>
+                        <tr class="bg-white border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
+                            <th class="p-4 pl-6">Funcionario</th>
+                            <th class="p-4">Cargo / Asignatura</th>
+                            <th class="p-4">Rol / Categoría</th>
+                            <th class="p-4">Contacto</th>
+                            <th class="p-4 pr-6 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]">
+                        <tr th:each="p : ${personalList}" 
+                            class="hover:bg-[#fcfdfb] transition-colors personal-row"
+                            th:data-tipo="${p.tipo != null ? p.tipo : 'DOCENTE'}">
+                            
+                            <!-- Nombre y Documento -->
+                            <td class="p-4 pl-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="size-9 rounded-full bg-[#f1fbe4] text-sidebar font-black grid place-items-center border border-[#c4eec0] text-xs">
+                                        <span th:text="${p.nombres != null ? #strings.substring(p.nombres, 0, 1) : (p.nombreCompleto != null ? #strings.substring(p.nombreCompleto, 0, 1) : 'P')}">C</span>
+                                    </div>
+                                    <div>
+                                        <a th:href="@{'/personal/perfil/' + ${p.id}}" class="font-black text-sidebar text-[13px] hover:underline" th:text="${p.nombreCompleto != null ? p.nombreCompleto : (p.nombres + ' ' + p.apellidos)}">Carlos Mendoza</a>
+                                        <div class="text-[10px] font-semibold text-text-secondary" th:text="${(p.tipoDocumento != null ? p.tipoDocumento : 'CC') + ': ' + (p.numeroDocumento != null ? p.numeroDocumento : '')}">CC: 1088123456</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Cargo -->
+                            <td class="p-4 font-bold text-text-primary" th:text="${p.cargo != null ? p.cargo : 'Docente'}">Docente de Matemáticas</td>
+
+                            <!-- Tipo / Rol Badge -->
+                            <td class="p-4">
+                                <span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border"
+                                      th:classappend="${p.tipo == 'DOCENTE'} ? 'bg-pill-green text-sidebar border-[#8ce383]' : 'bg-blue-50 text-blue-800 border-blue-200'"
+                                      th:text="${p.tipo != null ? p.tipo : 'DOCENTE'}">DOCENTE</span>
+                            </td>
+
+                            <!-- Contacto -->
+                            <td class="p-4">
+                                <div class="font-semibold text-text-primary text-[11px]" th:text="${p.email != null ? p.email : (p.correo != null ? p.correo : 'carlos.mendoza@ieaci.edu.co')}">carlos.mendoza@ieaci.edu.co</div>
+                                <div class="text-[10px] text-text-secondary font-semibold" th:text="${p.telefono != null ? p.telefono : '3001234567'}">3001234567</div>
+                            </td>
+
+                            <!-- Acciones -->
+                            <td class="p-4 pr-6 text-right">
+                                <div class="flex justify-end gap-1">
+                                    <a th:href="@{'/personal/perfil/' + ${p.id}}" class="p-1.5 hover:bg-[#eafbe4] rounded-lg transition-colors text-sidebar" title="Ver hoja de vida">
+                                        <i data-lucide="eye" class="size-4 stroke-[2]"></i>
+                                    </a>
+                                    <button type="button" class="p-1.5 hover:bg-[#f1fbe4] rounded-lg transition-colors text-sidebar" title="Editar datos">
+                                        <i data-lucide="edit-3" class="size-4 stroke-[2]"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fragmento Modal Registrar Personal -->
+    <div th:replace="~{personal/fragments/modal-personal :: modalPersonal}"></div>
+
+    <!-- Script del módulo personal -->
+    <script th:src="@{/js/personal.js}"></script>
+</th:block>
+
+</body>
+</html>

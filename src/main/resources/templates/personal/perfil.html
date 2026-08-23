@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/base :: html(~{::content})}">
+<head>
+    <title>Perfil de Personal – IEACI</title>
+</head>
+<body>
+
+<th:block th:fragment="content">
+    <div class="flex flex-col gap-6">
+        <!-- Flash Messages -->
+        <div th:if="${mensajeExito}" class="p-4 rounded-xl bg-[#e3f7dc] border border-[#c4eec0] flex gap-3 text-xs font-bold text-sidebar">
+            <i data-lucide="check-circle-2" class="size-5 shrink-0 stroke-2"></i>
+            <span th:text="${mensajeExito}"></span>
+        </div>
+        <div th:if="${mensajeError}" class="p-4 rounded-xl bg-red-50 border border-red-200 flex gap-3 text-xs font-bold text-alert-red">
+            <i data-lucide="alert-circle" class="size-5 shrink-0 stroke-2"></i>
+            <span th:text="${mensajeError}"></span>
+        </div>
+
+        <!-- Back Button & Breadcrumbs -->
+        <div class="flex items-center gap-2">
+            <a th:href="@{/personal}" class="p-2 hover:bg-white rounded-lg transition-colors text-sidebar flex items-center justify-center shrink-0 border border-[#c4eec0]/40 shadow-sm">
+                <i data-lucide="arrow-left" class="size-4.5 stroke-[2.5]"></i>
+            </a>
+            <div>
+                <small class="block text-[8px] font-black uppercase tracking-wider text-text-secondary">Personal › Ficha de Registro</small>
+                <h1 class="text-text-primary text-[20px] font-black tracking-tight leading-none mt-0.5" th:text="${staff.nombreCompleto}">Carlos Mendoza</h1>
+            </div>
+        </div>
+
+        <!-- Layout Grid -->
+        <div class="grid grid-cols-1 xl:grid-cols-[280px_1fr] gap-6 items-start">
+            
+            <!-- Left Panel: Ficha Card -->
+            <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-6 flex flex-col items-center text-center gap-5">
+                <div class="relative size-24">
+                    <span class="w-full h-full rounded-full bg-sidebar/10 text-sidebar flex items-center justify-center border border-sidebar/20 shadow-inner overflow-hidden">
+                        <img th:if="${staff.foto != null}" th:src="${staff.foto}" alt="Foto" class="w-full h-full object-cover">
+                        <i th:unless="${staff.foto != null}" data-lucide="user" class="size-12 stroke-[1.5]"></i>
+                    </span>
+                    <span class="absolute bottom-1 right-1 size-5 rounded-full border-2 border-white flex items-center justify-center shrink-0"
+                          th:classappend="${staff.estado == 'Activo'} ? 'bg-sidebar' : 'bg-alert-red'"
+                          title="Estado">
+                        <i th:data-lucide="${staff.estado == 'Activo' ? 'check' : 'x'}" class="size-2.5 text-white stroke-[3]"></i>
+                    </span>
+                </div>
+
+                <div>
+                    <h2 class="text-text-primary text-base font-black leading-tight" th:text="${staff.nombreCompleto}">Carlos Mendoza</h2>
+                    <span class="block text-text-secondary text-[11px] font-bold mt-1" th:text="${staff.cargo}">Docente</span>
+                    <span class="block text-[10px] text-[#677768] font-semibold mt-0.5" th:text="'Área: ' + ${staff.area}">Área Académica</span>
+                </div>
+
+                <div class="w-full h-px bg-[#c4eec0]/30"></div>
+
+                <div class="w-full grid gap-2.5 text-left text-[11px] font-bold text-text-secondary">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="mail" class="size-4 text-sidebar stroke-2"></i>
+                        <span class="text-text-primary text-ellipsis overflow-hidden" th:text="${staff.correo}">carlos@ieaci.edu.co</span>
+                    </div>
+                    <div class="flex items-center gap-2" th:if="${staff.telefono != null}">
+                        <i data-lucide="phone" class="size-4 text-sidebar stroke-2"></i>
+                        <span class="text-text-primary" th:text="${staff.telefono}">300 123 4567</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="key" class="size-4 stroke-2" th:classappend="${staff.tieneCuenta} ? 'text-sidebar' : 'text-gray-400'"></i>
+                        <span class="text-text-primary" th:text="${staff.tieneCuenta} ? 'Cuenta Activa' : 'Sin Cuenta de Acceso'">Sin Cuenta</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Tabs Content -->
+            <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft flex flex-col overflow-hidden min-h-[460px]">
+                
+                <!-- Tabs Bar -->
+                <div class="flex border-b border-[#c4eec0]/40 px-6 bg-[#f7fcf6] overflow-x-auto gap-2 scrollbar-none">
+                    <button type="button" class="tab-btn-p px-4 py-4 text-[10px] font-black uppercase tracking-wider text-sidebar border-b-2 border-sidebar whitespace-nowrap" onclick="switchProfileTab(this, 'tab-info')">Información</button>
+                    <button type="button" class="tab-btn-p px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchProfileTab(this, 'tab-laboral-p')">Laboral</button>
+                    <button type="button" class="tab-btn-p px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchProfileTab(this, 'tab-cuenta-p')">Cuenta Acceso</button>
+                </div>
+
+                <!-- Tab Body Content -->
+                <div class="p-8 flex-1">
+                    
+                    <!-- TAB 1: INFORMACIÓN -->
+                    <div id="tab-info" class="profile-tab-content flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Información Personal</h3>
+                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5 text-[11px] font-bold">
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Nombre Completo</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.nombreCompleto}">Carlos Mendoza</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Documento de Identidad</span>
+                                <span class="text-text-primary text-xs" th:text="${(staff.tipoDoc ?: 'CC') + ' - ' + (staff.numDoc ?: 'Sin Doc')}">CC - 1088123456</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Teléfono de contacto</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.telefono ?: 'N/A'}">300 123 4567</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Dirección residencial</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.direccion ?: 'N/A'}">Calle 45</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: LABORAL -->
+                    <div id="tab-laboral-p" class="profile-tab-content hidden flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Información Laboral / Profesional</h3>
+                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5 text-[11px] font-bold">
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Cargo</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.cargo}">Docente</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Área</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.area}">Académica</span>
+                            </div>
+                            <div class="grid gap-1" th:if="${staff.profesion != null}">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Profesión / Título</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.profesion}">Licenciado</span>
+                            </div>
+                            <div class="grid gap-1" th:if="${staff.especialidad != null}">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Especialidad</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.especialidad}">Matemáticas</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: CUENTA -->
+                    <div id="tab-cuenta-p" class="profile-tab-content hidden flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Cuenta de Acceso al Sistema</h3>
+                        
+                        <div th:if="${staff.tieneCuenta}" class="p-5 rounded-xl border border-[#c4eec0] bg-[#f1fbe4]/50 flex flex-col gap-4">
+                            <div class="flex items-center gap-3">
+                                <span class="w-10 h-10 rounded-full bg-sidebar text-white grid place-items-center shrink-0">
+                                    <i data-lucide="user-check" class="size-5 stroke-2"></i>
+                                </span>
+                                <div>
+                                    <strong class="block text-text-primary text-sm font-black" th:text="${staff.correo}">carlos@ieaci.edu.co</strong>
+                                    <span class="text-text-secondary text-[11px] font-semibold">Rol: <span class="uppercase font-bold" th:text="${staff.usuarioRol}">DOCENTE</span> | Estado: <span class="font-bold text-sidebar" th:text="${staff.usuarioEstado}">Activo</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-5 rounded-xl border border-[#c4eec0]/60 bg-white shadow-sm flex flex-col gap-4">
+                            <h4 class="text-sidebar text-xs font-black uppercase tracking-wider" th:text="${staff.tieneCuenta} ? 'Actualizar Credenciales' : 'Generar Cuenta de Acceso'">Generar Cuenta</h4>
+                            <p class="text-text-secondary text-[11px] font-semibold">El correo electrónico se genera automáticamente combinando el nombre y apellido del empleado. Puede ser modificado.</p>
+                            
+                            <form th:action="@{'/personal/' + ${staff.id} + '/crear-cuenta'}" method="post" class="grid grid-cols-2 max-sm:grid-cols-1 gap-4">
+                                <div>
+                                    <label class="block mb-1 text-[9px] font-black text-text-secondary uppercase">Correo Institucional</label>
+                                    <input type="email" name="email" th:value="${staff.tieneCuenta ? staff.correo : staff.emailSugerido}" required
+                                           class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-xs font-bold text-text-primary focus:ring-2 focus:ring-sidebar/20">
+                                </div>
+                                <div>
+                                    <label class="block mb-1 text-[9px] font-black text-text-secondary uppercase">Contraseña</label>
+                                    <input type="text" name="password" placeholder="Contraseña o dejar en blanco" 
+                                           class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-xs font-bold text-text-primary focus:ring-2 focus:ring-sidebar/20">
+                                </div>
+                                <div>
+                                    <label class="block mb-1 text-[9px] font-black text-text-secondary uppercase">Rol del Sistema</label>
+                                    <select name="rol" class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-xs font-bold text-text-primary focus:ring-2 focus:ring-sidebar/20">
+                                        <option value="DOCENTE" th:selected="${staff.usuarioRol == 'DOCENTE' || staff.cargo == 'Docente'}">DOCENTE</option>
+                                        <option value="ADMIN" th:selected="${staff.usuarioRol == 'ADMIN' || staff.cargo == 'Rector' || staff.cargo == 'Coordinador'}">ADMIN</option>
+                                        <option value="SECRETARIA" th:selected="${staff.usuarioRol == 'SECRETARIA' || staff.cargo == 'Secretario'}">SECRETARIA</option>
+                                    </select>
+                                </div>
+                                <div class="col-span-2 max-sm:col-span-1 flex justify-end">
+                                    <button type="submit" class="px-5 py-2.5 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md">
+                                        <i data-lucide="key-round" class="size-4 stroke-2"></i>
+                                        <span th:text="${staff.tieneCuenta} ? 'Guardar Cambios' : 'Generar Cuenta de Acceso'">Generar Cuenta</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TAB SWITCHING SCRIPT -->
+    <script>
+        function switchProfileTab(btn, tabId) {
+            document.querySelectorAll('.profile-tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-btn-p').forEach(b => {
+                b.classList.remove('border-sidebar', 'text-sidebar');
+                b.classList.add('border-transparent', 'text-text-secondary');
+            });
+            btn.classList.remove('border-transparent', 'text-text-secondary');
+            btn.classList.add('border-sidebar', 'text-sidebar');
+        }
+    </script>
+</th:block>
+
+</body>
+</html>

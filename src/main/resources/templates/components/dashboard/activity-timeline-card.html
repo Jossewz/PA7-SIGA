@@ -1,0 +1,24 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <!-- ÚLTIMOS MOVIMIENTOS / TIMELINE -->
+    <article th:fragment="activityTimelineCard()" 
+             class="p-6 rounded-xl bg-white border border-[#c4eec0]/40 shadow-soft flex flex-col h-full">
+        <h3 class="flex items-center gap-2 text-sidebar text-base font-black uppercase tracking-wider mb-5">
+            <i data-lucide="activity" class="size-[18px] stroke-[2.2]"></i>
+            Línea de Actividad
+        </h3>
+
+        <div class="relative border-l border-[#c4eec0]/40 ml-2.5 pl-6 space-y-4 flex-1">
+            <div th:if="${#lists.isEmpty(stats.actividadTimeline)}" class="py-4 text-xs text-text-muted italic">
+                Sin actividad reciente registrada en el sistema.
+            </div>
+            
+            <div th:each="item : ${stats.actividadTimeline}" class="relative">
+                <span class="absolute -left-[30px] top-1 flex items-center justify-center w-[12px] h-[12px] rounded-full bg-sidebar border-2 border-white"></span>
+                <p class="text-xs font-extrabold text-text-primary leading-snug" th:text="${item.titulo}">Actividad registrada</p>
+                <time class="text-[10px] text-text-muted font-bold uppercase tracking-wider" th:text="${item.tiempo}">Tiempo</time>
+            </div>
+        </div>
+    </article>
+
+</th:block>

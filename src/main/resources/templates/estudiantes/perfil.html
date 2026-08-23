@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/base :: html(~{::content})}">
+<head>
+    <title>Perfil del Estudiante – IEACI</title>
+</head>
+<body>
+
+<th:block th:fragment="content">
+    <div class="flex flex-col gap-6">
+        <!-- Flash Messages -->
+        <div th:if="${mensajeExito}" class="p-4 rounded-xl bg-[#e3f7dc] border border-[#c4eec0] flex gap-3 text-xs font-bold text-sidebar">
+            <i data-lucide="check-circle-2" class="size-5 shrink-0 stroke-2"></i>
+            <span th:text="${mensajeExito}"></span>
+        </div>
+        <div th:if="${mensajeError}" class="p-4 rounded-xl bg-red-50 border border-red-200 flex gap-3 text-xs font-bold text-alert-red">
+            <i data-lucide="alert-circle" class="size-5 shrink-0 stroke-2"></i>
+            <span th:text="${mensajeError}"></span>
+        </div>
+
+        <!-- Back Button & Breadcrumbs -->
+        <div class="flex items-center gap-2">
+            <a th:href="@{/estudiantes}" class="p-2 hover:bg-white rounded-lg transition-colors text-sidebar flex items-center justify-center shrink-0 border border-[#c4eec0]/40 shadow-sm">
+                <i data-lucide="arrow-left" class="size-4.5 stroke-[2.5]"></i>
+            </a>
+            <div>
+                <small class="block text-[8px] font-black uppercase tracking-wider text-text-secondary">Estudiantes › Expediente Académico</small>
+                <h1 class="text-text-primary text-[20px] font-black tracking-tight leading-none mt-0.5" th:text="${student.nombreCompleto}">Santiago Alejandro Gómez Pérez</h1>
+            </div>
+        </div>
+
+        <!-- Layout Grid -->
+        <div class="grid grid-cols-1 xl:grid-cols-[280px_1fr] gap-6 items-start">
+            
+            <!-- Left Panel: Student Card -->
+            <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-6 flex flex-col items-center text-center gap-5">
+                <div class="relative size-24">
+                    <span class="w-full h-full rounded-full bg-sidebar/10 text-sidebar flex items-center justify-center border border-sidebar/20 shadow-inner overflow-hidden">
+                        <img th:if="${student.foto != null and !#strings.isEmpty(student.foto)}" th:src="${student.foto}" class="w-full h-full object-cover">
+                        <i th:unless="${student.foto != null and !#strings.isEmpty(student.foto)}" data-lucide="user" class="size-12 stroke-[1.5]"></i>
+                    </span>
+                    <span class="absolute bottom-1 right-1 size-5 rounded-full border-2 border-white flex items-center justify-center shrink-0"
+                          th:classappend="${student.estado == 'Activo'} ? 'bg-sidebar' : 'bg-alert-red'"
+                          title="Estado">
+                        <i th:data-lucide="${student.estado == 'Activo' ? 'check' : 'x'}" class="size-2.5 text-white stroke-[3]"></i>
+                    </span>
+                </div>
+
+                <div>
+                    <h2 class="text-text-primary text-base font-black leading-tight" th:text="${student.nombreCompleto}">Santiago Gómez</h2>
+                    <span class="block text-text-secondary text-[11px] font-black mt-1" th:text="'Código: ' + ${student.codigo}">Código: 2026001</span>
+                    <span class="block text-[10px] text-[#677768] font-bold mt-0.5" th:text="'Grado: ' + ${student.curso}">Grado: 9° - A</span>
+                </div>
+
+                <div class="w-full h-px bg-[#c4eec0]/30"></div>
+
+                <div class="w-full grid gap-2.5 text-left text-[11px] font-bold text-text-secondary">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="shield-check" class="size-4 text-sidebar stroke-2"></i>
+                        <span class="text-text-primary">Matrícula Registrada</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="key" class="size-4 stroke-2" th:classappend="${student.tieneCuenta} ? 'text-sidebar' : 'text-gray-400'"></i>
+                        <span class="text-text-primary" th:text="${student.tieneCuenta} ? 'Cuenta Activa: ' + ${student.usuarioEmail} : 'Sin Cuenta de Acceso'">Sin Cuenta</span>
+                    </div>
+                </div>
+
+                <form th:action="@{'/estudiantes/' + ${student.id} + '/toggle-estado'}" method="post" class="w-full mt-2">
+                    <button type="submit" class="w-full py-2.5 px-3 text-xs font-black rounded-lg transition-colors border flex items-center justify-center gap-2 cursor-pointer"
+                            th:classappend="${student.estado == 'Activo'} ? 'border-amber-300 text-amber-900 bg-amber-50 hover:bg-amber-100' : 'border-[#c4eec0] text-sidebar hover:bg-[#f1fbe4]'">
+                        <i th:data-lucide="${student.estado == 'Activo' ? 'user-minus' : 'user-check'}" class="size-4 stroke-2"></i>
+                        <span th:text="${student.estado == 'Activo' ? 'Desactivar / Retirar' : 'Activar Estudiante'}">Cambiar Estado</span>
+                    </button>
+                </form>
+
+                <form th:action="@{'/estudiantes/' + ${student.id} + '/eliminar'}" method="post" class="w-full mt-1.5" onsubmit="return confirm('¿Está seguro de ELIMINAR permanentemente a este estudiante y todas sus matrículas, calificaciones y documentos vinculados? Esta acción no se puede deshacer.');">
+                    <button type="submit" class="w-full py-2.5 px-3 text-xs font-black rounded-lg transition-colors border border-red-300 bg-red-50 text-alert-red hover:bg-red-100 flex items-center justify-center gap-2 cursor-pointer">
+                        <i data-lucide="trash-2" class="size-4 stroke-2"></i>
+                        <span>Eliminar Estudiante</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right Panel: Tabs Content -->
+            <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft flex flex-col overflow-hidden min-h-[460px]">
+                
+                <!-- Tabs Bar -->
+                <div class="flex border-b border-[#c4eec0]/40 px-6 bg-[#f7fcf6] overflow-x-auto gap-2 scrollbar-none">
+                    <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-sidebar border-b-2 border-sidebar whitespace-nowrap" onclick="switchStudentTab(this, 'st-info')">Información</button>
+                    <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchStudentTab(this, 'st-acudiente')">Acudiente</button>
+                    <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchStudentTab(this, 'st-cuenta')">Cuenta Acceso</button>
+                    <button type="button" class="tab-btn-s px-4 py-4 text-[10px] font-black uppercase tracking-wider text-text-secondary border-b-2 border-transparent whitespace-nowrap" onclick="switchStudentTab(this, 'st-academico')">Académico</button>
+                </div>
+
+                <!-- Tab Body Content -->
+                <div class="p-8 flex-1">
+                    
+                    <!-- TAB 1: INFORMACIÓN -->
+                    <div id="st-info" class="student-tab-content flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Datos Personales del Estudiante</h3>
+                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5 text-[11px] font-bold">
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Nombres Completos</span>
+                                <span class="text-text-primary text-xs" th:text="${student.nombres}">Santiago Alejandro</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Apellidos Completos</span>
+                                <span class="text-text-primary text-xs" th:text="${student.apellidos}">Gómez Pérez</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Documento de Identidad</span>
+                                <span class="text-text-primary text-xs" th:text="${student.documento}">TI - 1088456123</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Fecha de Nacimiento</span>
+                                <span class="text-text-primary text-xs" th:text="${student.fechaNac}">2011-08-25</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Género</span>
+                                <span class="text-text-primary text-xs" th:text="${student.genero}">Masculino</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Teléfono de Contacto</span>
+                                <span class="text-text-primary text-xs" th:text="${student.telefono}">300 123 4567</span>
+                            </div>
+                            <div class="col-span-2 max-sm:col-span-1 grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Dirección de Residencia</span>
+                                <span class="text-text-primary text-xs" th:text="${student.direccion}">Manzana A Lote 5</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: ACUDIENTE -->
+                    <div id="st-acudiente" class="student-tab-content hidden flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Información del Acudiente</h3>
+                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5 text-[11px] font-bold">
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Nombre del Acudiente</span>
+                                <span class="text-text-primary text-xs" th:text="${student.acudienteNombre}">Felipe Gómez Rivas</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Parentesco</span>
+                                <span class="text-text-primary text-xs" th:text="${student.acudienteParentesco}">Padre</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Documento de Identidad</span>
+                                <span class="text-text-primary text-xs" th:text="${student.acudienteDoc}">CC - 73.123.456</span>
+                            </div>
+                            <div class="grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Teléfono de Contacto</span>
+                                <span class="text-text-primary text-xs" th:text="${student.acudienteTel}">300 123 4567</span>
+                            </div>
+                            <div class="col-span-2 max-sm:col-span-1 grid gap-1">
+                                <span class="text-text-secondary uppercase text-[9px] tracking-wider">Dirección de Residencia</span>
+                                <span class="text-text-primary text-xs" th:text="${student.acudienteDir}">Manzana A Lote 5</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: CUENTA DE ACCESO -->
+                    <div id="st-cuenta" class="student-tab-content hidden flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Cuenta de Acceso al Sistema</h3>
+                        
+                        <div th:if="${student.tieneCuenta}" class="p-5 rounded-xl border border-[#c4eec0] bg-[#f1fbe4]/50 flex flex-col gap-4">
+                            <div class="flex items-center gap-3">
+                                <span class="w-10 h-10 rounded-full bg-sidebar text-white grid place-items-center shrink-0">
+                                    <i data-lucide="user-check" class="size-5 stroke-2"></i>
+                                </span>
+                                <div>
+                                    <strong class="block text-text-primary text-sm font-black" th:text="${student.usuarioEmail}">estudiante@ieaci.edu.co</strong>
+                                    <span class="text-text-secondary text-[11px] font-semibold">Rol: <span class="uppercase font-bold" th:text="${student.usuarioRol}">ESTUDIANTE</span> | Estado: <span class="font-bold text-sidebar" th:text="${student.usuarioEstado}">Activo</span></span>
+                                </div>
+                            </div>
+                            <p class="text-text-secondary text-xs font-semibold">Esta cuenta permite ingresar al portal de calificaciones y seguimiento académico.</p>
+                        </div>
+
+                        <div class="p-5 rounded-xl border border-[#c4eec0]/60 bg-white shadow-sm flex flex-col gap-4">
+                            <h4 class="text-sidebar text-xs font-black uppercase tracking-wider" th:text="${student.tieneCuenta} ? 'Actualizar Credenciales' : 'Generar Cuenta de Acceso'">Generar Cuenta</h4>
+                            <p class="text-text-secondary text-[11px] font-semibold">El correo electrónico se genera automáticamente combinando el nombre y apellido del estudiante. Puede personalizarlo si lo requiere.</p>
+                            
+                            <form th:action="@{'/estudiantes/' + ${student.id} + '/crear-cuenta'}" method="post" class="grid grid-cols-2 max-sm:grid-cols-1 gap-4">
+                                <div>
+                                    <label class="block mb-1 text-[9px] font-black text-text-secondary uppercase">Correo Institucional</label>
+                                    <input type="email" name="email" th:value="${student.tieneCuenta ? student.usuarioEmail : student.emailSugerido}" required
+                                           class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-xs font-bold text-text-primary focus:ring-2 focus:ring-sidebar/20">
+                                </div>
+                                <div>
+                                    <label class="block mb-1 text-[9px] font-black text-text-secondary uppercase">Contraseña</label>
+                                    <input type="text" name="password" placeholder="Contraseña o dejar en blanco" 
+                                           class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-xs font-bold text-text-primary focus:ring-2 focus:ring-sidebar/20">
+                                </div>
+                                <div class="col-span-2 max-sm:col-span-1 flex justify-end">
+                                    <button type="submit" class="px-5 py-2.5 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md">
+                                        <i data-lucide="key-round" class="size-4 stroke-2"></i>
+                                        <span th:text="${student.tieneCuenta} ? 'Guardar Cambios' : 'Generar Cuenta de Acceso'">Generar Cuenta</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: ACADÉMICO -->
+                    <div id="st-academico" class="student-tab-content hidden flex flex-col gap-6">
+                        <h3 class="text-sidebar text-sm font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Información Académica</h3>
+                        
+                        <div class="grid gap-4">
+                            <div class="p-4 rounded-xl border border-[#c4eec0]/40 bg-[#f9fbf8]/50 flex justify-between items-center text-[11px] font-bold">
+                                <div>
+                                    <strong class="block text-text-primary text-xs font-black" th:text="'Grado ' + ${student.curso}">Grado 9°</strong>
+                                    <span class="block text-text-secondary text-[9px] mt-0.5" th:text="'Año Lectivo: ' + ${student.anoLectivo}">Año Lectivo: 2026</span>
+                                </div>
+                                <span class="px-2.5 py-1 rounded bg-[#f1fbe4] text-sidebar text-[9px] font-black uppercase" th:text="${student.estadoMatricula}">Vigente</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TAB SWITCHING SCRIPT -->
+    <script>
+        function switchStudentTab(btn, tabId) {
+            document.querySelectorAll('.student-tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-btn-s').forEach(b => {
+                b.classList.remove('border-sidebar', 'text-sidebar');
+                b.classList.add('border-transparent', 'text-text-secondary');
+            });
+            btn.classList.remove('border-transparent', 'text-text-secondary');
+            btn.classList.add('border-sidebar', 'text-sidebar');
+        }
+    </script>
+</th:block>
+
+</body>
+</html>

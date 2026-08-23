@@ -1,0 +1,305 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <!-- MODAL DE ASIGNACIÓN DE HORARIO EN MATRIZ -->
+    <div th:fragment="modalHorario" id="horario-modal" class="hidden fixed inset-0 bg-[#0d4117]/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-[#c4eec0] shadow-xl max-w-6xl w-full max-h-[92vh] flex flex-col overflow-hidden transition-all scale-95 opacity-0 duration-300" id="horario-modal-dialog">
+            
+            <!-- Modal Header -->
+            <div class="p-5 border-b border-[#c4eec0]/40 flex justify-between items-center bg-white shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="size-10 rounded-xl bg-[#eafbe4] text-sidebar grid place-items-center border border-[#c4eec0]">
+                        <i data-lucide="calendar" class="size-5 stroke-[2.5]"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sidebar text-[18px] font-black" id="horario-title">Asignación de Horario Semanal</h3>
+                        <p class="text-text-secondary text-[11px] font-bold">Configure el horario lectivo seleccionando la franja horaria, materia y docente para cada día.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeHorarioModal()" class="p-1 hover:bg-red-50 text-text-secondary hover:text-alert-red rounded-lg transition-colors cursor-pointer">
+                    <i data-lucide="x" class="size-5 stroke-2"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content (Schedule Grid Table) -->
+            <div class="p-5 overflow-y-auto flex-1 bg-white">
+                <form id="form-guardar-horario" th:action="@{/clases/horarios/guardar-grid}" method="post">
+                    <input type="hidden" name="cursoId" id="h-curso-id" />
+
+                    <div class="overflow-x-auto border border-[#c4eec0]/60 rounded-xl">
+                        <table class="w-full text-center border-collapse text-[11px] min-w-[850px]">
+                            <thead>
+                                <tr class="bg-[#f7fcf6] border-b border-[#c4eec0]/80 text-sidebar font-black uppercase text-[11px]">
+                                    <th class="p-3 text-left w-48 border-r border-[#c4eec0]/60">Franja Horaria</th>
+                                    <th class="p-3 border-r border-[#c4eec0]/40">Lunes</th>
+                                    <th class="p-3 border-r border-[#c4eec0]/40">Martes</th>
+                                    <th class="p-3 border-r border-[#c4eec0]/40">Miércoles</th>
+                                    <th class="p-3 border-r border-[#c4eec0]/40">Jueves</th>
+                                    <th class="p-3">Viernes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="horario-tbody" class="divide-y divide-[#c4eec0]/30 text-text-primary">
+                                
+                                <!-- BLOQUE 1 (07:00 - 08:30) -->
+                                <tr class="slot-row hover:bg-slate-50/50">
+                                    <td class="p-3 text-left bg-[#f7fcf6]/50 border-r border-[#c4eec0]/60 font-bold">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <span class="text-sidebar text-[11px] font-black slot-title">Bloque 1</span>
+                                            <button type="button" onclick="eliminarFilaHorario(this)" class="text-text-secondary hover:text-alert-red p-1 rounded cursor-pointer" title="Eliminar bloque">
+                                                <i data-lucide="trash-2" class="size-3.5"></i>
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <input type="time" name="slot_0_inicio" value="07:00" class="p-1 border border-[#c4eec0] rounded text-[10px] font-bold bg-white text-center w-20">
+                                            <span class="text-text-secondary font-bold">-</span>
+                                            <input type="time" name="slot_0_fin" value="08:30" class="p-1 border border-[#c4eec0] rounded text-[10px] font-bold bg-white text-center w-20">
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Lunes -->
+                                    <td class="p-2 border-r border-[#c4eec0]/30">
+                                        <select name="slot_0_Lunes_materiaId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-bold text-text-primary mb-1 focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Materia --</option>
+                                            <option th:each="mat : ${materiasList}" th:value="${mat.id}" th:text="${mat.nombre}"></option>
+                                        </select>
+                                        <select name="slot_0_Lunes_docenteId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-semibold text-sidebar focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Docente --</option>
+                                            <option th:each="doc : ${docentesList}" th:value="${doc.id}" th:text="${doc.nombreCompleto}"></option>
+                                        </select>
+                                    </td>
+
+                                    <!-- Martes -->
+                                    <td class="p-2 border-r border-[#c4eec0]/30">
+                                        <select name="slot_0_Martes_materiaId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-bold text-text-primary mb-1 focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Materia --</option>
+                                            <option th:each="mat : ${materiasList}" th:value="${mat.id}" th:text="${mat.nombre}"></option>
+                                        </select>
+                                        <select name="slot_0_Martes_docenteId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-semibold text-sidebar focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Docente --</option>
+                                            <option th:each="doc : ${docentesList}" th:value="${doc.id}" th:text="${doc.nombreCompleto}"></option>
+                                        </select>
+                                    </td>
+
+                                    <!-- Miércoles -->
+                                    <td class="p-2 border-r border-[#c4eec0]/30">
+                                        <select name="slot_0_Miércoles_materiaId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-bold text-text-primary mb-1 focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Materia --</option>
+                                            <option th:each="mat : ${materiasList}" th:value="${mat.id}" th:text="${mat.nombre}"></option>
+                                        </select>
+                                        <select name="slot_0_Miércoles_docenteId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-semibold text-sidebar focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Docente --</option>
+                                            <option th:each="doc : ${docentesList}" th:value="${doc.id}" th:text="${doc.nombreCompleto}"></option>
+                                        </select>
+                                    </td>
+
+                                    <!-- Jueves -->
+                                    <td class="p-2 border-r border-[#c4eec0]/30">
+                                        <select name="slot_0_Jueves_materiaId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-bold text-text-primary mb-1 focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Materia --</option>
+                                            <option th:each="mat : ${materiasList}" th:value="${mat.id}" th:text="${mat.nombre}"></option>
+                                        </select>
+                                        <select name="slot_0_Jueves_docenteId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-semibold text-sidebar focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Docente --</option>
+                                            <option th:each="doc : ${docentesList}" th:value="${doc.id}" th:text="${doc.nombreCompleto}"></option>
+                                        </select>
+                                    </td>
+
+                                    <!-- Viernes -->
+                                    <td class="p-2">
+                                        <select name="slot_0_Viernes_materiaId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-bold text-text-primary mb-1 focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Materia --</option>
+                                            <option th:each="mat : ${materiasList}" th:value="${mat.id}" th:text="${mat.nombre}"></option>
+                                        </select>
+                                        <select name="slot_0_Viernes_docenteId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-semibold text-sidebar focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Docente --</option>
+                                            <option th:each="doc : ${docentesList}" th:value="${doc.id}" th:text="${doc.nombreCompleto}"></option>
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <!-- BLOQUE 2 (08:30 - 10:00) -->
+                                <tr class="slot-row hover:bg-slate-50/50">
+                                    <td class="p-3 text-left bg-[#f7fcf6]/50 border-r border-[#c4eec0]/60 font-bold">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <span class="text-sidebar text-[11px] font-black slot-title">Bloque 2</span>
+                                            <button type="button" onclick="eliminarFilaHorario(this)" class="text-text-secondary hover:text-alert-red p-1 rounded cursor-pointer" title="Eliminar bloque">
+                                                <i data-lucide="trash-2" class="size-3.5"></i>
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <input type="time" name="slot_1_inicio" value="08:30" class="p-1 border border-[#c4eec0] rounded text-[10px] font-bold bg-white text-center w-20">
+                                            <span class="text-text-secondary font-bold">-</span>
+                                            <input type="time" name="slot_1_fin" value="10:00" class="p-1 border border-[#c4eec0] rounded text-[10px] font-bold bg-white text-center w-20">
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Lunes -->
+                                    <td class="p-2 border-r border-[#c4eec0]/30">
+                                        <select name="slot_1_Lunes_materiaId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-bold text-text-primary mb-1 focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Materia --</option>
+                                            <option th:each="mat : ${materiasList}" th:value="${mat.id}" th:text="${mat.nombre}"></option>
+                                        </select>
+                                        <select name="slot_1_Lunes_docenteId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-semibold text-sidebar focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Docente --</option>
+                                            <option th:each="doc : ${docentesList}" th:value="${doc.id}" th:text="${doc.nombreCompleto}"></option>
+                                        </select>
+                                    </td>
+
+                                    <!-- Martes -->
+                                    <td class="p-2 border-r border-[#c4eec0]/30">
+                                        <select name="slot_1_Martes_materiaId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-bold text-text-primary mb-1 focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Materia --</option>
+                                            <option th:each="mat : ${materiasList}" th:value="${mat.id}" th:text="${mat.nombre}"></option>
+                                        </select>
+                                        <select name="slot_1_Martes_docenteId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-semibold text-sidebar focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Docente --</option>
+                                            <option th:each="doc : ${docentesList}" th:value="${doc.id}" th:text="${doc.nombreCompleto}"></option>
+                                        </select>
+                                    </td>
+
+                                    <!-- Miércoles -->
+                                    <td class="p-2 border-r border-[#c4eec0]/30">
+                                        <select name="slot_1_Miércoles_materiaId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-bold text-text-primary mb-1 focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Materia --</option>
+                                            <option th:each="mat : ${materiasList}" th:value="${mat.id}" th:text="${mat.nombre}"></option>
+                                        </select>
+                                        <select name="slot_1_Miércoles_docenteId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-semibold text-sidebar focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Docente --</option>
+                                            <option th:each="doc : ${doc定めるList}" th:value="${doc.id}" th:text="${doc.nombreCompleto}"></option>
+                                        </select>
+                                    </td>
+
+                                    <!-- Jueves -->
+                                    <td class="p-2 border-r border-[#c4eec0]/30">
+                                        <select name="slot_1_Jueves_materiaId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-bold text-text-primary mb-1 focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Materia --</option>
+                                            <option th:each="mat : ${materiasList}" th:value="${mat.id}" th:text="${mat.nombre}"></option>
+                                        </select>
+                                        <select name="slot_1_Jueves_docenteId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-semibold text-sidebar focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Docente --</option>
+                                            <option th:each="doc : ${docentesList}" th:value="${doc.id}" th:text="${doc.nombreCompleto}"></option>
+                                        </select>
+                                    </td>
+
+                                    <!-- Viernes -->
+                                    <td class="p-2">
+                                        <select name="slot_1_Viernes_materiaId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-bold text-text-primary mb-1 focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Materia --</option>
+                                            <option th:each="mat : ${materiasList}" th:value="${mat.id}" th:text="${mat.nombre}"></option>
+                                        </select>
+                                        <select name="slot_1_Viernes_docenteId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-semibold text-sidebar focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Docente --</option>
+                                            <option th:each="doc : ${docentesList}" th:value="${doc.id}" th:text="${doc.nombreCompleto}"></option>
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <!-- RECESO -->
+                                <tr class="bg-[#f7fcf6]">
+                                    <td colspan="6" class="p-2 font-black text-sidebar text-[10px] uppercase tracking-wider text-center">
+                                        ☕ Receso Pedagógico (10:00 - 10:30)
+                                    </td>
+                                </tr>
+
+                                <!-- BLOQUE 3 (10:30 - 12:30) -->
+                                <tr class="slot-row hover:bg-slate-50/50">
+                                    <td class="p-3 text-left bg-[#f7fcf6]/50 border-r border-[#c4eec0]/60 font-bold">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <span class="text-sidebar text-[11px] font-black slot-title">Bloque 3</span>
+                                            <button type="button" onclick="eliminarFilaHorario(this)" class="text-text-secondary hover:text-alert-red p-1 rounded cursor-pointer" title="Eliminar bloque">
+                                                <i data-lucide="trash-2" class="size-3.5"></i>
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <input type="time" name="slot_2_inicio" value="10:30" class="p-1 border border-[#c4eec0] rounded text-[10px] font-bold bg-white text-center w-20">
+                                            <span class="text-text-secondary font-bold">-</span>
+                                            <input type="time" name="slot_2_fin" value="12:30" class="p-1 border border-[#c4eec0] rounded text-[10px] font-bold bg-white text-center w-20">
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Lunes -->
+                                    <td class="p-2 border-r border-[#c4eec0]/30">
+                                        <select name="slot_2_Lunes_materiaId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-bold text-text-primary mb-1 focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Materia --</option>
+                                            <option th:each="mat : ${materiasList}" th:value="${mat.id}" th:text="${mat.nombre}"></option>
+                                        </select>
+                                        <select name="slot_2_Lunes_docenteId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-semibold text-sidebar focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Docente --</option>
+                                            <option th:each="doc : ${docentesList}" th:value="${doc.id}" th:text="${doc.nombreCompleto}"></option>
+                                        </select>
+                                    </td>
+
+                                    <!-- Martes -->
+                                    <td class="p-2 border-r border-[#c4eec0]/30">
+                                        <select name="slot_2_Martes_materiaId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-bold text-text-primary mb-1 focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Materia --</option>
+                                            <option th:each="mat : ${materiasList}" th:value="${mat.id}" th:text="${mat.nombre}"></option>
+                                        </select>
+                                        <select name="slot_2_Martes_docenteId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-semibold text-sidebar focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Docente --</option>
+                                            <option th:each="doc : ${docentesList}" th:value="${doc.id}" th:text="${doc.nombreCompleto}"></option>
+                                        </select>
+                                    </td>
+
+                                    <!-- Miércoles -->
+                                    <td class="p-2 border-r border-[#c4eec0]/30">
+                                        <select name="slot_2_Miércoles_materiaId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-bold text-text-primary mb-1 focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Materia --</option>
+                                            <option th:each="mat : ${materiasList}" th:value="${mat.id}" th:text="${mat.nombre}"></option>
+                                        </select>
+                                        <select name="slot_2_Miércoles_docenteId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-semibold text-sidebar focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Docente --</option>
+                                            <option th:each="doc : ${docentesList}" th:value="${doc.id}" th:text="${doc.nombreCompleto}"></option>
+                                        </select>
+                                    </td>
+
+                                    <!-- Jueves -->
+                                    <td class="p-2 border-r border-[#c4eec0]/30">
+                                        <select name="slot_2_Jueves_materiaId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-bold text-text-primary mb-1 focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Materia --</option>
+                                            <option th:each="mat : ${materiasList}" th:value="${mat.id}" th:text="${mat.nombre}"></option>
+                                        </select>
+                                        <select name="slot_2_Jueves_docenteId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-semibold text-sidebar focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Docente --</option>
+                                            <option th:each="doc : ${docentesList}" th:value="${doc.id}" th:text="${doc.nombreCompleto}"></option>
+                                        </select>
+                                    </td>
+
+                                    <!-- Viernes -->
+                                    <td class="p-2">
+                                        <select name="slot_2_Viernes_materiaId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-bold text-text-primary mb-1 focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Materia --</option>
+                                            <option th:each="mat : ${materiasList}" th:value="${mat.id}" th:text="${mat.nombre}"></option>
+                                        </select>
+                                        <select name="slot_2_Viernes_docenteId" class="w-full p-1.5 bg-white border border-[#c4eec0] rounded-lg text-[10px] font-semibold text-sidebar focus:ring-1 focus:ring-sidebar">
+                                            <option value="">-- Docente --</option>
+                                            <option th:each="doc : ${docentesList}" th:value="${doc.id}" th:text="${doc.nombreCompleto}"></option>
+                                        </select>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-3 flex justify-start">
+                        <button type="button" onclick="agregarFilaHorario()" class="px-4 py-2 bg-[#eafbe4] text-sidebar border border-[#c4eec0] hover:bg-[#d8f7cf] font-bold text-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                            <i data-lucide="plus-circle" class="size-4"></i>
+                            <span>+ Agregar Bloque Horario</span>
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-5 border-t border-[#c4eec0]/40 flex justify-between items-center bg-[#f7fcf6] shrink-0">
+                <button type="button" onclick="closeHorarioModal()" class="px-5 py-2.5 text-xs font-black text-text-secondary bg-transparent hover:bg-red-50 hover:text-alert-red rounded-lg transition-all cursor-pointer">
+                    Cancelar
+                </button>
+                <button type="submit" form="form-guardar-horario" class="px-6 py-2.5 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md cursor-pointer">
+                    <i data-lucide="save" class="size-4 stroke-[2.5]"></i>
+                    <span>Guardar Horario Completo</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</th:block>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -9,7 +9,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.5.6</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <groupId>com.siga</groupId>
@@ -20,6 +20,7 @@
 
     <properties>
         <java.version>21</java.version>
+        <tailwind.phase>compile</tailwind.phase>
     </properties>
 
     <dependencies>
@@ -67,6 +68,16 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Flyway Migration -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+
         <!-- HTMX -->
         <dependency>
             <groupId>io.github.wimdeblauwe</groupId>
@@ -102,6 +113,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- MinIO SDK -->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.5.14</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -135,6 +153,25 @@
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
+            </plugin>
+
+            <!-- Tailwind CSS Maven Plugin -->
+            <plugin>
+                <groupId>io.github.4ndreidev</groupId>
+                <artifactId>tailwind-maven-plugin</artifactId>
+                <version>1.1.0</version>
+                <configuration>
+                    <inputFile>${project.basedir}/src/main/resources/static/css/input.css</inputFile>
+                    <outputFile>${project.basedir}/src/main/resources/static/css/output.css</outputFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>${tailwind.phase}</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>

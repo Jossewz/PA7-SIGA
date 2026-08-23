@@ -1,1 +1,142 @@
-﻿<!DOCTYPE html>\n<html xmlns:th='http://www.thymeleaf.org'>\n<body>\n    <section th:fragment='content'>Index clases</section>\n</body>\n</html>
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/base :: html(~{::content})}">
+<head>
+    <title>Gestión de Cursos – IEACI</title>
+</head>
+<body>
+
+<th:block th:fragment="content">
+    <div class="flex flex-col gap-6">
+        <!-- Flash messages -->
+        <div th:if="${mensajeExito}" class="p-4 rounded-xl bg-green-50 border border-green-200 text-xs font-bold text-sidebar flex items-center gap-2">
+            <i data-lucide="check-circle" class="size-4.5 text-sidebar"></i>
+            <span th:text="${mensajeExito}">Éxito</span>
+        </div>
+        <div th:if="${mensajeError}" class="p-4 rounded-xl bg-red-50 border border-red-200 text-xs font-bold text-alert-red flex items-center gap-2">
+            <i data-lucide="alert-triangle" class="size-4.5 text-alert-red"></i>
+            <span th:text="${mensajeError}">Error</span>
+        </div>
+
+        <!-- Header -->
+        <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
+            <div>
+                <h1 class="text-text-primary text-[28px] font-black tracking-tight leading-none mb-1.5">Gestión de Cursos</h1>
+                <p class="text-text-secondary text-sm font-semibold">Configuración de grados, directores de grupo, horarios y planillas académicas.</p>
+            </div>
+            <button type="button" onclick="openCursoModal()"
+                    class="px-5 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md shrink-0 cursor-pointer">
+                <i data-lucide="plus-circle" class="size-4 stroke-[2.5]"></i>
+                <span>Nuevo Curso</span>
+            </button>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-[12px]">
+                    <thead>
+                        <tr class="bg-[#f7fcf6] border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
+                            <th class="p-4.5 pl-6">Grado</th>
+                            <th class="p-4.5">Grupo</th>
+                            <th class="p-4.5">Director de Grupo</th>
+                            <th class="p-4.5">Cupos Totales</th>
+                            <th class="p-4.5">Estudiantes</th>
+                            <th class="p-4.5">Horario</th>
+                            <th class="p-4.5 pr-6 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]">
+                        <tr th:each="c : ${cursosList}" 
+                            class="hover:bg-[#f8fdf6] transition-colors cursor-pointer group curso-tr"
+                            th:data-codigo="${c.codigoCurso}"
+                            onclick="handleRowClick(this, event)">
+                            
+                            <!-- Grado -->
+                            <td class="p-4.5 pl-6 font-black text-sidebar text-[14px]">
+                                <div class="flex items-center gap-2">
+                                    <span th:text="${c.grado}">11°</span>
+                                    <span class="text-[10px] font-bold text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                                        <i data-lucide="external-link" class="size-3 stroke-2"></i> Abrir
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Grupo (Secuencia Numérica) -->
+                            <td class="p-4.5">
+                                <span class="px-2.5 py-1 bg-[#eafbe4] text-sidebar border border-[#c4eec0] rounded-md font-black text-[11px]" th:text="${c.codigoCurso}">11-01</span>
+                            </td>
+
+                            <!-- Director -->
+                            <td class="p-4.5 font-semibold text-text-secondary" th:text="${c.director}">Jorge Eliécer Rojas</td>
+
+                            <!-- Cupos -->
+                            <td class="p-4.5 font-semibold text-text-secondary" th:text="${c.cuposMaximos}">30</td>
+
+                            <!-- Estudiantes -->
+                            <td class="p-4.5 font-semibold text-text-secondary">
+                                <span class="font-bold text-sidebar" th:text="${c.estudiantes}">28</span> / <span th:text="${c.cuposMaximos}">30</span>
+                            </td>
+
+                            <!-- Horario -->
+                            <td class="p-4.5">
+                                <button type="button" 
+                                        th:data-id="${c.id}"
+                                        th:data-codigo="${c.codigoCurso}"
+                                        th:data-tiene="${c.tieneHorario}"
+                                        onclick="handleHorarioBtn(this, event)"
+                                        class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wide leading-none transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                                        th:classappend="${c.tieneHorario} ? 'bg-pill-green text-sidebar border border-[#8ce383] hover:brightness-95' : 'bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200'">
+                                    <i data-lucide="clock" class="size-3.5 stroke-[2.5]"></i>
+                                    <span th:text="${c.tieneHorario} ? 'Horario Asignado' : 'Sin Horario'">Sin Horario</span>
+                                </button>
+                            </td>
+
+                            <!-- Acciones -->
+                            <td class="p-4.5 pr-6 text-right">
+                                <div class="flex justify-end gap-1.5">
+                                    <button type="button" 
+                                            th:data-codigo="${c.codigoCurso}"
+                                            onclick="handleGestionBtn(this, event)"
+                                            class="p-1.5 hover:bg-[#eafbe4] rounded-lg transition-colors text-sidebar cursor-pointer" title="Gestionar Notas y Asistencia">
+                                        <i data-lucide="clipboard-list" class="size-4 stroke-[2]"></i>
+                                    </button>
+                                    <button type="button" 
+                                            th:data-id="${c.id}"
+                                            th:data-codigo="${c.codigoCurso}"
+                                            th:data-grado="${c.grado}"
+                                            th:data-jornada="${c.jornada}"
+                                            th:data-cupos="${c.cuposMaximos}"
+                                            th:data-directorid="${c.directorId}"
+                                            onclick="handleEditarCursoBtn(this, event)"
+                                            class="p-1.5 hover:bg-[#f1fbe4] rounded-lg transition-colors text-sidebar cursor-pointer" title="Editar curso">
+                                        <i data-lucide="edit-3" class="size-4 stroke-[2]"></i>
+                                    </button>
+                                    <form th:action="@{/clases/eliminar}" method="post" class="inline" onsubmit="event.stopPropagation(); return confirm('¿Está seguro de eliminar este curso?');">
+                                        <input type="hidden" name="cursoId" th:value="${c.id}" />
+                                        <button type="submit" onclick="event.stopPropagation();" class="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-alert-red cursor-pointer" title="Eliminar curso">
+                                            <i data-lucide="trash-2" class="size-4 stroke-[2]"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fragmentos Modales -->
+    <div th:replace="~{clases/fragments/modal-curso :: modalCurso}"></div>
+    <div th:replace="~{clases/fragments/modal-horario :: modalHorario}"></div>
+
+    <!-- Script del listado de cursos -->
+    <script th:inline="javascript">
+        window.materiasGlobales = /*[[${materiasList}]]*/ [];
+        window.docentesGlobales = /*[[${docentesList}]]*/ [];
+    </script>
+    <script th:src="@{/js/clases.js}"></script>
+</th:block>
+
+</body>
+</html>

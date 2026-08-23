@@ -1,0 +1,50 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <!-- PASO 1: DATOS PERSONALES -->
+    <div th:fragment="stepPersonal" class="step-content block" data-step="1">
+        <div class="p-9 rounded-2xl bg-[#e3f7dc]/50 border border-[#c4eec0] shadow-sm mb-8">
+            <!-- Título del paso -->
+            <div class="flex gap-4 items-start mb-6">
+                <span class="w-11 h-11 grid place-items-center rounded-xl bg-sidebar text-white shrink-0">
+                    <i data-lucide="user" class="size-6 stroke-[1.75]"></i>
+                </span>
+                <div>
+                    <h2 class="text-sidebar text-[17px] font-black">Datos Personales</h2>
+                    <p class="text-text-secondary text-[11px] font-semibold leading-relaxed mt-0.5">
+                        Por favor, ingrese la información oficial tal como aparece en su documento de identidad. Esta información será validada por el sistema de registro.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Form Grid -->
+            <form id="form-step-1" class="grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5">
+                <div th:replace="~{components/forms/field-input :: fieldInput('Nombres Completos', 'student-names', 'studentNames', ${studentNames}, 'Ej: Juan Antonio', true, 'text', '/matricula/update-name', '#student-names, #student-surnames', 'keyup changed delay:200ms', '#summary-student-name')}"></div>
+                <div th:replace="~{components/forms/field-input :: fieldInput('Apellidos Completos', 'student-surnames', 'studentSurnames', ${studentSurnames}, 'Ej: Pérez Rodríguez', true, 'text', '/matricula/update-name', '#student-names, #student-surnames', 'keyup changed delay:200ms', '#summary-student-name')}"></div>
+                <div th:replace="~{components/forms/field-select :: fieldSelect('Tipo de Documento', 'student-doc-type', 'studentDocType', ${studentDocType}, ${ { 'TI': 'Tarjeta de Identidad (TI)', 'RC': 'Registro Civil (RC)', 'CC': 'Cédula de Ciudadanía (CC)', 'CE': 'Cédula de Extranjería (CE)' } }, true)}"></div>
+                <div th:replace="~{components/forms/field-input :: fieldInput('Número de Documento', 'student-doc-number', 'studentDocNumber', ${studentDocNumber}, 'Ej: 1045328901', true, 'text', null, null, null, null)}"></div>
+                <div th:replace="~{components/forms/field-select :: fieldSelect('Género', 'student-gender', 'studentGender', ${studentGender}, ${ { 'M': 'Masculino', 'F': 'Femenino', 'O': 'Otro' } }, true)}"></div>
+                <div th:replace="~{components/forms/field-phone :: fieldPhone('Teléfono de Contacto', 'student-phone', 'studentPhone', ${studentPhone}, '+57 300 000 0000', true)}"></div>
+                <div th:replace="~{components/forms/field-input :: fieldInput('Fecha de Nacimiento', 'student-birthday', 'studentBirthday', ${studentBirthday}, null, true, 'date', null, null, null, null)}"></div>
+                <div th:replace="~{components/forms/field-input :: fieldInput('Dirección de Residencia', 'student-address', 'studentAddress', ${studentAddress}, 'Calle, Carrera, Barrio y Ciudad', true, 'text', null, null, null, null)}"></div>
+            </form>
+
+            <!-- Footer de protección de datos -->
+            <div class="mt-8 pt-5 border-t border-[#c4eec0]/60 flex gap-2 items-center text-[10px] text-text-secondary font-bold">
+                <i data-lucide="shield-check" class="size-4 text-sidebar stroke-2"></i>
+                <span>Sus datos están protegidos bajo nuestra política de tratamiento de información institucional. <a href="#" class="underline text-sidebar font-black">Ver Políticas</a></span>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="flex items-center justify-between">
+            <button type="button" class="px-5 py-3 text-xs font-black text-sidebar bg-transparent hover:bg-card-green/45 rounded-lg transition-colors">Guardar Borrador</button>
+            <button type="button"
+                    hx-post="/matricula/paso/2"
+                    hx-include="#form-step-1"
+                    hx-target="#step-container"
+                    class="px-6 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md">
+                <span>Siguiente Paso</span>
+                <i data-lucide="arrow-right" class="size-4 stroke-[2.5]"></i>
+            </button>
+        </div>
+    </div>
+</th:block>

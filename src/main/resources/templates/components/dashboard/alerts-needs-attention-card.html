@@ -1,0 +1,35 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <!-- ALERTAS OPERATIVAS (NECESITA ATENCIÓN) -->
+    <article th:fragment="alertsNeedsAttentionCard()" 
+             class="p-6 rounded-xl bg-white border border-[#c4eec0]/40 shadow-soft flex flex-col h-full">
+        <h3 class="flex items-center gap-2 text-sidebar text-base font-black uppercase tracking-wider mb-5">
+            <i data-lucide="bell" class="size-[18px] text-alert-red stroke-[2.2]"></i>
+            Necesita Atención
+        </h3>
+
+        <div class="grid gap-3 flex-1 overflow-y-auto max-h-[340px] pr-1">
+            <div th:if="${#lists.isEmpty(stats.alertasOperativas)}" class="p-6 text-center text-xs text-text-muted italic">
+                No hay alertas operativas pendientes en este momento.
+            </div>
+
+            <div th:each="alerta : ${stats.alertasOperativas}" 
+                 class="flex items-start gap-3 p-3 rounded-lg text-xs"
+                 th:classappend="${alerta.tipo == 'alert'} ? 'bg-red-50/50 border border-[#ffc2c4]/45' : 'bg-amber-50/50 border border-amber-200/40'">
+                <i th:attr="data-lucide=${alerta.icono ?: 'alert-triangle'}" 
+                   class="size-4.5 shrink-0 stroke-[2] mt-0.5"
+                   th:classappend="${alerta.tipo == 'alert'} ? 'text-alert-red' : 'text-[#e6a100]'"></i>
+                <div class="flex-1">
+                    <p class="font-extrabold text-text-primary" th:text="${alerta.titulo}">Alerta pendiente</p>
+                    <p class="text-[10px] text-text-muted mt-0.5" th:text="${alerta.subtitulo}">Detalle</p>
+                </div>
+            </div>
+        </div>
+
+        <a th:href="@{/reportes}" 
+           class="w-full mt-4 py-2 bg-sidebar text-white text-xs font-black rounded-lg transition-all hover:bg-opacity-90 shadow-soft text-center block">
+            Revisar Todos los Reportes
+        </a>
+    </article>
+
+</th:block>

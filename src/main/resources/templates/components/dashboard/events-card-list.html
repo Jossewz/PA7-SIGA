@@ -1,0 +1,18 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <!-- PRÓXIMOS EVENTOS -->
+    <article th:fragment="eventsCardList()" 
+             class="p-6 rounded-xl bg-[#eafbe4]/40 border border-[#c4eec0]/40 shadow-soft flex flex-col h-full">
+        <h3 class="flex items-center gap-2 text-sidebar text-base font-black uppercase tracking-wider mb-5">
+            <i data-lucide="calendar-days" class="size-[18px] stroke-[2.2]"></i>
+            Próximos Eventos
+        </h3>
+
+        <div class="grid gap-3.5 flex-1 justify-center items-center">
+            <div class="p-6 text-center text-xs text-text-muted italic">
+                No hay eventos programados próximamente.
+            </div>
+        </div>
+    </article>
+
+</th:block>

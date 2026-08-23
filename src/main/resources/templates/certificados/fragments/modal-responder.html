@@ -1,0 +1,85 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <!-- MODAL: RESPONDER Y ADJUNTAR ARCHIVO (VISTA PERSONAL ADMINISTRATIVO) -->
+    <div th:fragment="modalResponder" id="modal-responder-solicitud" class="hidden fixed inset-0 bg-[#0d4117]/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-[#c4eec0] shadow-xl max-w-lg w-full flex flex-col overflow-hidden transition-all scale-95 opacity-0 duration-300" id="dialog-responder">
+            <!-- Modal Header -->
+            <div class="p-5 border-b border-[#c4eec0]/40 flex justify-between items-center bg-white shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="size-10 rounded-xl bg-[#eafbe4] text-sidebar grid place-items-center border border-[#c4eec0]">
+                        <i data-lucide="file-check-2" class="size-5 stroke-[2.5]"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sidebar text-base font-black" id="resp-titulo">Atender Solicitud</h3>
+                        <span class="text-[10px] font-bold text-text-secondary" id="resp-codigo">CERT-2026-003</span>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModalResponder()" class="p-1 hover:bg-red-50 text-text-secondary hover:text-alert-red rounded-lg transition-colors cursor-pointer">
+                    <i data-lucide="x" class="size-5 stroke-2"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <form id="form-responder-admin" th:action="@{/certificados/responder}" method="post" enctype="multipart/form-data" class="p-6 space-y-4 bg-white">
+                <input type="hidden" id="resp-solicitud-id" name="solicitudId">
+
+                <!-- Detalle del Estudiante -->
+                <div class="p-3.5 rounded-xl bg-[#f7fcf6] border border-[#c4eec0]/60 space-y-1">
+                    <div class="text-[11px] font-bold text-text-primary">
+                        Estudiante: <strong id="resp-estudiante-nombre" class="text-sidebar">Mateo Álvarez Restrepo</strong>
+                    </div>
+                    <div class="text-[11px] font-semibold text-text-secondary">
+                        Certificado: <span id="resp-tipo-cert" class="font-bold">Paz y salvo</span>
+                    </div>
+                    <div class="text-[10px] font-semibold text-text-muted" id="resp-motivo-txt">
+                        Motivo: Verificación de pagos
+                    </div>
+                </div>
+
+                <!-- Estado de la Respuesta -->
+                <div>
+                    <label for="resp-estado-select" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Estado de la Respuesta</label>
+                    <select id="resp-estado-select" name="decision" required class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-sidebar focus:outline-none">
+                        <option value="Resuelto">Emitir / Aprobar Certificado (Resuelto)</option>
+                        <option value="Rechazado">Rechazar Solicitud</option>
+                    </select>
+                </div>
+
+                <!-- Mensaje de Respuesta para el Estudiante -->
+                <div>
+                    <label for="resp-mensaje-txt" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Mensaje o Respuesta para el Estudiante <span class="text-alert-red">*</span></label>
+                    <textarea id="resp-mensaje-txt" name="mensajeRespuesta" rows="3" required placeholder="Escriba aquí las indicaciones o la confirmación del trámite..."
+                              class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none resize-none"></textarea>
+                </div>
+
+                <!-- Cargador de Archivos Adjuntos -->
+                <div>
+                    <label class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1.5 block">Adjuntar Certificado Digital (PDF)</label>
+                    <label for="resp-file-input" class="flex items-center justify-between p-3.5 bg-white border border-[#c4eec0] rounded-xl cursor-pointer hover:bg-[#f1fbe4]/60 transition-colors">
+                        <input type="file" id="resp-file-input" name="archivoPDF" class="hidden" accept="application/pdf" onchange="actualizarNombreFileAdjunto(this)">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="size-8 rounded-lg bg-[#f1fbe4] text-sidebar flex items-center justify-center shrink-0">
+                                <i data-lucide="paperclip" class="size-4 stroke-2"></i>
+                            </span>
+                            <strong class="text-text-primary text-[11px] font-bold text-ellipsis overflow-hidden whitespace-nowrap" id="txt-file-adjunto">Certificado_Oficial.pdf</strong>
+                        </div>
+                        <span class="px-3.5 py-1.5 bg-sidebar text-white text-[10px] font-black rounded-lg hover:brightness-97 transition-all flex items-center gap-1 shrink-0">
+                            <i data-lucide="upload" class="size-3 stroke-2"></i>
+                            <span>Seleccionar PDF</span>
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Modal Footer Buttons -->
+                <div class="pt-3 border-t border-[#c4eec0]/40 flex justify-between items-center">
+                    <button type="button" onclick="closeModalResponder()" class="px-4 py-2 text-xs font-black text-text-secondary hover:text-alert-red cursor-pointer">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-xl transition-all flex items-center gap-1.5 shadow-md cursor-pointer">
+                        <i data-lucide="check" class="size-4 stroke-[2.5]"></i>
+                        <span>Enviar Respuesta al Estudiante</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</th:block>

@@ -1,0 +1,16 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <!-- PANEL DE BIENVENIDA -->
+    <section th:fragment="welcomePanel(adminName, dateText)" 
+             class="relative min-h-[140px] flex items-center justify-between p-8 rounded-xl overflow-hidden bg-sidebar text-sidebar-text shadow-soft">
+        <div class="z-10">
+            <h1 class="mb-2 text-white text-3xl md:text-4xl leading-none font-black tracking-tight" 
+                th:text="'Bienvenido, ' + ${adminName} + '.'">Bienvenido, Admin.</h1>
+            <p class="text-sidebar-text/86 text-sm font-medium" th:text="${dateText}">Resumen de analítica institucional para hoy.</p>
+        </div>
+        <i data-lucide="zap" 
+           class="absolute -right-6 -bottom-8 w-64 h-48 text-[#2e802d]/45 fill-current stroke-0 -rotate-9 pointer-events-none" 
+           aria-hidden="true"></i>
+    </section>
+
+</th:block>

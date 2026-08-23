@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/base :: html(~{::content})}">
+<head>
+    <title th:text="${title}">Certificados – IEACI</title>
+</head>
+<body>
+
+<th:block th:fragment="content">
+    <div class="flex flex-col gap-6 flex-1">
+        
+        <!-- Banners de Notificación Flash -->
+        <div th:if="${mensajeExito}" class="p-4 rounded-xl bg-pill-green text-sidebar border border-[#8ce383] text-xs font-bold flex items-center justify-between shadow-2xs">
+            <div class="flex items-center gap-2">
+                <i data-lucide="check-circle-2" class="size-4 stroke-[2.5]"></i>
+                <span th:text="${mensajeExito}"></span>
+            </div>
+        </div>
+        <div th:if="${mensajeError}" class="p-4 rounded-xl bg-pill-red text-alert-red border border-red-300 text-xs font-bold flex items-center justify-between shadow-2xs">
+            <div class="flex items-center gap-2">
+                <i data-lucide="alert-circle" class="size-4 stroke-[2.5]"></i>
+                <span th:text="${mensajeError}"></span>
+            </div>
+        </div>
+
+        <!-- Header Principal y Conmutador de Rol para Pruebas -->
+        <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
+            <div>
+                <h1 class="text-text-primary text-[28px] font-black tracking-tight leading-none mb-1.5">Módulo de Certificados y Constancias</h1>
+                <p class="text-text-secondary text-sm font-semibold">Solicitud, expedición y descarga de constancias académicas y administrativas.</p>
+            </div>
+
+            <!-- Selector / Toggle de Rol -->
+            <div class="bg-white rounded-xl border border-[#c4eec0]/60 p-1.5 flex items-center gap-1 shadow-2xs">
+                <button type="button" onclick="cambiarRolSimulado('estudiante')" id="btn-rol-estudiante"
+                        class="px-3.5 py-2 rounded-lg text-xs font-black transition-all flex items-center gap-2 cursor-pointer bg-sidebar text-white shadow-2xs">
+                    <i data-lucide="user" class="size-4 stroke-[2.5]"></i>
+                    <span>Rol Estudiante</span>
+                </button>
+                <button type="button" onclick="cambiarRolSimulado('admin')" id="btn-rol-admin"
+                        class="px-3.5 py-2 rounded-lg text-xs font-bold text-text-secondary hover:text-sidebar hover:bg-[#f7fcf6] transition-all flex items-center gap-2 cursor-pointer">
+                    <i data-lucide="shield-check" class="size-4 stroke-[2.5]"></i>
+                    <span>Rol Personal Administrativo</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- VISTA: ROL ESTUDIANTE -->
+        <div id="vista-estudiante" class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Columna Izquierda: Formulario -->
+                <div class="lg:col-span-5 bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2.5 pb-4 mb-4 border-b border-[#c4eec0]/40">
+                            <div class="size-9 rounded-lg bg-[#eafbe4] text-sidebar grid place-items-center border border-[#c4eec0]">
+                                <i data-lucide="file-plus-2" class="size-5 stroke-[2.5]"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sidebar text-base font-black">Solicitar Nuevo Certificado</h3>
+                                <p class="text-text-secondary text-[11px] font-semibold">Diligencie los campos requeridos para procesar su trámite.</p>
+                            </div>
+                        </div>
+
+                        <form id="form-solicitar-certificado" th:action="@{/certificados/solicitar}" method="post" class="space-y-4">
+                            <div class="flex flex-col">
+                                <label for="select-tipo-cert" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1">
+                                    Tipo de Certificado o Constancia <span class="text-alert-red">*</span>
+                                </label>
+                                <select id="select-tipo-cert" name="tipo" required onchange="actualizarDescripcionCert(this.value)"
+                                        class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                                    <option value="" disabled selected>-- Seleccione un certificado --</option>
+                                    <optgroup label="Certificados Académicos y de Notas">
+                                        <option value="Certificado de estudios">Certificado de estudios</option>
+                                        <option value="Certificado de notas">Certificado de notas</option>
+                                        <option value="Copia del acta de grado o diploma">Copia del acta de grado o diploma</option>
+                                    </optgroup>
+                                    <optgroup label="Constancias Administrativas">
+                                        <option value="Constancia de matrícula">Constancia de matrícula</option>
+                                        <option value="Paz y salvo">Paz y salvo</option>
+                                        <option value="Certificado de comportamiento o conducta">Certificado de comportamiento o conducta</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+
+                            <div id="caja-desc-cert" class="p-3.5 rounded-xl bg-[#f7fcf6] border border-[#c4eec0]/60 text-text-secondary text-[11px] font-semibold space-y-1">
+                                <div class="flex items-center gap-1.5 font-bold text-sidebar">
+                                    <i data-lucide="info" class="size-4 stroke-[2.5]"></i>
+                                    <span id="desc-title">Seleccione un certificado</span>
+                                </div>
+                                <p id="desc-body">Elija una opción del listado para conocer los detalles del trámite.</p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label for="c-ano" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Año Lectivo</label>
+                                    <input type="number" id="c-ano" name="anoLectivo" value="2026" required class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                                </div>
+                                <div>
+                                    <label for="c-grado-ref" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Grado Referencia</label>
+                                    <input type="text" id="c-grado-ref" name="gradoReferencia" value="11°" required class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="c-motivo" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Motivo o Entidad Destino</label>
+                                <textarea id="c-motivo" name="motivo" rows="3" placeholder="Ej: Trámite de subsidio en Caja de Compensación..." required
+                                          class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none resize-none"></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-xl transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer">
+                                <i data-lucide="send" class="size-4 stroke-[2.5]"></i>
+                                <span>Enviar Solicitud a Administración</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Mis Solicitudes -->
+                <div class="lg:col-span-7 bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden flex flex-col">
+                    <div class="p-4 border-b border-[#c4eec0]/30 bg-[#f7fcf6] flex justify-between items-center">
+                        <div class="flex items-center gap-2 text-sidebar font-black text-xs uppercase tracking-wider">
+                            <i data-lucide="history" class="size-4 stroke-[2.5]"></i>
+                            <span>Historial de Mis Solicitudes</span>
+                        </div>
+                        <span class="text-[11px] font-bold text-text-secondary">Estudiante: Mateo Álvarez</span>
+                    </div>
+
+                    <div class="overflow-x-auto flex-1">
+                        <table class="w-full text-left border-collapse text-[12px]">
+                            <thead>
+                                <tr class="bg-white border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
+                                    <th class="p-3.5 pl-5">Código</th>
+                                    <th class="p-3.5">Certificado</th>
+                                    <th class="p-3.5">Fecha</th>
+                                    <th class="p-3.5 text-center">Estado</th>
+                                    <th class="p-3.5 pr-5 text-right">Respuesta / Documento</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]" id="tbody-solicitudes-estudiante">
+                                <th:block th:each="sol : ${solicitudesMock}">
+                                    <tr class="hover:bg-[#fcfdfb] transition-colors">
+                                        <td class="p-3.5 pl-5 font-black text-sidebar text-[11px]" th:text="${sol.id}">CERT-2026-001</td>
+                                        <td class="p-3.5">
+                                            <div class="font-black text-text-primary text-[12px]" th:text="${sol.tipo}">Constancia de matrícula</div>
+                                            <div class="text-[10px] font-semibold text-text-secondary" th:text="${sol.motivo}">Trámite EPS</div>
+                                        </td>
+                                        <td class="p-3.5 font-semibold text-text-secondary" th:text="${sol.fecha}">2026-07-28</td>
+                                        <td class="p-3.5 text-center">
+                                            <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide"
+                                                  th:classappend="${sol.estado == 'Resuelto'} ? 'bg-pill-green text-sidebar border border-[#8ce383]' : 'bg-amber-100 text-amber-800 border border-amber-300'"
+                                                  th:text="${sol.estado}">Resuelto</span>
+                                        </td>
+                                        <td class="p-3.5 pr-5 text-right">
+                                            <div th:if="${sol.estado == 'Resuelto'}" class="flex justify-end gap-1.5">
+                                                <button type="button" 
+                                                        th:data-id="${sol.id}"
+                                                        th:data-tipo="${sol.tipo}"
+                                                        th:data-mensaje="${sol.mensajeRespuesta}"
+                                                        th:data-archivo="${sol.archivoAdjunto}"
+                                                        onclick="openModalVerRespuesta(this)"
+                                                        class="px-3 py-1.5 bg-[#eafbe4] text-sidebar border border-[#c4eec0] hover:bg-[#d8f5ce] rounded-lg text-[10px] font-black transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                                                    <i data-lucide="download" class="size-3.5 stroke-[2.5]"></i>
+                                                    <span>Ver y Descargar</span>
+                                                </button>
+                                            </div>
+                                            <span th:if="${sol.estado != 'Resuelto'}" class="text-[11px] font-bold text-text-secondary italic">En proceso...</span>
+                                        </td>
+                                    </tr>
+                                </th:block>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA: ROL PERSONAL ADMINISTRATIVO -->
+        <div id="vista-admin" class="hidden space-y-6">
+            <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
+                <div class="p-4 border-b border-[#c4eec0]/30 bg-[#f7fcf6] flex justify-between items-center flex-wrap gap-3">
+                    <div class="flex items-center gap-2 text-sidebar font-black text-xs uppercase tracking-wider">
+                        <i data-lucide="inbox" class="size-4 stroke-[2.5]"></i>
+                        <span>Bandeja de Solicitudes de Certificados Recibidas</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="text-[11px] font-bold text-text-secondary">Filtrar:</span>
+                        <select onchange="filtrarTablaAdmin(this.value)" class="p-1.5 bg-white border border-[#c4eec0] rounded-lg text-xs font-bold text-sidebar focus:outline-none">
+                            <option value="todos">Todas las solicitudes</option>
+                            <option value="Pendiente">Pendientes</option>
+                            <option value="Resuelto">Resueltas</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-[12px]">
+                        <thead>
+                            <tr class="bg-white border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
+                                <th class="p-3.5 pl-5">Código</th>
+                                <th class="p-3.5">Estudiante</th>
+                                <th class="p-3.5">Certificado Solicitado</th>
+                                <th class="p-3.5">Fecha</th>
+                                <th class="p-3.5 text-center">Estado</th>
+                                <th class="p-3.5 pr-5 text-right">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]" id="tbody-admin-solicitudes">
+                            <tr th:each="sol : ${solicitudesMock}" class="hover:bg-[#fcfdfb] transition-colors row-solicitud-admin" th:data-estado="${sol.estado}">
+                                <td class="p-3.5 pl-5 font-black text-sidebar text-[11px]" th:text="${sol.id}">CERT-2026-001</td>
+                                <td class="p-3.5">
+                                    <div class="font-black text-text-primary text-[12px]" th:text="${sol.estudiante}">Mateo Álvarez Restrepo</div>
+                                    <div class="text-[10px] font-semibold text-text-secondary" th:text="${'Doc: ' + sol.documento + ' • ' + sol.grado}">Doc: 1098432101 • 11° - 01</div>
+                                </td>
+                                <td class="p-3.5">
+                                    <div class="font-bold text-sidebar text-[12px]" th:text="${sol.tipo}">Constancia de matrícula</div>
+                                    <div class="text-[10px] font-semibold text-text-secondary" th:text="${sol.motivo}">Trámite EPS</div>
+                                </td>
+                                <td class="p-3.5 font-semibold text-text-secondary" th:text="${sol.fecha}">2026-07-31</td>
+                                <td class="p-3.5 text-center">
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide"
+                                          th:classappend="${sol.estado == 'Resuelto'} ? 'bg-pill-green text-sidebar border border-[#8ce383]' : 'bg-amber-100 text-amber-800 border border-amber-300'"
+                                          th:text="${sol.estado}">Pendiente</span>
+                                </td>
+                                <td class="p-3.5 pr-5 text-right">
+                                    <button type="button" 
+                                            th:data-id="${sol.id}"
+                                            th:data-estudiante="${sol.estudiante}"
+                                            th:data-tipo="${sol.tipo}"
+                                            th:data-motivo="${sol.motivo}"
+                                            th:data-estado="${sol.estado}"
+                                            onclick="openModalResponder(this)"
+                                            class="px-3.5 py-1.5 text-[11px] font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-1.5 ml-auto cursor-pointer shadow-2xs">
+                                        <i data-lucide="message-square-plus" class="size-3.5 stroke-[2.5]"></i>
+                                        <span th:text="${sol.estado == 'Resuelto'} ? 'Ver / Modificar' : 'Atender Solicitud'">Atender Solicitud</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Fragmentos de Modales -->
+    <div th:replace="~{certificados/fragments/modal-ver-respuesta :: modalVerRespuesta}"></div>
+    <div th:replace="~{certificados/fragments/modal-responder :: modalResponder}"></div>
+
+    <!-- Script de comportamiento del módulo -->
+    <script th:src="@{/js/certificados.js}"></script>
+</th:block>
+
+</body>
+</html>

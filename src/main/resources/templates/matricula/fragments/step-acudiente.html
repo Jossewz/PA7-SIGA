@@ -1,0 +1,77 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <!-- PASO 2: INFORMACIÓN DEL ACUDIENTE -->
+    <div th:fragment="stepAcudiente" class="step-content block" data-step="2">
+        <div class="p-9 rounded-2xl bg-[#e3f7dc]/50 border border-[#c4eec0] shadow-sm mb-8">
+            <!-- Título del paso -->
+            <div class="flex gap-4 items-start mb-6">
+                <span class="w-11 h-11 grid place-items-center rounded-xl bg-sidebar text-white shrink-0">
+                    <i data-lucide="users-2" class="size-6 stroke-[1.75]"></i>
+                </span>
+                <div>
+                    <h2 class="text-sidebar text-[17px] font-black">Información del Acudiente</h2>
+                    <p class="text-text-secondary text-[11px] font-semibold leading-relaxed mt-0.5">
+                        Ingrese los datos de la persona responsable del estudiante
+                    </p>
+                </div>
+            </div>
+
+            <!-- Form Grid -->
+            <form id="form-step-2" class="grid grid-cols-2 max-md:grid-cols-1 gap-x-6 gap-y-5 mb-6">
+                <div th:replace="~{components/forms/field-input :: fieldInput('Nombres Completos', 'parent-names', 'parentNames', ${parentNames}, 'Ej: Martha Cecilia', true, 'text', null, null, null, null)}"></div>
+                <div th:replace="~{components/forms/field-input :: fieldInput('Apellidos Completos', 'parent-surnames', 'parentSurnames', ${parentSurnames}, 'Ej: Rodríguez Silva', true, 'text', null, null, null, null)}"></div>
+                <div th:replace="~{components/forms/field-select :: fieldSelect('Tipo de Documento', 'parent-doc-type', 'parentDocType', ${parentDocType}, ${ { 'CC': 'Cédula de Ciudadanía', 'CE': 'Cédula de Extranjería', 'PA': 'Pasaporte', 'TI': 'Tarjeta de Identidad' } }, true)}"></div>
+                <div th:replace="~{components/forms/field-input :: fieldInput('Número de Identificación', 'parent-id', 'parentId', ${parentId}, 'CC / CE / Nit', true, 'text', null, null, null, null)}"></div>
+                <div th:replace="~{components/forms/field-select :: fieldSelect('Parentesco', 'parent-relation', 'parentRelation', ${parentRelation}, ${ { 'madre': 'Madre', 'padre': 'Padre', 'tutor': 'Tutor Legal', 'otro': 'Otro' } }, true)}"></div>
+                <div th:replace="~{components/forms/field-phone :: fieldPhone('Teléfono de Contacto', 'parent-phone', 'parentPhone', ${parentPhone}, '+57 300 000 0000', true)}"></div>
+                <div class="col-span-2 max-md:col-span-1" th:replace="~{components/forms/field-input :: fieldInput('Dirección de Residencia', 'parent-address', 'parentAddress', ${parentAddress}, 'Calle, Carrera, Barrio', true, 'text', null, null, null, null)}"></div>
+            </form>
+
+            <!-- Upload Section -->
+            <div>
+                <label class="block mb-3.5 text-[10px] font-black tracking-wider text-text-secondary uppercase">Documento de Identidad (Acudiente)</label>
+                <div th:fragment="parentDocContainer" id="parent-doc-container">
+                    <label for="parent-doc-file" class="w-full border-2 border-dashed border-[#b7f3ae] bg-[#f1fbe4]/60 rounded-xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-[#e6f7d5]/60 transition-colors block">
+                        <input type="file" class="hidden file-input" id="parent-doc-file" name="file" accept="application/pdf,image/*"
+                               hx-post="/matricula/upload-file"
+                               hx-vals='{"fieldName": "parentDoc"}'
+                               hx-encoding="multipart/form-data"
+                               hx-target="#parent-doc-container"
+                               hx-swap="outerHTML">
+                        <i data-lucide="file-up" class="size-10 text-sidebar-border stroke-[1.5]"></i>
+                        <div class="text-center">
+                            <strong class="block text-text-primary text-[12px] font-black" th:text="${parentDocName != null ? 'Archivo seleccionado: ' + parentDocName : 'Haz clic para subir o arrastra tu archivo aquí'}">Haz clic para subir o arrastra tu archivo aquí</strong>
+                            <span class="text-text-secondary text-[10px] font-bold uppercase">pdf, jpg o png (máximo 5mb)</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="flex items-center justify-between">
+            <button type="button"
+                    hx-post="/matricula/paso/1"
+                    hx-include="#form-step-2"
+                    hx-target="#step-container"
+                    class="px-6 py-3 text-xs font-black text-sidebar bg-transparent hover:bg-card-green/45 rounded-lg transition-colors flex items-center gap-2">
+                <i data-lucide="arrow-left" class="size-4 stroke-[2.5]"></i>
+                <span>Anterior</span>
+            </button>
+            <button type="button"
+                    hx-post="/matricula/paso/3"
+                    hx-include="#form-step-2"
+                    hx-target="#step-container"
+                    class="px-6 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md">
+                <span>Siguiente Paso</span>
+                <i data-lucide="arrow-right" class="size-4 stroke-[2.5]"></i>
+            </button>
+        </div>
+    </div>
+
+    <th:block th:fragment="parentDocResponse">
+        <div th:replace="~{matricula/fragments/step-acudiente :: parentDocContainer}"></div>
+        <div id="summary-container" hx-swap-oob="true" class="flex-1 flex flex-col h-full min-h-0">
+            <div th:replace="~{components/forms/step-summary :: stepSummary}"></div>
+        </div>
+    </th:block>
+</th:block>

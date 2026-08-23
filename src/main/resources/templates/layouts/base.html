@@ -1,15 +1,78 @@
-﻿<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html
+lang="es"
+xmlns:th="http://www.thymeleaf.org"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+th:fragment="html(content)">
+
+
 <head>
-    <meta charset="UTF-8" />
-    <title th:replace="this::title">Colegio</title>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title
+        th:text="${title ?: 'SIGA'}">
+        SIGA
+    </title>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet"
+          th:href="@{/css/output.css}">
+
+    <!-- HTMX v2 -->
+    <script
+      src="https://unpkg.com/htmx.org@2.0.10/dist/htmx.min.js">
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
 </head>
+
 <body>
-    <div th:replace="layouts/navbar :: navbar"></div>
-    <div th:replace="layouts/sidebar :: sidebar"></div>
-    <main>
-        <section th:fragment="content">Contenido</section>
+
+<div class="flex min-h-screen bg-page-bg max-md:flex-col">
+
+    <!-- SIDEBAR -->
+    <aside
+      th:replace="
+      ~{layouts/sidebar :: sidebar(
+        activePage=${activePage ?: 'dashboard'},
+        bottomUrl='/soporte',
+        bottomText='Soporte Técnico'
+      )}">
+    </aside>
+
+    <!-- CONTENIDO -->
+    <main class="flex-1 min-w-0 flex flex-col">
+
+        <!-- NAVBAR -->
+        <header
+          th:replace="
+          ~{layouts/navbar :: navbar}">
+        </header>
+
+        <!-- CONTENIDO DINÁMICO -->
+        <section
+          class="flex-1 p-[28px_32px_32px] max-md:p-5 flex flex-col">
+
+            <th:block
+              th:replace="${content}">
+            </th:block>
+
+        </section>
+
     </main>
-    <div th:replace="layouts/footer :: footer"></div>
+
+</div>
+
+<script>
+    lucide.createIcons();
+</script>
+
 </body>
 </html>

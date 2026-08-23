@@ -1,0 +1,113 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <!-- MODAL REGISTRAR PERSONAL -->
+    <div th:fragment="modalPersonal" id="modal-personal" class="hidden fixed inset-0 bg-[#0d4117]/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-[#c4eec0] shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden transition-all scale-95 opacity-0 duration-300" id="modal-personal-dialog">
+            
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-[#c4eec0]/40 flex justify-between items-center bg-white shrink-0">
+                <div>
+                    <h3 class="text-sidebar text-[18px] font-black">Registrar Nuevo Miembro del Personal</h3>
+                    <p class="text-text-secondary text-[11px] font-bold">Ingrese los datos para la vinculación institucional de docentes o administrativos.</p>
+                </div>
+                <button type="button" onclick="closeModalPersonal()" class="p-1 hover:bg-red-50 text-text-secondary hover:text-alert-red rounded-lg transition-colors cursor-pointer">
+                    <i data-lucide="x" class="size-5 stroke-2"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content (Form) -->
+            <div class="p-6 overflow-y-auto flex-1 bg-white">
+                <form id="form-personal" th:action="@{/personal}" method="POST" class="grid grid-cols-2 gap-x-5 gap-y-4">
+                    
+                    <!-- Tipo de Personal -->
+                    <div class="col-span-2 flex flex-col">
+                        <label for="p-tipo" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1">
+                            Tipo de Personal / Rol <span class="text-sidebar">*</span>
+                        </label>
+                        <select id="p-tipo" name="tipo" required class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                            <option value="DOCENTE">Docente / Profesor</option>
+                            <option value="ADMINISTRATIVO">Personal Administrativo</option>
+                            <option value="DIRECTIVO">Directivo / Rectoría</option>
+                        </select>
+                    </div>
+
+                    <!-- Nombres y Apellidos -->
+                    <div class="flex flex-col">
+                        <label for="p-nombres" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1">
+                            Nombres Completos <span class="text-sidebar">*</span>
+                        </label>
+                        <input type="text" id="p-nombres" name="nombres" required placeholder="Ej: Carlos Andrés" class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                    </div>
+
+                    <div class="flex flex-col">
+                        <label for="p-apellidos" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1">
+                            Apellidos <span class="text-sidebar">*</span>
+                        </label>
+                        <input type="text" id="p-apellidos" name="apellidos" required placeholder="Ej: Mendoza Pérez" class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                    </div>
+
+                    <!-- Tipo y Número de Documento -->
+                    <div class="flex flex-col">
+                        <label for="p-tipo-doc" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1">
+                            Tipo Documento <span class="text-sidebar">*</span>
+                        </label>
+                        <select id="p-tipo-doc" name="tipoDocumento" required class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                            <option value="CC">Cédula de Ciudadanía</option>
+                            <option value="CE">Cédula de Extranjería</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col">
+                        <label for="p-doc" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1">
+                            Número Documento <span class="text-sidebar">*</span>
+                        </label>
+                        <input type="text" id="p-doc" name="numeroDocumento" required placeholder="Ej: 1098432101" class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                    </div>
+
+                    <!-- Correo y Teléfono -->
+                    <div class="flex flex-col">
+                        <label for="p-email" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1">
+                            Correo Electrónico Institucional <span class="text-sidebar">*</span>
+                        </label>
+                        <input type="email" id="p-email" name="email" required placeholder="ejemplo@ieaci.edu.co" class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                    </div>
+
+                    <div class="flex flex-col">
+                        <label for="p-phone" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1">
+                            Teléfono de Contacto <span class="text-sidebar">*</span>
+                        </label>
+                        <input type="tel" id="p-phone" name="telefono" required placeholder="3001234567" class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                    </div>
+
+                    <!-- Asignatura / Cargo -->
+                    <div class="col-span-2 flex flex-col">
+                        <label for="p-cargo" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1">
+                            Cargo / Asignatura Principal <span class="text-sidebar">*</span>
+                        </label>
+                        <input type="text" id="p-cargo" name="cargo" required placeholder="Ej: Docente de Matemáticas / Secretario" class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                    </div>
+
+                    <!-- Titulación / Profesión -->
+                    <div class="col-span-2 flex flex-col">
+                        <label for="p-estudios" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1">
+                            Titulación Profesional / Estudios
+                        </label>
+                        <input type="text" id="p-estudios" name="estudios" placeholder="Ej: Licenciado en Educación Básica" class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-6 border-t border-[#c4eec0]/40 flex justify-between items-center bg-[#f7fcf6] shrink-0">
+                <button type="button" onclick="closeModalPersonal()" class="px-5 py-3 text-xs font-black text-text-secondary bg-transparent hover:bg-red-50 hover:text-alert-red rounded-lg transition-all cursor-pointer">
+                    Cancelar
+                </button>
+                <button type="submit" form="form-personal" class="px-6 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md cursor-pointer">
+                    <i data-lucide="check" class="size-4 stroke-[2.5]"></i>
+                    <span>Registrar Personal</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+</th:block>

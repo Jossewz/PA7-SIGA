@@ -13,4 +13,6 @@ public interface CursoEstudianteRepository extends JpaRepository<CursoEstudiante
     List<CursoEstudiante> findByCursoId(UUID cursoId);
     Optional<CursoEstudiante> findByCursoIdAndEstudianteIdAndAnoLectivo(UUID cursoId, UUID estudianteId, String anoLectivo);
     List<CursoEstudiante> findByEstudianteId(UUID estudianteId);
+    boolean existsByEstudianteIdAndAnoLectivo(UUID estudianteId, String anoLectivo);
+    boolean existsByCursoIdAndEstudianteId(UUID cursoId, UUID estudianteId);
 }

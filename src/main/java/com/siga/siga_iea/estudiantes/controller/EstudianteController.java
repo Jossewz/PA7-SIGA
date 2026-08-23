@@ -192,6 +192,19 @@ public class EstudianteController {
         return "redirect:/estudiantes/perfil/" + id;
     }
 
+    @PostMapping("/estudiantes/{id}/eliminar")
+    public String eliminarEstudiante(@PathVariable String id, RedirectAttributes redirectAttributes) {
+        try {
+            UUID uuid = UUID.fromString(id);
+            estudianteService.eliminarEstudiante(uuid);
+            redirectAttributes.addFlashAttribute("mensajeExito", "Estudiante y todos sus registros vinculados fueron eliminados correctamente.");
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al eliminar estudiante: " + ex.getMessage());
+        }
+
+        return "redirect:/estudiantes";
+    }
+
     private String resolverFotoUrl(Estudiante e, Optional<Matricula> matOpt) {
         String key = e.getFotoKey();
 

@@ -50,12 +50,22 @@ public class Clase {
     public void setId(UUID id) { this.id = id; }
 
     public String getGrado() { return grado; }
-    public void setGrado(String grado) { this.grado = grado; }
+    public void setGrado(String grado) { 
+        if (grado == null) {
+            this.grado = "11°";
+        } else {
+            String num = grado.replaceAll("[^0-9]", "");
+            this.grado = num.isEmpty() ? "11°" : num + "°";
+        }
+    }
 
     public String getGrupo() { return grupo; }
     public void setGrupo(String grupo) { this.grupo = grupo; }
 
-    public String getCodigoCurso() { return grado + "-" + grupo; }
+    public String getCodigoCurso() { 
+        String num = grado != null ? grado.replaceAll("[^0-9]", "") : "11";
+        return num + "-" + (grupo != null ? grupo : "01");
+    }
 
     public String getJornada() { return jornada; }
     public void setJornada(String jornada) { this.jornada = jornada; }

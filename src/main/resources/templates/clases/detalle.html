@@ -17,6 +17,16 @@
                 </a>
             </div>
 
+            <!-- Mensajes Flash de Éxito o Error -->
+            <div th:if="${mensajeExito}" class="p-4 rounded-xl bg-green-50 border border-green-200 text-xs font-bold text-sidebar flex items-center gap-2">
+                <i data-lucide="check-circle" class="size-4.5 text-sidebar"></i>
+                <span th:text="${mensajeExito}">Éxito</span>
+            </div>
+            <div th:if="${mensajeError}" class="p-4 rounded-xl bg-red-50 border border-red-200 text-xs font-bold text-alert-red flex items-center gap-2">
+                <i data-lucide="alert-triangle" class="size-4.5 text-alert-red"></i>
+                <span th:text="${mensajeError}">Error</span>
+            </div>
+
             <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start bg-white p-5 rounded-xl border border-[#c4eec0]/50 shadow-soft">
                 <div class="flex items-center gap-4">
                     <div class="size-12 rounded-xl bg-sidebar text-white grid place-items-center shadow-md shrink-0">
@@ -28,18 +38,70 @@
                             <span class="px-2.5 py-1 bg-[#eafbe4] text-sidebar border border-[#c4eec0] rounded-md font-bold text-[11px]" th:text="${'Jornada ' + jornadaCurso}">Jornada Mañana</span>
                         </div>
                         <p class="text-text-secondary text-[12px] font-semibold mt-1">
-                            Director de Grupo: <span class="font-bold text-text-primary" th:text="${directorCurso}">Jorge Eliécer Rojas</span> • 
+                            Director de Grupo: <span class="font-bold text-text-primary" th:text="${directorCurso}">Sin asignar</span> • 
                             Grado: <span class="font-bold text-sidebar" th:text="${gradoCurso}">11°</span> • 
-                            Estudiantes: <span class="font-bold text-sidebar" th:text="${#lists.size(estudiantesMock) + ' Matriculados'}">7 Matriculados</span>
+                            Estudiantes: <span class="font-bold text-sidebar" th:text="${#lists.size(estudiantesData) + ' Matriculados'}">0 Matriculados</span>
                         </p>
                     </div>
                 </div>
 
-                <!-- Guardar Cambios -->
-                <button type="button" onclick="guardarCambiosDetalle()" class="px-5 py-2.5 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md shrink-0 cursor-pointer">
-                    <i data-lucide="save" class="size-4 stroke-[2.5]"></i>
-                    <span>Guardar Cambios</span>
-                </button>
+                <!-- Botones de Acción -->
+                <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                    <form th:action="@{/clases/mapear-estudiantes}" method="post" class="inline" th:if="${cursoId != null && !cursoId.isEmpty()}">
+                        <input type="hidden" name="cursoId" th:value="${cursoId}" />
+                        <button type="submit" class="px-4 py-2.5 text-xs font-black text-sidebar bg-[#eafbe4] border border-[#c4eec0] hover:bg-pill-green rounded-lg transition-all flex items-center gap-1.5 shadow-xs cursor-pointer">
+                            <i data-lucide="user-plus" class="size-4 stroke-[2.5]"></i>
+                            <span>Auto-Mapear Matriculados</span>
+                        </button>
+                    </form>
+
+                    <form th:action="@{/clases/promover-estudiantes}" method="post" id="form-promover" class="inline" th:if="${cursoId != null && !cursoId.isEmpty()}" onsubmit="return prepararPromocion(event);">
+                        <input type="hidden" name="cursoId" th:value="${cursoId}" />
+                        <input type="hidden" name="notasJson" id="input-promover-notas-json" />
+                        <button type="submit" class="px-4 py-2.5 text-xs font-black text-amber-900 bg-amber-100 border border-amber-300 hover:bg-amber-200 rounded-lg transition-all flex items-center gap-1.5 shadow-xs cursor-pointer">
+                            <i data-lucide="arrow-up-right" class="size-4 stroke-[2.5]"></i>
+                            <span>Promover Año Lectivo</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control de Fecha, Horario y Selección de Materia -->
+        <div class="bg-white p-5 rounded-xl border border-[#c4eec0]/50 shadow-soft flex items-center justify-between gap-4 max-lg:flex-col max-lg:items-start">
+            <div class="flex items-center gap-4 flex-wrap w-full lg:w-auto">
+                
+                <!-- Date picker -->
+                <div class="flex flex-col">
+                    <label for="fecha-evaluacion" class="text-[9px] font-black uppercase text-text-secondary tracking-wider mb-1">Fecha de Clase / Evaluación</label>
+                    <input type="date" id="fecha-evaluacion" onchange="actualizarMateriaPorFecha()" class="h-10 px-3.5 bg-[#f9fbf8] border border-[#c4eec0] rounded-xl text-xs font-extrabold text-sidebar focus:ring-1 focus:ring-sidebar focus:outline-none cursor-pointer">
+                </div>
+
+                <!-- Día de la semana -->
+                <div class="flex flex-col justify-end">
+                    <span class="text-[9px] font-black uppercase text-text-secondary tracking-wider mb-1">Día Programado</span>
+                    <span id="dia-semana-badge" class="h-10 px-4 bg-[#eafbe4] text-sidebar border border-[#c4eec0] rounded-xl text-xs font-black flex items-center gap-1.5 shadow-2xs">
+                        <i data-lucide="calendar-days" class="size-4 stroke-[2.5]"></i>
+                        <span id="dia-nombre">Lunes</span>
+                    </span>
+                </div>
+
+                <!-- Selector de Materia -->
+                <div class="flex flex-col flex-1 min-w-[220px]">
+                    <label for="select-materia" class="text-[9px] font-black uppercase text-text-secondary tracking-wider mb-1">Materia según Horario</label>
+                    <div id="container-materia-select">
+                        <select id="select-materia" onchange="cambiarMateriaSeleccionada(this.value)" class="w-full h-10 px-3.5 bg-[#f9fbf8] border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none cursor-pointer">
+                            <!-- Inyectado dinámicamente por JS -->
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Banner de Info de Horario -->
+            <div id="status-horario-banner" class="px-4 py-2.5 bg-[#f7fcf6] border border-[#c4eec0] rounded-xl text-[11px] font-bold text-sidebar flex items-center gap-2 shrink-0">
+                <i data-lucide="clock" class="size-4 text-sidebar stroke-[2.5]"></i>
+                <span id="horario-info-text">Horario: 07:00 AM - 08:30 AM</span>
             </div>
         </div>
 
@@ -95,6 +157,12 @@
     </div>
 
     <!-- Script JS para gestión de notas y períodos -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        window.estudiantesBDData = /*[[${estudiantesData}]]*/ [];
+        window.horariosBDData = /*[[${horariosData}]]*/ [];
+        /*]]>*/
+    </script>
     <script th:src="@{/js/clases-detalle.js}"></script>
 </th:block>
 

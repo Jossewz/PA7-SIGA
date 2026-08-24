@@ -1,0 +1,62 @@
+name: CI Pipeline Spring Boot
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # Servicio de PostgreSQL levantado automáticamente por GitHub Actions (Opción A)
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: siga
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: siga
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build con Maven
+        run: ./mvnw -B clean compile
+
+      - name: Ejecutar pruebas unitarias
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/siga
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: siga
+        run: ./mvnw -B test
+
+      - name: Reporte de cobertura JaCoCo
+        run: ./mvnw jacoco:report
+
+      - name: Publicar reporte como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-jacoco
+          path: target/site/jacoco
+
+      - name: Verificar variable de entorno y secretos
+        env:
+          APP_ENV: ${{ secrets.APP_ENV_DEMO }}
+        run: echo "Ejecutando en el ambiente configurado"

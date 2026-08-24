@@ -36,3 +36,10 @@ build/
 
 # Tailwind compiled CSS
 /src/main/resources/static/css/output.css
+
+### Environment & Secrets ###
+.env
+.env.*
+*.env
+src/main/resources/application-local.properties
+

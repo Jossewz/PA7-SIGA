@@ -1,0 +1,45 @@
+name: CI Pipeline Spring Boot
+
+on:
+  push:
+    branches: [ main, develop, "feature/**" ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    name: Build, Test & Cobertura
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # Paso 6: Gestión de variables sensibles mediante GitHub Secrets
+      - name: Verificar variable de entorno y secretos
+        env:
+          APP_ENV: ${{ secrets.APP_ENV_DEMO }}
+        run: |
+          echo "Ejecutando en el ambiente configurado"
+
+      # Paso 2 y 3: Compilación y ejecución de pruebas unitarias
+      - name: Compilar y ejecutar pruebas unitarias (JUnit)
+        run: mvn -B clean test
+
+      # Paso 4: Generación y publicación de reporte JaCoCo
+      - name: Generar reporte de cobertura JaCoCo
+        run: mvn jacoco:report
+
+      - name: Publicar reporte como artefacto
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reporte-jacoco
+          path: target/site/jacoco

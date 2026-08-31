@@ -29,8 +29,8 @@
                 <p class="text-text-secondary text-sm font-semibold">Solicitud, expedición y descarga de constancias académicas y administrativas.</p>
             </div>
 
-            <!-- Selector / Toggle de Rol -->
-            <div class="bg-white rounded-xl border border-[#c4eec0]/60 p-1.5 flex items-center gap-1 shadow-2xs">
+            <!-- Selector / Toggle de Rol (Solo visible para ADMIN) -->
+            <div th:if="${esAdmin}" class="bg-white rounded-xl border border-[#c4eec0]/60 p-1.5 flex items-center gap-1 shadow-2xs">
                 <button type="button" onclick="cambiarRolSimulado('estudiante')" id="btn-rol-estudiante"
                         class="px-3.5 py-2 rounded-lg text-xs font-black transition-all flex items-center gap-2 cursor-pointer bg-sidebar text-white shadow-2xs">
                     <i data-lucide="user" class="size-4 stroke-[2.5]"></i>
@@ -45,7 +45,7 @@
         </div>
 
         <!-- VISTA: ROL ESTUDIANTE -->
-        <div id="vista-estudiante" class="space-y-6">
+        <div id="vista-estudiante" class="space-y-6" th:classappend="${esPersonal} ? 'hidden' : ''">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
                 <!-- Columna Izquierda: Formulario -->
@@ -62,6 +62,17 @@
                         </div>
 
                         <form id="form-solicitar-certificado" th:action="@{/certificados/solicitar}" method="post" class="space-y-4">
+                            <input th:if="${esEstudiante}" type="hidden" name="estudianteId" th:value="${estudianteId}" />
+                            <div th:if="${!esEstudiante}" class="flex flex-col">
+                                <label for="select-estudiante-id" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1">
+                                    Estudiante Solicitante <span class="text-alert-red">*</span>
+                                </label>
+                                <select id="select-estudiante-id" name="estudianteId" required
+                                        class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                                    <option value="" disabled selected>-- Seleccione el estudiante --</option>
+                                    <option th:each="est : ${listaEstudiantes}" th:value="${est.id}" th:text="${est.nombreCompleto + ' (Doc: ' + est.numeroDocumento + ')'}"></option>
+                                </select>
+                            </div>
                             <div class="flex flex-col">
                                 <label for="select-tipo-cert" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1">
                                     Tipo de Certificado o Constancia <span class="text-alert-red">*</span>
@@ -97,7 +108,7 @@
                                 </div>
                                 <div>
                                     <label for="c-grado-ref" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Grado Referencia</label>
-                                    <input type="text" id="c-grado-ref" name="gradoReferencia" value="11°" required class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                                    <input type="text" id="c-grado-ref" name="gradoReferencia" th:value="${estudianteGrado}" value="11°" required class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
                                 </div>
                             </div>
 
@@ -122,7 +133,7 @@
                             <i data-lucide="history" class="size-4 stroke-[2.5]"></i>
                             <span>Historial de Mis Solicitudes</span>
                         </div>
-                        <span class="text-[11px] font-bold text-text-secondary">Estudiante: Mateo Álvarez</span>
+                        <span class="text-[11px] font-bold text-text-secondary" th:text="${esEstudiante ? 'Estudiante: ' + estudianteNombre : 'Vista previa de solicitudes'}">Estudiante: Mateo Álvarez</span>
                     </div>
 
                     <div class="overflow-x-auto flex-1">
@@ -137,7 +148,7 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]" id="tbody-solicitudes-estudiante">
-                                <th:block th:each="sol : ${solicitudesMock}">
+                                <th:block th:each="sol : ${solicitudesEstudianteMock}">
                                     <tr class="hover:bg-[#fcfdfb] transition-colors">
                                         <td class="p-3.5 pl-5 font-black text-sidebar text-[11px]" th:text="${sol.id}">CERT-2026-001</td>
                                         <td class="p-3.5">
@@ -175,7 +186,7 @@
         </div>
 
         <!-- VISTA: ROL PERSONAL ADMINISTRATIVO -->
-        <div id="vista-admin" class="hidden space-y-6">
+        <div id="vista-admin" class="space-y-6" th:classappend="${esPersonal} ? '' : 'hidden'">
             <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
                 <div class="p-4 border-b border-[#c4eec0]/30 bg-[#f7fcf6] flex justify-between items-center flex-wrap gap-3">
                     <div class="flex items-center gap-2 text-sidebar font-black text-xs uppercase tracking-wider">
@@ -206,7 +217,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]" id="tbody-admin-solicitudes">
-                            <tr th:each="sol : ${solicitudesMock}" class="hover:bg-[#fcfdfb] transition-colors row-solicitud-admin" th:data-estado="${sol.estado}">
+                            <tr th:each="sol : ${solicitudesAdminMock}" class="hover:bg-[#fcfdfb] transition-colors row-solicitud-admin" th:data-estado="${sol.estado}">
                                 <td class="p-3.5 pl-5 font-black text-sidebar text-[11px]" th:text="${sol.id}">CERT-2026-001</td>
                                 <td class="p-3.5">
                                     <div class="font-black text-text-primary text-[12px]" th:text="${sol.estudiante}">Mateo Álvarez Restrepo</div>

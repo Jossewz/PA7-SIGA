@@ -14,6 +14,7 @@ import com.siga.siga_iea.usuarios.entity.Estudiante;
 import com.siga.siga_iea.usuarios.entity.Usuario;
 import com.siga.siga_iea.usuarios.repository.EstudianteRepository;
 import com.siga.siga_iea.usuarios.repository.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ public class EstudianteService {
 
     private final EstudianteRepository estudianteRepository;
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
     private final MatriculaRepository matriculaRepository;
     private final DocumentoRepository documentoRepository;
     private final CursoEstudianteRepository cursoEstudianteRepository;
@@ -34,14 +36,16 @@ public class EstudianteService {
     private final SolicitudCertificadoRepository certificadoRepository;
 
     public EstudianteService(EstudianteRepository estudianteRepository,
-                            UsuarioRepository usuarioRepository,
-                            MatriculaRepository matriculaRepository,
-                            DocumentoRepository documentoRepository,
-                            CursoEstudianteRepository cursoEstudianteRepository,
-                            ReporteRepository reporteRepository,
-                            SolicitudCertificadoRepository certificadoRepository) {
+                             UsuarioRepository usuarioRepository,
+                             PasswordEncoder passwordEncoder,
+                             MatriculaRepository matriculaRepository,
+                             DocumentoRepository documentoRepository,
+                             CursoEstudianteRepository cursoEstudianteRepository,
+                             ReporteRepository reporteRepository,
+                             SolicitudCertificadoRepository certificadoRepository) {
         this.estudianteRepository = estudianteRepository;
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
         this.matriculaRepository = matriculaRepository;
         this.documentoRepository = documentoRepository;
         this.cursoEstudianteRepository = cursoEstudianteRepository;
@@ -152,17 +156,21 @@ public class EstudianteService {
         String doc = estudiante.getNumeroDocumento();
         Optional<Usuario> usuarioOpt = usuarioRepository.findByNumeroDocumento(doc);
 
+        String encodedPassword = (password != null && !password.isBlank())
+                ? (password.startsWith("$2a$") || password.startsWith("$2b$") ? password : passwordEncoder.encode(password))
+                : null;
+
         Usuario usuario;
         if (usuarioOpt.isPresent()) {
             usuario = usuarioOpt.get();
             if (email != null && !email.isBlank()) usuario.setEmail(email.trim());
-            if (password != null && !password.isBlank()) usuario.setPassword(password);
+            if (encodedPassword != null) usuario.setPassword(encodedPassword);
         } else {
             String targetEmail = (email != null && !email.isBlank())
                     ? email.trim()
                     : generarEmailSugerido(estudiante.getNombres(), estudiante.getApellidos());
 
-            usuario = new Usuario(targetEmail, password, "ESTUDIANTE", doc);
+            usuario = new Usuario(targetEmail, encodedPassword, "ESTUDIANTE", doc);
         }
 
         return usuarioRepository.save(usuario);

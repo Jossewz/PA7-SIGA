@@ -104,50 +104,70 @@ public class PersonalController {
         return "personal/index";
     }
 
-    @PostMapping("/personal/registrar")
+    @PostMapping({"/personal", "/personal/registrar"})
     public String registrarPersonal(
-            @RequestParam("primerNombre") String primerNombre,
-            @RequestParam(value = "segundoNombre", required = false) String segundoNombre,
-            @RequestParam("primerApellido") String primerApellido,
-            @RequestParam(value = "segundoApellido", required = false) String segundoApellido,
-            @RequestParam("tipoDoc") String tipoDoc,
-            @RequestParam("numDoc") String numDoc,
-            @RequestParam(value = "sexo", required = false) String sexo,
+            @RequestParam(value = "tipo", required = false) String tipo,
+            @RequestParam(value = "nombres", required = false) String nombres,
+            @RequestParam(value = "apellidos", required = false) String apellidos,
+            @RequestParam(value = "tipoDocumento", required = false) String tipoDocumento,
+            @RequestParam(value = "numeroDocumento", required = false) String numeroDocumento,
+            @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "telefono", required = false) String telefono,
             @RequestParam(value = "direccion", required = false) String direccion,
-            @RequestParam("cargo") String cargo,
+            @RequestParam(value = "cargo", required = false) String cargo,
             @RequestParam(value = "area", required = false) String area,
+            @RequestParam(value = "estudios", required = false) String estudios,
             @RequestParam(value = "profesion", required = false) String profesion,
             @RequestParam(value = "especialidad", required = false) String especialidad,
+            @RequestParam(value = "sexo", required = false) String sexo,
             @RequestParam(value = "fotoFile", required = false) MultipartFile fotoFile,
             @RequestParam(value = "createUser", required = false, defaultValue = "false") boolean createUser,
             @RequestParam(value = "userEmail", required = false) String userEmail,
             @RequestParam(value = "passwordTemp", required = false) String passwordTemp,
             @RequestParam(value = "role", required = false) String role,
+
+            @RequestParam(value = "primerNombre", required = false) String primerNombre,
+            @RequestParam(value = "segundoNombre", required = false) String segundoNombre,
+            @RequestParam(value = "primerApellido", required = false) String primerApellido,
+            @RequestParam(value = "segundoApellido", required = false) String segundoApellido,
+            @RequestParam(value = "tipoDoc", required = false) String tipoDoc,
+            @RequestParam(value = "numDoc", required = false) String numDoc,
             RedirectAttributes redirectAttributes) {
 
         try {
-            String nombresFull = (primerNombre + (segundoNombre != null && !segundoNombre.isBlank() ? " " + segundoNombre : "")).trim();
-            String apellidosFull = (primerApellido + (segundoApellido != null && !segundoApellido.isBlank() ? " " + segundoApellido : "")).trim();
+            String nombresFull = (nombres != null && !nombres.isBlank()) ? nombres.trim() :
+                    ((primerNombre != null ? primerNombre : "") + (segundoNombre != null && !segundoNombre.isBlank() ? " " + segundoNombre : "")).trim();
+
+            String apellidosFull = (apellidos != null && !apellidos.isBlank()) ? apellidos.trim() :
+                    ((primerApellido != null ? primerApellido : "") + (segundoApellido != null && !segundoApellido.isBlank() ? " " + segundoApellido : "")).trim();
+
+            String docType = (tipoDocumento != null && !tipoDocumento.isBlank()) ? tipoDocumento.trim() : (tipoDoc != null ? tipoDoc.trim() : "CC");
+            String docNum = (numeroDocumento != null && !numeroDocumento.isBlank()) ? numeroDocumento.trim() : (numDoc != null ? numDoc.trim() : "");
+
+            if (nombresFull.isBlank() || apellidosFull.isBlank() || docNum.isBlank()) {
+                throw new IllegalArgumentException("Nombres, apellidos y número de documento son obligatorios.");
+            }
 
             String uploadedFotoKey = null;
             if (fotoFile != null && !fotoFile.isEmpty()) {
                 storageService.validateSize(fotoFile, 10 * 1024 * 1024);
                 storageService.validateExtension(fotoFile, "jpg", "jpeg", "png");
-                UploadResult result = storageService.upload(fotoFile, StorageFolder.DOCENTES, numDoc);
+                UploadResult result = storageService.upload(fotoFile, StorageFolder.DOCENTES, docNum);
                 uploadedFotoKey = result.getKey();
             }
 
-            if ("Docente".equalsIgnoreCase(cargo)) {
+            boolean esDocente = "DOCENTE".equalsIgnoreCase(tipo) || "Docente".equalsIgnoreCase(cargo);
+
+            if (esDocente) {
                 Docente d = new Docente();
                 d.setNombres(nombresFull);
                 d.setApellidos(apellidosFull);
-                d.setTipoDocumento(tipoDoc);
-                d.setNumeroDocumento(numDoc);
+                d.setTipoDocumento(docType);
+                d.setNumeroDocumento(docNum);
                 d.setGenero(sexo);
                 d.setTelefono(telefono);
                 d.setDireccion(direccion);
-                d.setTitulo(profesion);
+                d.setTitulo((estudios != null && !estudios.isBlank()) ? estudios : profesion);
                 d.setEspecialidad(especialidad);
                 d.setFotoKey(uploadedFotoKey);
                 d.setEstado("Activo");
@@ -156,10 +176,10 @@ public class PersonalController {
                 PersonalAdministrativo p = new PersonalAdministrativo();
                 p.setNombres(nombresFull);
                 p.setApellidos(apellidosFull);
-                p.setTipoDocumento(tipoDoc);
-                p.setNumeroDocumento(numDoc);
-                p.setCargo(cargo);
-                p.setArea(area != null ? area : "Administrativa");
+                p.setTipoDocumento(docType);
+                p.setNumeroDocumento(docNum);
+                p.setCargo((cargo != null && !cargo.isBlank()) ? cargo : ("DIRECTIVO".equalsIgnoreCase(tipo) ? "Directivo" : "Administrativo"));
+                p.setArea((area != null && !area.isBlank()) ? area : ("DIRECTIVO".equalsIgnoreCase(tipo) ? "Directiva" : "Administrativa"));
                 p.setGenero(sexo);
                 p.setTelefono(telefono);
                 p.setDireccion(direccion);
@@ -168,10 +188,11 @@ public class PersonalController {
                 personalService.guardarPersonal(p);
             }
 
-            if (createUser) {
+            String targetEmail = (email != null && !email.isBlank()) ? email.trim() : userEmail;
+            if (createUser || (targetEmail != null && !targetEmail.isBlank())) {
                 String pass = (passwordTemp != null && !passwordTemp.isBlank()) ? passwordTemp : "IEACI" + java.time.Year.now().getValue() + "*";
-                String targetRole = (role != null && !role.isBlank()) ? role : ("Docente".equalsIgnoreCase(cargo) ? "DOCENTE" : "ADMIN");
-                personalService.crearOCambiarCuentaAcceso(numDoc, nombresFull, apellidosFull, userEmail, pass, targetRole);
+                String targetRole = (role != null && !role.isBlank()) ? role : (esDocente ? "DOCENTE" : "PERSONAL_ADMINISTRATIVO");
+                personalService.crearOCambiarCuentaAcceso(docNum, nombresFull, apellidosFull, targetEmail, pass, targetRole);
             }
 
             redirectAttributes.addFlashAttribute("mensajeExito", "Personal registrado exitosamente.");
@@ -225,11 +246,14 @@ public class PersonalController {
                 Usuario u = usrOpt.get();
                 staff.put("tieneCuenta", true);
                 staff.put("correo", u.getEmail());
-                staff.put("usuarioRol", u.getRol());
-                staff.put("usuarioEstado", u.getEstado());
+                staff.put("usuarioRol", u.getRol() != null ? u.getRol() : "DOCENTE");
+                staff.put("usuarioEstado", u.getEstado() != null ? u.getEstado() : "Activo");
+                staff.put("emailSugerido", u.getEmail());
             } else {
                 staff.put("tieneCuenta", false);
                 staff.put("correo", "Sin cuenta creada");
+                staff.put("usuarioRol", "DOCENTE");
+                staff.put("usuarioEstado", "Inactivo");
                 staff.put("emailSugerido", personalService.generarEmailSugerido(d.getNombres(), d.getApellidos()));
             }
         } else if (adminOpt.isPresent()) {
@@ -247,6 +271,8 @@ public class PersonalController {
             staff.put("numeroDocumento", p.getNumeroDocumento());
             staff.put("telefono", p.getTelefono() != null ? p.getTelefono() : "N/A");
             staff.put("direccion", p.getDireccion() != null ? p.getDireccion() : "N/A");
+            staff.put("profesion", "Administrativo");
+            staff.put("especialidad", "N/A");
             staff.put("estado", p.getEstado() != null ? p.getEstado() : "Activo");
             staff.put("foto", p.getFotoKey() != null ? "/storage/public/view?key=" + p.getFotoKey() : null);
 
@@ -255,11 +281,14 @@ public class PersonalController {
                 Usuario u = usrOpt.get();
                 staff.put("tieneCuenta", true);
                 staff.put("correo", u.getEmail());
-                staff.put("usuarioRol", u.getRol());
-                staff.put("usuarioEstado", u.getEstado());
+                staff.put("usuarioRol", u.getRol() != null ? u.getRol() : "PERSONAL_ADMINISTRATIVO");
+                staff.put("usuarioEstado", u.getEstado() != null ? u.getEstado() : "Activo");
+                staff.put("emailSugerido", u.getEmail());
             } else {
                 staff.put("tieneCuenta", false);
                 staff.put("correo", "Sin cuenta creada");
+                staff.put("usuarioRol", "PERSONAL_ADMINISTRATIVO");
+                staff.put("usuarioEstado", "Inactivo");
                 staff.put("emailSugerido", personalService.generarEmailSugerido(p.getNombres(), p.getApellidos()));
             }
         } else {

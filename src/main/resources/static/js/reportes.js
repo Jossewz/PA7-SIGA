@@ -35,6 +35,10 @@ const descripcionesRazones = {
     'Salud o riesgo': {
         titulo: 'Situación de salud o riesgo',
         body: 'Evidenciar señales de desánimo extremo, enfermedad visible o posibles vulnerabilidades en el hogar.'
+    },
+    'Otro': {
+        titulo: 'Otra razón no especificada',
+        body: 'Utilice la caja de especificación y detalles del reporte para describir ampliamente el motivo o situación.'
     }
 };
 
@@ -92,6 +96,7 @@ function handleFormCrearReporte(e) {
     let categoria = 'Razones Académicas';
     if (['Agresión', 'Falta de respeto', 'Daño a la escuela'].includes(razon)) categoria = 'Convivencia y Disciplina';
     if (['Ausencias', 'Llegadas tarde', 'Salud o riesgo'].includes(razon)) categoria = 'Asistencia y Salud';
+    if (razon === 'Otro') categoria = 'Otras Razones';
 
     // Insertar en la tabla del Docente
     const tbodyDoc = document.getElementById('tbody-reportes-docente');

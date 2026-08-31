@@ -7,6 +7,16 @@
 
 <th:block th:fragment="content">
     <div class="flex flex-col gap-6">
+        <!-- Flash messages -->
+        <div th:if="${mensajeExito}" class="p-4 rounded-xl bg-green-50 border border-green-200 text-xs font-bold text-sidebar flex items-center gap-2">
+            <i data-lucide="check-circle" class="size-4.5 text-sidebar"></i>
+            <span th:text="${mensajeExito}">Éxito</span>
+        </div>
+        <div th:if="${mensajeError}" class="p-4 rounded-xl bg-red-50 border border-red-200 text-xs font-bold text-alert-red flex items-center gap-2">
+            <i data-lucide="alert-triangle" class="size-4.5 text-alert-red"></i>
+            <span th:text="${mensajeError}">Error</span>
+        </div>
+
         <!-- Header -->
         <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
             <div>
@@ -70,13 +80,14 @@
                             <!-- Horario -->
                             <td class="p-4.5">
                                 <button type="button" 
+                                        th:data-id="${c.id}"
                                         th:data-codigo="${c.codigoCurso}"
                                         th:data-tiene="${c.tieneHorario}"
                                         onclick="handleHorarioBtn(this, event)"
                                         class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wide leading-none transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
                                         th:classappend="${c.tieneHorario} ? 'bg-pill-green text-sidebar border border-[#8ce383] hover:brightness-95' : 'bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200'">
                                     <i data-lucide="clock" class="size-3.5 stroke-[2.5]"></i>
-                                    <span th:text="${c.tieneHorario} ? ${c.horarioResumen} : 'Sin Horario'">Lun-Vie: 07:00 - 12:30</span>
+                                    <span th:text="${c.tieneHorario} ? 'Horario Asignado' : 'Sin Horario'">Sin Horario</span>
                                 </button>
                             </td>
 
@@ -86,15 +97,26 @@
                                     <button type="button" 
                                             th:data-codigo="${c.codigoCurso}"
                                             onclick="handleGestionBtn(this, event)"
-                                            class="p-1.5 hover:bg-[#eafbe4] rounded-lg transition-colors text-sidebar" title="Gestionar Notas y Asistencia">
+                                            class="p-1.5 hover:bg-[#eafbe4] rounded-lg transition-colors text-sidebar cursor-pointer" title="Gestionar Notas y Asistencia">
                                         <i data-lucide="clipboard-list" class="size-4 stroke-[2]"></i>
                                     </button>
-                                    <button type="button" class="p-1.5 hover:bg-[#f1fbe4] rounded-lg transition-colors text-sidebar" title="Editar curso">
+                                    <button type="button" 
+                                            th:data-id="${c.id}"
+                                            th:data-codigo="${c.codigoCurso}"
+                                            th:data-grado="${c.grado}"
+                                            th:data-jornada="${c.jornada}"
+                                            th:data-cupos="${c.cuposMaximos}"
+                                            th:data-directorid="${c.directorId}"
+                                            onclick="handleEditarCursoBtn(this, event)"
+                                            class="p-1.5 hover:bg-[#f1fbe4] rounded-lg transition-colors text-sidebar cursor-pointer" title="Editar curso">
                                         <i data-lucide="edit-3" class="size-4 stroke-[2]"></i>
                                     </button>
-                                    <button type="button" class="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-alert-red" title="Eliminar curso">
-                                        <i data-lucide="trash-2" class="size-4 stroke-[2]"></i>
-                                    </button>
+                                    <form th:action="@{/clases/eliminar}" method="post" class="inline" onsubmit="event.stopPropagation(); return confirm('¿Está seguro de eliminar este curso?');">
+                                        <input type="hidden" name="cursoId" th:value="${c.id}" />
+                                        <button type="submit" onclick="event.stopPropagation();" class="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-alert-red cursor-pointer" title="Eliminar curso">
+                                            <i data-lucide="trash-2" class="size-4 stroke-[2]"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -109,6 +131,10 @@
     <div th:replace="~{clases/fragments/modal-horario :: modalHorario}"></div>
 
     <!-- Script del listado de cursos -->
+    <script th:inline="javascript">
+        window.materiasGlobales = /*[[${materiasList}]]*/ [];
+        window.docentesGlobales = /*[[${docentesList}]]*/ [];
+    </script>
     <script th:src="@{/js/clases.js}"></script>
 </th:block>
 

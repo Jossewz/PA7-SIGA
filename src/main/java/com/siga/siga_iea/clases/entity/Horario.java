@@ -1,5 +1,6 @@
 package com.siga.siga_iea.clases.entity;
 
+import com.siga.siga_iea.usuarios.entity.Docente;
 import jakarta.persistence.*;
 import java.time.LocalTime;
 import java.util.UUID;
@@ -20,6 +21,10 @@ public class Horario {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "materia_id")
     private Materia materia;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "docente_id")
+    private Docente docente;
 
     @Column(name = "dia_semana", columnDefinition = "VARCHAR", nullable = false)
     private String diaSemana;
@@ -43,6 +48,9 @@ public class Horario {
 
     public Materia getMateria() { return materia; }
     public void setMateria(Materia materia) { this.materia = materia; }
+
+    public Docente getDocente() { return docente; }
+    public void setDocente(Docente docente) { this.docente = docente; }
 
     public String getDiaSemana() { return diaSemana; }
     public void setDiaSemana(String diaSemana) { this.diaSemana = diaSemana; }

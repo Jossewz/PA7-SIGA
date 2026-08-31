@@ -200,11 +200,21 @@ public class MatriculaHtmxController {
         );
 
         // 2. Guardar Estudiante con sus datos reales
+        String studentNames = (String) session.getAttribute("studentNames");
+        String studentDocNumber = (String) session.getAttribute("studentDocNumber");
+
+        if (studentNames == null || studentNames.isBlank() || studentDocNumber == null || studentDocNumber.isBlank()) {
+            model.addAttribute("error", "Por favor regrese al Paso 1 e ingrese los nombres y el número de documento del estudiante.");
+            model.addAttribute("currentStep", 1);
+            populateModelFromSession(session, model);
+            return "matricula/htmx-step";
+        }
+
         Estudiante estudiante = new Estudiante();
-        estudiante.setNombres((String) session.getAttribute("studentNames"));
+        estudiante.setNombres(studentNames);
         estudiante.setApellidos((String) session.getAttribute("studentSurnames"));
         estudiante.setTipoDocumento((String) session.getAttribute("studentDocType"));
-        estudiante.setNumeroDocumento((String) session.getAttribute("studentDocNumber"));
+        estudiante.setNumeroDocumento(studentDocNumber);
         estudiante.setGenero((String) session.getAttribute("studentGender"));
         estudiante.setTelefono((String) session.getAttribute("studentPhone"));
 

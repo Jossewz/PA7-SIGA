@@ -129,6 +129,7 @@ public class ReporteController {
         }
 
         model.addAttribute("estudiantesList", estudiantesList);
+        model.addAttribute("docentesList", personalService.listarDocentes());
         model.addAttribute("reportesMock", reportesMock);
         return "reportes/index";
     }

@@ -1,5 +1,15 @@
 package com.siga.siga_iea.usuarios.service;
 
+import com.siga.siga_iea.certificados.entity.SolicitudCertificado;
+import com.siga.siga_iea.certificados.repository.SolicitudCertificadoRepository;
+import com.siga.siga_iea.clases.entity.CursoEstudiante;
+import com.siga.siga_iea.clases.repository.CursoEstudianteRepository;
+import com.siga.siga_iea.matricula.entity.Matricula;
+import com.siga.siga_iea.matricula.repository.MatriculaRepository;
+import com.siga.siga_iea.reportes.entity.Reporte;
+import com.siga.siga_iea.reportes.repository.ReporteRepository;
+import com.siga.siga_iea.storage.entity.Documento;
+import com.siga.siga_iea.storage.repository.DocumentoRepository;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
 import com.siga.siga_iea.usuarios.entity.Usuario;
 import com.siga.siga_iea.usuarios.repository.EstudianteRepository;
@@ -19,13 +29,28 @@ public class EstudianteService {
     private final EstudianteRepository estudianteRepository;
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MatriculaRepository matriculaRepository;
+    private final DocumentoRepository documentoRepository;
+    private final CursoEstudianteRepository cursoEstudianteRepository;
+    private final ReporteRepository reporteRepository;
+    private final SolicitudCertificadoRepository certificadoRepository;
 
     public EstudianteService(EstudianteRepository estudianteRepository,
                              UsuarioRepository usuarioRepository,
-                             PasswordEncoder passwordEncoder) {
+                             PasswordEncoder passwordEncoder,
+                             MatriculaRepository matriculaRepository,
+                             DocumentoRepository documentoRepository,
+                             CursoEstudianteRepository cursoEstudianteRepository,
+                             ReporteRepository reporteRepository,
+                             SolicitudCertificadoRepository certificadoRepository) {
         this.estudianteRepository = estudianteRepository;
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.matriculaRepository = matriculaRepository;
+        this.documentoRepository = documentoRepository;
+        this.cursoEstudianteRepository = cursoEstudianteRepository;
+        this.reporteRepository = reporteRepository;
+        this.certificadoRepository = certificadoRepository;
     }
 
     public List<Estudiante> listarTodos() {
@@ -46,10 +71,56 @@ public class EstudianteService {
 
     @Transactional
     public Estudiante guardar(Estudiante estudiante) {
+        if (estudiante.getNombres() == null || estudiante.getNombres().isBlank()) {
+            throw new IllegalArgumentException("El nombre del estudiante no puede estar vacío.");
+        }
+        if (estudiante.getNumeroDocumento() == null || estudiante.getNumeroDocumento().isBlank()) {
+            throw new IllegalArgumentException("El número de documento es obligatorio.");
+        }
+
         if (estudiante.getCodigo() == null || estudiante.getCodigo().isBlank()) {
             estudiante.setCodigo(generarCodigoEstudiante());
         }
         return estudianteRepository.save(estudiante);
+    }
+
+    @Transactional
+    public void eliminarEstudiante(UUID estudianteId) {
+        Estudiante e = estudianteRepository.findById(estudianteId)
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado con id: " + estudianteId));
+
+        // 1. Eliminar cuenta de usuario si existe
+        if (e.getNumeroDocumento() != null && !e.getNumeroDocumento().isBlank()) {
+            usuarioRepository.findByNumeroDocumento(e.getNumeroDocumento())
+                    .ifPresent(usuarioRepository::delete);
+        }
+
+        // 2. Eliminar inscripciones en cursos (CursoEstudiante)
+        List<CursoEstudiante> cursos = cursoEstudianteRepository.findByEstudianteId(estudianteId);
+        cursoEstudianteRepository.deleteAll(cursos);
+
+        // 3. Eliminar reportes disciplinarios/académicos del estudiante
+        List<Reporte> reportes = reporteRepository.findByEstudianteIdOrderByCreatedAtDesc(estudianteId);
+        reporteRepository.deleteAll(reportes);
+
+        // 4. Eliminar solicitudes de certificados del estudiante
+        List<SolicitudCertificado> certs = certificadoRepository.findByEstudianteIdOrderByCreatedAtDesc(estudianteId);
+        certificadoRepository.deleteAll(certs);
+
+        // 5. Eliminar documentos asociados directamente al estudiante
+        List<Documento> docsEstudiante = documentoRepository.findByEstudianteId(estudianteId);
+        documentoRepository.deleteAll(docsEstudiante);
+
+        // 6. Eliminar documentos asociados a las matrículas y eliminar matrículas
+        List<Matricula> matriculas = matriculaRepository.findByEstudianteId(estudianteId);
+        for (Matricula m : matriculas) {
+            List<Documento> docsMatricula = documentoRepository.findByMatriculaId(m.getId());
+            documentoRepository.deleteAll(docsMatricula);
+        }
+        matriculaRepository.deleteAll(matriculas);
+
+        // 7. Eliminar la entidad Estudiante
+        estudianteRepository.delete(e);
     }
 
     /**

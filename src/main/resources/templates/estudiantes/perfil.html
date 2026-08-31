@@ -65,10 +65,17 @@
                 </div>
 
                 <form th:action="@{'/estudiantes/' + ${student.id} + '/toggle-estado'}" method="post" class="w-full mt-2">
-                    <button type="submit" class="w-full py-2.5 px-3 text-xs font-black rounded-lg transition-colors border flex items-center justify-center gap-2"
-                            th:classappend="${student.estado == 'Activo'} ? 'border-red-200 text-alert-red hover:bg-red-50' : 'border-[#c4eec0] text-sidebar hover:bg-[#f1fbe4]'">
+                    <button type="submit" class="w-full py-2.5 px-3 text-xs font-black rounded-lg transition-colors border flex items-center justify-center gap-2 cursor-pointer"
+                            th:classappend="${student.estado == 'Activo'} ? 'border-amber-300 text-amber-900 bg-amber-50 hover:bg-amber-100' : 'border-[#c4eec0] text-sidebar hover:bg-[#f1fbe4]'">
                         <i th:data-lucide="${student.estado == 'Activo' ? 'user-minus' : 'user-check'}" class="size-4 stroke-2"></i>
-                        <span th:text="${student.estado == 'Activo' ? 'Retirar Estudiante' : 'Activar Estudiante'}">Cambiar Estado</span>
+                        <span th:text="${student.estado == 'Activo' ? 'Desactivar / Retirar' : 'Activar Estudiante'}">Cambiar Estado</span>
+                    </button>
+                </form>
+
+                <form th:action="@{'/estudiantes/' + ${student.id} + '/eliminar'}" method="post" class="w-full mt-1.5" onsubmit="return confirm('¿Está seguro de ELIMINAR permanentemente a este estudiante y todas sus matrículas, calificaciones y documentos vinculados? Esta acción no se puede deshacer.');">
+                    <button type="submit" class="w-full py-2.5 px-3 text-xs font-black rounded-lg transition-colors border border-red-300 bg-red-50 text-alert-red hover:bg-red-100 flex items-center justify-center gap-2 cursor-pointer">
+                        <i data-lucide="trash-2" class="size-4 stroke-2"></i>
+                        <span>Eliminar Estudiante</span>
                     </button>
                 </form>
             </div>

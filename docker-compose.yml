@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:18.3
+    image: postgres:16
     container_name: siga-postgres
     environment:
       POSTGRES_DB: siga
@@ -20,6 +20,7 @@ services:
   app:
     build:
       context: .
+      dockerfile: Dockerfile
     container_name: siga-app
     depends_on:
       db:
@@ -39,7 +40,7 @@ services:
     volumes:
       - .:/workspace
       - siga_maven_cache:/root/.m2
-    command: sh ./mvnw spring-boot:run -Dtailwind.phase=none
+    command: sh -c "./mvnw tailwind:compile && ./mvnw spring-boot:run -Dtailwind.phase=none"
 
   pgadmin:
     image: dpage/pgadmin4

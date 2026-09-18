@@ -97,6 +97,12 @@ class ClaseViewRenderTest {
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.containsString("Boletín de Calificaciones")));
     }
 
+    @Autowired
+    private com.siga.siga_iea.clases.service.ClaseService claseService;
+
+    @Autowired
+    private com.siga.siga_iea.clases.repository.MateriaRepository materiaRepository;
+
     @Test
     @WithMockUser(roles = "ADMIN")
     @DisplayName("POST /clases/calificaciones/guardar debe procesar decimales con punto y coma correctamente")
@@ -105,6 +111,12 @@ class ClaseViewRenderTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String cursoIdStr = (String) mvcResult.getModelAndView().getModel().get("cursoId");
+
+        // Aseguramos que el curso tenga un horario configurado para el día actual
+        com.siga.siga_iea.clases.entity.Materia mat = materiaRepository.findByNombre("Matemáticas")
+                .orElseGet(() -> materiaRepository.save(new com.siga.siga_iea.clases.entity.Materia("Matemáticas", "Ciencias Exactas")));
+        String diaHoy = com.siga.siga_iea.clases.controller.ClaseController.obtenerNombreDiaEspanol(java.time.LocalDate.now().getDayOfWeek());
+        claseService.guardarHorarioBloque(java.util.UUID.fromString(cursoIdStr), diaHoy, mat.getId(), null, "07:00", "08:30", "Aula 101");
 
         // Crear una evaluacion
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/clases/evaluaciones/crear")
@@ -142,5 +154,38 @@ class ClaseViewRenderTest {
                 .andExpect(status().isOk())
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.containsString("badge-final-")))
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.anyOf(org.hamcrest.Matchers.containsString("4.75"), org.hamcrest.Matchers.containsString("4,75"))));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("GET /clases/fragmento/tabla-notas sin horario asignado debe mostrar aviso y bloquear acciones")
+    void testRenderFragmentoSinHorarioBloqueado() throws Exception {
+        var mvcResult = mockMvc.perform(get("/clases/gestion").param("codigo", "11-01"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String cursoIdStr = (String) mvcResult.getModelAndView().getModel().get("cursoId");
+        var curso = claseRepository.findById(java.util.UUID.fromString(cursoIdStr)).orElseThrow();
+
+        // Creamos un estudiante asociado al curso para probar los botones bloqueados
+        com.siga.siga_iea.usuarios.entity.Estudiante est = new com.siga.siga_iea.usuarios.entity.Estudiante();
+        est.setNombres("Estudiante");
+        est.setApellidos("Bloqueado");
+        est.setNumeroDocumento("DOC-BLQ-" + System.currentTimeMillis());
+        est = estudianteRepository.save(est);
+
+        com.siga.siga_iea.clases.entity.CursoEstudiante ce = new com.siga.siga_iea.clases.entity.CursoEstudiante();
+        ce.setCurso(curso);
+        ce.setEstudiante(est);
+        ce.setAnoLectivo("2026");
+        cursoEstudianteRepository.save(ce);
+
+        // Consultamos en una fecha de fin de semana (domingo 2026-03-01) sin horario
+        mockMvc.perform(get("/clases/fragmento/tabla-notas")
+                        .param("cursoId", cursoIdStr)
+                        .param("periodo", "1")
+                        .param("fecha", "2026-03-01"))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.containsString("Sin horario asignado para esta fecha")))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.containsString("Bloqueado")));
     }
 }

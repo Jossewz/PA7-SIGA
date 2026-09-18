@@ -55,6 +55,9 @@ function actualizarMateriaPorFecha(recargar = true) {
     const materiasDelDia = horariosList.filter(h => h.dia && h.dia.toLowerCase() === diaNombre.toLowerCase());
     const selectMateria = document.getElementById('select-materia');
     const bannerInfo = document.getElementById('horario-info-text');
+    const bannerContainer = document.getElementById('status-horario-banner');
+    const btnAgregarNota = document.getElementById('btn-agregar-nota');
+    const textoAyuda = document.getElementById('texto-ayuda-porcentajes');
 
     if (!selectMateria) return;
     selectMateria.innerHTML = '';
@@ -68,17 +71,48 @@ function actualizarMateriaPorFecha(recargar = true) {
         });
 
         selectMateria.disabled = false;
+        selectMateria.classList.remove('opacity-50', 'bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
+        selectMateria.classList.add('bg-[#f9fbf8]', 'text-text-primary');
         selectMateria.selectedIndex = 0;
+
         if (bannerInfo) {
             bannerInfo.innerText = `Horario: ${materiasDelDia[0].hora}${materiasDelDia[0].docente ? ' • Docente: ' + materiasDelDia[0].docente : ''}`;
         }
+        if (bannerContainer) {
+            bannerContainer.className = "px-4 py-2.5 bg-[#f7fcf6] border border-[#c4eec0] rounded-xl text-[11px] font-bold text-sidebar flex items-center gap-2 shrink-0";
+        }
+        if (btnAgregarNota) {
+            btnAgregarNota.disabled = false;
+            btnAgregarNota.classList.remove('opacity-40', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-400');
+            btnAgregarNota.classList.add('bg-sidebar', 'hover:brightness-97', 'cursor-pointer');
+        }
+        if (textoAyuda) {
+            textoAyuda.innerHTML = 'Edite los porcentajes % en el encabezado de cada columna.';
+            textoAyuda.className = "text-[11px] font-semibold text-text-secondary";
+        }
     } else {
         const opt = document.createElement('option');
-        opt.value = "General";
-        opt.text = "General (Sin horario específico hoy)";
+        opt.value = "";
+        opt.text = "-- Sin Horario Asignado --";
         selectMateria.appendChild(opt);
-        selectMateria.disabled = false;
-        if (bannerInfo) bannerInfo.innerText = "No hay clases programadas en el horario para este día.";
+        selectMateria.disabled = true;
+        selectMateria.classList.add('opacity-50', 'bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
+        selectMateria.classList.remove('bg-[#f9fbf8]', 'text-text-primary');
+
+        if (bannerInfo) {
+            bannerInfo.innerText = "No hay clases programadas en el horario para este día.";
+        }
+        if (bannerContainer) {
+            bannerContainer.className = "px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-[11px] font-bold text-amber-800 flex items-center gap-2 shrink-0";
+        }
+        if (btnAgregarNota) {
+            btnAgregarNota.disabled = true;
+            btnAgregarNota.classList.add('opacity-40', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-400');
+            btnAgregarNota.classList.remove('bg-sidebar', 'hover:brightness-97', 'cursor-pointer');
+        }
+        if (textoAyuda) {
+            textoAyuda.innerHTML = '<span class="text-amber-700 font-bold">Sin horario asignado para esta fecha. Acciones bloqueadas.</span>';
+        }
     }
 
     if (window.lucide) lucide.createIcons();
@@ -129,7 +163,7 @@ function recargarTablaNotas() {
     if (!cursoId || !window.htmx) return;
 
     const selectMateria = document.getElementById('select-materia');
-    const materiaNombre = (selectMateria && selectMateria.value) ? selectMateria.value : 'Matemáticas';
+    const materiaNombre = (selectMateria && selectMateria.value) ? selectMateria.value : '';
     const fecha = document.getElementById('fecha-evaluacion')?.value || getHoyFechaLocalStr();
 
     htmx.ajax('GET', '/clases/fragmento/tabla-notas', {
@@ -147,3 +181,9 @@ function recargarTablaNotas() {
 function prepararPromocion(event) {
     return confirm('¿Desea ejecutar el proceso de promoción/graduación para los estudiantes aprobados (nota final ≥ 3.0)?');
 }
+
+document.addEventListener('htmx:afterSwap', () => {
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+});

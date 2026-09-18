@@ -99,9 +99,11 @@
             </div>
 
             <!-- Banner de Info de Horario -->
-            <div id="status-horario-banner" class="px-4 py-2.5 bg-[#f7fcf6] border border-[#c4eec0] rounded-xl text-[11px] font-bold text-sidebar flex items-center gap-2 shrink-0">
-                <i data-lucide="clock" class="size-4 text-sidebar stroke-[2.5]"></i>
-                <span id="horario-info-text">Horario: 07:00 AM - 08:30 AM</span>
+            <div id="status-horario-banner" 
+                 class="px-4 py-2.5 rounded-xl text-[11px] font-bold flex items-center gap-2 shrink-0 border"
+                 th:classappend="${tieneHorarioHoy == false} ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-[#f7fcf6] border-[#c4eec0] text-sidebar'">
+                <i data-lucide="clock" class="size-4 stroke-[2.5]" th:classappend="${tieneHorarioHoy == false} ? 'text-amber-800' : 'text-sidebar'"></i>
+                <span id="horario-info-text" th:text="${tieneHorarioHoy == false ? 'No hay clases programadas en el horario para este día.' : 'Horario asignado'}">Horario: 07:00 AM - 08:30 AM</span>
             </div>
         </div>
 
@@ -139,18 +141,24 @@
         <input type="hidden" id="input-periodo-activo" name="periodo" value="1" />
 
         <!-- Barra de Acciones de Calificaciones -->
-        <div class="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-[#c4eec0]/40 shadow-2xs">
+        <div id="barra-acciones-calificaciones" class="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-[#c4eec0]/40 shadow-2xs">
             <div class="flex items-center gap-3">
                 <button type="button" 
+                        id="btn-agregar-nota"
+                        th:disabled="${tieneHorarioHoy == false}"
+                        th:classappend="${tieneHorarioHoy == false} ? 'opacity-40 cursor-not-allowed pointer-events-none bg-gray-400' : 'bg-sidebar hover:brightness-97 cursor-pointer'"
                         th:attr="hx-post=@{/clases/evaluaciones/crear}"
                         hx-include="#input-curso-id, #select-materia, #input-periodo-activo, #fecha-evaluacion"
                         hx-target="#contenedor-tabla-notas"
                         hx-swap="outerHTML"
-                        class="px-4 py-2 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-1.5 shadow-sm cursor-pointer">
+                        class="px-4 py-2 text-xs font-black text-white rounded-lg transition-all flex items-center gap-1.5 shadow-sm">
                     <i data-lucide="plus" class="size-4 stroke-[3]"></i>
                     <span>Agregar Nota al Periodo</span>
                 </button>
-                <span class="text-[11px] font-semibold text-text-secondary">Edite los porcentajes % en el encabezado de cada columna.</span>
+                <span class="text-[11px] font-semibold text-text-secondary" id="texto-ayuda-porcentajes">
+                    <span th:if="${tieneHorarioHoy != false}">Edite los porcentajes % en el encabezado de cada columna.</span>
+                    <span th:if="${tieneHorarioHoy == false}" class="text-amber-700 font-bold">Sin horario asignado para esta fecha. Acciones bloqueadas.</span>
+                </span>
             </div>
 
             <!-- Badge de Estado de Ponderación -->

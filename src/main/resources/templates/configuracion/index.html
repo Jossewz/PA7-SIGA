@@ -13,6 +13,16 @@
             <p class="text-text-secondary text-sm font-semibold">Parámetros globales del sistema, información de la institución y políticas de acceso.</p>
         </div>
 
+        <!-- Mensajes Flash de Éxito o Error -->
+        <div th:if="${mensajeExito}" class="p-4 rounded-xl bg-green-50 border border-green-200 text-xs font-bold text-sidebar flex items-center gap-2">
+            <i data-lucide="check-circle" class="size-4.5 text-sidebar"></i>
+            <span th:text="${mensajeExito}">Éxito</span>
+        </div>
+        <div th:if="${mensajeError}" class="p-4 rounded-xl bg-red-50 border border-red-200 text-xs font-bold text-alert-red flex items-center gap-2">
+            <i data-lucide="alert-triangle" class="size-4.5 text-alert-red"></i>
+            <span th:text="${mensajeError}">Error</span>
+        </div>
+
         <!-- Settings Layout -->
         <div class="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6 items-start">
             
@@ -62,27 +72,91 @@
                     </form>
                 </div>
 
-                <!-- TAB 2: CALENDARIO -->
+                <!-- TAB 2: CALENDARIO Y PERIODOS ACADÉMICOS -->
                 <div id="cfg-calendario" class="config-tab-content hidden flex flex-col gap-6">
-                    <h3 class="text-sidebar text-base font-black uppercase tracking-wide border-b border-[#c4eec0]/30 pb-2">Calendario Académico</h3>
-                    
-                    <form class="grid grid-cols-2 max-sm:grid-cols-1 gap-5">
-                        <div th:replace="~{components/forms/field-input :: fieldInput('Año Lectivo Activo', 'cal-year', 'añoLectivo', ${añoLectivo}, '2026', true, 'number', null, null, null, null)}"></div>
-                        <div></div> <!-- Empty block to align -->
+                    <div class="flex items-center justify-between border-b border-[#c4eec0]/30 pb-2">
+                        <h3 class="text-sidebar text-base font-black uppercase tracking-wide">Calendario Académico y Ponderación de Períodos</h3>
                         
-                        <div class="col-span-2 max-sm:col-span-1">
-                            <h4 class="text-sidebar text-[11px] font-black uppercase tracking-wider mb-4 border-b border-[#c4eec0]/20 pb-1">Periodos Académicos</h4>
-                            <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5">
-                                <div th:replace="~{components/forms/field-input :: fieldInput('Inicio Primer Periodo', 'period-1-start', 'period1Start', '2026-02-01', null, true, 'date', null, null, null, null)}"></div>
-                                <div th:replace="~{components/forms/field-input :: fieldInput('Cierre Primer Periodo', 'period-1-end', 'period1End', '2026-06-15', null, true, 'date', null, null, null, null)}"></div>
-                                <div th:replace="~{components/forms/field-input :: fieldInput('Inicio Segundo Periodo', 'period-2-start', 'period2Start', '2026-07-15', null, true, 'date', null, null, null, null)}"></div>
-                                <div th:replace="~{components/forms/field-input :: fieldInput('Cierre Segundo Periodo', 'period-2-end', 'period2End', '2026-11-30', null, true, 'date', null, null, null, null)}"></div>
+                        <!-- Badge Dinámico de Validación de Suma de Pesos -->
+                        <div id="cfg-peso-total-badge" class="px-3.5 py-1.5 rounded-full text-[11px] font-black flex items-center gap-1.5 shadow-2xs bg-pill-green text-sidebar border border-[#8ce383]">
+                            <i data-lucide="check-circle-2" class="size-3.5 stroke-[2.5]"></i>
+                            <span>Suma Total: <strong id="cfg-peso-sum-text">100%</strong></span>
+                        </div>
+                    </div>
+                    
+                    <form th:action="@{/configuracion/periodos}" method="post" id="form-config-periodos" class="flex flex-col gap-6" onsubmit="return validarPonderacionesCfg(event)">
+                        <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-5">
+                            <div th:replace="~{components/forms/field-input :: fieldInput('Año Lectivo Activo', 'cal-year', 'añoLectivo', ${añoLectivo}, '2026', true, 'number', null, null, null, null)}"></div>
+                        </div>
+                        
+                        <!-- Tarjetas de los 3 Períodos con fechas y Ponderación % -->
+                        <div class="space-y-4">
+                            <h4 class="text-sidebar text-[11px] font-black uppercase tracking-wider border-b border-[#c4eec0]/20 pb-1 flex items-center gap-2">
+                                <i data-lucide="layers" class="size-4"></i>
+                                <span>Distribución de Períodos y Ponderación Oficial</span>
+                            </h4>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <!-- Periodo 1 -->
+                                <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-[#f9fbf8] flex flex-col gap-3.5">
+                                    <div class="flex items-center justify-between border-b border-[#c4eec0]/30 pb-2">
+                                        <span class="text-xs font-black text-sidebar uppercase">Primer Período</span>
+                                        <div class="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-[#c4eec0]">
+                                            <span class="text-[10px] font-bold text-text-secondary">Peso:</span>
+                                            <input type="number" id="cfg-peso-p1" name="pesoP1" th:value="${pesoP1 ?: 30}" min="1" max="100" step="1" oninput="recalcularSumaPeriodosCfg()" class="w-10 text-center font-black text-sidebar text-xs focus:outline-none" required />
+                                            <span class="text-[10px] font-bold text-sidebar">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col gap-2 text-[11px]">
+                                        <label for="fIniP1" class="font-bold text-text-secondary">Inicio:</label>
+                                        <input type="date" id="fIniP1" name="fIniP1" th:value="${fIniP1 ?: '2026-02-01'}" required class="h-9 px-3 bg-white border border-[#c5ecd4] rounded-lg text-xs font-bold text-sidebar" />
+                                        <label for="fFinP1" class="font-bold text-text-secondary">Cierre:</label>
+                                        <input type="date" id="fFinP1" name="fFinP1" th:value="${fFinP1 ?: '2026-06-15'}" required class="h-9 px-3 bg-white border border-[#c5ecd4] rounded-lg text-xs font-bold text-sidebar" />
+                                    </div>
+                                </div>
+
+                                <!-- Periodo 2 -->
+                                <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-[#f9fbf8] flex flex-col gap-3.5">
+                                    <div class="flex items-center justify-between border-b border-[#c4eec0]/30 pb-2">
+                                        <span class="text-xs font-black text-sidebar uppercase">Segundo Período</span>
+                                        <div class="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-[#c4eec0]">
+                                            <span class="text-[10px] font-bold text-text-secondary">Peso:</span>
+                                            <input type="number" id="cfg-peso-p2" name="pesoP2" th:value="${pesoP2 ?: 35}" min="1" max="100" step="1" oninput="recalcularSumaPeriodosCfg()" class="w-10 text-center font-black text-sidebar text-xs focus:outline-none" required />
+                                            <span class="text-[10px] font-bold text-sidebar">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col gap-2 text-[11px]">
+                                        <label for="fIniP2" class="font-bold text-text-secondary">Inicio:</label>
+                                        <input type="date" id="fIniP2" name="fIniP2" th:value="${fIniP2 ?: '2026-07-15'}" required class="h-9 px-3 bg-white border border-[#c5ecd4] rounded-lg text-xs font-bold text-sidebar" />
+                                        <label for="fFinP2" class="font-bold text-text-secondary">Cierre:</label>
+                                        <input type="date" id="fFinP2" name="fFinP2" th:value="${fFinP2 ?: '2026-09-15'}" required class="h-9 px-3 bg-white border border-[#c5ecd4] rounded-lg text-xs font-bold text-sidebar" />
+                                    </div>
+                                </div>
+
+                                <!-- Periodo 3 -->
+                                <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-[#f9fbf8] flex flex-col gap-3.5">
+                                    <div class="flex items-center justify-between border-b border-[#c4eec0]/30 pb-2">
+                                        <span class="text-xs font-black text-sidebar uppercase">Tercer Período</span>
+                                        <div class="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-[#c4eec0]">
+                                            <span class="text-[10px] font-bold text-text-secondary">Peso:</span>
+                                            <input type="number" id="cfg-peso-p3" name="pesoP3" th:value="${pesoP3 ?: 35}" min="1" max="100" step="1" oninput="recalcularSumaPeriodosCfg()" class="w-10 text-center font-black text-sidebar text-xs focus:outline-none" required />
+                                            <span class="text-[10px] font-bold text-sidebar">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col gap-2 text-[11px]">
+                                        <label for="fIniP3" class="font-bold text-text-secondary">Inicio:</label>
+                                        <input type="date" id="fIniP3" name="fIniP3" th:value="${fIniP3 ?: '2026-09-16'}" required class="h-9 px-3 bg-white border border-[#c5ecd4] rounded-lg text-xs font-bold text-sidebar" />
+                                        <label for="fFinP3" class="font-bold text-text-secondary">Cierre:</label>
+                                        <input type="date" id="fFinP3" name="fFinP3" th:value="${fFinP3 ?: '2026-11-30'}" required class="h-9 px-3 bg-white border border-[#c5ecd4] rounded-lg text-xs font-bold text-sidebar" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="col-span-2 max-sm:col-span-1 border-t border-[#c4eec0]/30 pt-5 mt-2 flex justify-end">
-                            <button type="button" class="px-5 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all shadow-md">
-                                Guardar Calendario
+                        <div class="border-t border-[#c4eec0]/30 pt-4 flex justify-end">
+                            <button type="submit" class="px-5 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all shadow-md cursor-pointer flex items-center gap-2">
+                                <i data-lucide="save" class="size-4"></i>
+                                <span>Guardar Calendario y Ponderaciones</span>
                             </button>
                         </div>
                     </form>
@@ -203,18 +277,63 @@
     </div>
 
     <!-- SCRIPT DE CONFIGURACIÓN -->
-    <script>
+    <script th:inline="javascript">
         function switchConfigTab(btn, tabId) {
             document.querySelectorAll('.config-tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(tabId).classList.remove('hidden');
+            const target = document.getElementById(tabId);
+            if (target) target.classList.remove('hidden');
             
             document.querySelectorAll('.cfg-tab-btn').forEach(b => {
                 b.classList.remove('bg-[#f1fbe4]', 'text-sidebar');
                 b.classList.add('text-text-secondary', 'hover:bg-[#fcfdfb]');
             });
-            btn.classList.add('bg-[#f1fbe4]', 'text-sidebar');
-            btn.classList.remove('text-text-secondary', 'hover:bg-[#fcfdfb]');
+            if (btn) {
+                btn.classList.add('bg-[#f1fbe4]', 'text-sidebar');
+                btn.classList.remove('text-text-secondary', 'hover:bg-[#fcfdfb]');
+            }
         }
+
+        function recalcularSumaPeriodosCfg() {
+            const p1 = parseFloat(document.getElementById('cfg-peso-p1')?.value) || 0;
+            const p2 = parseFloat(document.getElementById('cfg-peso-p2')?.value) || 0;
+            const p3 = parseFloat(document.getElementById('cfg-peso-p3')?.value) || 0;
+            const suma = p1 + p2 + p3;
+
+            const badge = document.getElementById('cfg-peso-total-badge');
+            const text = document.getElementById('cfg-peso-sum-text');
+            if (text) text.innerText = suma + '%';
+
+            if (badge) {
+                if (suma === 100) {
+                    badge.className = "px-3.5 py-1.5 rounded-full text-[11px] font-black flex items-center gap-1.5 shadow-2xs bg-pill-green text-sidebar border border-[#8ce383]";
+                } else {
+                    badge.className = "px-3.5 py-1.5 rounded-full text-[11px] font-black flex items-center gap-1.5 shadow-2xs bg-pill-red text-alert-red border border-red-300";
+                }
+            }
+        }
+
+        function validarPonderacionesCfg(event) {
+            const p1 = parseFloat(document.getElementById('cfg-peso-p1')?.value) || 0;
+            const p2 = parseFloat(document.getElementById('cfg-peso-p2')?.value) || 0;
+            const p3 = parseFloat(document.getElementById('cfg-peso-p3')?.value) || 0;
+            const suma = p1 + p2 + p3;
+
+            if (suma !== 100) {
+                alert('La suma de las ponderaciones de los 3 períodos debe ser exactamente 100% (Suma actual: ' + suma + '%).');
+                event.preventDefault();
+                return false;
+            }
+            return true;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            recalcularSumaPeriodosCfg();
+            const activeTabAttr = /*[[${activeTab}]]*/ null;
+            if (activeTabAttr) {
+                const targetBtn = document.querySelector(`[onclick*="${activeTabAttr}"]`);
+                if (targetBtn) switchConfigTab(targetBtn, activeTabAttr);
+            }
+        });
     </script>
 </th:block>
 

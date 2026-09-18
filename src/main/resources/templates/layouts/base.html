@@ -19,18 +19,20 @@ th:fragment="html(content)">
         SIGA
     </title>
 
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <!-- Tailwind CSS -->
     <link rel="stylesheet"
           th:href="@{/css/output.css}">
 
-    <!-- HTMX v2 -->
-    <script
-      src="https://unpkg.com/htmx.org@2.0.10/dist/htmx.min.js">
-    </script>
+    <!-- HTMX v2 (pinned) -->
+    <script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js"></script>
 
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-
+    <!-- Lucide Icons (pinned) -->
+    <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
 </head>
 
 <body>
@@ -71,7 +73,10 @@ th:fragment="html(content)">
 </div>
 
 <script>
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
+    document.addEventListener('htmx:afterSwap', function() {
+        if (window.lucide) lucide.createIcons();
+    });
 </script>
 
 </body>

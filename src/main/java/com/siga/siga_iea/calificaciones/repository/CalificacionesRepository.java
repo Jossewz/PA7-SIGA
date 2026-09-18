@@ -17,6 +17,13 @@ public interface CalificacionesRepository extends JpaRepository<Calificacion, UU
 
     Optional<Calificacion> findByEvaluacionIdAndEstudianteId(UUID evaluacionId, UUID estudianteId);
 
+    List<Calificacion> findByEvaluacionId(UUID evaluacionId);
+
+    void deleteByEvaluacionId(UUID evaluacionId);
+
     @Query("SELECT c FROM Calificacion c WHERE c.evaluacion.cursoMateria.curso.id = :cursoId AND c.evaluacion.periodo = :periodo")
     List<Calificacion> findByCursoAndPeriodo(@Param("cursoId") UUID cursoId, @Param("periodo") Integer periodo);
+
+    @Query("SELECT c FROM Calificacion c WHERE c.evaluacion.cursoMateria.id = :cursoMateriaId")
+    List<Calificacion> findByCursoMateriaId(@Param("cursoMateriaId") UUID cursoMateriaId);
 }

@@ -10,6 +10,17 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.siga.siga_iea.asistencias.entity.Asistencia;
+import com.siga.siga_iea.asistencias.service.AsistenciaService;
+import com.siga.siga_iea.calificaciones.entity.Evaluacion;
+import com.siga.siga_iea.calificaciones.service.CalificacionesService;
+import com.siga.siga_iea.clases.entity.CursoMateria;
+import com.siga.siga_iea.clases.entity.Materia;
+import com.siga.siga_iea.clases.repository.MateriaRepository;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -18,10 +29,20 @@ public class ClaseController {
 
     private final ClaseService claseService;
     private final PersonalService personalService;
+    private final CalificacionesService calificacionesService;
+    private final AsistenciaService asistenciaService;
+    private final MateriaRepository materiaRepository;
 
-    public ClaseController(ClaseService claseService, PersonalService personalService) {
+    public ClaseController(ClaseService claseService,
+                           PersonalService personalService,
+                           CalificacionesService calificacionesService,
+                           AsistenciaService asistenciaService,
+                           MateriaRepository materiaRepository) {
         this.claseService = claseService;
         this.personalService = personalService;
+        this.calificacionesService = calificacionesService;
+        this.asistenciaService = asistenciaService;
+        this.materiaRepository = materiaRepository;
     }
 
     @GetMapping("/clases")
@@ -138,6 +159,43 @@ public class ClaseController {
             }
         }
         model.addAttribute("horariosData", horariosData);
+
+        // Cargar datos académicos para vista inicial (Materia inicial, evaluaciones, notas y asistencia)
+        String materiaNombre = (!horarios.isEmpty() && horarios.get(0).getMateria() != null)
+                ? horarios.get(0).getMateria().getNombre()
+                : "Matemáticas";
+        CursoMateria cm = calificacionesService.obtenerOCrearCursoMateriaPorNombre(c.getId(), materiaNombre, "2026");
+
+        Integer periodo = 1;
+        LocalDate hoy = LocalDate.now();
+        List<Evaluacion> evaluaciones = calificacionesService.obtenerEvaluacionesPorCursoYMateria(cm.getId(), periodo);
+        BigDecimal sumaPesos = evaluaciones.stream()
+                .map(e -> e.getPeso() != null ? e.getPeso() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Map<UUID, Map<UUID, BigDecimal>> calificacionesMapa = calificacionesService.obtenerCalificacionesMapa(cm.getId(), periodo);
+        Map<UUID, String> asistenciasMapa = asistenciaService.obtenerMapaEstadosAsistencia(c.getId(), hoy, cm.getMateria().getId());
+
+        Map<UUID, BigDecimal> notasFinales = new HashMap<>();
+        for (CursoEstudiante ce : estudiantesCE) {
+            if (ce.getEstudiante() != null) {
+                UUID estId = ce.getEstudiante().getId();
+                BigDecimal notaFinal = calificacionesService.calcularNotaFinalPeriodo(estId, cm.getId(), periodo);
+                notasFinales.put(estId, notaFinal);
+            }
+        }
+
+        model.addAttribute("cursoMateriaId", cm.getId());
+        model.addAttribute("materiaId", cm.getMateria().getId());
+        model.addAttribute("materiaNombre", cm.getMateria().getNombre());
+        model.addAttribute("periodo", periodo);
+        model.addAttribute("fecha", hoy.toString());
+        model.addAttribute("evaluaciones", evaluaciones);
+        model.addAttribute("sumaPesos", sumaPesos);
+        model.addAttribute("estudiantesCE", estudiantesCE);
+        model.addAttribute("calificacionesMapa", calificacionesMapa);
+        model.addAttribute("asistenciasMapa", asistenciasMapa);
+        model.addAttribute("notasFinales", notasFinales);
 
         return "clases/detalle";
     }
@@ -267,5 +325,167 @@ public class ClaseController {
         Optional<Clase> cOpt = claseService.buscarPorId(cursoId);
         String codigo = cOpt.map(Clase::getCodigoCurso).orElse("11-01");
         return "redirect:/clases/gestion?codigo=" + codigo;
+    }
+
+    // ==========================================
+    // HTMX ENDPOINTS: NOTAS Y ASISTENCIA (POSTGRESQL)
+    // ==========================================
+
+    @GetMapping("/clases/fragmento/tabla-notas")
+    public String obtenerFragmentoTablaNotas(
+            @RequestParam("cursoId") UUID cursoId,
+            @RequestParam(value = "materiaNombre", defaultValue = "Matemáticas") String materiaNombre,
+            @RequestParam(value = "materiaId", required = false) UUID materiaId,
+            @RequestParam(value = "periodo", defaultValue = "1") Integer periodo,
+            @RequestParam(value = "fecha", required = false) String fechaStr,
+            Model model) {
+
+        LocalDate fecha;
+        try {
+            fecha = (fechaStr != null && !fechaStr.isBlank()) ? LocalDate.parse(fechaStr) : LocalDate.now();
+        } catch (Exception e) {
+            fecha = LocalDate.now();
+        }
+
+        CursoMateria cm;
+        if (materiaId != null) {
+            cm = calificacionesService.obtenerOCrearCursoMateria(cursoId, materiaId, "2026");
+        } else {
+            cm = calificacionesService.obtenerOCrearCursoMateriaPorNombre(cursoId, materiaNombre, "2026");
+        }
+
+        List<Evaluacion> evaluaciones = calificacionesService.obtenerEvaluacionesPorCursoYMateria(cm.getId(), periodo);
+        BigDecimal sumaPesos = evaluaciones.stream()
+                .map(e -> e.getPeso() != null ? e.getPeso() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        List<CursoEstudiante> estudiantesCE = claseService.listarEstudiantesDeCurso(cursoId);
+        Map<UUID, Map<UUID, BigDecimal>> calificacionesMapa = calificacionesService.obtenerCalificacionesMapa(cm.getId(), periodo);
+        Map<UUID, String> asistenciasMapa = asistenciaService.obtenerMapaEstadosAsistencia(cursoId, fecha, cm.getMateria().getId());
+
+        Map<UUID, BigDecimal> notasFinales = new HashMap<>();
+        for (CursoEstudiante ce : estudiantesCE) {
+            if (ce.getEstudiante() != null) {
+                UUID estId = ce.getEstudiante().getId();
+                BigDecimal notaFinal = calificacionesService.calcularNotaFinalPeriodo(estId, cm.getId(), periodo);
+                notasFinales.put(estId, notaFinal);
+            }
+        }
+
+        model.addAttribute("cursoId", cursoId);
+        model.addAttribute("cursoMateriaId", cm.getId());
+        model.addAttribute("materiaId", cm.getMateria().getId());
+        model.addAttribute("materiaNombre", cm.getMateria().getNombre());
+        model.addAttribute("periodo", periodo);
+        model.addAttribute("fecha", fecha.toString());
+        model.addAttribute("evaluaciones", evaluaciones);
+        model.addAttribute("sumaPesos", sumaPesos);
+        model.addAttribute("estudiantesCE", estudiantesCE);
+        model.addAttribute("calificacionesMapa", calificacionesMapa);
+        model.addAttribute("asistenciasMapa", asistenciasMapa);
+        model.addAttribute("notasFinales", notasFinales);
+
+        return "clases/fragments/tabla-detalle-notas :: tablaDetalleNotas";
+    }
+
+    @PostMapping("/clases/evaluaciones/crear")
+    public String crearEvaluacion(
+            @RequestParam("cursoId") UUID cursoId,
+            @RequestParam(value = "materiaNombre", defaultValue = "Matemáticas") String materiaNombre,
+            @RequestParam(value = "materiaId", required = false) UUID materiaId,
+            @RequestParam(value = "periodo", defaultValue = "1") Integer periodo,
+            @RequestParam(value = "fecha", required = false) String fecha,
+            Model model) {
+
+        CursoMateria cm = (materiaId != null)
+                ? calificacionesService.obtenerOCrearCursoMateria(cursoId, materiaId, "2026")
+                : calificacionesService.obtenerOCrearCursoMateriaPorNombre(cursoId, materiaNombre, "2026");
+
+        calificacionesService.crearEvaluacionAutoEquitativa(cm.getId(), periodo, fecha);
+
+        return obtenerFragmentoTablaNotas(cursoId, materiaNombre, cm.getMateria().getId(), periodo, fecha, model);
+    }
+
+    @PostMapping("/clases/evaluaciones/eliminar")
+    public String eliminarEvaluacion(
+            @RequestParam("evaluacionId") UUID evaluacionId,
+            @RequestParam("cursoId") UUID cursoId,
+            @RequestParam(value = "materiaNombre", defaultValue = "Matemáticas") String materiaNombre,
+            @RequestParam(value = "materiaId", required = false) UUID materiaId,
+            @RequestParam(value = "periodo", defaultValue = "1") Integer periodo,
+            @RequestParam(value = "fecha", required = false) String fecha,
+            Model model) {
+
+        calificacionesService.eliminarEvaluacion(evaluacionId);
+
+        return obtenerFragmentoTablaNotas(cursoId, materiaNombre, materiaId, periodo, fecha, model);
+    }
+
+    @PostMapping("/clases/evaluaciones/actualizar-peso")
+    public String actualizarPeso(
+            @RequestParam("evaluacionId") UUID evaluacionId,
+            @RequestParam("peso") String pesoStr,
+            @RequestParam("cursoId") UUID cursoId,
+            @RequestParam(value = "materiaNombre", defaultValue = "Matemáticas") String materiaNombre,
+            @RequestParam(value = "materiaId", required = false) UUID materiaId,
+            @RequestParam(value = "periodo", defaultValue = "1") Integer periodo,
+            @RequestParam(value = "fecha", required = false) String fecha,
+            Model model) {
+
+        BigDecimal peso = BigDecimal.ZERO;
+        if (pesoStr != null && !pesoStr.isBlank()) {
+            try {
+                peso = new BigDecimal(pesoStr.trim().replace(',', '.')).setScale(2, RoundingMode.HALF_UP);
+            } catch (Exception ignored) {}
+        }
+
+        calificacionesService.actualizarPesoEvaluacion(evaluacionId, peso);
+
+        return obtenerFragmentoTablaNotas(cursoId, materiaNombre, materiaId, periodo, fecha, model);
+    }
+
+    @PostMapping("/clases/calificaciones/guardar")
+    public String guardarCalificacion(
+            @RequestParam("evaluacionId") UUID evaluacionId,
+            @RequestParam("estudianteId") UUID estudianteId,
+            @RequestParam("nota") String notaStr,
+            @RequestParam("cursoMateriaId") UUID cursoMateriaId,
+            @RequestParam("periodo") Integer periodo,
+            Model model) {
+
+        BigDecimal nota = BigDecimal.ZERO;
+        if (notaStr != null && !notaStr.isBlank()) {
+            try {
+                nota = new BigDecimal(notaStr.trim().replace(',', '.')).setScale(2, RoundingMode.HALF_UP);
+            } catch (Exception ignored) {}
+        }
+
+        calificacionesService.registrarONota(evaluacionId, estudianteId, nota, null);
+        BigDecimal notaFinal = calificacionesService.calcularNotaFinalPeriodo(estudianteId, cursoMateriaId, periodo);
+
+        model.addAttribute("estId", estudianteId.toString());
+        model.addAttribute("notaFinal", notaFinal);
+
+        return "clases/fragments/tabla-detalle-notas :: badgeNotaFinal";
+    }
+
+    @PostMapping("/clases/asistencias/toggle")
+    public String toggleAsistencia(
+            @RequestParam("cursoId") UUID cursoId,
+            @RequestParam("estudianteId") UUID estudianteId,
+            @RequestParam(value = "materiaId", required = false) UUID materiaId,
+            @RequestParam("fecha") String fechaStr,
+            Model model) {
+
+        LocalDate fecha = (fechaStr != null && !fechaStr.isBlank()) ? LocalDate.parse(fechaStr) : LocalDate.now();
+        Asistencia a = asistenciaService.toggleAsistencia(cursoId, estudianteId, fecha, materiaId);
+
+        model.addAttribute("estId", estudianteId.toString());
+        model.addAttribute("cursoId", cursoId.toString());
+        model.addAttribute("materiaId", materiaId != null ? materiaId.toString() : "");
+        model.addAttribute("fecha", fechaStr);
+        model.addAttribute("estado", a.getEstado());
+
+        return "clases/fragments/tabla-detalle-notas :: botonAsistencia";
     }
 }

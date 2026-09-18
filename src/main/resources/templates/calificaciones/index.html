@@ -56,25 +56,128 @@
                     <thead>
                         <tr class="bg-white border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
                             <th class="p-4 pl-6">Asignatura</th>
-                            <th class="p-4 text-center">Periodo 1</th>
-                            <th class="p-4 text-center">Periodo 2</th>
-                            <th class="p-4 text-center">Periodo 3</th>
-                            <th class="p-4 text-center">Definitiva</th>
+                            <th class="p-4 text-center" th:text="${'Periodo 1 (' + (pesoP1 != null ? pesoP1 : '30') + '%)'}">Periodo 1 (30%)</th>
+                            <th class="p-4 text-center" th:text="${'Periodo 2 (' + (pesoP2 != null ? pesoP2 : '35') + '%)'}">Periodo 2 (35%)</th>
+                            <th class="p-4 text-center" th:text="${'Periodo 3 (' + (pesoP3 != null ? pesoP3 : '35') + '%)'}">Periodo 3 (35%)</th>
+                            <th class="p-4 text-center">Definitiva (100%)</th>
                             <th class="p-4 pr-6 text-right">Detalle</th>
                         </tr>
                     </thead>
                     <tbody id="tbody-boletin" class="divide-y divide-[#c4eec0]/20 text-[#243d28]">
-                        <!-- Inyectado dinámicamente por calificaciones.js -->
+                        <!-- Estado Vacío -->
+                        <tr th:if="${boletin == null || #lists.isEmpty(boletin)}">
+                            <td colspan="6" class="p-8 text-center text-text-muted italic">
+                                El estudiante no posee calificaciones registradas en el período activo en la base de datos.
+                            </td>
+                        </tr>
+
+                        <!-- Iteración de Asignaturas con datos reales de PostgreSQL -->
+                        <th:block th:each="asig, iter : ${boletin}">
+                            <!-- Fila Principal de Asignatura -->
+                            <tr class="hover:bg-[#fcfdfb] transition-colors cursor-pointer" th:data-index="${iter.index}" onclick="toggleEvaluaciones(this.dataset.index)">
+                                <td class="p-4 pl-6 font-black text-sidebar text-[13px] flex items-center gap-2.5">
+                                    <i data-lucide="chevron-right" th:id="${'icon-chevron-' + iter.index}" class="size-4 stroke-[2.5] text-text-secondary transition-transform duration-200"></i>
+                                    <span th:text="${asig.materiaNombre}">Matemáticas</span>
+                                </td>
+                                <td class="p-4 text-center font-bold text-sidebar" th:text="${asig.periodo1Nota != null ? #numbers.formatDecimal(asig.periodo1Nota, 1, 2) : '-'}">-</td>
+                                <td class="p-4 text-center font-bold text-sidebar" th:text="${asig.periodo2Nota != null ? #numbers.formatDecimal(asig.periodo2Nota, 1, 2) : '-'}">-</td>
+                                <td class="p-4 text-center font-bold text-sidebar" th:text="${asig.periodo3Nota != null ? #numbers.formatDecimal(asig.periodo3Nota, 1, 2) : '-'}">-</td>
+                                <td class="p-4 text-center">
+                                    <span th:text="${asig.notaDefinitiva != null ? #numbers.formatDecimal(asig.notaDefinitiva, 1, 2) : '0.00'}"
+                                          class="px-2.5 py-1 rounded-full text-[11px] font-black text-white"
+                                          th:classappend="${asig.notaDefinitiva != null && asig.notaDefinitiva.doubleValue() >= 3.5} ? 'bg-sidebar' : (${asig.notaDefinitiva != null && asig.notaDefinitiva.doubleValue() >= 3.0} ? 'bg-amber-500' : 'bg-alert-red')">
+                                        0.00
+                                    </span>
+                                </td>
+                                <td class="p-4 pr-6 text-right">
+                                    <span class="text-[11px] font-bold text-sidebar underline underline-offset-2">Ver Detalle</span>
+                                </td>
+                            </tr>
+
+                            <!-- Fila Desplegable con Detalle de Evaluaciones por Período -->
+                            <tr th:id="${'eval-row-' + iter.index}" class="hidden bg-[#f7fcf6]/60 border-b border-[#c4eec0]/40">
+                                <td colspan="6" class="p-5 pl-10 pr-8">
+                                    <div class="bg-white rounded-xl p-4 border border-[#c4eec0]/40 shadow-sm space-y-4">
+                                        <div class="flex items-center justify-between border-b border-[#c4eec0]/30 pb-3">
+                                            <h5 class="text-[11px] font-black uppercase text-sidebar tracking-wider flex items-center gap-2">
+                                                <i data-lucide="layers" class="size-4 stroke-2"></i>
+                                                <span th:text="${'Evaluaciones Detalladas – ' + asig.materiaNombre}">Evaluaciones Detalladas</span>
+                                            </h5>
+                                            <div class="flex items-center gap-1 bg-[#f7fcf6] p-1 rounded-lg border border-[#c4eec0]/50">
+                                                <button type="button" th:data-index="${iter.index}" onclick="switchSubPeriodo(this.dataset.index, 1)" th:id="${'tab-' + iter.index + '-1'}" class="subtab-btn px-3 py-1 rounded-md text-[11px] font-black bg-sidebar text-white shadow-2xs cursor-pointer">Periodo 1</button>
+                                                <button type="button" th:data-index="${iter.index}" onclick="switchSubPeriodo(this.dataset.index, 2)" th:id="${'tab-' + iter.index + '-2'}" class="subtab-btn px-3 py-1 rounded-md text-[11px] font-bold text-text-secondary hover:text-sidebar cursor-pointer">Periodo 2</button>
+                                                <button type="button" th:data-index="${iter.index}" onclick="switchSubPeriodo(this.dataset.index, 3)" th:id="${'tab-' + iter.index + '-3'}" class="subtab-btn px-3 py-1 rounded-md text-[11px] font-bold text-text-secondary hover:text-sidebar cursor-pointer">Periodo 3</button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Panel Periodo 1 -->
+                                        <div th:id="${'pane-' + iter.index + '-1'}" class="subpane-window">
+                                            <div th:if="${asig.evaluacionesP1 == null || #lists.isEmpty(asig.evaluacionesP1)}" class="text-[11px] text-text-muted italic py-2">
+                                                Sin evaluaciones registradas en este período.
+                                            </div>
+                                            <div th:if="${asig.evaluacionesP1 != null && !#lists.isEmpty(asig.evaluacionesP1)}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                                <div th:each="n : ${asig.evaluacionesP1}" class="p-3 rounded-lg border border-[#c4eec0]/40 bg-[#fbfdfa] flex justify-between items-center">
+                                                    <div>
+                                                        <p class="text-[11px] font-bold text-text-primary">
+                                                            <span th:text="${n.nombre}">Nota 1</span>
+                                                            <span th:if="${n.fechaDisplay != null && !n.fechaDisplay.isEmpty()}" class="text-[9px] text-[#3e6837]" th:text="${'(' + n.fechaDisplay + ')'}"></span>
+                                                        </p>
+                                                        <span class="text-[10px] font-semibold text-text-secondary" th:text="${'Peso: ' + (n.peso != null ? (n.peso.doubleValue() % 1 == 0 ? n.peso.intValue() : n.peso) : 0) + '%'}">Peso: 25%</span>
+                                                    </div>
+                                                    <span class="px-2 py-0.5 rounded text-[11px] font-black bg-[#eafbe4] text-sidebar border border-[#c4eec0]" th:text="${n.nota != null ? #numbers.formatDecimal(n.nota, 1, 2) : '0.00'}">0.00</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Panel Periodo 2 -->
+                                        <div th:id="${'pane-' + iter.index + '-2'}" class="subpane-window hidden">
+                                            <div th:if="${asig.evaluacionesP2 == null || #lists.isEmpty(asig.evaluacionesP2)}" class="text-[11px] text-text-muted italic py-2">
+                                                Sin evaluaciones registradas en este período.
+                                            </div>
+                                            <div th:if="${asig.evaluacionesP2 != null && !#lists.isEmpty(asig.evaluacionesP2)}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                                <div th:each="n : ${asig.evaluacionesP2}" class="p-3 rounded-lg border border-[#c4eec0]/40 bg-[#fbfdfa] flex justify-between items-center">
+                                                    <div>
+                                                        <p class="text-[11px] font-bold text-text-primary">
+                                                            <span th:text="${n.nombre}">Nota 1</span>
+                                                            <span th:if="${n.fechaDisplay != null && !n.fechaDisplay.isEmpty()}" class="text-[9px] text-[#3e6837]" th:text="${'(' + n.fechaDisplay + ')'}"></span>
+                                                        </p>
+                                                        <span class="text-[10px] font-semibold text-text-secondary" th:text="${'Peso: ' + (n.peso != null ? (n.peso.doubleValue() % 1 == 0 ? n.peso.intValue() : n.peso) : 0) + '%'}">Peso: 25%</span>
+                                                    </div>
+                                                    <span class="px-2 py-0.5 rounded text-[11px] font-black bg-[#eafbe4] text-sidebar border border-[#c4eec0]" th:text="${n.nota != null ? #numbers.formatDecimal(n.nota, 1, 2) : '0.00'}">0.00</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Panel Periodo 3 -->
+                                        <div th:id="${'pane-' + iter.index + '-3'}" class="subpane-window hidden">
+                                            <div th:if="${asig.evaluacionesP3 == null || #lists.isEmpty(asig.evaluacionesP3)}" class="text-[11px] text-text-muted italic py-2">
+                                                Sin evaluaciones registradas en este período.
+                                            </div>
+                                            <div th:if="${asig.evaluacionesP3 != null && !#lists.isEmpty(asig.evaluacionesP3)}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                                <div th:each="n : ${asig.evaluacionesP3}" class="p-3 rounded-lg border border-[#c4eec0]/40 bg-[#fbfdfa] flex justify-between items-center">
+                                                    <div>
+                                                        <p class="text-[11px] font-bold text-text-primary">
+                                                            <span th:text="${n.nombre}">Nota 1</span>
+                                                            <span th:if="${n.fechaDisplay != null && !n.fechaDisplay.isEmpty()}" class="text-[9px] text-[#3e6837]" th:text="${'(' + n.fechaDisplay + ')'}"></span>
+                                                        </p>
+                                                        <span class="text-[10px] font-semibold text-text-secondary" th:text="${'Peso: ' + (n.peso != null ? (n.peso.doubleValue() % 1 == 0 ? n.peso.intValue() : n.peso) : 0) + '%'}">Peso: 25%</span>
+                                                    </div>
+                                                    <span class="px-2 py-0.5 rounded text-[11px] font-black bg-[#eafbe4] text-sidebar border border-[#c4eec0]" th:text="${n.nota != null ? #numbers.formatDecimal(n.nota, 1, 2) : '0.00'}">0.00</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        </th:block>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Script del módulo de calificaciones -->
-    <script th:inline="javascript">
-        window.estudianteIdActivo = /*[[${estudianteSeleccionadoId}]]*/ '';
-    </script>
+    <!-- Script visual para acordeón de detalles -->
     <script th:src="@{/js/calificaciones.js}"></script>
 </th:block>
 

@@ -74,7 +74,7 @@
                 <!-- Date picker -->
                 <div class="flex flex-col">
                     <label for="fecha-evaluacion" class="text-[9px] font-black uppercase text-text-secondary tracking-wider mb-1">Fecha de Clase / Evaluación</label>
-                    <input type="date" id="fecha-evaluacion" onchange="actualizarMateriaPorFecha()" class="h-10 px-3.5 bg-[#f9fbf8] border border-[#c4eec0] rounded-xl text-xs font-extrabold text-sidebar focus:ring-1 focus:ring-sidebar focus:outline-none cursor-pointer">
+                    <input type="date" id="fecha-evaluacion" name="fecha" th:value="${fecha}" onchange="actualizarMateriaPorFecha()" class="h-10 px-3.5 bg-[#f9fbf8] border border-[#c4eec0] rounded-xl text-xs font-extrabold text-sidebar focus:ring-1 focus:ring-sidebar focus:outline-none cursor-pointer">
                 </div>
 
                 <!-- Día de la semana -->
@@ -90,7 +90,7 @@
                 <div class="flex flex-col flex-1 min-w-[220px]">
                     <label for="select-materia" class="text-[9px] font-black uppercase text-text-secondary tracking-wider mb-1">Materia según Horario</label>
                     <div id="container-materia-select">
-                        <select id="select-materia" onchange="cambiarMateriaSeleccionada(this.value)" class="w-full h-10 px-3.5 bg-[#f9fbf8] border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none cursor-pointer">
+                        <select id="select-materia" name="materiaNombre" onchange="cambiarMateriaSeleccionada(this.value)" class="w-full h-10 px-3.5 bg-[#f9fbf8] border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none cursor-pointer">
                             <!-- Inyectado dinámicamente por JS -->
                         </select>
                     </div>
@@ -134,10 +134,19 @@
             </div>
         </div>
 
+        <!-- Inputs ocultos para interacción HTMX -->
+        <input type="hidden" id="input-curso-id" name="cursoId" th:value="${cursoId}" />
+        <input type="hidden" id="input-periodo-activo" name="periodo" value="1" />
+
         <!-- Barra de Acciones de Calificaciones -->
         <div class="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-[#c4eec0]/40 shadow-2xs">
             <div class="flex items-center gap-3">
-                <button type="button" onclick="agregarNota()" class="px-4 py-2 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-1.5 shadow-sm cursor-pointer">
+                <button type="button" 
+                        th:attr="hx-post=@{/clases/evaluaciones/crear}"
+                        hx-include="#input-curso-id, #select-materia, #input-periodo-activo, #fecha-evaluacion"
+                        hx-target="#contenedor-tabla-notas"
+                        hx-swap="outerHTML"
+                        class="px-4 py-2 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-1.5 shadow-sm cursor-pointer">
                     <i data-lucide="plus" class="size-4 stroke-[3]"></i>
                     <span>Agregar Nota al Periodo</span>
                 </button>

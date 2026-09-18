@@ -1,20 +1,123 @@
 <th:block xmlns:th="http://www.thymeleaf.org">
-    <!-- Tabla Ajustable de Estudiantes, Notas y Asistencia (Sin scroll forzado) -->
-    <div th:fragment="tablaDetalleNotas" class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
+
+    <!-- FRAGMENTO PRINCIPAL: TABLA DE CALIFICACIONES Y ASISTENCIA -->
+    <div th:fragment="tablaDetalleNotas" id="contenedor-tabla-notas" class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
+        
+        <!-- Out-Of-Band Swap para el Badge de Ponderación Superior -->
+        <div id="peso-val-badge" hx-swap-oob="true" 
+             class="px-4 py-1.5 rounded-full text-[11px] font-black flex items-center gap-1.5 shadow-2xs shrink-0"
+             th:classappend="${sumaPesos != null && sumaPesos.intValue() == 100} ? 'bg-pill-green text-sidebar border border-[#8ce383]' : 'bg-pill-red text-alert-red border border-red-300'">
+            <i th:attr="data-lucide=${sumaPesos != null && sumaPesos.intValue() == 100 ? 'check-circle-2' : 'alert-circle'}" class="size-3.5 stroke-[2.5]"></i>
+            <span>Suma de Pesos: <strong id="peso-total-val" th:text="${(sumaPesos != null ? (sumaPesos.doubleValue() % 1 == 0 ? sumaPesos.intValue() : #numbers.formatDecimal(sumaPesos, 1, 2)) : 0) + '%'}">100%</strong></span>
+        </div>
+
         <div class="w-full overflow-x-auto">
             <table class="w-full text-left border-collapse text-[12px] table-auto" id="tabla-estudiantes-notas">
                 <thead>
                     <tr class="bg-[#f7fcf6] border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]" id="thead-row">
-                        <th class="p-3 pl-5 w-8 text-center">#</th>
-                        <th class="p-3 min-w-[160px]">Estudiante</th>
-                        <th class="p-3 text-center w-24">Nota Final</th>
-                        <th class="p-3 pr-5 text-center w-32">Asistencia</th>
+                        <th class="p-3.5 pl-5 w-12 text-center">#</th>
+                        <th class="p-3.5 min-w-[200px]">Estudiante</th>
+                        
+                        <!-- Columnas Dinámicas de Evaluaciones en PostgreSQL -->
+                        <th th:each="ev : ${evaluaciones}" class="p-3 text-center border-x border-[#c4eec0]/30 bg-[#f4fbf2] w-32 min-w-[130px]">
+                            <div class="flex flex-col items-center justify-center gap-1.5 w-full">
+                                <div class="inline-flex items-center justify-center gap-1.5 w-full">
+                                    <span class="text-[11px] font-black uppercase text-sidebar tracking-wider" th:text="${ev.nombre}">Nota 1</span>
+                                    <button type="button" 
+                                            th:attr="hx-post=@{/clases/evaluaciones/eliminar(evaluacionId=${ev.id}, cursoId=${cursoId}, materiaId=${materiaId}, periodo=${periodo}, fecha=${fecha})}"
+                                            hx-target="#contenedor-tabla-notas"
+                                            hx-swap="outerHTML"
+                                            hx-confirm="¿Desea eliminar esta nota del período?"
+                                            class="text-alert-red/70 hover:text-alert-red hover:bg-red-50 p-1 rounded-md transition-colors cursor-pointer" title="Eliminar Nota">
+                                        <i data-lucide="trash-2" class="size-3.5"></i>
+                                    </button>
+                                </div>
+                                <div class="inline-flex items-center justify-center gap-1 bg-white px-2.5 py-1 rounded-lg border border-[#c4eec0] shadow-2xs">
+                                    <span class="text-[10px] font-black text-text-secondary">%</span>
+                                    <input type="number" 
+                                           th:value="${ev.peso != null ? (ev.peso.doubleValue() % 1 == 0 ? ev.peso.intValue() : #numbers.formatDecimal(ev.peso, 1, 2)) : 0}" 
+                                           min="0" max="100" step="0.01"
+                                           th:attr="hx-post=@{/clases/evaluaciones/actualizar-peso(evaluacionId=${ev.id}, cursoId=${cursoId}, materiaId=${materiaId}, periodo=${periodo}, fecha=${fecha})}"
+                                           hx-trigger="change delay:300ms"
+                                           name="peso"
+                                           hx-target="#contenedor-tabla-notas"
+                                           hx-swap="outerHTML"
+                                           class="w-14 text-center font-black text-sidebar text-[12px] focus:outline-none focus:ring-1 focus:ring-sidebar rounded p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                </div>
+                            </div>
+                        </th>
+
+                        <th class="p-3.5 text-center w-28 min-w-[110px] whitespace-nowrap">Nota Final</th>
+                        <th class="p-3.5 pr-5 text-center w-36 min-w-[140px] whitespace-nowrap" th:text="${'Asistencia (' + (fecha != null ? fecha : 'Hoy') + ')'}">Asistencia</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]" id="tbody-estudiantes">
-                    <!-- Filas generadas dinámicamente por clases-detalle.js -->
+                    <tr th:if="${estudiantesCE == null || #lists.isEmpty(estudiantesCE)}">
+                        <td th:colspan="${(evaluaciones != null ? #lists.size(evaluaciones) : 0) + 4}" class="p-8 text-center text-text-muted italic">
+                            No hay estudiantes asignados a este curso actualmente. <br>
+                            <span class="text-[11px] font-normal text-text-secondary mt-1 inline-block">Haga clic en el botón <strong>'Auto-Mapear Matriculados'</strong> superior para asignar automáticamente estudiantes matriculados en este grado.</span>
+                        </td>
+                    </tr>
+
+                    <tr th:each="ce, iter : ${estudiantesCE}" class="hover:bg-[#fcfdfb] transition-colors est-row">
+                        <td class="p-3.5 pl-5 font-bold text-text-secondary text-center w-12" th:text="${iter.count}">1</td>
+                        <td class="p-3.5 min-w-[200px]">
+                            <div class="font-black text-text-primary text-[13px] leading-tight" th:text="${ce.estudiante.nombreCompleto}">Nombre Estudiante</div>
+                            <div class="text-[11px] font-semibold text-text-secondary mt-0.5" th:text="${'Doc: ' + ce.estudiante.numeroDocumento}">Doc: 123456</div>
+                        </td>
+
+                        <!-- Inputs de Notas por Evaluación -->
+                        <td th:each="ev : ${evaluaciones}" class="p-3 text-center border-x border-[#c4eec0]/20 w-32 min-w-[130px]">
+                            <div class="flex items-center justify-center">
+                                <input type="number" step="0.01" min="0" max="5.0" 
+                                       th:value="${calificacionesMapa != null && calificacionesMapa.containsKey(ce.estudiante.id) && calificacionesMapa.get(ce.estudiante.id).containsKey(ev.id) ? #numbers.formatDecimal(calificacionesMapa.get(ce.estudiante.id).get(ev.id), 1, 2) : '0.00'}"
+                                       th:attr="hx-post=@{/clases/calificaciones/guardar(evaluacionId=${ev.id}, estudianteId=${ce.estudiante.id}, cursoMateriaId=${cursoMateriaId}, periodo=${periodo})}"
+                                       hx-trigger="change delay:200ms"
+                                       name="nota"
+                                       th:attrappend="hx-target=${'#badge-final-' + ce.estudiante.id}"
+                                       hx-swap="outerHTML"
+                                       class="w-20 h-9 px-2 text-center font-black border border-[#c4eec0] rounded-lg bg-white text-sidebar focus:ring-2 focus:ring-sidebar focus:border-sidebar n-input text-[13px] shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all">
+                            </div>
+                        </td>
+
+                        <!-- Badge Nota Final Calculada en Servidor -->
+                        <td class="p-3.5 text-center font-black w-28 min-w-[110px]">
+                            <th:block th:replace="~{clases/fragments/tabla-detalle-notas :: badgeNotaFinal(${ce.estudiante.id.toString()}, ${notasFinales != null ? notasFinales.get(ce.estudiante.id) : null})}"></th:block>
+                        </td>
+
+                        <!-- Botón de Asistencia Reactivo HTMX -->
+                        <td class="p-3.5 pr-5 text-center w-36 min-w-[140px]">
+                            <th:block th:replace="~{clases/fragments/tabla-detalle-notas :: botonAsistencia(${ce.estudiante.id.toString()}, ${cursoId != null ? cursoId.toString() : ''}, ${materiaId != null ? materiaId.toString() : ''}, ${fecha}, ${asistenciasMapa != null ? asistenciasMapa.get(ce.estudiante.id) : null})}"></th:block>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
+
+    <!-- FRAGMENTO ESPECÍFICO: BADGE DE NOTA FINAL -->
+    <th:block th:fragment="badgeNotaFinal(estId, notaFinal)">
+        <span th:id="${'badge-final-' + estId}"
+              th:text="${notaFinal != null ? #numbers.formatDecimal(notaFinal, 1, 2) : '0.00'}"
+              class="inline-flex items-center justify-center min-w-[58px] px-3 py-1.5 rounded-full text-[11px] font-black text-white text-center nota-final-badge shadow-2xs"
+              th:classappend="${notaFinal != null && notaFinal.doubleValue() >= 3.5} ? 'bg-sidebar' : (${notaFinal != null && notaFinal.doubleValue() >= 3.0} ? 'bg-amber-500' : 'bg-alert-red')">
+            0.00
+        </span>
+    </th:block>
+
+    <!-- FRAGMENTO ESPECÍFICO: BOTÓN DE ASISTENCIA HTMX -->
+    <th:block th:fragment="botonAsistencia(estId, cursoId, materiaId, fecha, estado)">
+        <button type="button"
+                th:id="${'btn-asistencia-' + estId}"
+                th:attr="hx-post=@{/clases/asistencias/toggle(cursoId=${cursoId}, estudianteId=${estId}, materiaId=${materiaId}, fecha=${fecha})}"
+                hx-target="this"
+                hx-swap="outerHTML"
+                th:data-estado="${estado != null ? estado : 'Presente'}"
+                class="inline-flex items-center justify-center gap-1.5 min-w-[100px] px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wide transition-all cursor-pointer shadow-2xs badge-asistencia"
+                th:classappend="${estado == null || estado == 'Presente'} ? 'bg-pill-green text-sidebar border border-[#8ce383]' : (${estado == 'No presente'} ? 'bg-pill-red text-alert-red border border-red-300' : 'bg-amber-100 text-amber-800 border border-amber-300')">
+            <i th:attr="data-lucide=${(estado == null || estado == 'Presente') ? 'check' : (estado == 'No presente' ? 'x' : 'file-text')}" class="size-3.5 stroke-[2.5]"></i>
+            <span class="ast-text" th:text="${estado != null ? estado : 'Presente'}">Presente</span>
+        </button>
+    </th:block>
+
 </th:block>

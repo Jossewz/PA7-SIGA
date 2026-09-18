@@ -74,13 +74,13 @@
                 <!-- Date picker -->
                 <div class="flex flex-col">
                     <label for="fecha-evaluacion" class="text-[9px] font-black uppercase text-text-secondary tracking-wider mb-1">Fecha de Clase / Evaluación</label>
-                    <input type="date" id="fecha-evaluacion" name="fecha" th:value="${fecha}" onchange="actualizarMateriaPorFecha()" class="h-10 px-3.5 bg-[#f9fbf8] border border-[#c4eec0] rounded-xl text-xs font-extrabold text-sidebar focus:ring-1 focus:ring-sidebar focus:outline-none cursor-pointer">
+                    <input type="date" id="fecha-evaluacion" name="fecha" th:value="${fecha}" onchange="actualizarMateriaPorFecha()" class="h-10 px-3.5 bg-[#f9fbf8] border border-[#c4eec0] rounded-lg text-xs font-extrabold text-sidebar focus:ring-1 focus:ring-sidebar focus:outline-none cursor-pointer">
                 </div>
 
                 <!-- Día de la semana -->
                 <div class="flex flex-col justify-end">
                     <span class="text-[9px] font-black uppercase text-text-secondary tracking-wider mb-1">Día Programado</span>
-                    <span id="dia-semana-badge" class="h-10 px-4 bg-[#eafbe4] text-sidebar border border-[#c4eec0] rounded-xl text-xs font-black flex items-center gap-1.5 shadow-2xs">
+                    <span id="dia-semana-badge" class="h-10 px-4 bg-[#eafbe4] text-sidebar border border-[#c4eec0] rounded-lg text-xs font-black flex items-center gap-1.5 shadow-2xs">
                         <i data-lucide="calendar-days" class="size-4 stroke-[2.5]"></i>
                         <span id="dia-nombre">Lunes</span>
                     </span>
@@ -90,7 +90,7 @@
                 <div class="flex flex-col flex-1 min-w-[220px]">
                     <label for="select-materia" class="text-[9px] font-black uppercase text-text-secondary tracking-wider mb-1">Materia según Horario</label>
                     <div id="container-materia-select">
-                        <select id="select-materia" name="materiaNombre" onchange="cambiarMateriaSeleccionada(this.value)" class="w-full h-10 px-3.5 bg-[#f9fbf8] border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none cursor-pointer">
+                        <select id="select-materia" name="materiaNombre" onchange="cambiarMateriaSeleccionada(this.value)" class="w-full h-10 px-3.5 bg-[#f9fbf8] border border-[#c4eec0] rounded-lg text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none cursor-pointer">
                             <!-- Inyectado dinámicamente por JS -->
                         </select>
                     </div>
@@ -100,7 +100,7 @@
 
             <!-- Banner de Info de Horario -->
             <div id="status-horario-banner" 
-                 class="px-4 py-2.5 rounded-xl text-[11px] font-bold flex items-center gap-2 shrink-0 border"
+                 class="px-4 py-2.5 rounded-lg text-[11px] font-bold flex items-center gap-2 shrink-0 border"
                  th:classappend="${tieneHorarioHoy == false} ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-[#f7fcf6] border-[#c4eec0] text-sidebar'">
                 <i data-lucide="clock" class="size-4 stroke-[2.5]" th:classappend="${tieneHorarioHoy == false} ? 'text-amber-800' : 'text-sidebar'"></i>
                 <span id="horario-info-text" th:text="${tieneHorarioHoy == false ? 'No hay clases programadas en el horario para este día.' : 'Horario asignado'}">Horario: 07:00 AM - 08:30 AM</span>

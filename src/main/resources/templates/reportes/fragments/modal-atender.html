@@ -39,7 +39,7 @@
                 <!-- Decisión Administrativa -->
                 <div>
                     <label for="ar-decision-select" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Decisión de Dirección</label>
-                    <select id="ar-decision-select" name="decision" required onchange="toggleCamposCitacion(this.value)" class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-sidebar focus:outline-none">
+                    <select id="ar-decision-select" name="decision" required onchange="toggleCamposCitacion(this.value)" class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-lg text-xs font-bold text-sidebar focus:outline-none">
                         <option value="Aceptado">Aceptar Reporte y Citar al Estudiante</option>
                         <option value="Rechazado">Rechazar / Archivar Reporte</option>
                     </select>
@@ -49,7 +49,7 @@
                 <div id="seccion-citacion" class="space-y-3 p-4 rounded-xl border border-[#c4eec0] bg-[#f1fbe4]/30">
                     <div>
                         <label for="ar-fecha-citacion" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Fecha y Hora de la Citación a Dirección <span class="text-alert-red">*</span></label>
-                        <input type="text" id="ar-fecha-citacion" name="fechaCitacionStr" value="2026-08-04 - 08:30 AM" placeholder="Ej: 2026-08-04 - 08:30 AM" class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:outline-none">
+                        <input type="text" id="ar-fecha-citacion" name="fechaCitacionStr" value="2026-08-04 - 08:30 AM" placeholder="Ej: 2026-08-04 - 08:30 AM" class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-lg text-xs font-bold text-text-primary focus:outline-none">
                     </div>
 
                     <!-- Presencia de Acudiente Checkbox -->
@@ -65,7 +65,7 @@
                 <div>
                     <label for="ar-obs-txt" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Indicaciones / Observaciones de Dirección</label>
                     <textarea id="ar-obs-txt" name="observacionesAdmin" rows="3" required placeholder="Escriba el mensaje institucional que verá el estudiante..."
-                              class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none resize-none">Se requiere presencia obligatoria del acudiente por bajo desempeño acumulado para la firma de compromisos pedagógicos.</textarea>
+                              class="w-full p-3 bg-white border border-[#c4eec0] rounded-lg text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none resize-none">Se requiere presencia obligatoria del acudiente por bajo desempeño acumulado para la firma de compromisos pedagógicos.</textarea>
                 </div>
 
                 <!-- Modal Footer -->
@@ -73,7 +73,7 @@
                     <button type="button" onclick="closeModalAtenderReporte()" class="px-4 py-2 text-xs font-black text-text-secondary hover:text-alert-red cursor-pointer">
                         Cancelar
                     </button>
-                    <button type="submit" class="px-5 py-2.5 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-xl transition-all flex items-center gap-1.5 shadow-md cursor-pointer">
+                    <button type="submit" class="px-5 py-2.5 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-1.5 shadow-md cursor-pointer">
                         <i data-lucide="check" class="size-4 stroke-[2.5]"></i>
                         <span>Procesar y Notificar</span>
                     </button>

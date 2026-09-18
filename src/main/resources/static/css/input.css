@@ -37,10 +37,10 @@
   --color-search-placeholder: #8a978d;
   --color-notification-red: #e53935;
 
-  --radius-xl: 28px;
-  --radius-lg: 24px;
-  --radius-md: 18px;
-  --radius-sm: 12px;
+  --radius-xl: 14px;
+  --radius-lg: 8px;
+  --radius-md: 6px;
+  --radius-sm: 4px;
 
   --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
@@ -53,6 +53,13 @@
     overflow-x: hidden;
   }
   
+  /* Borde sutilmente redondeado (round border ~8px) en todos los inputs, selects y textareas */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+  select,
+  textarea {
+    border-radius: 8px !important;
+  }
+
   /* Scrollbar personalizado para el sidebar */
   .sidebar-nav::-webkit-scrollbar {
     width: 5px;

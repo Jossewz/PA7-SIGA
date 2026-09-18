@@ -70,7 +70,7 @@
                                      th:classappend="${tieneHorarioHoy == false} ? 'bg-gray-100 border-gray-200' : 'bg-white border-[#c4eec0]'">
                                     <span class="text-[10px] font-black" th:classappend="${tieneHorarioHoy == false} ? 'text-gray-400' : 'text-text-secondary'">%</span>
                                     <input type="number" 
-                                           th:value="${ev.peso != null ? (ev.peso.doubleValue() % 1 == 0 ? ev.peso.intValue() : #numbers.formatDecimal(ev.peso, 1, 2)) : 0}" 
+                                           th:value="${ev.peso != null ? (ev.peso.doubleValue() % 1 == 0 ? ev.peso.intValue() : #numbers.formatDecimal(ev.peso, 1, 2, 'POINT')) : 0}" 
                                            min="0" max="100" step="0.01"
                                            th:disabled="${tieneHorarioHoy == false}"
                                            th:readonly="${tieneHorarioHoy == false}"
@@ -108,13 +108,12 @@
                         <td th:each="ev : ${evaluaciones}" class="p-3 text-center border-x border-[#c4eec0]/20 w-32 min-w-[130px]">
                             <div class="flex items-center justify-center">
                                 <input type="number" step="0.01" min="0" max="5.0" 
-                                       th:value="${calificacionesMapa != null && calificacionesMapa.containsKey(ce.estudiante.id) && calificacionesMapa.get(ce.estudiante.id).containsKey(ev.id) ? #numbers.formatDecimal(calificacionesMapa.get(ce.estudiante.id).get(ev.id), 1, 2) : '0.00'}"
+                                       th:value="${calificacionesMapa != null && calificacionesMapa.containsKey(ce.estudiante.id) && calificacionesMapa.get(ce.estudiante.id).containsKey(ev.id) ? #numbers.formatDecimal(calificacionesMapa.get(ce.estudiante.id).get(ev.id), 1, 2, 'POINT') : '0.00'}"
                                        th:disabled="${tieneHorarioHoy == false}"
                                        th:readonly="${tieneHorarioHoy == false}"
-                                       th:attr="hx-post=@{/clases/calificaciones/guardar(evaluacionId=${ev.id}, estudianteId=${ce.estudiante.id}, cursoMateriaId=${cursoMateriaId}, periodo=${periodo})}"
+                                       th:attr="hx-post=@{/clases/calificaciones/guardar(evaluacionId=${ev.id}, estudianteId=${ce.estudiante.id}, cursoMateriaId=${cursoMateriaId}, periodo=${periodo})},hx-target=${'#badge-final-' + ce.estudiante.id}"
                                        hx-trigger="change delay:200ms"
                                        name="nota"
-                                       th:attrappend="hx-target=${'#badge-final-' + ce.estudiante.id}"
                                        hx-swap="outerHTML"
                                        class="w-20 h-9 px-2 text-center font-black border rounded-lg n-input text-[13px] shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
                                        th:classappend="${tieneHorarioHoy == false} ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-50 select-none pointer-events-none' : 'bg-white border-[#c4eec0] text-sidebar focus:ring-2 focus:ring-sidebar focus:border-sidebar'">

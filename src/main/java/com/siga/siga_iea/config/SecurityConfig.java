@@ -53,6 +53,7 @@ public class SecurityConfig {
                         .requestMatchers("/configuracion/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO")
                         .requestMatchers("/usuarios/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO")
                         .requestMatchers("/estudiantes/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO", "DOCENTE")
+                        .requestMatchers("/clases/mapear-estudiantes", "/clases/promover-estudiantes").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO")
                         .requestMatchers("/clases/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO", "DOCENTE")
                         .requestMatchers("/asistencias/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO", "DOCENTE")
                         .requestMatchers("/reportes/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO", "DOCENTE", "ESTUDIANTE")

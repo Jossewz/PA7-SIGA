@@ -19,7 +19,8 @@ public interface PersonalAdministrativoRepository extends JpaRepository<Personal
            "(:search IS NULL OR :search = '' OR " +
            " LOWER(p.nombres) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            " LOWER(p.apellidos) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           " LOWER(p.numeroDocumento) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+           " LOWER(p.numeroDocumento) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           " (p.cargo IS NOT NULL AND LOWER(p.cargo) LIKE LOWER(CONCAT('%', :search, '%')))) AND " +
            "(:cargo IS NULL OR :cargo = '' OR p.cargo = :cargo) AND " +
            "(:area IS NULL OR :area = '' OR p.area = :area) AND " +
            "(:estado IS NULL OR :estado = '' OR p.estado = :estado) " +

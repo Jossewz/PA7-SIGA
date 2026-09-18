@@ -6,7 +6,7 @@
 <body>
 
 <th:block th:fragment="content">
-    <div class="flex flex-col gap-6 flex-1">
+    <div class="flex flex-col gap-6">
         <!-- Flash messages -->
         <div th:if="${mensajeExito}" class="p-4 rounded-xl bg-green-50 border border-green-200 text-xs font-bold text-sidebar flex items-center gap-2">
             <i data-lucide="check-circle" class="size-4.5 text-sidebar"></i>
@@ -48,12 +48,12 @@
                         <option value="Retirado" th:selected="${estado == 'Retirado'}">Retirado</option>
                     </select>
                 </div>
-                <div class="flex gap-2">
-                    <button type="submit" class="h-10 px-4 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center justify-center gap-2">
+                <div class="flex gap-2 w-full">
+                    <button type="submit" class="flex-1 h-10 px-4 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs">
                         <i data-lucide="filter" class="size-4 stroke-2"></i>
                         <span>Filtrar</span>
                     </button>
-                    <a th:href="@{/estudiantes}" class="h-10 px-4 text-xs font-black text-text-secondary bg-[#f1f5f1] hover:bg-[#e4ede4] rounded-lg transition-all flex items-center justify-center">
+                    <a th:href="@{/estudiantes}" class="flex-1 h-10 px-4 text-xs font-black text-text-secondary bg-[#f1f5f1] hover:bg-[#e4ede4] rounded-lg transition-all flex items-center justify-center cursor-pointer shadow-2xs">
                         Limpiar
                     </a>
                 </div>
@@ -61,9 +61,9 @@
         </div>
 
         <!-- ======================== TABLE (Desktop lg+) ======================== -->
-        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft flex-1 flex-col min-h-[300px] overflow-hidden hidden lg:flex">
-            <div class="overflow-x-auto flex-1">
-                <table class="w-full text-left border-collapse text-[13.5px] table-fixed">
+        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden hidden lg:block">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-[13.5px]">
                     <thead>
                         <tr class="bg-[#f7fcf6] border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[11px]">
                             <th class="py-4 px-4 text-center">Foto</th>

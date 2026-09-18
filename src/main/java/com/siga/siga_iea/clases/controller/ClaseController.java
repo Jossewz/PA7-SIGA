@@ -18,6 +18,14 @@ import com.siga.siga_iea.clases.entity.CursoMateria;
 import com.siga.siga_iea.clases.entity.Materia;
 import com.siga.siga_iea.clases.repository.MateriaRepository;
 
+import com.siga.siga_iea.auth.security.CustomUserDetailsService;
+import com.siga.siga_iea.usuarios.entity.Docente;
+import com.siga.siga_iea.usuarios.entity.Usuario;
+import com.siga.siga_iea.usuarios.repository.DocenteRepository;
+import com.siga.siga_iea.usuarios.repository.UsuarioRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DayOfWeek;
@@ -33,17 +41,58 @@ public class ClaseController {
     private final CalificacionesService calificacionesService;
     private final AsistenciaService asistenciaService;
     private final MateriaRepository materiaRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final DocenteRepository docenteRepository;
 
     public ClaseController(ClaseService claseService,
                            PersonalService personalService,
                            CalificacionesService calificacionesService,
                            AsistenciaService asistenciaService,
-                           MateriaRepository materiaRepository) {
+                           MateriaRepository materiaRepository,
+                           UsuarioRepository usuarioRepository,
+                           DocenteRepository docenteRepository) {
         this.claseService = claseService;
         this.personalService = personalService;
         this.calificacionesService = calificacionesService;
         this.asistenciaService = asistenciaService;
         this.materiaRepository = materiaRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.docenteRepository = docenteRepository;
+    }
+
+    private Optional<Docente> getDocenteLogueado() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return Optional.empty();
+        }
+        return usuarioRepository.findByEmail(auth.getName())
+                .filter(u -> "DOCENTE".equalsIgnoreCase(CustomUserDetailsService.normalizeRole(u.getRol())))
+                .map(Usuario::getNumeroDocumento)
+                .filter(doc -> doc != null && !doc.isBlank())
+                .flatMap(docenteRepository::findByNumeroDocumento);
+    }
+
+    private boolean isUserAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return false;
+        }
+        return usuarioRepository.findByEmail(auth.getName())
+                .map(u -> "ADMIN".equalsIgnoreCase(CustomUserDetailsService.normalizeRole(u.getRol())))
+                .orElse(false);
+    }
+
+    private boolean isUserAdminOrAdministrativo() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return false;
+        }
+        return usuarioRepository.findByEmail(auth.getName())
+                .map(u -> {
+                    String role = CustomUserDetailsService.normalizeRole(u.getRol());
+                    return "ADMIN".equalsIgnoreCase(role) || "PERSONAL_ADMINISTRATIVO".equalsIgnoreCase(role);
+                })
+                .orElse(false);
     }
 
     public static String obtenerNombreDiaEspanol(DayOfWeek dow) {
@@ -202,16 +251,44 @@ public class ClaseController {
         List<Horario> horariosDelDia = horarios.stream()
                 .filter(h -> h.getDiaSemana() != null && h.getDiaSemana().equalsIgnoreCase(diaHoy))
                 .toList();
-        boolean tieneHorarioHoy = !horariosDelDia.isEmpty();
+
+        boolean esAdmin = isUserAdmin();
+        Optional<Docente> docLogueadoOpt = getDocenteLogueado();
+        Horario primerH = null;
+
+        if (!esAdmin && docLogueadoOpt.isPresent()) {
+            Docente miDocente = docLogueadoOpt.get();
+            primerH = horariosDelDia.stream()
+                    .filter(h -> h.getDocente() != null && (
+                            h.getDocente().getId().equals(miDocente.getId()) ||
+                            (h.getDocente().getNumeroDocumento() != null && h.getDocente().getNumeroDocumento().equalsIgnoreCase(miDocente.getNumeroDocumento()))
+                    ))
+                    .findFirst()
+                    .orElse(null);
+        } else if (!horariosDelDia.isEmpty()) {
+            primerH = horariosDelDia.get(0);
+        }
+
+        boolean tieneHorarioHoy = (primerH != null);
         model.addAttribute("tieneHorarioHoy", tieneHorarioHoy);
+        model.addAttribute("esAdmin", esAdmin);
+
+        String horarioBannerTexto;
+        if (!tieneHorarioHoy || primerH == null) {
+            horarioBannerTexto = esAdmin ? "No hay clases programadas en el horario para este día." : "No tienes clases programadas en este curso para este día.";
+        } else {
+            String horaStr = (primerH.getHoraInicio() != null ? primerH.getHoraInicio().toString() : "07:00") + " - " + (primerH.getHoraFin() != null ? primerH.getHoraFin().toString() : "08:30");
+            String docStr = (primerH.getDocente() != null) ? " • Docente: " + primerH.getDocente().getNombreCompleto() : "";
+            horarioBannerTexto = "Horario: " + horaStr + docStr;
+        }
+        model.addAttribute("horarioBannerTexto", horarioBannerTexto);
 
         Integer periodo = 1;
         model.addAttribute("periodo", periodo);
         model.addAttribute("fecha", hoy.toString());
         model.addAttribute("estudiantesCE", estudiantesCE);
 
-        if (tieneHorarioHoy) {
-            Horario primerH = horariosDelDia.get(0);
+        if (tieneHorarioHoy && primerH != null) {
             String materiaNombre = primerH.getMateria() != null ? primerH.getMateria().getNombre() : "";
             UUID materiaId = primerH.getMateria() != null ? primerH.getMateria().getId() : null;
 
@@ -394,6 +471,13 @@ public class ClaseController {
 
     @PostMapping("/clases/mapear-estudiantes")
     public String mapearEstudiantes(@RequestParam("cursoId") UUID cursoId, RedirectAttributes redirectAttributes) {
+        if (!isUserAdminOrAdministrativo()) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Acceso denegado: solo Administradores y Personal Administrativo pueden auto-mapear estudiantes.");
+            Optional<Clase> cOpt = claseService.buscarPorId(cursoId);
+            String codigo = cOpt.map(Clase::getCodigoCurso).orElse("11-01");
+            return "redirect:/clases/gestion?codigo=" + codigo;
+        }
+
         try {
             int count = claseService.mapearEstudiantesMatriculados(cursoId);
             redirectAttributes.addFlashAttribute("mensajeExito", "Se han auto-mapeado " + count + " estudiantes matriculados a este curso.");
@@ -410,6 +494,13 @@ public class ClaseController {
     public String promoverEstudiantes(@RequestParam("cursoId") UUID cursoId,
                                       @RequestParam(value = "notasJson", required = false) String notasJson,
                                       RedirectAttributes redirectAttributes) {
+        if (!isUserAdminOrAdministrativo()) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Acceso denegado: solo Administradores y Personal Administrativo pueden promover estudiantes.");
+            Optional<Clase> cOpt = claseService.buscarPorId(cursoId);
+            String codigo = cOpt.map(Clase::getCodigoCurso).orElse("11-01");
+            return "redirect:/clases/gestion?codigo=" + codigo;
+        }
+
         try {
             String resultado = claseService.promoverEstudiantesAprobados(cursoId, notasJson);
             redirectAttributes.addFlashAttribute("mensajeExito", resultado);
@@ -482,7 +573,36 @@ public class ClaseController {
                     .findFirst();
         }
 
-        Horario hSeleccionado = horarioMatch.orElse(horariosDelDia.get(0));
+        boolean esAdmin = isUserAdmin();
+        Optional<Docente> docLogueadoOpt = getDocenteLogueado();
+        Horario hSeleccionado = null;
+
+        if (!esAdmin && docLogueadoOpt.isPresent()) {
+            Docente miDocente = docLogueadoOpt.get();
+            hSeleccionado = horariosDelDia.stream()
+                    .filter(h -> h.getDocente() != null && (
+                            h.getDocente().getId().equals(miDocente.getId()) ||
+                            (h.getDocente().getNumeroDocumento() != null && h.getDocente().getNumeroDocumento().equalsIgnoreCase(miDocente.getNumeroDocumento()))
+                    ))
+                    .findFirst()
+                    .orElse(null);
+        } else {
+            hSeleccionado = horarioMatch.orElse(!horariosDelDia.isEmpty() ? horariosDelDia.get(0) : null);
+        }
+
+        if (hSeleccionado == null) {
+            model.addAttribute("tieneHorarioHoy", false);
+            model.addAttribute("materiaNombre", "");
+            model.addAttribute("materiaId", null);
+            model.addAttribute("cursoMateriaId", null);
+            model.addAttribute("evaluaciones", Collections.emptyList());
+            model.addAttribute("sumaPesos", BigDecimal.ZERO);
+            model.addAttribute("calificacionesMapa", Collections.emptyMap());
+            model.addAttribute("asistenciasMapa", Collections.emptyMap());
+            model.addAttribute("notasFinales", Collections.emptyMap());
+            return "clases/fragments/tabla-detalle-notas :: tablaDetalleNotas";
+        }
+
         String selectedMateriaNombre = hSeleccionado.getMateria() != null ? hSeleccionado.getMateria().getNombre() : "";
         UUID selectedMateriaId = hSeleccionado.getMateria() != null ? hSeleccionado.getMateria().getId() : null;
 

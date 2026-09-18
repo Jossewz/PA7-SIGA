@@ -60,58 +60,122 @@ function actualizarMateriaPorFecha(recargar = true) {
     const textoAyuda = document.getElementById('texto-ayuda-porcentajes');
 
     if (!selectMateria) return;
-    selectMateria.innerHTML = '';
 
-    if (materiasDelDia.length > 0) {
-        materiasDelDia.forEach((m) => {
+    const isSelect = selectMateria.tagName && selectMateria.tagName.toLowerCase() === 'select';
+    const esAdmin = Boolean(window.esAdmin);
+
+    if (isSelect) {
+        // MODO ADMIN: Select interactivo para pruebas
+        selectMateria.innerHTML = '';
+
+        if (materiasDelDia.length > 0) {
+            materiasDelDia.forEach((m) => {
+                const opt = document.createElement('option');
+                opt.value = m.materia;
+                opt.text = `${m.materia} (${m.hora})${m.docente ? ' – Docente: ' + m.docente : ''}`;
+                selectMateria.appendChild(opt);
+            });
+
+            selectMateria.disabled = false;
+            selectMateria.classList.remove('opacity-50', 'bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
+            selectMateria.classList.add('bg-[#f9fbf8]', 'text-text-primary');
+            selectMateria.selectedIndex = 0;
+
+            if (bannerInfo) {
+                bannerInfo.innerText = `Horario: ${materiasDelDia[0].hora}${materiasDelDia[0].docente ? ' • Docente: ' + materiasDelDia[0].docente : ''}`;
+            }
+            if (bannerContainer) {
+                bannerContainer.className = "px-4 py-2.5 bg-[#f7fcf6] border border-[#c4eec0] rounded-lg text-[11px] font-bold text-sidebar flex items-center gap-2 shrink-0";
+            }
+            if (btnAgregarNota) {
+                btnAgregarNota.disabled = false;
+                btnAgregarNota.classList.remove('opacity-40', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-400');
+                btnAgregarNota.classList.add('bg-sidebar', 'hover:brightness-97', 'cursor-pointer');
+            }
+            if (textoAyuda) {
+                textoAyuda.innerHTML = 'Edite los porcentajes % en el encabezado de cada columna.';
+                textoAyuda.className = "text-[11px] font-semibold text-text-secondary";
+            }
+        } else {
             const opt = document.createElement('option');
-            opt.value = m.materia;
-            opt.text = `${m.materia} (${m.hora})${m.docente ? ' – Docente: ' + m.docente : ''}`;
+            opt.value = "";
+            opt.text = "-- Sin Horario Asignado --";
             selectMateria.appendChild(opt);
-        });
+            selectMateria.disabled = true;
+            selectMateria.classList.add('opacity-50', 'bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
+            selectMateria.classList.remove('bg-[#f9fbf8]', 'text-text-primary');
 
-        selectMateria.disabled = false;
-        selectMateria.classList.remove('opacity-50', 'bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
-        selectMateria.classList.add('bg-[#f9fbf8]', 'text-text-primary');
-        selectMateria.selectedIndex = 0;
-
-        if (bannerInfo) {
-            bannerInfo.innerText = `Horario: ${materiasDelDia[0].hora}${materiasDelDia[0].docente ? ' • Docente: ' + materiasDelDia[0].docente : ''}`;
-        }
-        if (bannerContainer) {
-            bannerContainer.className = "px-4 py-2.5 bg-[#f7fcf6] border border-[#c4eec0] rounded-xl text-[11px] font-bold text-sidebar flex items-center gap-2 shrink-0";
-        }
-        if (btnAgregarNota) {
-            btnAgregarNota.disabled = false;
-            btnAgregarNota.classList.remove('opacity-40', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-400');
-            btnAgregarNota.classList.add('bg-sidebar', 'hover:brightness-97', 'cursor-pointer');
-        }
-        if (textoAyuda) {
-            textoAyuda.innerHTML = 'Edite los porcentajes % en el encabezado de cada columna.';
-            textoAyuda.className = "text-[11px] font-semibold text-text-secondary";
+            if (bannerInfo) {
+                bannerInfo.innerText = "No hay clases programadas en el horario para este día.";
+            }
+            if (bannerContainer) {
+                bannerContainer.className = "px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-[11px] font-bold text-amber-800 flex items-center gap-2 shrink-0";
+            }
+            if (btnAgregarNota) {
+                btnAgregarNota.disabled = true;
+                btnAgregarNota.classList.add('opacity-40', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-400');
+                btnAgregarNota.classList.remove('bg-sidebar', 'hover:brightness-97', 'cursor-pointer');
+            }
+            if (textoAyuda) {
+                textoAyuda.innerHTML = '<span class="text-amber-700 font-bold">Sin horario asignado para esta fecha. Acciones bloqueadas.</span>';
+            }
         }
     } else {
-        const opt = document.createElement('option');
-        opt.value = "";
-        opt.text = "-- Sin Horario Asignado --";
-        selectMateria.appendChild(opt);
-        selectMateria.disabled = true;
-        selectMateria.classList.add('opacity-50', 'bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
-        selectMateria.classList.remove('bg-[#f9fbf8]', 'text-text-primary');
+        // MODO DOCENTE: Muestra su asignatura asignada y horario en estático
+        const badgeTexto = document.getElementById('texto-materia-estatica');
+        const docNombre = (window.docenteLogueadoNombre || '').trim().toLowerCase();
+        let miHorario = null;
 
-        if (bannerInfo) {
-            bannerInfo.innerText = "No hay clases programadas en el horario para este día.";
+        if (docNombre) {
+            miHorario = materiasDelDia.find(h => {
+                if (!h.docente) return false;
+                const hDoc = h.docente.trim().toLowerCase();
+                return hDoc.includes(docNombre) || docNombre.includes(hDoc);
+            });
         }
-        if (bannerContainer) {
-            bannerContainer.className = "px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-[11px] font-bold text-amber-800 flex items-center gap-2 shrink-0";
+        if (!miHorario && !esAdmin && materiasDelDia.length === 1) {
+            miHorario = materiasDelDia[0];
         }
-        if (btnAgregarNota) {
-            btnAgregarNota.disabled = true;
-            btnAgregarNota.classList.add('opacity-40', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-400');
-            btnAgregarNota.classList.remove('bg-sidebar', 'hover:brightness-97', 'cursor-pointer');
-        }
-        if (textoAyuda) {
-            textoAyuda.innerHTML = '<span class="text-amber-700 font-bold">Sin horario asignado para esta fecha. Acciones bloqueadas.</span>';
+
+        if (miHorario) {
+            selectMateria.value = miHorario.materia;
+            if (badgeTexto) {
+                badgeTexto.innerText = miHorario.materia;
+            }
+            if (bannerInfo) {
+                bannerInfo.innerText = `Horario: ${miHorario.hora}${miHorario.docente ? ' • Docente: ' + miHorario.docente : ''}`;
+            }
+            if (bannerContainer) {
+                bannerContainer.className = "px-4 py-2.5 bg-[#f7fcf6] border border-[#c4eec0] rounded-lg text-[11px] font-bold text-sidebar flex items-center gap-2 shrink-0";
+            }
+            if (btnAgregarNota) {
+                btnAgregarNota.disabled = false;
+                btnAgregarNota.classList.remove('opacity-40', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-400');
+                btnAgregarNota.classList.add('bg-sidebar', 'hover:brightness-97', 'cursor-pointer');
+            }
+            if (textoAyuda) {
+                textoAyuda.innerHTML = 'Edite los porcentajes % en el encabezado de cada columna.';
+                textoAyuda.className = "text-[11px] font-semibold text-text-secondary";
+            }
+        } else {
+            selectMateria.value = '';
+            if (badgeTexto) {
+                badgeTexto.innerText = 'Sin Asignación Hoy';
+            }
+            if (bannerInfo) {
+                bannerInfo.innerText = "No tienes clases programadas en este curso para este día.";
+            }
+            if (bannerContainer) {
+                bannerContainer.className = "px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-[11px] font-bold text-amber-800 flex items-center gap-2 shrink-0";
+            }
+            if (btnAgregarNota) {
+                btnAgregarNota.disabled = true;
+                btnAgregarNota.classList.add('opacity-40', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-400');
+                btnAgregarNota.classList.remove('bg-sidebar', 'hover:brightness-97', 'cursor-pointer');
+            }
+            if (textoAyuda) {
+                textoAyuda.innerHTML = '<span class="text-amber-700 font-bold">Sin horario asignado para esta fecha. Acciones bloqueadas.</span>';
+            }
         }
     }
 

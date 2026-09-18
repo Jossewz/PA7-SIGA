@@ -20,6 +20,37 @@
             </button>
         </div>
 
+        <!-- Filters Box -->
+        <div class="p-5 rounded-xl bg-white border border-[#c4eec0]/40 shadow-soft">
+            <form th:action="@{/personal}" method="get" class="grid grid-cols-3 max-lg:grid-cols-2 max-sm:grid-cols-1 gap-4 items-end">
+                <div class="col-span-1 max-lg:col-span-2 max-sm:col-span-1">
+                    <label for="search-personal" class="block mb-1.5 text-[9px] font-black text-text-secondary uppercase tracking-wider">Buscar por nombre, documento o cargo</label>
+                    <div class="relative">
+                        <input type="text" id="search-personal" name="search" th:value="${search}" placeholder="Buscar personal..." 
+                               class="w-full h-10 pl-4 pr-10 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary placeholder-[#b4c9b9] focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all">
+                        <i data-lucide="search" class="absolute right-3.5 top-1/2 -translate-y-1/2 size-4 text-text-secondary stroke-2"></i>
+                    </div>
+                </div>
+                <div>
+                    <label for="filter-status-personal" class="block mb-1.5 text-[9px] font-black text-text-secondary uppercase tracking-wider">Estado</label>
+                    <select id="filter-status-personal" name="estado" th:value="${estado}" onchange="this.form.submit()" class="w-full h-10 px-3 rounded-lg bg-[#f9fbf8] border border-[#c5ecd4] text-[12px] text-text-primary focus:ring-2 focus:ring-sidebar/20 focus:border-sidebar transition-all">
+                        <option value="">Todos los estados</option>
+                        <option value="Activo" th:selected="${estado == 'Activo'}">Activo</option>
+                        <option value="Inactivo" th:selected="${estado == 'Inactivo'}">Inactivo</option>
+                    </select>
+                </div>
+                <div class="flex gap-2 w-full">
+                    <button type="submit" class="flex-1 h-10 px-4 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs">
+                        <i data-lucide="filter" class="size-4 stroke-2"></i>
+                        <span>Filtrar</span>
+                    </button>
+                    <a th:href="@{/personal}" class="flex-1 h-10 px-4 text-xs font-black text-text-secondary bg-[#f1f5f1] hover:bg-[#e4ede4] rounded-lg transition-all flex items-center justify-center cursor-pointer shadow-2xs">
+                        Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+
         <!-- Filtros y Tabla -->
         <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
             <div class="p-4 border-b border-[#c4eec0]/30 bg-[#f7fcf6] flex items-center justify-between gap-4 flex-wrap">
@@ -54,6 +85,11 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]">
+                        <tr th:if="${personalList == null || #lists.isEmpty(personalList)}">
+                            <td colspan="5" class="p-8 text-center text-text-secondary font-semibold text-xs">
+                                No se encontraron miembros del personal con los filtros seleccionados.
+                            </td>
+                        </tr>
                         <tr th:each="p : ${personalList}" 
                             class="hover:bg-[#fcfdfb] transition-colors personal-row"
                             th:data-tipo="${p.tipo != null ? p.tipo : 'DOCENTE'}">

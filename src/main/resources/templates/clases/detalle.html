@@ -45,8 +45,8 @@
                     </div>
                 </div>
 
-                <!-- Botones de Acción -->
-                <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                <!-- Botones de Acción (Solo Admin y Administrativos) -->
+                <div class="flex items-center gap-2 shrink-0 flex-wrap" th:if="${puedeAdministrarCursos}">
                     <form th:action="@{/clases/mapear-estudiantes}" method="post" class="inline" th:if="${cursoId != null && !cursoId.isEmpty()}">
                         <input type="hidden" name="cursoId" th:value="${cursoId}" />
                         <button type="submit" class="px-4 py-2.5 text-xs font-black text-sidebar bg-[#eafbe4] border border-[#c4eec0] hover:bg-pill-green rounded-lg transition-all flex items-center gap-1.5 shadow-xs cursor-pointer">
@@ -86,13 +86,24 @@
                     </span>
                 </div>
 
-                <!-- Selector de Materia -->
+                <!-- Selector de Materia (Solo Admin para pruebas) vs Asignatura Estática (Docente) -->
                 <div class="flex flex-col flex-1 min-w-[220px]">
-                    <label for="select-materia" class="text-[9px] font-black uppercase text-text-secondary tracking-wider mb-1">Materia según Horario</label>
+                    <label class="text-[9px] font-black uppercase text-text-secondary tracking-wider mb-1"
+                           th:text="${esAdmin} ? 'Materia según Horario' : 'Asignatura Asignada'">Asignatura</label>
                     <div id="container-materia-select">
-                        <select id="select-materia" name="materiaNombre" onchange="cambiarMateriaSeleccionada(this.value)" class="w-full h-10 px-3.5 bg-[#f9fbf8] border border-[#c4eec0] rounded-lg text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none cursor-pointer">
+                        <!-- MODO ADMIN: Select interactivo para pruebas -->
+                        <select th:if="${esAdmin}" id="select-materia" name="materiaNombre" onchange="cambiarMateriaSeleccionada(this.value)" class="w-full h-10 px-3.5 bg-[#f9fbf8] border border-[#c4eec0] rounded-lg text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none cursor-pointer">
                             <!-- Inyectado dinámicamente por JS -->
                         </select>
+
+                        <!-- MODO DOCENTE: Muestra asignatura en estático sin select -->
+                        <div th:unless="${esAdmin}" class="flex items-center">
+                            <div id="badge-materia-estatica" class="w-full h-10 px-3.5 bg-[#eafbe4] border border-[#c4eec0] rounded-lg text-xs font-black text-sidebar flex items-center gap-2 shadow-2xs">
+                                <i data-lucide="book-open" class="size-4 stroke-[2.5] text-sidebar shrink-0"></i>
+                                <span id="texto-materia-estatica" th:text="${materiaNombre != null && !materiaNombre.isEmpty() ? materiaNombre : 'Sin Asignación'}">Matemáticas</span>
+                            </div>
+                            <input type="hidden" id="select-materia" name="materiaNombre" th:value="${materiaNombre}" />
+                        </div>
                     </div>
                 </div>
 
@@ -103,7 +114,7 @@
                  class="px-4 py-2.5 rounded-lg text-[11px] font-bold flex items-center gap-2 shrink-0 border"
                  th:classappend="${tieneHorarioHoy == false} ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-[#f7fcf6] border-[#c4eec0] text-sidebar'">
                 <i data-lucide="clock" class="size-4 stroke-[2.5]" th:classappend="${tieneHorarioHoy == false} ? 'text-amber-800' : 'text-sidebar'"></i>
-                <span id="horario-info-text" th:text="${tieneHorarioHoy == false ? 'No hay clases programadas en el horario para este día.' : 'Horario asignado'}">Horario: 07:00 AM - 08:30 AM</span>
+                <span id="horario-info-text" th:text="${horarioBannerTexto != null ? horarioBannerTexto : (tieneHorarioHoy == false ? 'No hay clases programadas en el horario para este día.' : 'Horario asignado')}">Horario: 07:00 AM - 08:30 AM</span>
             </div>
         </div>
 
@@ -178,6 +189,9 @@
         /*<![CDATA[*/
         window.estudiantesBDData = /*[[${estudiantesData}]]*/ [];
         window.horariosBDData = /*[[${horariosData}]]*/ [];
+        window.esAdmin = /*[[${esAdmin}]]*/ false;
+        window.esDocente = /*[[${esDocente}]]*/ false;
+        window.docenteLogueadoNombre = /*[[${docenteLogueado != null ? docenteLogueado.nombreCompleto : ''}]]*/ '';
         /*]]>*/
     </script>
     <script th:src="@{/js/clases-detalle.js}"></script>

@@ -188,4 +188,73 @@ class ClaseViewRenderTest {
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.containsString("Sin horario asignado para esta fecha")))
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.containsString("Bloqueado")));
     }
+
+    @Autowired
+    private com.siga.siga_iea.usuarios.repository.UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private com.siga.siga_iea.usuarios.repository.DocenteRepository docenteRepository;
+
+    @Test
+    @WithMockUser(username = "admin@ieaci.edu.co", roles = "ADMIN")
+    @DisplayName("GET /clases/gestion como ADMIN debe renderizar el <select id='select-materia'> y los botones de auto-mapear y promover")
+    void testRenderClasesGestionModoAdmin() throws Exception {
+        mockMvc.perform(get("/clases/gestion").param("codigo", "11-01"))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.containsString("<select")))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.containsString("id=\"select-materia\"")))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.containsString("Auto-Mapear Matriculados")))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.containsString("Promover Año Lectivo")));
+    }
+
+    @Test
+    @DisplayName("GET /clases/gestion como DOCENTE NO debe mostrar el <select> ni los botones de auto-mapear y promover")
+    void testRenderClasesGestionModoDocente() throws Exception {
+        String docEmail = "docente.test." + System.currentTimeMillis() + "@ieaci.edu.co";
+        String numDoc = "DOC-TEST-" + System.currentTimeMillis();
+
+        com.siga.siga_iea.usuarios.entity.Docente docEntity = new com.siga.siga_iea.usuarios.entity.Docente();
+        docEntity.setNombres("Profesor");
+        docEntity.setApellidos("Prueba");
+        docEntity.setNumeroDocumento(numDoc);
+        docenteRepository.save(docEntity);
+
+        com.siga.siga_iea.usuarios.entity.Usuario userEntity = new com.siga.siga_iea.usuarios.entity.Usuario();
+        userEntity.setEmail(docEmail);
+        userEntity.setRol("DOCENTE");
+        userEntity.setNumeroDocumento(numDoc);
+        userEntity.setPassword("secret");
+        usuarioRepository.save(userEntity);
+
+        mockMvc.perform(get("/clases/gestion")
+                        .param("codigo", "11-01")
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user(docEmail).roles("DOCENTE")))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.containsString("badge-materia-estatica")))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.containsString("type=\"hidden\" id=\"select-materia\"")))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("<select id=\"select-materia\""))))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Auto-Mapear Matriculados"))))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Promover Año Lectivo"))));
+    }
+
+    @Test
+    @DisplayName("GET /clases/gestion como PERSONAL_ADMINISTRATIVO debe mostrar los botones de auto-mapear y promover")
+    void testRenderClasesGestionModoAdministrativo() throws Exception {
+        String adminEmail = "admin.sec." + System.currentTimeMillis() + "@ieaci.edu.co";
+        String numDoc = "ADMIN-TEST-" + System.currentTimeMillis();
+
+        com.siga.siga_iea.usuarios.entity.Usuario userEntity = new com.siga.siga_iea.usuarios.entity.Usuario();
+        userEntity.setEmail(adminEmail);
+        userEntity.setRol("PERSONAL_ADMINISTRATIVO");
+        userEntity.setNumeroDocumento(numDoc);
+        userEntity.setPassword("secret");
+        usuarioRepository.save(userEntity);
+
+        mockMvc.perform(get("/clases/gestion")
+                        .param("codigo", "11-01")
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user(adminEmail).roles("PERSONAL_ADMINISTRATIVO")))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.containsString("Auto-Mapear Matriculados")))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content().string(org.hamcrest.Matchers.containsString("Promover Año Lectivo")));
+    }
 }

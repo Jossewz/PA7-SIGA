@@ -110,24 +110,6 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
         </nav>
 
-        <div class="mt-auto flex flex-col gap-3.5 max-md:hidden">
-
-            <a th:href="${bottomUrl}"
-               class="min-h-[44px] flex items-center gap-3 px-[18px] rounded-lg text-[13px] font-semibold bg-action-btn text-action-btn-text hover:brightness-97 transition-all">
-                <i data-lucide="headphones" class="size-[18px] shrink-0 stroke-2"></i>
-                <span th:text="${bottomText}">Soporte Tecnico</span>
-            </a>
-
-            <form th:action="@{/logout}" method="post" class="w-full">
-                <button type="submit"
-                        class="w-full min-h-[44px] flex items-center gap-3 px-[18px] rounded-lg text-[13px] font-semibold text-sidebar-text/72 hover:text-white hover:bg-white/12 transition-all cursor-pointer">
-                    <i data-lucide="log-out" class="size-[18px] shrink-0 stroke-2"></i>
-                    <span>Cerrar Sesión</span>
-                </button>
-            </form>
-
-        </div>
-
     </aside>
 
 </th:block>

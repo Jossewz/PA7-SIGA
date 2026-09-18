@@ -44,8 +44,8 @@ th:fragment="html(content)">
       th:replace="
       ~{layouts/sidebar :: sidebar(
         activePage=${activePage ?: 'dashboard'},
-        bottomUrl='/soporte',
-        bottomText='Soporte Técnico'
+        bottomText='',
+        bottomUrl=''
       )}">
     </aside>
 

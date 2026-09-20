@@ -16,6 +16,8 @@ import com.siga.siga_iea.clases.repository.CursoMateriaRepository;
 import com.siga.siga_iea.clases.repository.MateriaRepository;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
 import com.siga.siga_iea.usuarios.repository.EstudianteRepository;
+import com.siga.siga_iea.configuracion.entity.EscalaDesempeno;
+import com.siga.siga_iea.configuracion.service.EscalaDesempenoService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,7 @@ public class CalificacionesService {
     private final ClaseRepository claseRepository;
     private final MateriaRepository materiaRepository;
     private final CursoEstudianteRepository cursoEstudianteRepository;
+    private final EscalaDesempenoService escalaDesempenoService;
 
     public CalificacionesService(CalificacionesRepository calificacionesRepository,
                                  EvaluacionRepository evaluacionRepository,
@@ -42,7 +45,8 @@ public class CalificacionesService {
                                  EstudianteRepository estudianteRepository,
                                  ClaseRepository claseRepository,
                                  MateriaRepository materiaRepository,
-                                 CursoEstudianteRepository cursoEstudianteRepository) {
+                                 CursoEstudianteRepository cursoEstudianteRepository,
+                                 EscalaDesempenoService escalaDesempenoService) {
         this.calificacionesRepository = calificacionesRepository;
         this.evaluacionRepository = evaluacionRepository;
         this.cursoMateriaRepository = cursoMateriaRepository;
@@ -50,6 +54,7 @@ public class CalificacionesService {
         this.claseRepository = claseRepository;
         this.materiaRepository = materiaRepository;
         this.cursoEstudianteRepository = cursoEstudianteRepository;
+        this.escalaDesempenoService = escalaDesempenoService;
     }
 
     public List<Calificacion> obtenerCalificacionesEstudiante(UUID estudianteId) {
@@ -272,7 +277,12 @@ public class CalificacionesService {
                     }
                 }
 
-                dto.setNotaDefinitiva(sumaPonderadaDefinitiva.setScale(2, RoundingMode.HALF_UP));
+                BigDecimal notaDef = sumaPonderadaDefinitiva.setScale(2, RoundingMode.HALF_UP);
+                dto.setNotaDefinitiva(notaDef);
+                EscalaDesempeno escala = escalaDesempenoService.obtenerEscalaPorNota(notaDef);
+                dto.setDesempenoNombre(escala.getNombre());
+                dto.setDesempenoBadgeClass(escala.getColorBadge());
+                dto.setDesempenoColorHex(escala.getColorHex());
                 listaBoletin.add(dto);
             }
         }

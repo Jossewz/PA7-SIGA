@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- FRAGMENTO: PANEL DE PERMISOS POR ROL -->
+<div th:fragment="panelPermisos" id="panel-permisos-container" class="flex flex-col gap-4">
+    <div class="flex items-center justify-between border-b border-[#c4eec0]/30 pb-3 flex-wrap gap-2">
+        <div>
+            <h4 class="text-text-primary text-[14px] font-black" th:text="${'Permisos asignados al Rol: ' + rolSeleccionado}">Permisos del Rol</h4>
+            <p class="text-text-secondary text-[11px] font-semibold">Configura las facultades de acceso a vistas, creación/edición y eliminación por cada módulo institucional.</p>
+        </div>
+        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-pill-green text-sidebar border border-[#8ce383]"
+              th:text="${rolSeleccionado == 'ADMIN' ? 'Control Total' : 'Personalizado'}">
+            Personalizado
+        </span>
+    </div>
+
+    <form th:action="@{/configuracion/roles/permisos}" method="post" class="flex flex-col gap-5">
+        <input type="hidden" name="rol" th:value="${rolSeleccionado}" />
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-[12px]">
+                <thead>
+                    <tr class="bg-[#f7fcf6] border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
+                        <th class="p-3 pl-4">Módulo del Sistema</th>
+                        <th class="p-3 text-center">Estado</th>
+                        <th class="p-3 text-center">Acceso a Vistas</th>
+                        <th class="p-3 text-center">Crear / Editar</th>
+                        <th class="p-3 text-center">Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]">
+                    <tr th:each="p : ${permisosRol}" class="hover:bg-[#fcfdfb] transition-colors">
+                        <td class="p-3 pl-4">
+                            <div class="font-black text-sidebar text-[13px]" th:text="${p.nombreModulo}">Módulo</div>
+                            <div class="text-[10.5px] font-semibold text-text-secondary" th:text="${p.descripcion}">Descripción</div>
+                        </td>
+                        <td class="p-3 text-center">
+                            <!-- Badge Dinámico de Estado -->
+                            <span th:id="${'badge-estado-' + p.modulo}"
+                                  class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider transition-all inline-flex items-center gap-1.5 shadow-2xs"
+                                  th:classappend="${p.puedeAcceder} ? 'bg-pill-green text-sidebar border border-[#8ce383]' : 'bg-red-50 text-alert-red border border-red-200'">
+                                <span class="size-1.5 rounded-full" th:classappend="${p.puedeAcceder} ? 'bg-sidebar' : 'bg-alert-red'"></span>
+                                <span class="badge-text" th:text="${p.puedeAcceder ? 'Habilitado' : 'Sin Acceso'}">Habilitado</span>
+                            </span>
+                        </td>
+                        <td class="p-3 text-center">
+                            <input type="checkbox" name="modulosAcceso" th:value="${p.modulo}" th:checked="${p.puedeAcceder}"
+                                   th:data-modulo="${p.modulo}"
+                                   onchange="onToggleModuloAcceso(this.dataset.modulo, this)"
+                                   class="chk-acceso rounded border-[#c5ecd4] text-sidebar focus:ring-sidebar/20 size-4.5 cursor-pointer" />
+                        </td>
+                        <td class="p-3 text-center">
+                            <input type="checkbox" name="modulosEdicion" th:value="${p.modulo}" th:checked="${p.puedeEditar}"
+                                   th:id="${'chk-edit-' + p.modulo}"
+                                   th:disabled="${!p.puedeAcceder}"
+                                   class="rounded border-[#c5ecd4] text-sidebar focus:ring-sidebar/20 size-4.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed" />
+                        </td>
+                        <td class="p-3 text-center">
+                            <input type="checkbox" name="modulosEliminacion" th:value="${p.modulo}" th:checked="${p.puedeEliminar}"
+                                   th:id="${'chk-del-' + p.modulo}"
+                                   th:disabled="${!p.puedeAcceder}"
+                                   class="rounded border-[#c5ecd4] text-sidebar focus:ring-sidebar/20 size-4.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex justify-between items-center pt-3 border-t border-[#c4eec0]/30 flex-wrap gap-3">
+            <p class="text-[11px] text-text-secondary font-medium flex items-center gap-1.5">
+                <i data-lucide="shield-check" class="size-3.5 text-sidebar"></i>
+                <span>Al hacer clic en <strong>Guardar</strong>, los cambios de navegación y acceso se aplicarán inmediatamente.</span>
+            </p>
+            <button type="submit" class="px-5 py-2.5 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all shadow-md flex items-center gap-2 cursor-pointer">
+                <i data-lucide="save" class="size-4"></i>
+                <span>Guardar Permisos de <strong th:text="${rolSeleccionado}">ADMIN</strong></span>
+            </button>
+        </div>
+    </form>
+
+    <script>
+        function onToggleModuloAcceso(modulo, chk) {
+            const checked = chk.checked;
+            const badge = document.getElementById('badge-estado-' + modulo);
+            const editChk = document.getElementById('chk-edit-' + modulo);
+            const delChk = document.getElementById('chk-del-' + modulo);
+
+            if (badge) {
+                const textSpan = badge.querySelector('.badge-text');
+                const dotSpan = badge.querySelector('span:first-child');
+                if (checked) {
+                    badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider transition-all inline-flex items-center gap-1.5 shadow-2xs bg-pill-green text-sidebar border border-[#8ce383]';
+                    if (dotSpan) dotSpan.className = 'size-1.5 rounded-full bg-sidebar';
+                    if (textSpan) textSpan.innerText = 'Habilitado';
+                } else {
+                    badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider transition-all inline-flex items-center gap-1.5 shadow-2xs bg-red-50 text-alert-red border border-red-200';
+                    if (dotSpan) dotSpan.className = 'size-1.5 rounded-full bg-alert-red';
+                    if (textSpan) textSpan.innerText = 'Sin Acceso';
+                }
+            }
+
+            if (editChk) {
+                editChk.disabled = !checked;
+                if (!checked) editChk.checked = false;
+            }
+            if (delChk) {
+                delChk.disabled = !checked;
+                if (!checked) delChk.checked = false;
+            }
+        }
+    </script>
+</div>
+
+</body>
+</html>

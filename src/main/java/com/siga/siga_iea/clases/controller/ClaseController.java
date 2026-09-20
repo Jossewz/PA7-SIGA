@@ -161,7 +161,7 @@ public class ClaseController {
 
         model.addAttribute("cursosList", cursosList);
         model.addAttribute("docentesList", personalService.listarDocentes());
-        model.addAttribute("materiasList", claseService.listarTodasMaterias());
+        model.addAttribute("materiasList", claseService.listarMateriasActivas());
         return "clases/index";
     }
 

@@ -140,7 +140,7 @@
         <span th:id="${'badge-final-' + estId}"
               th:text="${notaFinal != null ? #numbers.formatDecimal(notaFinal, 1, 2) : '0.00'}"
               class="inline-flex items-center justify-center min-w-[58px] px-3 py-1.5 rounded-full text-[11px] font-black text-white text-center nota-final-badge shadow-2xs"
-              th:classappend="${notaFinal != null && notaFinal.doubleValue() >= 3.5} ? 'bg-sidebar' : (${notaFinal != null && notaFinal.doubleValue() >= 3.0} ? 'bg-amber-500' : 'bg-alert-red')">
+              th:classappend="${notaFinal != null && notaFinal.doubleValue() >= 4.6} ? 'bg-sidebar' : (${notaFinal != null && notaFinal.doubleValue() >= 4.0} ? 'bg-emerald-600' : (${notaFinal != null && notaFinal.doubleValue() >= 3.0} ? 'bg-amber-500' : (${notaFinal != null && notaFinal.doubleValue() >= 2.0} ? 'bg-orange-500' : (${notaFinal != null && notaFinal.doubleValue() >= 1.0} ? 'bg-rose-500' : 'bg-red-700'))))">
             0.00
         </span>
     </th:block>

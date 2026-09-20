@@ -62,6 +62,12 @@ th:fragment="html(content)">
         <section
           class="flex-1 p-[28px_32px_32px] max-md:p-5 flex flex-col">
 
+            <!-- Banner Alerta Sin Acceso -->
+            <div th:if="${param.sinAcceso}" class="mb-5 p-4 rounded-xl bg-amber-50 border border-amber-300 text-xs font-bold text-amber-900 flex items-center gap-3 shadow-xs">
+                <i data-lucide="shield-alert" class="size-5 text-amber-600 shrink-0"></i>
+                <span>Acceso Restringido: No cuentas con permisos asignados para acceder a la vista requerida (<strong th:text="${param.sinAcceso}"></strong>). Contacta a la administración institucional si requieres habilitar este acceso.</span>
+            </div>
+
             <th:block
               th:replace="${content}">
             </th:block>

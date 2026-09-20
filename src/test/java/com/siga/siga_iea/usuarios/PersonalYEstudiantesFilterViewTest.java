@@ -48,11 +48,12 @@ class PersonalYEstudiantesFilterViewTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    @DisplayName("GET /personal con parámetros de búsqueda y estado debe responder 200 OK")
-    void testPersonalFiltrosConParametros() throws Exception {
-        mockMvc.perform(get("/personal")
-                        .param("search", "Perez")
-                        .param("estado", "Activo"))
-                .andExpect(status().isOk());
+    @DisplayName("GET / (Dashboard) no debe contener la etiqueta 'En BD' en las cards de estudiantes y docentes activos")
+    void testRenderDashboardSinEnBd() throws Exception {
+        mockMvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Estudiantes Activos")))
+                .andExpect(content().string(containsString("Docentes Activos")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("En BD"))));
     }
 }

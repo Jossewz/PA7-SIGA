@@ -10,17 +10,39 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import com.siga.siga_iea.configuracion.service.RolPermisoService;
+
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
 @ControllerAdvice
 public class GlobalModelAdvice {
 
     private final UsuarioRepository usuarioRepository;
     private final DocenteRepository docenteRepository;
+    private final RolPermisoService rolPermisoService;
 
-    public GlobalModelAdvice(UsuarioRepository usuarioRepository, DocenteRepository docenteRepository) {
+    public GlobalModelAdvice(UsuarioRepository usuarioRepository,
+                             DocenteRepository docenteRepository,
+                             RolPermisoService rolPermisoService) {
         this.usuarioRepository = usuarioRepository;
         this.docenteRepository = docenteRepository;
+        this.rolPermisoService = rolPermisoService;
+    }
+
+    @ModelAttribute("modulosPermitidos")
+    public Set<String> populateModulosPermitidos() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            String email = auth.getName();
+            Optional<Usuario> userOpt = usuarioRepository.findByEmail(email);
+            if (userOpt.isPresent()) {
+                String role = CustomUserDetailsService.normalizeRole(userOpt.get().getRol());
+                return rolPermisoService.obtenerModulosPermitidos(role);
+            }
+        }
+        return Collections.emptySet();
     }
 
     @ModelAttribute("currentUser")

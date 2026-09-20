@@ -84,10 +84,12 @@
                                 <td class="p-4 text-center font-bold text-sidebar" th:text="${asig.periodo3Nota != null ? #numbers.formatDecimal(asig.periodo3Nota, 1, 2) : '-'}">-</td>
                                 <td class="p-4 text-center">
                                     <span th:text="${asig.notaDefinitiva != null ? #numbers.formatDecimal(asig.notaDefinitiva, 1, 2) : '0.00'}"
-                                          class="px-2.5 py-1 rounded-full text-[11px] font-black text-white"
-                                          th:classappend="${asig.notaDefinitiva != null && asig.notaDefinitiva.doubleValue() >= 3.5} ? 'bg-sidebar' : (${asig.notaDefinitiva != null && asig.notaDefinitiva.doubleValue() >= 3.0} ? 'bg-amber-500' : 'bg-alert-red')">
+                                          class="px-2.5 py-1 rounded-full text-[11px] font-black shadow-2xs"
+                                          th:classappend="${asig.desempenoBadgeClass != null ? asig.desempenoBadgeClass : 'bg-sidebar text-white'}"
+                                          th:title="${asig.desempenoNombre}">
                                         0.00
                                     </span>
+                                    <span class="block text-[9.5px] font-extrabold text-text-secondary mt-0.5 tracking-tight" th:text="${asig.desempenoNombre}">Superior</span>
                                 </td>
                                 <td class="p-4 pr-6 text-right">
                                     <span class="text-[11px] font-bold text-sidebar underline underline-offset-2">Ver Detalle</span>

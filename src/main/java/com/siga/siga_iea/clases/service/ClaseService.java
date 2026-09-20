@@ -130,6 +130,11 @@ public class ClaseService {
         return materias;
     }
 
+    public List<Materia> listarMateriasActivas() {
+        listarTodasMaterias();
+        return materiaRepository.findByEstadoOrderByNombreAsc("Activo");
+    }
+
     public List<CursoEstudiante> listarEstudiantesDeCurso(UUID cursoId) {
         return cursoEstudianteRepository.findByCursoId(cursoId);
     }

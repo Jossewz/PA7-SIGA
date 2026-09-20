@@ -32,13 +32,19 @@
         <!-- CUERPO DEL DASHBOARD -->
         <section class="flex-1 pt-5 px-8 pb-8 max-md:p-5 space-y-6">
 
+            <!-- Banner Alerta Sin Acceso -->
+            <div th:if="${param.sinAcceso}" class="p-4 rounded-xl bg-amber-50 border border-amber-300 text-xs font-bold text-amber-900 flex items-center gap-3 shadow-xs">
+                <i data-lucide="shield-alert" class="size-5 text-amber-600 shrink-0"></i>
+                <span>Acceso Restringido: No cuentas con permisos asignados para acceder al módulo <strong th:text="${param.sinAcceso}"></strong>. Contacta a un administrador institucional si requieres habilitar este acceso.</span>
+            </div>
+
             <!-- CABECERA: BIENVENIDA -->
             <div th:replace="~{components/dashboard/welcome-panel :: welcomePanel('Admin', 'Resumen analítico de la gestión institucional de hoy.')}"></div>
 
             <!-- FILA 1: KPIs GENERALES -->
             <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" aria-label="Indicadores Generales">
-                <div th:replace="~{components/dashboard/stat-card :: statCard('users', 'Estudiantes Activos', ${stats.estudiantesActivos}, 'En BD', 'success')}"></div>
-                <div th:replace="~{components/dashboard/stat-card :: statCard('graduation-cap', 'Docentes Activos', ${stats.docentesActivos}, 'En BD', 'success')}"></div>
+                <div th:replace="~{components/dashboard/stat-card :: statCard('users', 'Estudiantes Activos', ${stats.estudiantesActivos}, null, 'success')}"></div>
+                <div th:replace="~{components/dashboard/stat-card :: statCard('graduation-cap', 'Docentes Activos', ${stats.docentesActivos}, null, 'success')}"></div>
                 <div th:replace="~{components/dashboard/stat-card :: statCard('clipboard-check', 'Asistencia Hoy', ${stats.asistenciaHoy}, 'Registrada', 'success')}"></div>
                 <div th:replace="~{components/dashboard/stat-card :: statCard('alert-triangle', 'Alertas del Sistema', ${stats.alertasSistema}, 'Pendientes', ${stats.alertasSistema > 0 ? 'warning' : 'success'})}"></div>
             </section>

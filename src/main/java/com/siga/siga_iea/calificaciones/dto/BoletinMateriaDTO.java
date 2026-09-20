@@ -12,6 +12,9 @@ public class BoletinMateriaDTO {
     private BigDecimal periodo2Nota;
     private BigDecimal periodo3Nota;
     private BigDecimal notaDefinitiva;
+    private String desempenoNombre = "Desempeño Crítico";
+    private String desempenoBadgeClass = "bg-red-700 text-white";
+    private String desempenoColorHex = "#b91c1c";
     private List<EvaluacionResumenDTO> evaluacionesP1 = new ArrayList<>();
     private List<EvaluacionResumenDTO> evaluacionesP2 = new ArrayList<>();
     private List<EvaluacionResumenDTO> evaluacionesP3 = new ArrayList<>();
@@ -53,4 +56,13 @@ public class BoletinMateriaDTO {
 
     public List<EvaluacionResumenDTO> getEvaluacionesP3() { return evaluacionesP3; }
     public void setEvaluacionesP3(List<EvaluacionResumenDTO> evaluacionesP3) { this.evaluacionesP3 = evaluacionesP3; }
+
+    public String getDesempenoNombre() { return desempenoNombre; }
+    public void setDesempenoNombre(String desempenoNombre) { this.desempenoNombre = desempenoNombre; }
+
+    public String getDesempenoBadgeClass() { return desempenoBadgeClass; }
+    public void setDesempenoBadgeClass(String desempenoBadgeClass) { this.desempenoBadgeClass = desempenoBadgeClass; }
+
+    public String getDesempenoColorHex() { return desempenoColorHex; }
+    public void setDesempenoColorHex(String desempenoColorHex) { this.desempenoColorHex = desempenoColorHex; }
 }

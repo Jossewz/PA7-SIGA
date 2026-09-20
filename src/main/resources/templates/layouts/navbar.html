@@ -14,9 +14,12 @@
                 <i data-lucide="bell" class="size-[18px] stroke-2"></i>
             </button>
 
-            <button class="relative w-7 h-7 grid place-items-center rounded-full bg-transparent text-text-primary cursor-pointer" type="button" aria-label="Configuracion">
+            <a th:href="@{/configuracion}"
+               th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CONFIGURACION'))}"
+               class="relative w-7 h-7 grid place-items-center rounded-full bg-transparent text-text-primary hover:bg-white/40 transition-colors cursor-pointer"
+               aria-label="Configuración">
                 <i data-lucide="settings" class="size-[18px] stroke-2"></i>
-            </button>
+            </a>
 
             <!-- Perfil de Usuario con Menú Desplegable -->
             <div class="relative" id="profile-dropdown-wrapper">

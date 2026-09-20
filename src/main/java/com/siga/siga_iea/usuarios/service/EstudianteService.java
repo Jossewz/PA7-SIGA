@@ -184,7 +184,12 @@ public class EstudianteService {
     private String generarCodigoEstudiante() {
         int year = java.time.Year.now().getValue();
         long count = estudianteRepository.count() + 1;
-        return String.format("%d%03d", year, count);
+        String candidate = String.format("%d%03d", year, count);
+        while (estudianteRepository.existsByCodigo(candidate)) {
+            count++;
+            candidate = String.format("%d%03d", year, count);
+        }
+        return candidate;
     }
 
     private String slugify(String text) {

@@ -46,21 +46,24 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Mantener disabled o habilitar si es necesario
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**", "/js/**", "/img/**", "/icons/**", "/fonts/**", "/favicon.ico").permitAll()
-                        .requestMatchers("/matricula/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO")
-                        .requestMatchers("/personal/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO")
-                        .requestMatchers("/ambiental/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO")
-                        .requestMatchers("/configuracion/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO")
-                        .requestMatchers("/usuarios/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO")
-                        .requestMatchers("/estudiantes/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO", "DOCENTE")
+                        .requestMatchers("/login", "/logout", "/css/**", "/js/**", "/img/**", "/icons/**", "/fonts/**", "/favicon.ico", "/error").permitAll()
+                        .requestMatchers("/configuracion/roles/**").hasRole("ADMIN")
                         .requestMatchers("/clases/mapear-estudiantes", "/clases/promover-estudiantes").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO")
-                        .requestMatchers("/clases/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO", "DOCENTE")
-                        .requestMatchers("/asistencias/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO", "DOCENTE")
-                        .requestMatchers("/reportes/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO", "DOCENTE", "ESTUDIANTE")
-                        .requestMatchers("/calificaciones/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO", "DOCENTE", "ESTUDIANTE")
-                        .requestMatchers("/certificados/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO", "ESTUDIANTE")
-                        .requestMatchers("/soporte/**").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO", "DOCENTE", "ESTUDIANTE")
-                        .requestMatchers("/").authenticated()
+                        .requestMatchers(
+                                "/matricula/**",
+                                "/personal/**",
+                                "/ambiental/**",
+                                "/configuracion/**",
+                                "/usuarios/**",
+                                "/estudiantes/**",
+                                "/clases/**",
+                                "/asistencias/**",
+                                "/reportes/**",
+                                "/calificaciones/**",
+                                "/certificados/**",
+                                "/soporte/**",
+                                "/"
+                        ).authenticated()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

@@ -230,46 +230,53 @@ public class MatriculaHtmxController {
         estudiante.setAcudiente(acudiente);
         estudiante.setEstado("Activo");
 
-        estudiante = estudianteService.guardar(estudiante);
+        try {
+            estudiante = estudianteService.guardar(estudiante);
 
-        // 3. Guardar Matrícula
-        Matricula nuevaMatricula = new Matricula();
-        nuevaMatricula.setEstudiante(estudiante);
+            // 3. Guardar Matrícula
+            Matricula nuevaMatricula = new Matricula();
+            nuevaMatricula.setEstudiante(estudiante);
 
-        String grado = (String) session.getAttribute("grado");
-        nuevaMatricula.setGrado(grado != null ? grado : "No Asignado");
-        nuevaMatricula.setAnoLectivo(String.valueOf(Year.now().getValue()));
-        nuevaMatricula.setEstado("PENDIENTE_DE_REVISION");
-        nuevaMatricula.setFechaMatricula(LocalDate.now());
+            String grado = (String) session.getAttribute("grado");
+            nuevaMatricula.setGrado(grado != null ? grado : "No Asignado");
+            nuevaMatricula.setAnoLectivo(String.valueOf(Year.now().getValue()));
+            nuevaMatricula.setEstado("PENDIENTE_DE_REVISION");
+            nuevaMatricula.setFechaMatricula(LocalDate.now());
 
-        matriculaService.guardar(nuevaMatricula);
+            matriculaService.guardar(nuevaMatricula);
 
-        // 4. Vincular documentos a la matrícula
-        Map<String, TipoDocumento> fieldToTipo = Map.of(
-                "parentDoc", TipoDocumento.DOCUMENTO_ACUDIENTE,
-                "civilDoc", TipoDocumento.REGISTRO_CIVIL,
-                "saludFile", TipoDocumento.CERTIFICADO_SALUD,
-                "fotoFile", TipoDocumento.FOTO_ESTUDIANTE,
-                "historialFile", TipoDocumento.HISTORIAL_ACADEMICO
-        );
+            // 4. Vincular documentos a la matrícula
+            Map<String, TipoDocumento> fieldToTipo = Map.of(
+                    "parentDoc", TipoDocumento.DOCUMENTO_ACUDIENTE,
+                    "civilDoc", TipoDocumento.REGISTRO_CIVIL,
+                    "saludFile", TipoDocumento.CERTIFICADO_SALUD,
+                    "fotoFile", TipoDocumento.FOTO_ESTUDIANTE,
+                    "historialFile", TipoDocumento.HISTORIAL_ACADEMICO
+            );
 
-        for (var entry : fieldToTipo.entrySet()) {
-            String field = entry.getKey();
-            String tempKey = (String) session.getAttribute(field + "Key");
-            if (tempKey != null) {
-                Documento doc = documentoService.vincularAMatricula(
-                        tempKey,
-                        nuevaMatricula,
-                        entry.getValue(),
-                        (String) session.getAttribute(field + "Name"),
-                        (String) session.getAttribute(field + "ContentType"),
-                        (Long) session.getAttribute(field + "Size")
-                );
-                if ("fotoFile".equals(field)) {
-                    estudiante.setFotoKey(doc.getStorageKey());
-                    estudianteService.guardar(estudiante);
+            for (var entry : fieldToTipo.entrySet()) {
+                String field = entry.getKey();
+                String tempKey = (String) session.getAttribute(field + "Key");
+                if (tempKey != null) {
+                    Documento doc = documentoService.vincularAMatricula(
+                            tempKey,
+                            nuevaMatricula,
+                            entry.getValue(),
+                            (String) session.getAttribute(field + "Name"),
+                            (String) session.getAttribute(field + "ContentType"),
+                            (Long) session.getAttribute(field + "Size")
+                    );
+                    if ("fotoFile".equals(field)) {
+                        estudiante.setFotoKey(doc.getStorageKey());
+                        estudianteService.guardar(estudiante);
+                    }
                 }
             }
+        } catch (Exception ex) {
+            model.addAttribute("error", "Error al procesar la matrícula: " + ex.getMessage());
+            model.addAttribute("currentStep", 4);
+            populateModelFromSession(session, model);
+            return "matricula/htmx-step";
         }
 
         // 5. Limpiar sesión
@@ -301,8 +308,12 @@ public class MatriculaHtmxController {
         model.addAttribute("studentBirthday", session.getAttribute("studentBirthday"));
         model.addAttribute("studentAddress", session.getAttribute("studentAddress"));
 
-        model.addAttribute("parentNames", session.getAttribute("parentNames"));
-        model.addAttribute("parentSurnames", session.getAttribute("parentSurnames"));
+        String pNames = (String) session.getAttribute("parentNames");
+        String pSurnames = (String) session.getAttribute("parentSurnames");
+        String pFullName = ((pNames != null ? pNames : "") + " " + (pSurnames != null ? pSurnames : "")).trim();
+        model.addAttribute("parentNames", pNames);
+        model.addAttribute("parentName", pFullName.isEmpty() ? null : pFullName);
+        model.addAttribute("parentSurnames", pSurnames);
         model.addAttribute("parentDocType", session.getAttribute("parentDocType"));
         model.addAttribute("parentId", session.getAttribute("parentId"));
         model.addAttribute("parentRelation", session.getAttribute("parentRelation"));

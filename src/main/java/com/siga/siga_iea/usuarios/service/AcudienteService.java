@@ -18,7 +18,7 @@ public class AcudienteService {
 
     @Transactional
     public Acudiente buscarOCrear(String nombres, String apellidos, String parentesco,
-                                  String tipoDoc, String numDoc, String telefono, String direccion) {
+                                  String tipoDoc, String numDoc, String telefono) {
         if (numDoc != null && !numDoc.isBlank()) {
             Optional<Acudiente> existente = acudienteRepository.findByNumeroDocumento(numDoc.trim());
             if (existente.isPresent()) {
@@ -27,7 +27,6 @@ public class AcudienteService {
                 if (apellidos != null && !apellidos.isBlank()) ac.setApellidos(apellidos.trim());
                 if (parentesco != null && !parentesco.isBlank()) ac.setParentesco(parentesco.trim());
                 if (telefono != null && !telefono.isBlank()) ac.setTelefono(telefono.trim());
-                if (direccion != null && !direccion.isBlank()) ac.setDireccion(direccion.trim());
                 return acudienteRepository.save(ac);
             }
         }
@@ -39,7 +38,6 @@ public class AcudienteService {
         nuevo.setTipoDocumento(tipoDoc != null ? tipoDoc.trim() : "CC");
         nuevo.setNumeroDocumento(numDoc != null ? numDoc.trim() : null);
         nuevo.setTelefono(telefono != null ? telefono.trim() : "");
-        nuevo.setDireccion(direccion != null ? direccion.trim() : "");
 
         return acudienteRepository.save(nuevo);
     }

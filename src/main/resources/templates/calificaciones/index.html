@@ -39,42 +39,148 @@
             </div>
         </div>
 
-        <!-- Subjects & 3 Periods Table Container -->
-        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
-            <div class="p-4 border-b border-[#c4eec0]/30 bg-[#f7fcf6] flex justify-between items-center">
-                <div class="flex items-center gap-2 text-sidebar font-black text-xs uppercase tracking-wider">
-                    <i data-lucide="book-open" class="size-4 stroke-[2.5]"></i>
-                    <span>Boletín Individual de Calificaciones</span>
+        <!-- ======================== DATA TABLE CARD (Estilo SEGI con Paleta SIGA) ======================== -->
+        <div class="rounded-surface border border-border bg-white shadow-card transition relative">
+            <div class="flex flex-col gap-4 px-6 pt-5 pb-4 sm:flex-row sm:items-center sm:justify-between relative z-30">
+                <div class="flex flex-wrap items-center gap-3">
+                    <h2 class="text-base font-bold uppercase tracking-wider text-brand-900">Boletín Individual de Calificaciones</h2>
+                    <span class="inline-flex items-center rounded-full bg-surface-sunken border border-border px-2.5 py-0.5 text-xs font-bold uppercase text-brand-700 shadow-2xs">
+                        <span th:text="${(boletin != null ? #lists.size(boletin) : 0) + ' ASIGNATURAS'}">0 ASIGNATURAS</span>
+                    </span>
                 </div>
-                <div class="text-[11px] font-bold text-text-secondary">
-                    Año Lectivo 2026
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-control bg-surface-sunken border border-border text-xs font-bold text-brand-600">
+                    <i data-lucide="calendar" class="size-3.5 stroke-2 text-brand-500"></i>
+                    <span>Año Lectivo 2026</span>
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-[12px]">
-                    <thead>
-                        <tr class="bg-white border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
-                            <th class="p-4 pl-6">Asignatura</th>
-                            <th class="p-4 text-center">Periodo 1</th>
-                            <th class="p-4 text-center">Periodo 2</th>
-                            <th class="p-4 text-center">Periodo 3</th>
-                            <th class="p-4 text-center">Definitiva</th>
-                            <th class="p-4 pr-6 text-right">Detalle</th>
+            <div class="w-full border-t border-border relative rounded-b-surface overflow-visible">
+                <table class="tabla-siga w-full text-left text-sm bg-surface">
+                    <thead class="sticky top-0 z-20 border-b border-border-strong bg-surface-sunken text-[11px] font-bold uppercase tracking-wider text-brand-700 [&_th]:bg-surface-sunken">
+                        <tr>
+                            <th class="py-3 px-4 pl-6">Asignatura</th>
+                            <th class="py-3 px-4 text-center w-36" th:text="${'Periodo 1 (' + (pesoP1 != null ? pesoP1 : '30') + '%)'}">Periodo 1 (30%)</th>
+                            <th class="py-3 px-4 text-center w-36" th:text="${'Periodo 2 (' + (pesoP2 != null ? pesoP2 : '35') + '%)'}">Periodo 2 (35%)</th>
+                            <th class="py-3 px-4 text-center w-36" th:text="${'Periodo 3 (' + (pesoP3 != null ? pesoP3 : '35') + '%)'}">Periodo 3 (35%)</th>
+                            <th class="py-3 px-4 text-center w-36">Definitiva (100%)</th>
+                            <th class="py-3 px-4 pr-6 text-right w-28">Detalle</th>
                         </tr>
                     </thead>
-                    <tbody id="tbody-boletin" class="divide-y divide-[#c4eec0]/20 text-[#243d28]">
-                        <!-- Inyectado dinámicamente por calificaciones.js -->
+                    <tbody id="tbody-boletin" class="text-brand-900">
+                        <!-- Estado Vacío -->
+                        <th:block th:if="${boletin == null || #lists.isEmpty(boletin)}">
+                            <tr th:replace="~{components/tables/empty-state :: emptyState(colspan=6, title='No hay notas registradas', description='El estudiante no posee calificaciones registradas en el período activo.', resetUrl='/calificaciones')}"></tr>
+                        </th:block>
+
+                        <!-- Iteración de Asignaturas con datos reales de PostgreSQL -->
+                        <th:block th:each="asig, iter : ${boletin}">
+                            <!-- Fila Principal de Asignatura -->
+                            <tr class="transition-colors cursor-pointer" th:data-index="${iter.index}" onclick="toggleEvaluaciones(this.dataset.index)">
+                                <td class="py-3 px-4 pl-6 font-black text-sidebar text-sm flex items-center gap-2.5">
+                                    <i data-lucide="chevron-right" th:id="${'icon-chevron-' + iter.index}" class="size-4 stroke-[2.5] text-brand-400 transition-transform duration-200"></i>
+                                    <span th:text="${asig.materiaNombre}">Matemáticas</span>
+                                </td>
+                                <td class="py-3 px-4 text-center font-bold text-sidebar text-xs" th:text="${asig.periodo1Nota != null ? #numbers.formatDecimal(asig.periodo1Nota, 1, 2) : '-'}">-</td>
+                                <td class="py-3 px-4 text-center font-bold text-sidebar text-xs" th:text="${asig.periodo2Nota != null ? #numbers.formatDecimal(asig.periodo2Nota, 1, 2) : '-'}">-</td>
+                                <td class="py-3 px-4 text-center font-bold text-sidebar text-xs" th:text="${asig.periodo3Nota != null ? #numbers.formatDecimal(asig.periodo3Nota, 1, 2) : '-'}">-</td>
+                                <td class="py-3 px-4 text-center">
+                                    <span th:text="${asig.notaDefinitiva != null ? #numbers.formatDecimal(asig.notaDefinitiva, 1, 2) : '0.00'}"
+                                          class="px-2.5 py-0.5 rounded-full text-xs font-black shadow-2xs inline-block"
+                                          th:classappend="${asig.desempenoBadgeClass != null ? asig.desempenoBadgeClass : 'bg-sidebar text-white'}"
+                                          th:title="${asig.desempenoNombre}">
+                                        0.00
+                                    </span>
+                                    <span class="block text-[10px] font-extrabold text-brand-600 mt-0.5 tracking-tight" th:text="${asig.desempenoNombre}">Superior</span>
+                                </td>
+                                <td class="py-3 px-4 pr-6 text-right">
+                                    <span class="text-xs font-bold text-sidebar hover:underline">Ver Detalle</span>
+                                </td>
+                            </tr>
+
+                            <!-- Fila Desplegable con Detalle de Evaluaciones por Período -->
+                            <tr th:id="${'eval-row-' + iter.index}" class="hidden bg-[#f7fcf6]/60 border-b border-[#c4eec0]/40">
+                                <td colspan="6" class="p-5 pl-10 pr-8">
+                                    <div class="bg-white rounded-xl p-4 border border-[#c4eec0]/40 shadow-sm space-y-4">
+                                        <div class="flex items-center justify-between border-b border-[#c4eec0]/30 pb-3">
+                                            <h5 class="text-[11px] font-black uppercase text-sidebar tracking-wider flex items-center gap-2">
+                                                <i data-lucide="layers" class="size-4 stroke-2"></i>
+                                                <span th:text="${'Evaluaciones Detalladas – ' + asig.materiaNombre}">Evaluaciones Detalladas</span>
+                                            </h5>
+                                            <div class="flex items-center gap-1 bg-[#f7fcf6] p-1 rounded-lg border border-[#c4eec0]/50">
+                                                <button type="button" th:data-index="${iter.index}" onclick="switchSubPeriodo(this.dataset.index, 1)" th:id="${'tab-' + iter.index + '-1'}" class="subtab-btn px-3 py-1 rounded-md text-[11px] font-black bg-sidebar text-white shadow-2xs cursor-pointer">Periodo 1</button>
+                                                <button type="button" th:data-index="${iter.index}" onclick="switchSubPeriodo(this.dataset.index, 2)" th:id="${'tab-' + iter.index + '-2'}" class="subtab-btn px-3 py-1 rounded-md text-[11px] font-bold text-text-secondary hover:text-sidebar cursor-pointer">Periodo 2</button>
+                                                <button type="button" th:data-index="${iter.index}" onclick="switchSubPeriodo(this.dataset.index, 3)" th:id="${'tab-' + iter.index + '-3'}" class="subtab-btn px-3 py-1 rounded-md text-[11px] font-bold text-text-secondary hover:text-sidebar cursor-pointer">Periodo 3</button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Panel Periodo 1 -->
+                                        <div th:id="${'pane-' + iter.index + '-1'}" class="subpane-window">
+                                            <div th:if="${asig.evaluacionesP1 == null || #lists.isEmpty(asig.evaluacionesP1)}" class="text-[11px] text-text-muted italic py-2">
+                                                Sin evaluaciones registradas en este período.
+                                            </div>
+                                            <div th:if="${asig.evaluacionesP1 != null && !#lists.isEmpty(asig.evaluacionesP1)}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                                <div th:each="n : ${asig.evaluacionesP1}" class="p-3 rounded-lg border border-[#c4eec0]/40 bg-[#fbfdfa] flex justify-between items-center">
+                                                    <div>
+                                                        <p class="text-[11px] font-bold text-text-primary">
+                                                            <span th:text="${n.nombre}">Nota 1</span>
+                                                            <span th:if="${n.fechaDisplay != null && !n.fechaDisplay.isEmpty()}" class="text-[9px] text-[#3e6837]" th:text="${'(' + n.fechaDisplay + ')'}"></span>
+                                                        </p>
+                                                        <span class="text-[10px] font-semibold text-text-secondary" th:text="${'Peso: ' + (n.peso != null ? (n.peso.doubleValue() % 1 == 0 ? n.peso.intValue() : n.peso) : 0) + '%'}">Peso: 25%</span>
+                                                    </div>
+                                                    <span class="px-2 py-0.5 rounded text-[11px] font-black bg-[#eafbe4] text-sidebar border border-[#c4eec0]" th:text="${n.nota != null ? #numbers.formatDecimal(n.nota, 1, 2) : '0.00'}">0.00</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Panel Periodo 2 -->
+                                        <div th:id="${'pane-' + iter.index + '-2'}" class="subpane-window hidden">
+                                            <div th:if="${asig.evaluacionesP2 == null || #lists.isEmpty(asig.evaluacionesP2)}" class="text-[11px] text-text-muted italic py-2">
+                                                Sin evaluaciones registradas en este período.
+                                            </div>
+                                            <div th:if="${asig.evaluacionesP2 != null && !#lists.isEmpty(asig.evaluacionesP2)}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                                <div th:each="n : ${asig.evaluacionesP2}" class="p-3 rounded-lg border border-[#c4eec0]/40 bg-[#fbfdfa] flex justify-between items-center">
+                                                    <div>
+                                                        <p class="text-[11px] font-bold text-text-primary">
+                                                            <span th:text="${n.nombre}">Nota 1</span>
+                                                            <span th:if="${n.fechaDisplay != null && !n.fechaDisplay.isEmpty()}" class="text-[9px] text-[#3e6837]" th:text="${'(' + n.fechaDisplay + ')'}"></span>
+                                                        </p>
+                                                        <span class="text-[10px] font-semibold text-text-secondary" th:text="${'Peso: ' + (n.peso != null ? (n.peso.doubleValue() % 1 == 0 ? n.peso.intValue() : n.peso) : 0) + '%'}">Peso: 25%</span>
+                                                    </div>
+                                                    <span class="px-2 py-0.5 rounded text-[11px] font-black bg-[#eafbe4] text-sidebar border border-[#c4eec0]" th:text="${n.nota != null ? #numbers.formatDecimal(n.nota, 1, 2) : '0.00'}">0.00</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Panel Periodo 3 -->
+                                        <div th:id="${'pane-' + iter.index + '-3'}" class="subpane-window hidden">
+                                            <div th:if="${asig.evaluacionesP3 == null || #lists.isEmpty(asig.evaluacionesP3)}" class="text-[11px] text-text-muted italic py-2">
+                                                Sin evaluaciones registradas en este período.
+                                            </div>
+                                            <div th:if="${asig.evaluacionesP3 != null && !#lists.isEmpty(asig.evaluacionesP3)}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                                <div th:each="n : ${asig.evaluacionesP3}" class="p-3 rounded-lg border border-[#c4eec0]/40 bg-[#fbfdfa] flex justify-between items-center">
+                                                    <div>
+                                                        <p class="text-[11px] font-bold text-text-primary">
+                                                            <span th:text="${n.nombre}">Nota 1</span>
+                                                            <span th:if="${n.fechaDisplay != null && !n.fechaDisplay.isEmpty()}" class="text-[9px] text-[#3e6837]" th:text="${'(' + n.fechaDisplay + ')'}"></span>
+                                                        </p>
+                                                        <span class="text-[10px] font-semibold text-text-secondary" th:text="${'Peso: ' + (n.peso != null ? (n.peso.doubleValue() % 1 == 0 ? n.peso.intValue() : n.peso) : 0) + '%'}">Peso: 25%</span>
+                                                    </div>
+                                                    <span class="px-2 py-0.5 rounded text-[11px] font-black bg-[#eafbe4] text-sidebar border border-[#c4eec0]" th:text="${n.nota != null ? #numbers.formatDecimal(n.nota, 1, 2) : '0.00'}">0.00</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        </th:block>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Script del módulo de calificaciones -->
-    <script th:inline="javascript">
-        window.estudianteIdActivo = /*[[${estudianteSeleccionadoId}]]*/ '';
-    </script>
+    <!-- Script visual para acordeón de detalles -->
     <script th:src="@{/js/calificaciones.js}"></script>
 </th:block>
 

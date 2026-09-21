@@ -17,88 +17,109 @@
             <span th:text="${mensajeError}">Error</span>
         </div>
 
-        <!-- Header -->
-        <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
+        <!-- Header General -->
+        <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start mb-2">
             <div>
                 <h1 class="text-text-primary text-[28px] font-black tracking-tight leading-none mb-1.5">Gestión de Cursos</h1>
                 <p class="text-text-secondary text-sm font-semibold">Configuración de grados, directores de grupo, horarios y planillas académicas.</p>
             </div>
-            <button type="button" onclick="openCursoModal()"
-                    class="px-5 py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-2 shadow-md shrink-0 cursor-pointer">
-                <i data-lucide="plus-circle" class="size-4 stroke-[2.5]"></i>
-                <span>Nuevo Curso</span>
-            </button>
         </div>
 
-        <!-- Table Container -->
-        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-[12px]">
-                    <thead>
-                        <tr class="bg-[#f7fcf6] border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
-                            <th class="p-4.5 pl-6">Grado</th>
-                            <th class="p-4.5">Grupo</th>
-                            <th class="p-4.5">Director de Grupo</th>
-                            <th class="p-4.5">Cupos Totales</th>
-                            <th class="p-4.5">Estudiantes</th>
-                            <th class="p-4.5">Horario</th>
-                            <th class="p-4.5 pr-6 text-right">Acciones</th>
+        <!-- ======================== DATA TABLE CARD (Estilo SEGI con Paleta SIGA) ======================== -->
+        <div class="rounded-surface border border-border bg-white shadow-card transition relative">
+
+            <!-- Cabecera: Título + Contador + Acción Primaria -->
+            <div class="flex flex-col gap-4 px-6 pt-5 pb-4 sm:flex-row sm:items-center sm:justify-between relative z-30">
+                <div class="flex flex-wrap items-center gap-3">
+                    <h2 class="text-base font-bold uppercase tracking-wider text-brand-900">Cursos Habilitados</h2>
+                    <span class="inline-flex items-center rounded-full bg-surface-sunken border border-border px-2.5 py-0.5 text-xs font-bold uppercase text-brand-700 shadow-2xs">
+                        <span th:text="${(cursosList != null ? #lists.size(cursosList) : 0) + ' CURSOS'}">0 CURSOS</span>
+                    </span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="openCursoModal()"
+                            class="inline-flex items-center gap-2 rounded-control bg-sidebar px-4 py-2 text-xs font-bold text-white shadow-xs hover:brightness-110 transition cursor-pointer shrink-0">
+                        <i data-lucide="plus-circle" class="size-4 stroke-[2.2]"></i>
+                        <span>Nuevo Curso</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla de Datos Desktop -->
+            <div class="w-full border-t border-border relative rounded-b-surface overflow-visible">
+                <table class="tabla-siga w-full text-left text-sm bg-surface">
+                    <thead class="sticky top-0 z-20 border-b border-border-strong bg-surface-sunken text-[11px] font-bold uppercase tracking-wider text-brand-700 [&_th]:bg-surface-sunken">
+                        <tr>
+                            <th class="py-3 px-4 pl-6 w-28">Grado</th>
+                            <th class="py-3 px-4 w-24">Grupo</th>
+                            <th class="py-3 px-4">Director de Grupo</th>
+                            <th class="py-3 px-4 text-center w-28">Cupos</th>
+                            <th class="py-3 px-4 text-center w-32">Estudiantes</th>
+                            <th class="py-3 px-4 text-center w-40">Horario</th>
+                            <th class="py-3 px-4 pr-6 text-right w-24">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]">
+                    <tbody class="text-brand-900">
+                        <!-- Estado Vacío -->
+                        <th:block th:if="${cursosList == null || #lists.isEmpty(cursosList)}">
+                            <tr th:replace="~{components/tables/empty-state :: emptyState(colspan=7, title='No hay cursos configurados', description='Aún no se han definido grados ni grupos académicos en la institución.', resetUrl='/clases')}"></tr>
+                        </th:block>
+
+                        <!-- Filas de Cursos -->
                         <tr th:each="c : ${cursosList}" 
-                            class="hover:bg-[#f8fdf6] transition-colors cursor-pointer group curso-tr"
+                            class="transition-colors cursor-pointer group curso-tr"
                             th:data-codigo="${c.codigoCurso}"
                             onclick="handleRowClick(this, event)">
                             
                             <!-- Grado -->
-                            <td class="p-4.5 pl-6 font-black text-sidebar text-[14px]">
+                            <td class="py-3 px-4 pl-6 font-black text-sidebar text-sm">
                                 <div class="flex items-center gap-2">
                                     <span th:text="${c.grado}">11°</span>
-                                    <span class="text-[10px] font-bold text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                                    <span class="text-[10px] font-bold text-brand-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
                                         <i data-lucide="external-link" class="size-3 stroke-2"></i> Abrir
                                     </span>
                                 </div>
                             </td>
 
-                            <!-- Grupo (Secuencia Numérica) -->
-                            <td class="p-4.5">
-                                <span class="px-2.5 py-1 bg-[#eafbe4] text-sidebar border border-[#c4eec0] rounded-md font-black text-[11px]" th:text="${c.codigoCurso}">11-01</span>
+                            <!-- Grupo -->
+                            <td class="py-3 px-4">
+                                <span class="px-2 py-0.5 bg-accent-50 text-sidebar border border-accent-200 rounded-md font-black text-xs" th:text="${c.codigoCurso}">11-01</span>
                             </td>
 
                             <!-- Director -->
-                            <td class="p-4.5 font-semibold text-text-secondary" th:text="${c.director}">Jorge Eliécer Rojas</td>
+                            <td class="py-3 px-4 font-bold text-brand-900 text-xs" th:text="${c.director}">Jorge Eliécer Rojas</td>
 
                             <!-- Cupos -->
-                            <td class="p-4.5 font-semibold text-text-secondary" th:text="${c.cuposMaximos}">30</td>
+                            <td class="py-3 px-4 font-semibold text-brand-600 text-xs text-center" th:text="${c.cuposMaximos}">30</td>
 
                             <!-- Estudiantes -->
-                            <td class="p-4.5 font-semibold text-text-secondary">
+                            <td class="py-3 px-4 font-semibold text-brand-600 text-xs text-center">
                                 <span class="font-bold text-sidebar" th:text="${c.estudiantes}">28</span> / <span th:text="${c.cuposMaximos}">30</span>
                             </td>
 
                             <!-- Horario -->
-                            <td class="p-4.5">
+                            <td class="py-3 px-4 text-center">
                                 <button type="button" 
                                         th:data-id="${c.id}"
                                         th:data-codigo="${c.codigoCurso}"
                                         th:data-tiene="${c.tieneHorario}"
                                         onclick="handleHorarioBtn(this, event)"
-                                        class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wide leading-none transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                                        class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide leading-none transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs"
                                         th:classappend="${c.tieneHorario} ? 'bg-pill-green text-sidebar border border-[#8ce383] hover:brightness-95' : 'bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200'">
-                                    <i data-lucide="clock" class="size-3.5 stroke-[2.5]"></i>
-                                    <span th:text="${c.tieneHorario} ? 'Horario Asignado' : 'Sin Horario'">Sin Horario</span>
+                                    <i data-lucide="clock" class="size-3 stroke-[2.5]"></i>
+                                    <span th:text="${c.tieneHorario} ? 'Asignado' : 'Sin Horario'">Sin Horario</span>
                                 </button>
                             </td>
 
                             <!-- Acciones -->
-                            <td class="p-4.5 pr-6 text-right">
-                                <div class="flex justify-end gap-1.5">
+                            <td class="py-3 px-4 pr-6 text-right">
+                                <div class="flex justify-end items-center gap-1.5">
                                     <button type="button" 
                                             th:data-codigo="${c.codigoCurso}"
                                             onclick="handleGestionBtn(this, event)"
-                                            class="p-1.5 hover:bg-[#eafbe4] rounded-lg transition-colors text-sidebar cursor-pointer" title="Gestionar Notas y Asistencia">
-                                        <i data-lucide="clipboard-list" class="size-4 stroke-[2]"></i>
+                                            class="p-1.5 hover:bg-surface-sunken rounded-control transition text-brand-600 hover:text-sidebar cursor-pointer" title="Gestionar Notas y Asistencia">
+                                        <i data-lucide="clipboard-list" class="size-4 stroke-2"></i>
                                     </button>
                                     <button type="button" 
                                             th:data-id="${c.id}"
@@ -108,8 +129,8 @@
                                             th:data-cupos="${c.cuposMaximos}"
                                             th:data-directorid="${c.directorId}"
                                             onclick="handleEditarCursoBtn(this, event)"
-                                            class="p-1.5 hover:bg-[#f1fbe4] rounded-lg transition-colors text-sidebar cursor-pointer" title="Editar curso">
-                                        <i data-lucide="edit-3" class="size-4 stroke-[2]"></i>
+                                            class="p-1.5 hover:bg-surface-sunken rounded-control transition text-brand-600 hover:text-sidebar cursor-pointer" title="Editar Parámetros">
+                                        <i data-lucide="edit" class="size-4 stroke-2"></i>
                                     </button>
                                     <form th:action="@{/clases/eliminar}" method="post" class="inline" onsubmit="event.stopPropagation(); return confirm('¿Está seguro de eliminar este curso?');">
                                         <input type="hidden" name="cursoId" th:value="${c.id}" />
@@ -135,7 +156,7 @@
         window.materiasGlobales = /*[[${materiasList}]]*/ [];
         window.docentesGlobales = /*[[${docentesList}]]*/ [];
     </script>
-    <script th:src="@{/js/clases.js}"></script>
+    <script th:src="@{/js/clases.js(v='2.1')}"></script>
 </th:block>
 
 </body>

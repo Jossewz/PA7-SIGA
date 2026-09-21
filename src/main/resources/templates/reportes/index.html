@@ -8,6 +8,16 @@
 <th:block th:fragment="content">
     <div class="flex flex-col gap-6 flex-1">
         
+        <!-- Flash Messages -->
+        <div th:if="${mensajeExito}" class="p-4 rounded-xl bg-[#e3f7dc] border border-[#c4eec0] flex gap-3 text-xs font-bold text-sidebar">
+            <i data-lucide="check-circle-2" class="size-5 shrink-0 stroke-2"></i>
+            <span th:text="${mensajeExito}"></span>
+        </div>
+        <div th:if="${mensajeError}" class="p-4 rounded-xl bg-red-50 border border-red-200 flex gap-3 text-xs font-bold text-alert-red">
+            <i data-lucide="alert-circle" class="size-5 shrink-0 stroke-2"></i>
+            <span th:text="${mensajeError}"></span>
+        </div>
+
         <!-- Header Principal y Conmutador de Roles -->
         <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
             <div>
@@ -15,8 +25,8 @@
                 <p class="text-text-secondary text-sm font-semibold">Registro de informes académicos, disciplinarios, de asistencia y seguimiento de citaciones.</p>
             </div>
 
-            <!-- Selector / Toggle de Rol para Pruebas -->
-            <div class="bg-white rounded-xl border border-[#c4eec0]/60 p-1.5 flex items-center gap-1 shadow-2xs">
+            <!-- Selector / Toggle de Rol para Pruebas (Solo visible para ADMIN) -->
+            <div th:if="${esAdmin}" class="bg-white rounded-xl border border-[#c4eec0]/60 p-1.5 flex items-center gap-1 shadow-2xs">
                 <button type="button" onclick="cambiarRolSimulado('docente')" id="btn-rol-docente"
                         class="px-3 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer bg-sidebar text-white shadow-2xs">
                     <i data-lucide="user-check" class="size-4 stroke-[2.5]"></i>
@@ -38,7 +48,7 @@
         <!-- ========================================================================= -->
         <!-- VISTA 1: ROL DOCENTE (Creación de Reportes) -->
         <!-- ========================================================================= -->
-        <div id="vista-docente" class="space-y-6">
+        <div id="vista-docente" class="space-y-6" th:classappend="${esDocente} ? '' : 'hidden'">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
                 <!-- Formulario de Nuevo Reporte de Estudiante -->
@@ -54,13 +64,13 @@
                             </div>
                         </div>
 
-                        <form id="form-crear-reporte" class="space-y-4" onsubmit="handleFormCrearReporte(event)">
+                        <form id="form-crear-reporte" th:action="@{/reportes/crear}" method="POST" class="space-y-4">
                             <div>
                                 <label for="select-estudiante-reporte" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">
                                     Estudiante a Reportar <span class="text-alert-red">*</span>
                                 </label>
-                                <select id="select-estudiante-reporte" required
-                                        class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                                <select id="select-estudiante-reporte" name="estudianteId" required
+                                        class="w-full p-3 bg-white border border-[#c4eec0] rounded-lg text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
                                     <option value="" disabled selected>-- Seleccione un estudiante --</option>
                                     <option th:each="est : ${estudiantesList}" th:value="${est.id}" th:text="${est.nombre + ' (' + est.grado + ')'}">Álvarez Restrepo, Mateo (11° - 01)</option>
                                 </select>
@@ -70,8 +80,8 @@
                                 <label for="select-razon-reporte" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">
                                     Razón del Reporte <span class="text-alert-red">*</span>
                                 </label>
-                                <select id="select-razon-reporte" required onchange="actualizarDescripcionRazon(this.value)"
-                                        class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                                <select id="select-razon-reporte" name="razon" required onchange="actualizarDescripcionRazon(this.value)"
+                                        class="w-full p-3 bg-white border border-[#c4eec0] rounded-lg text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
                                     <option value="" disabled selected>-- Seleccione la razón --</option>
                                     <optgroup label="Razones Académicas">
                                         <option value="Bajo rendimiento">Bajo rendimiento (Notas bajas / pérdida constante)</option>
@@ -88,10 +98,13 @@
                                         <option value="Llegadas tarde">Llegadas tarde (Entrar tarde habitualmente)</option>
                                         <option value="Salud o riesgo">Salud o riesgo (Tristeza extrema, enfermedad o peligro)</option>
                                     </optgroup>
+                                    <optgroup label="Otras Razones">
+                                        <option value="Otro">Otro (Especificar la razón en los detalles)</option>
+                                    </optgroup>
                                 </select>
                             </div>
 
-                            <div id="caja-desc-razon" class="p-3.5 rounded-xl bg-[#f7fcf6] border border-[#c4eec0]/60 text-text-secondary text-[11px] font-semibold space-y-1">
+                            <div id="caja-desc-razon" class="p-3.5 rounded-lg bg-[#f7fcf6] border border-[#c4eec0]/60 text-text-secondary text-[11px] font-semibold space-y-1">
                                 <div class="flex items-center gap-1.5 font-bold text-sidebar">
                                     <i data-lucide="info" class="size-4 stroke-[2.5]"></i>
                                     <span id="razon-title">Descripción del reporte</span>
@@ -103,11 +116,11 @@
                                 <label for="reporte-detalles-txt" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">
                                     Especificación y Detalles del Reporte <span class="text-alert-red">*</span>
                                 </label>
-                                <textarea id="reporte-detalles-txt" rows="4" required placeholder="Describa detalladamente los hechos, fechas, antecedentes u observaciones del caso..."
-                                          class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none resize-none"></textarea>
+                                <textarea id="reporte-detalles-txt" name="detalles" rows="4" required placeholder="Describa detalladamente los hechos, fechas, antecedentes u observaciones del caso..."
+                                          class="w-full p-3 bg-white border border-[#c4eec0] rounded-lg text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none resize-none"></textarea>
                             </div>
 
-                            <button type="submit" class="w-full py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-xl transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer">
+                            <button type="submit" class="w-full py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer">
                                 <i data-lucide="send" class="size-4 stroke-[2.5]"></i>
                                 <span>Enviar Reporte a Dirección</span>
                             </button>
@@ -116,45 +129,50 @@
                 </div>
 
                 <!-- Tabla de Historial de Reportes Emitidos por Docente -->
-                <div class="lg:col-span-7 bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden flex flex-col">
-                    <div class="p-4 border-b border-[#c4eec0]/30 bg-[#f7fcf6] flex justify-between items-center">
-                        <div class="flex items-center gap-2 text-sidebar font-black text-xs uppercase tracking-wider">
-                            <i data-lucide="clipboard-list" class="size-4 stroke-[2.5]"></i>
-                            <span>Reportes Generados por el Docente</span>
+                <div class="lg:col-span-7 rounded-surface border border-border bg-white shadow-card transition relative flex flex-col">
+                    <div class="flex flex-col gap-3 px-6 pt-5 pb-4 sm:flex-row sm:items-center sm:justify-between relative z-30">
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <h2 class="text-base font-bold uppercase tracking-wider text-brand-900">Reportes Generados</h2>
+                            <span class="inline-flex items-center rounded-full bg-surface-sunken border border-border px-2.5 py-0.5 text-xs font-bold uppercase text-brand-700 shadow-2xs">
+                                <span th:text="${(reportesMock != null ? #lists.size(reportesMock) : 0) + ' EMITIDOS'}">0 EMITIDOS</span>
+                            </span>
                         </div>
-                        <span class="text-[11px] font-bold text-text-secondary">Docente: Prof. Jorge Eliécer Rojas</span>
+                        <span class="text-xs font-bold text-brand-500">Docente: Prof. Jorge Eliécer Rojas</span>
                     </div>
 
-                    <div class="overflow-x-auto flex-1">
-                        <table class="w-full text-left border-collapse text-[12px]">
-                            <thead>
-                                <tr class="bg-white border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
-                                    <th class="p-3.5 pl-5">Código</th>
-                                    <th class="p-3.5">Estudiante</th>
-                                    <th class="p-3.5">Razón de Reporte</th>
-                                    <th class="p-3.5 text-center">Estado</th>
-                                    <th class="p-3.5 pr-5 text-right">Citación Programada</th>
+                    <div class="w-full border-t border-border relative rounded-b-surface flex-1 overflow-visible">
+                        <table class="tabla-siga w-full text-left text-sm bg-surface">
+                            <thead class="sticky top-0 z-20 border-b border-border-strong bg-surface-sunken text-[11px] font-bold uppercase tracking-wider text-brand-700 [&_th]:bg-surface-sunken">
+                                <tr>
+                                    <th class="py-3 px-4 pl-5 w-28">Código</th>
+                                    <th class="py-3 px-4">Estudiante</th>
+                                    <th class="py-3 px-4">Razón / Tipo</th>
+                                    <th class="py-3 px-4 text-center w-28">Estado</th>
+                                    <th class="py-3 px-4 pr-5 text-right w-44">Citación Programada</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]" id="tbody-reportes-docente">
-                                <tr th:each="rep : ${reportesMock}" class="hover:bg-[#fcfdfb] transition-colors">
-                                    <td class="p-3.5 pl-5 font-black text-sidebar text-[11px]" th:text="${rep.id}">REP-2026-001</td>
-                                    <td class="p-3.5">
-                                        <div class="font-black text-text-primary text-[12px]" th:text="${rep.estudiante}">Mateo Álvarez Restrepo</div>
-                                        <div class="text-[10px] font-semibold text-text-secondary" th:text="${rep.grado}">11° - 01</div>
+                            <tbody class="text-brand-900" id="tbody-reportes-docente">
+                                <th:block th:if="${reportesMock == null || #lists.isEmpty(reportesMock)}">
+                                    <tr th:replace="~{components/tables/empty-state :: emptyState(colspan=5, title='No has emitido reportes', description='Los reportes disciplinarios o académicos que generes aparecerán aquí.', resetUrl='')}"></tr>
+                                </th:block>
+                                <tr th:each="rep : ${reportesMock}" class="transition-colors">
+                                    <td class="py-3 px-4 pl-5 font-black text-sidebar text-xs" th:text="${rep.id}">REP-2026-001</td>
+                                    <td class="py-3 px-4">
+                                        <div class="font-bold text-brand-900 text-xs" th:text="${rep.estudiante}">Mateo Álvarez Restrepo</div>
+                                        <div class="text-[11px] font-medium text-brand-500" th:text="${rep.grado}">11° - 01</div>
                                     </td>
-                                    <td class="p-3.5">
-                                        <div class="font-bold text-sidebar text-[12px]" th:text="${rep.razon}">Bajo rendimiento</div>
-                                        <div class="text-[10px] font-semibold text-text-secondary" th:text="${rep.categoria}">Razones Académicas</div>
+                                    <td class="py-3 px-4">
+                                        <div class="font-bold text-sidebar text-xs" th:text="${rep.razon}">Bajo rendimiento</div>
+                                        <div class="text-[11px] font-medium text-brand-500" th:text="${rep.categoria}">Razones Académicas</div>
                                     </td>
-                                    <td class="p-3.5 text-center">
-                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide"
+                                    <td class="py-3 px-4 text-center">
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide inline-block shadow-2xs"
                                               th:classappend="${rep.estado == 'Aceptado'} ? 'bg-pill-green text-sidebar border border-[#8ce383]' : (${rep.estado == 'Rechazado'} ? 'bg-pill-red text-alert-red border border-red-300' : 'bg-amber-100 text-amber-800 border border-amber-300')"
                                               th:text="${rep.estado}">Aceptado</span>
                                     </td>
-                                    <td class="p-3.5 pr-5 text-right font-bold text-[11px]">
+                                    <td class="py-3 px-4 pr-5 text-right font-bold text-xs">
                                         <span th:if="${rep.estado == 'Aceptado'}" class="text-sidebar" th:text="${rep.fechaCitacion}">2026-08-04 - 08:30 AM</span>
-                                        <span th:if="${rep.estado != 'Aceptado'}" class="text-text-secondary italic">En evaluación...</span>
+                                        <span th:if="${rep.estado != 'Aceptado'}" class="text-brand-400 font-medium italic">En evaluación...</span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -167,17 +185,19 @@
         <!-- ========================================================================= -->
         <!-- VISTA 2: ROL PERSONAL ADMINISTRATIVO (Revisión y Citaciones) -->
         <!-- ========================================================================= -->
-        <div id="vista-admin" class="hidden space-y-6">
-            <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
-                <div class="p-4 border-b border-[#c4eec0]/30 bg-[#f7fcf6] flex justify-between items-center flex-wrap gap-3">
-                    <div class="flex items-center gap-2 text-sidebar font-black text-xs uppercase tracking-wider">
-                        <i data-lucide="inbox" class="size-4 stroke-[2.5]"></i>
-                        <span>Bandeja de Reportes de Estudiantes Recibidos</span>
+        <div id="vista-admin" class="space-y-6" th:classappend="${esPersonal || esAdmin} ? '' : 'hidden'">
+            <div class="rounded-surface border border-border bg-white shadow-card transition relative">
+                <div class="flex flex-col gap-4 px-6 pt-5 pb-4 sm:flex-row sm:items-center sm:justify-between relative z-30">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <h2 class="text-base font-bold uppercase tracking-wider text-brand-900">Bandeja de Reportes</h2>
+                        <span class="inline-flex items-center rounded-full bg-surface-sunken border border-border px-2.5 py-0.5 text-xs font-bold uppercase text-brand-700 shadow-2xs">
+                            <span th:text="${(reportesMock != null ? #lists.size(reportesMock) : 0) + ' REGISTROS'}">0 REGISTROS</span>
+                        </span>
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <span class="text-[11px] font-bold text-text-secondary">Filtrar:</span>
-                        <select onchange="filtrarReportesAdmin(this.value)" class="p-1.5 bg-white border border-[#c4eec0] rounded-lg text-xs font-bold text-sidebar focus:outline-none">
+                        <label class="text-xs font-bold text-brand-600">Filtrar:</label>
+                        <select onchange="filtrarReportesAdmin(this.value)" class="rounded-control border border-border bg-surface-muted py-1.5 px-3 text-xs font-bold text-brand-800 focus:outline-none focus:ring-2 focus:ring-accent-100 transition shadow-2xs">
                             <option value="todos">Todos los reportes</option>
                             <option value="Pendiente">Pendientes</option>
                             <option value="Aceptado">Aceptados (Citados)</option>
@@ -186,38 +206,41 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-[12px]">
-                        <thead>
-                            <tr class="bg-white border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
-                                <th class="p-3.5 pl-5">Código</th>
-                                <th class="p-3.5">Estudiante</th>
-                                <th class="p-3.5">Docente Emisor</th>
-                                <th class="p-3.5">Razón / Categoría</th>
-                                <th class="p-3.5 text-center">Estado</th>
-                                <th class="p-3.5 pr-5 text-right">Acción</th>
+                <div class="w-full border-t border-border relative rounded-b-surface overflow-visible">
+                    <table class="tabla-siga w-full text-left text-sm bg-surface">
+                        <thead class="sticky top-0 z-20 border-b border-border-strong bg-surface-sunken text-[11px] font-bold uppercase tracking-wider text-brand-700 [&_th]:bg-surface-sunken">
+                            <tr>
+                                <th class="py-3 px-4 pl-5 w-28">Código</th>
+                                <th class="py-3 px-4">Estudiante</th>
+                                <th class="py-3 px-4">Docente Emisor</th>
+                                <th class="py-3 px-4">Razón / Categoría</th>
+                                <th class="py-3 px-4 text-center w-28">Estado</th>
+                                <th class="py-3 px-4 pr-5 text-right w-36">Acción</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]" id="tbody-admin-reportes">
-                            <tr th:each="rep : ${reportesMock}" class="hover:bg-[#fcfdfb] transition-colors row-reporte-admin" th:data-estado="${rep.estado}">
-                                <td class="p-3.5 pl-5 font-black text-sidebar text-[11px]" th:text="${rep.id}">REP-2026-001</td>
-                                <td class="p-3.5">
-                                    <div class="font-black text-text-primary text-[12px]" th:text="${rep.estudiante}">Mateo Álvarez Restrepo</div>
-                                    <div class="text-[10px] font-semibold text-text-secondary" th:text="${rep.grado}">11° - 01</div>
+                        <tbody class="text-brand-900" id="tbody-admin-reportes">
+                            <th:block th:if="${reportesMock == null || #lists.isEmpty(reportesMock)}">
+                                <tr th:replace="~{components/tables/empty-state :: emptyState(colspan=6, title='No hay reportes pendientes', description='No se encontraron reportes pendientes por atender.', resetUrl='')}"></tr>
+                            </th:block>
+                            <tr th:each="rep : ${reportesMock}" class="transition-colors row-reporte-admin" th:data-estado="${rep.estado}">
+                                <td class="py-3 px-4 pl-5 font-black text-sidebar text-xs" th:text="${rep.id}">REP-2026-001</td>
+                                <td class="py-3 px-4">
+                                    <div class="font-bold text-brand-900 text-xs" th:text="${rep.estudiante}">Mateo Álvarez Restrepo</div>
+                                    <div class="text-[11px] font-medium text-brand-500" th:text="${rep.grado}">11° - 01</div>
                                 </td>
-                                <td class="p-3.5 font-semibold text-text-secondary" th:text="${rep.docente}">Prof. Jorge Eliécer Rojas</td>
-                                <td class="p-3.5">
-                                    <div class="font-bold text-sidebar text-[12px]" th:text="${rep.razon}">Bajo rendimiento</div>
-                                    <div class="text-[10px] font-semibold text-text-secondary" th:text="${rep.categoria}">Razones Académicas</div>
+                                <td class="py-3 px-4 font-semibold text-brand-600 text-xs" th:text="${rep.docente}">Prof. Jorge Eliécer Rojas</td>
+                                <td class="py-3 px-4">
+                                    <div class="font-bold text-sidebar text-xs" th:text="${rep.razon}">Bajo rendimiento</div>
+                                    <div class="text-[11px] font-medium text-brand-500" th:text="${rep.categoria}">Razones Académicas</div>
                                 </td>
-                                <td class="p-3.5 text-center">
-                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide"
+                                <td class="py-3 px-4 text-center">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide inline-block shadow-2xs"
                                           th:classappend="${rep.estado == 'Aceptado'} ? 'bg-pill-green text-sidebar border border-[#8ce383]' : (${rep.estado == 'Rechazado'} ? 'bg-pill-red text-alert-red border border-red-300' : 'bg-amber-100 text-amber-800 border border-amber-300')"
                                           th:text="${rep.estado}">Pendiente</span>
                                 </td>
-                                <td class="p-3.5 pr-5 text-right">
+                                <td class="py-3 px-4 pr-5 text-right">
                                     <button type="button" 
-                                            th:data-id="${rep.id}"
+                                            th:data-id="${rep.dbId != null ? rep.dbId : rep.id}"
                                             th:data-estudiante="${rep.estudiante}"
                                             th:data-grado="${rep.grado}"
                                             th:data-docente="${rep.docente}"
@@ -226,12 +249,10 @@
                                             th:data-detalles="${rep.detalles}"
                                             th:data-estado="${rep.estado}"
                                             onclick="openModalAtenderReporte(this)"
-                                            class="px-3.5 py-1.5 text-[11px] font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-1.5 ml-auto cursor-pointer shadow-2xs">
-                                        <i data-lucide="user-check" class="size-3.5 stroke-[2.5]"></i>
+                                            class="px-3 py-1.5 text-xs font-bold text-white bg-sidebar hover:brightness-110 rounded-control transition-all inline-flex items-center gap-1.5 ml-auto cursor-pointer shadow-xs">
+                                        <i data-lucide="user-check" class="size-3.5 stroke-2"></i>
                                         <span th:text="${rep.estado == 'Aceptado'} ? 'Ver Citación' : 'Revisar Reporte'">Revisar Reporte</span>
                                     </button>
-                                </td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>

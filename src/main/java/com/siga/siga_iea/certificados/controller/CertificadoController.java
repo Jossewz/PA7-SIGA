@@ -1,8 +1,12 @@
 package com.siga.siga_iea.certificados.controller;
 
+import com.siga.siga_iea.auth.service.CurrentUserContextService;
 import com.siga.siga_iea.certificados.entity.SolicitudCertificado;
 import com.siga.siga_iea.certificados.service.CertificadoService;
+import com.siga.siga_iea.matricula.entity.Matricula;
+import com.siga.siga_iea.matricula.service.MatriculaService;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
+import com.siga.siga_iea.usuarios.entity.Usuario;
 import com.siga.siga_iea.usuarios.service.EstudianteService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,10 +21,28 @@ public class CertificadoController {
 
     private final CertificadoService certificadoService;
     private final EstudianteService estudianteService;
+    private final CurrentUserContextService currentUserContextService;
+    private final MatriculaService matriculaService;
 
-    public CertificadoController(CertificadoService certificadoService, EstudianteService estudianteService) {
+    public CertificadoController(CertificadoService certificadoService,
+                                 EstudianteService estudianteService,
+                                 CurrentUserContextService currentUserContextService,
+                                 MatriculaService matriculaService) {
         this.certificadoService = certificadoService;
         this.estudianteService = estudianteService;
+        this.currentUserContextService = currentUserContextService;
+        this.matriculaService = matriculaService;
+    }
+
+    private Optional<Usuario> getUsuarioLogueado() {
+        return currentUserContextService.getUsuarioAutenticado();
+    }
+
+    private Optional<Estudiante> getEstudianteLogueado() {
+        return getUsuarioLogueado()
+                .map(Usuario::getNumeroDocumento)
+                .filter(doc -> doc != null && !doc.isBlank())
+                .flatMap(estudianteService::buscarPorNumeroDocumento);
     }
 
     @GetMapping("/certificados")
@@ -28,13 +50,41 @@ public class CertificadoController {
         model.addAttribute("title", "Certificados y Constancias – IEACI");
         model.addAttribute("activePage", "certificados");
 
-        List<Estudiante> todosEstudiantes = estudianteService.listarTodos();
-        if (!todosEstudiantes.isEmpty()) {
-            Estudiante primerEstudiante = todosEstudiantes.get(0);
-            model.addAttribute("estudianteNombre", primerEstudiante.getNombreCompleto());
-            model.addAttribute("estudianteGrado", "11° - 01");
-            model.addAttribute("estudianteDocumento", primerEstudiante.getNumeroDocumento());
-            model.addAttribute("estudianteId", primerEstudiante.getId());
+        String userRole = currentUserContextService.getRolAutenticado().name();
+        boolean esAdmin = currentUserContextService.esAdmin();
+        boolean esPersonal = currentUserContextService.esPersonalAdministrativo();
+        Optional<Estudiante> estLogueadoOpt = getEstudianteLogueado();
+        boolean esEstudiante = currentUserContextService.getRolAutenticado().esEstudiante() || estLogueadoOpt.isPresent();
+
+        model.addAttribute("esAdmin", esAdmin);
+        model.addAttribute("esPersonal", esPersonal);
+        model.addAttribute("esEstudiante", esEstudiante);
+        model.addAttribute("userRole", userRole);
+        model.addAttribute("listaEstudiantes", estudianteService.listarTodos());
+
+        Estudiante estudianteSeleccionado = null;
+        List<SolicitudCertificado> solicitudesEstudianteDB;
+
+        if (esEstudiante) {
+            estudianteSeleccionado = estLogueadoOpt.get();
+            solicitudesEstudianteDB = certificadoService.listarPorEstudiante(estudianteSeleccionado.getId());
+        } else {
+            List<Estudiante> todosEstudiantes = estudianteService.listarTodos();
+            if (!todosEstudiantes.isEmpty()) {
+                estudianteSeleccionado = todosEstudiantes.get(0);
+                solicitudesEstudianteDB = certificadoService.listarPorEstudiante(estudianteSeleccionado.getId());
+            } else {
+                solicitudesEstudianteDB = Collections.emptyList();
+            }
+        }
+
+        if (estudianteSeleccionado != null) {
+            model.addAttribute("estudianteNombre", estudianteSeleccionado.getNombreCompleto());
+            Optional<Matricula> matOpt = matriculaService.buscarUltimaMatriculaEstudiante(estudianteSeleccionado.getId());
+            String grado = matOpt.map(m -> m.getGrado() != null ? m.getGrado() : "11°").orElse("11°");
+            model.addAttribute("estudianteGrado", grado);
+            model.addAttribute("estudianteDocumento", estudianteSeleccionado.getNumeroDocumento());
+            model.addAttribute("estudianteId", estudianteSeleccionado.getId());
         } else {
             model.addAttribute("estudianteNombre", "Sin estudiantes registrados");
             model.addAttribute("estudianteGrado", "-");
@@ -42,10 +92,24 @@ public class CertificadoController {
             model.addAttribute("estudianteId", null);
         }
 
-        List<SolicitudCertificado> solicitudesDB = certificadoService.listarTodas();
-        List<Map<String, Object>> solicitudesMock = new ArrayList<>();
+        // Listar solicitudes del estudiante (privadas)
+        List<Map<String, Object>> solicitudesEstudianteMock = mapearSolicitudes(solicitudesEstudianteDB);
+        model.addAttribute("solicitudesEstudianteMock", solicitudesEstudianteMock);
 
-        for (SolicitudCertificado s : solicitudesDB) {
+        // Listar todas las solicitudes para el rol administrativo
+        List<SolicitudCertificado> solicitudesTodasDB = certificadoService.listarTodas();
+        List<Map<String, Object>> solicitudesAdminMock = mapearSolicitudes(solicitudesTodasDB);
+        model.addAttribute("solicitudesAdminMock", solicitudesAdminMock);
+
+        // Compatibilidad
+        model.addAttribute("solicitudesMock", solicitudesEstudianteMock);
+
+        return "certificados/index";
+    }
+
+    private List<Map<String, Object>> mapearSolicitudes(List<SolicitudCertificado> lista) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (SolicitudCertificado s : lista) {
             Map<String, Object> map = new HashMap<>();
             map.put("id", s.getCodigo());
             map.put("estudiante", s.getEstudiante() != null ? s.getEstudiante().getNombreCompleto() : "N/A");
@@ -59,11 +123,9 @@ public class CertificadoController {
             map.put("mensajeRespuesta", s.getMensajeRespuesta());
             map.put("archivoAdjunto", s.getArchivoAdjuntoKey() != null ? "/storage/public/view?key=" + s.getArchivoAdjuntoKey() : null);
             map.put("respondidoPor", s.getRespondidoPor() != null ? s.getRespondidoPor().getNombreCompleto() : "Secretaría Académica");
-            solicitudesMock.add(map);
+            result.add(map);
         }
-
-        model.addAttribute("solicitudesMock", solicitudesMock);
-        return "certificados/index";
+        return result;
     }
 
     @PostMapping("/certificados/solicitar")
@@ -78,11 +140,11 @@ public class CertificadoController {
 
         try {
             if (estudianteId == null) {
-                List<Estudiante> todos = estudianteService.listarTodos();
-                if (!todos.isEmpty()) {
-                    estudianteId = todos.get(0).getId();
+                Optional<Estudiante> estOpt = getEstudianteLogueado();
+                if (estOpt.isPresent()) {
+                    estudianteId = estOpt.get().getId();
                 } else {
-                    throw new IllegalArgumentException("No hay estudiantes registrados para realizar la solicitud.");
+                    throw new IllegalArgumentException("Debe seleccionar un estudiante para generar la solicitud.");
                 }
             }
 

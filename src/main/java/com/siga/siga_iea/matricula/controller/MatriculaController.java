@@ -42,7 +42,6 @@ public class MatriculaController {
         model.addAttribute("parentRelation", session.getAttribute("parentRelation"));
         model.addAttribute("parentId", session.getAttribute("parentId"));
         model.addAttribute("parentPhone", session.getAttribute("parentPhone"));
-        model.addAttribute("parentAddress", session.getAttribute("parentAddress"));
 
         model.addAttribute("sede", session.getAttribute("sede"));
         model.addAttribute("grado", session.getAttribute("grado"));
@@ -60,6 +59,7 @@ public class MatriculaController {
             model.addAttribute("fotoFileUrl", "/storage/public/view?key=" + fotoKey);
         }
 
+        model.addAttribute("activePage", "matricula");
         model.addAttribute("currentStep", 1);
         model.addAttribute("title", "Formulario de Matrícula – IEACI");
         return "matricula/index";

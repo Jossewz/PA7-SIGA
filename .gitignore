@@ -33,6 +33,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-# Tailwind compiled CSS
-/src/main/resources/static/css/output.css

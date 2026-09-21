@@ -92,15 +92,15 @@
                             </div>
                             <div class="grid gap-1">
                                 <span class="text-text-secondary uppercase text-[9px] tracking-wider">Documento de Identidad</span>
-                                <span class="text-text-primary text-xs" th:text="${(staff.tipoDoc ?: 'CC') + ' - ' + (staff.numDoc ?: 'Sin Doc')}">CC - 1088123456</span>
+                                <span class="text-text-primary text-xs" th:text="${(staff.tipoDoc != null ? staff.tipoDoc : 'CC') + ' - ' + (staff.numDoc != null ? staff.numDoc : 'Sin Doc')}">CC - 1088123456</span>
                             </div>
                             <div class="grid gap-1">
                                 <span class="text-text-secondary uppercase text-[9px] tracking-wider">Teléfono de contacto</span>
-                                <span class="text-text-primary text-xs" th:text="${staff.telefono ?: 'N/A'}">300 123 4567</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.telefono != null ? staff.telefono : 'N/A'}">300 123 4567</span>
                             </div>
                             <div class="grid gap-1">
                                 <span class="text-text-secondary uppercase text-[9px] tracking-wider">Dirección residencial</span>
-                                <span class="text-text-primary text-xs" th:text="${staff.direccion ?: 'N/A'}">Calle 45</span>
+                                <span class="text-text-primary text-xs" th:text="${staff.direccion != null ? staff.direccion : 'N/A'}">Calle 45</span>
                             </div>
                         </div>
                     </div>

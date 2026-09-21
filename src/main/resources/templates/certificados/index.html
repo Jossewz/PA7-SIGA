@@ -29,8 +29,8 @@
                 <p class="text-text-secondary text-sm font-semibold">Solicitud, expedición y descarga de constancias académicas y administrativas.</p>
             </div>
 
-            <!-- Selector / Toggle de Rol -->
-            <div class="bg-white rounded-xl border border-[#c4eec0]/60 p-1.5 flex items-center gap-1 shadow-2xs">
+            <!-- Selector / Toggle de Rol (Solo visible para ADMIN) -->
+            <div th:if="${esAdmin}" class="bg-white rounded-xl border border-[#c4eec0]/60 p-1.5 flex items-center gap-1 shadow-2xs">
                 <button type="button" onclick="cambiarRolSimulado('estudiante')" id="btn-rol-estudiante"
                         class="px-3.5 py-2 rounded-lg text-xs font-black transition-all flex items-center gap-2 cursor-pointer bg-sidebar text-white shadow-2xs">
                     <i data-lucide="user" class="size-4 stroke-[2.5]"></i>
@@ -45,7 +45,7 @@
         </div>
 
         <!-- VISTA: ROL ESTUDIANTE -->
-        <div id="vista-estudiante" class="space-y-6">
+        <div id="vista-estudiante" class="space-y-6" th:classappend="${esPersonal} ? 'hidden' : ''">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
                 <!-- Columna Izquierda: Formulario -->
@@ -62,12 +62,23 @@
                         </div>
 
                         <form id="form-solicitar-certificado" th:action="@{/certificados/solicitar}" method="post" class="space-y-4">
+                            <input th:if="${esEstudiante}" type="hidden" name="estudianteId" th:value="${estudianteId}" />
+                            <div th:if="${!esEstudiante}" class="flex flex-col">
+                                <label for="select-estudiante-id" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1">
+                                    Estudiante Solicitante <span class="text-alert-red">*</span>
+                                </label>
+                                <select id="select-estudiante-id" name="estudianteId" required
+                                        class="w-full p-3 bg-white border border-[#c4eec0] rounded-lg text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                                    <option value="" disabled selected>-- Seleccione el estudiante --</option>
+                                    <option th:each="est : ${listaEstudiantes}" th:value="${est.id}" th:text="${est.nombreCompleto + ' (Doc: ' + est.numeroDocumento + ')'}"></option>
+                                </select>
+                            </div>
                             <div class="flex flex-col">
                                 <label for="select-tipo-cert" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1">
                                     Tipo de Certificado o Constancia <span class="text-alert-red">*</span>
                                 </label>
                                 <select id="select-tipo-cert" name="tipo" required onchange="actualizarDescripcionCert(this.value)"
-                                        class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                                        class="w-full p-3 bg-white border border-[#c4eec0] rounded-lg text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
                                     <option value="" disabled selected>-- Seleccione un certificado --</option>
                                     <optgroup label="Certificados Académicos y de Notas">
                                         <option value="Certificado de estudios">Certificado de estudios</option>
@@ -82,7 +93,7 @@
                                 </select>
                             </div>
 
-                            <div id="caja-desc-cert" class="p-3.5 rounded-xl bg-[#f7fcf6] border border-[#c4eec0]/60 text-text-secondary text-[11px] font-semibold space-y-1">
+                            <div id="caja-desc-cert" class="p-3.5 rounded-lg bg-[#f7fcf6] border border-[#c4eec0]/60 text-text-secondary text-[11px] font-semibold space-y-1">
                                 <div class="flex items-center gap-1.5 font-bold text-sidebar">
                                     <i data-lucide="info" class="size-4 stroke-[2.5]"></i>
                                     <span id="desc-title">Seleccione un certificado</span>
@@ -93,21 +104,21 @@
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label for="c-ano" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Año Lectivo</label>
-                                    <input type="number" id="c-ano" name="anoLectivo" value="2026" required class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                                    <input type="number" id="c-ano" name="anoLectivo" value="2026" required class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-lg text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
                                 </div>
                                 <div>
                                     <label for="c-grado-ref" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Grado Referencia</label>
-                                    <input type="text" id="c-grado-ref" name="gradoReferencia" value="11°" required class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-xl text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
+                                    <input type="text" id="c-grado-ref" name="gradoReferencia" th:value="${estudianteGrado}" value="11°" required class="w-full p-2.5 bg-white border border-[#c4eec0] rounded-lg text-xs font-bold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none">
                                 </div>
                             </div>
 
                             <div>
                                 <label for="c-motivo" class="text-text-primary text-[10px] font-black tracking-wider uppercase mb-1 block">Motivo o Entidad Destino</label>
                                 <textarea id="c-motivo" name="motivo" rows="3" placeholder="Ej: Trámite de subsidio en Caja de Compensación..." required
-                                          class="w-full p-3 bg-white border border-[#c4eec0] rounded-xl text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none resize-none"></textarea>
+                                          class="w-full p-3 bg-white border border-[#c4eec0] rounded-lg text-xs font-semibold text-text-primary focus:ring-1 focus:ring-sidebar focus:outline-none resize-none"></textarea>
                             </div>
 
-                            <button type="submit" class="w-full py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-xl transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer">
+                            <button type="submit" class="w-full py-3 text-xs font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer">
                                 <i data-lucide="send" class="size-4 stroke-[2.5]"></i>
                                 <span>Enviar Solicitud a Administración</span>
                             </button>
@@ -116,41 +127,46 @@
                 </div>
 
                 <!-- Columna Derecha: Mis Solicitudes -->
-                <div class="lg:col-span-7 bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden flex flex-col">
-                    <div class="p-4 border-b border-[#c4eec0]/30 bg-[#f7fcf6] flex justify-between items-center">
-                        <div class="flex items-center gap-2 text-sidebar font-black text-xs uppercase tracking-wider">
-                            <i data-lucide="history" class="size-4 stroke-[2.5]"></i>
-                            <span>Historial de Mis Solicitudes</span>
+                <div class="lg:col-span-7 rounded-surface border border-border bg-white shadow-card transition relative flex flex-col">
+                    <div class="flex flex-col gap-3 px-6 pt-5 pb-4 sm:flex-row sm:items-center sm:justify-between relative z-30">
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <h2 class="text-base font-bold uppercase tracking-wider text-brand-900">Mis Solicitudes</h2>
+                            <span class="inline-flex items-center rounded-full bg-surface-sunken border border-border px-2.5 py-0.5 text-xs font-bold uppercase text-brand-700 shadow-2xs">
+                                <span th:text="${(solicitudesEstudianteMock != null ? #lists.size(solicitudesEstudianteMock) : 0) + ' TRÁMITES'}">0 TRÁMITES</span>
+                            </span>
                         </div>
-                        <span class="text-[11px] font-bold text-text-secondary">Estudiante: Mateo Álvarez</span>
+                        <span class="text-xs font-bold text-brand-500" th:text="${esEstudiante ? 'Estudiante: ' + estudianteNombre : 'Vista previa de solicitudes'}">Estudiante: Mateo Álvarez</span>
                     </div>
 
-                    <div class="overflow-x-auto flex-1">
-                        <table class="w-full text-left border-collapse text-[12px]">
-                            <thead>
-                                <tr class="bg-white border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
-                                    <th class="p-3.5 pl-5">Código</th>
-                                    <th class="p-3.5">Certificado</th>
-                                    <th class="p-3.5">Fecha</th>
-                                    <th class="p-3.5 text-center">Estado</th>
-                                    <th class="p-3.5 pr-5 text-right">Respuesta / Documento</th>
+                    <div class="w-full border-t border-border relative rounded-b-surface flex-1 overflow-visible">
+                        <table class="tabla-siga w-full text-left text-sm bg-surface">
+                            <thead class="sticky top-0 z-20 border-b border-border-strong bg-surface-sunken text-[11px] font-bold uppercase tracking-wider text-brand-700 [&_th]:bg-surface-sunken">
+                                <tr>
+                                    <th class="py-3 px-4 pl-5 w-28">Código</th>
+                                    <th class="py-3 px-4">Certificado</th>
+                                    <th class="py-3 px-4 text-center w-28">Fecha</th>
+                                    <th class="py-3 px-4 text-center w-28">Estado</th>
+                                    <th class="py-3 px-4 pr-5 text-right w-36">Documento</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]" id="tbody-solicitudes-estudiante">
-                                <th:block th:each="sol : ${solicitudesMock}">
-                                    <tr class="hover:bg-[#fcfdfb] transition-colors">
-                                        <td class="p-3.5 pl-5 font-black text-sidebar text-[11px]" th:text="${sol.id}">CERT-2026-001</td>
-                                        <td class="p-3.5">
-                                            <div class="font-black text-text-primary text-[12px]" th:text="${sol.tipo}">Constancia de matrícula</div>
-                                            <div class="text-[10px] font-semibold text-text-secondary" th:text="${sol.motivo}">Trámite EPS</div>
+                            <tbody class="text-brand-900" id="tbody-solicitudes-estudiante">
+                                <th:block th:if="${solicitudesEstudianteMock == null || #lists.isEmpty(solicitudesEstudianteMock)}">
+                                    <tr th:replace="~{components/tables/empty-state :: emptyState(colspan=5, title='No tienes solicitudes registradas', description='Usa el formulario lateral para emitir una nueva constancia o certificado.', resetUrl='')}"></tr>
+                                </th:block>
+                                <th:block th:each="sol : ${solicitudesEstudianteMock}">
+                                    <tr class="transition-colors">
+                                        <td class="py-3 px-4 pl-5 font-black text-sidebar text-xs" th:text="${sol.id}">CERT-2026-001</td>
+                                        <td class="py-3 px-4">
+                                            <div class="font-bold text-brand-900 text-xs" th:text="${sol.tipo}">Constancia de matrícula</div>
+                                            <div class="text-[11px] font-medium text-brand-500" th:text="${sol.motivo}">Trámite EPS</div>
                                         </td>
-                                        <td class="p-3.5 font-semibold text-text-secondary" th:text="${sol.fecha}">2026-07-28</td>
-                                        <td class="p-3.5 text-center">
-                                            <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide"
+                                        <td class="py-3 px-4 text-center font-semibold text-brand-500 text-xs" th:text="${sol.fecha}">2026-07-28</td>
+                                        <td class="py-3 px-4 text-center">
+                                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide inline-block shadow-2xs"
                                                   th:classappend="${sol.estado == 'Resuelto'} ? 'bg-pill-green text-sidebar border border-[#8ce383]' : 'bg-amber-100 text-amber-800 border border-amber-300'"
                                                   th:text="${sol.estado}">Resuelto</span>
                                         </td>
-                                        <td class="p-3.5 pr-5 text-right">
+                                        <td class="py-3 px-4 pr-5 text-right">
                                             <div th:if="${sol.estado == 'Resuelto'}" class="flex justify-end gap-1.5">
                                                 <button type="button" 
                                                         th:data-id="${sol.id}"
@@ -158,12 +174,12 @@
                                                         th:data-mensaje="${sol.mensajeRespuesta}"
                                                         th:data-archivo="${sol.archivoAdjunto}"
                                                         onclick="openModalVerRespuesta(this)"
-                                                        class="px-3 py-1.5 bg-[#eafbe4] text-sidebar border border-[#c4eec0] hover:bg-[#d8f5ce] rounded-lg text-[10px] font-black transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
-                                                    <i data-lucide="download" class="size-3.5 stroke-[2.5]"></i>
-                                                    <span>Ver y Descargar</span>
+                                                        class="px-2.5 py-1 bg-accent-50 text-sidebar border border-accent-200 hover:bg-accent-100 rounded-control text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                                                    <i data-lucide="download" class="size-3.5 stroke-2"></i>
+                                                    <span>Descargar</span>
                                                 </button>
                                             </div>
-                                            <span th:if="${sol.estado != 'Resuelto'}" class="text-[11px] font-bold text-text-secondary italic">En proceso...</span>
+                                            <span th:if="${sol.estado != 'Resuelto'}" class="text-xs font-medium text-brand-400 italic">En proceso...</span>
                                         </td>
                                     </tr>
                                 </th:block>
@@ -175,17 +191,19 @@
         </div>
 
         <!-- VISTA: ROL PERSONAL ADMINISTRATIVO -->
-        <div id="vista-admin" class="hidden space-y-6">
-            <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft overflow-hidden">
-                <div class="p-4 border-b border-[#c4eec0]/30 bg-[#f7fcf6] flex justify-between items-center flex-wrap gap-3">
-                    <div class="flex items-center gap-2 text-sidebar font-black text-xs uppercase tracking-wider">
-                        <i data-lucide="inbox" class="size-4 stroke-[2.5]"></i>
-                        <span>Bandeja de Solicitudes de Certificados Recibidas</span>
+        <div id="vista-admin" class="space-y-6" th:classappend="${esPersonal} ? '' : 'hidden'">
+            <div class="rounded-surface border border-border bg-white shadow-card transition relative">
+                <div class="flex flex-col gap-4 px-6 pt-5 pb-4 sm:flex-row sm:items-center sm:justify-between relative z-30">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <h2 class="text-base font-bold uppercase tracking-wider text-brand-900">Bandeja de Solicitudes</h2>
+                        <span class="inline-flex items-center rounded-full bg-surface-sunken border border-border px-2.5 py-0.5 text-xs font-bold uppercase text-brand-700 shadow-2xs">
+                            <span th:text="${(solicitudesAdminMock != null ? #lists.size(solicitudesAdminMock) : 0) + ' ENTRADAS'}">0 ENTRADAS</span>
+                        </span>
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <span class="text-[11px] font-bold text-text-secondary">Filtrar:</span>
-                        <select onchange="filtrarTablaAdmin(this.value)" class="p-1.5 bg-white border border-[#c4eec0] rounded-lg text-xs font-bold text-sidebar focus:outline-none">
+                        <label class="text-xs font-bold text-brand-600">Filtrar:</label>
+                        <select onchange="filtrarTablaAdmin(this.value)" class="rounded-control border border-border bg-surface-muted py-1.5 px-3 text-xs font-bold text-brand-800 focus:outline-none focus:ring-2 focus:ring-accent-100 transition shadow-2xs">
                             <option value="todos">Todas las solicitudes</option>
                             <option value="Pendiente">Pendientes</option>
                             <option value="Resuelto">Resueltas</option>
@@ -193,36 +211,39 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-[12px]">
-                        <thead>
-                            <tr class="bg-white border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
-                                <th class="p-3.5 pl-5">Código</th>
-                                <th class="p-3.5">Estudiante</th>
-                                <th class="p-3.5">Certificado Solicitado</th>
-                                <th class="p-3.5">Fecha</th>
-                                <th class="p-3.5 text-center">Estado</th>
-                                <th class="p-3.5 pr-5 text-right">Acción</th>
+                <div class="w-full border-t border-border relative rounded-b-surface overflow-visible">
+                    <table class="tabla-siga w-full text-left text-sm bg-surface">
+                        <thead class="sticky top-0 z-20 border-b border-border-strong bg-surface-sunken text-[11px] font-bold uppercase tracking-wider text-brand-700 [&_th]:bg-surface-sunken">
+                            <tr>
+                                <th class="py-3 px-4 pl-5 w-28">Código</th>
+                                <th class="py-3 px-4">Estudiante</th>
+                                <th class="py-3 px-4">Certificado Solicitado</th>
+                                <th class="py-3 px-4 text-center w-28">Fecha</th>
+                                <th class="py-3 px-4 text-center w-28">Estado</th>
+                                <th class="py-3 px-4 pr-5 text-right w-36">Acción</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]" id="tbody-admin-solicitudes">
-                            <tr th:each="sol : ${solicitudesMock}" class="hover:bg-[#fcfdfb] transition-colors row-solicitud-admin" th:data-estado="${sol.estado}">
-                                <td class="p-3.5 pl-5 font-black text-sidebar text-[11px]" th:text="${sol.id}">CERT-2026-001</td>
-                                <td class="p-3.5">
-                                    <div class="font-black text-text-primary text-[12px]" th:text="${sol.estudiante}">Mateo Álvarez Restrepo</div>
-                                    <div class="text-[10px] font-semibold text-text-secondary" th:text="${'Doc: ' + sol.documento + ' • ' + sol.grado}">Doc: 1098432101 • 11° - 01</div>
+                        <tbody class="text-brand-900" id="tbody-admin-solicitudes">
+                            <th:block th:if="${solicitudesAdminMock == null || #lists.isEmpty(solicitudesAdminMock)}">
+                                <tr th:replace="~{components/tables/empty-state :: emptyState(colspan=6, title='No hay solicitudes pendientes', description='La bandeja de solicitudes institucionales se encuentra al día.', resetUrl='')}"></tr>
+                            </th:block>
+                            <tr th:each="sol : ${solicitudesAdminMock}" class="transition-colors row-solicitud-admin" th:data-estado="${sol.estado}">
+                                <td class="py-3 px-4 pl-5 font-black text-sidebar text-xs" th:text="${sol.id}">CERT-2026-001</td>
+                                <td class="py-3 px-4">
+                                    <div class="font-bold text-brand-900 text-xs" th:text="${sol.estudiante}">Mateo Álvarez Restrepo</div>
+                                    <div class="text-[11px] font-medium text-brand-500" th:text="${'Doc: ' + sol.documento + ' • ' + sol.grado}">Doc: 1098432101 • 11° - 01</div>
                                 </td>
-                                <td class="p-3.5">
-                                    <div class="font-bold text-sidebar text-[12px]" th:text="${sol.tipo}">Constancia de matrícula</div>
-                                    <div class="text-[10px] font-semibold text-text-secondary" th:text="${sol.motivo}">Trámite EPS</div>
+                                <td class="py-3 px-4">
+                                    <div class="font-bold text-sidebar text-xs" th:text="${sol.tipo}">Constancia de matrícula</div>
+                                    <div class="text-[11px] font-medium text-brand-500" th:text="${sol.motivo}">Trámite EPS</div>
                                 </td>
-                                <td class="p-3.5 font-semibold text-text-secondary" th:text="${sol.fecha}">2026-07-31</td>
-                                <td class="p-3.5 text-center">
-                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide"
+                                <td class="py-3 px-4 text-center font-semibold text-brand-500 text-xs" th:text="${sol.fecha}">2026-07-31</td>
+                                <td class="py-3 px-4 text-center">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide inline-block shadow-2xs"
                                           th:classappend="${sol.estado == 'Resuelto'} ? 'bg-pill-green text-sidebar border border-[#8ce383]' : 'bg-amber-100 text-amber-800 border border-amber-300'"
                                           th:text="${sol.estado}">Pendiente</span>
                                 </td>
-                                <td class="p-3.5 pr-5 text-right">
+                                <td class="py-3 px-4 pr-5 text-right">
                                     <button type="button" 
                                             th:data-id="${sol.id}"
                                             th:data-estudiante="${sol.estudiante}"
@@ -230,8 +251,8 @@
                                             th:data-motivo="${sol.motivo}"
                                             th:data-estado="${sol.estado}"
                                             onclick="openModalResponder(this)"
-                                            class="px-3.5 py-1.5 text-[11px] font-black text-white bg-sidebar hover:brightness-97 rounded-lg transition-all flex items-center gap-1.5 ml-auto cursor-pointer shadow-2xs">
-                                        <i data-lucide="message-square-plus" class="size-3.5 stroke-[2.5]"></i>
+                                            class="px-3 py-1.5 text-xs font-bold text-white bg-sidebar hover:brightness-110 rounded-control transition-all inline-flex items-center gap-1.5 ml-auto cursor-pointer shadow-xs">
+                                        <i data-lucide="message-square-plus" class="size-3.5 stroke-2"></i>
                                         <span th:text="${sol.estado == 'Resuelto'} ? 'Ver / Modificar' : 'Atender Solicitud'">Atender Solicitud</span>
                                     </button>
                                 </td>

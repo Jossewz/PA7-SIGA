@@ -130,6 +130,36 @@ public class ClaseService {
         return materias;
     }
 
+    public List<Materia> listarMateriasActivas() {
+        listarTodasMaterias();
+        return materiaRepository.findByEstadoOrderByNombreAsc("Activo");
+    }
+
+    public List<Materia> listarTodasMateriasOrdenadas() {
+        listarTodasMaterias();
+        return materiaRepository.findAllByOrderByNombreAsc();
+    }
+
+    public Optional<Materia> buscarMateriaPorId(UUID id) {
+        return materiaRepository.findById(id);
+    }
+
+    @Transactional
+    public Materia guardarMateria(Materia materia) {
+        return materiaRepository.save(materia);
+    }
+
+    @Transactional
+    public Optional<Materia> toggleEstadoMateria(UUID id) {
+        Optional<Materia> matOpt = materiaRepository.findById(id);
+        matOpt.ifPresent(m -> {
+            String nuevoEstado = "Activo".equalsIgnoreCase(m.getEstado()) ? "Inactivo" : "Activo";
+            m.setEstado(nuevoEstado);
+            materiaRepository.save(m);
+        });
+        return matOpt;
+    }
+
     public List<CursoEstudiante> listarEstudiantesDeCurso(UUID cursoId) {
         return cursoEstudianteRepository.findByCursoId(cursoId);
     }

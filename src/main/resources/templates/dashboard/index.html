@@ -1,84 +1,68 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/base :: html(~{::content})}">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title th:text="${title ?: 'Dashboard'}">Dashboard</title>
-
-    <!-- Tailwind CSS -->
-    <link rel="stylesheet" th:href="@{/css/output.css}">
-
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- Chart.js CDN for modern analytics graphs -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title th:text="${title ?: 'Dashboard – IEACI'}">Dashboard</title>
 </head>
 
 <body>
-<div class="flex min-h-screen bg-page-bg max-md:flex-col">
 
-    <!-- BARRA LATERAL (SIDEBAR) -->
-    <aside th:replace="~{layouts/sidebar :: sidebar('dashboard', 'Soporte Tecnico', '/soporte')}"></aside>
+<th:block th:fragment="content">
+    <!-- Chart.js CDN for modern analytics graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <main class="flex-1 min-w-0 flex flex-col">
+    <div class="space-y-6">
+        <!-- Banner Alerta Sin Acceso -->
+        <div th:if="${param.sinAcceso}" class="p-4 rounded-xl bg-amber-50 border border-amber-300 text-xs font-bold text-amber-900 flex items-center gap-3 shadow-xs">
+            <i data-lucide="shield-alert" class="size-5 text-amber-600 shrink-0"></i>
+            <span>Acceso Restringido: No cuentas con permisos asignados para acceder al módulo <strong th:text="${param.sinAcceso}"></strong>. Contacta a un administrador institucional si requieres habilitar este acceso.</span>
+        </div>
 
-        <!-- BARRA DE NAVEGACIÓN SUPERIOR (NAVBAR) -->
-        <header th:replace="~{layouts/navbar :: navbar}"></header>
+        <!-- CABECERA: BIENVENIDA -->
+        <div th:replace="~{components/dashboard/welcome-panel :: welcomePanel('Admin', 'Resumen analítico de la gestión institucional de hoy.')}"></div>
 
-        <!-- CUERPO DEL DASHBOARD -->
-        <section class="flex-1 pt-5 px-8 pb-8 max-md:p-5 space-y-6">
-
-            <!-- CABECERA: BIENVENIDA -->
-            <div th:replace="~{components/dashboard/welcome-panel :: welcomePanel('Admin', 'Resumen analítico de la gestión institucional de hoy.')}"></div>
-
-            <!-- FILA 1: KPIs GENERALES -->
-            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" aria-label="Indicadores Generales">
-                <div th:replace="~{components/dashboard/stat-card :: statCard('users', 'Estudiantes Activos', ${stats.estudiantesActivos}, 'En BD', 'success')}"></div>
-                <div th:replace="~{components/dashboard/stat-card :: statCard('graduation-cap', 'Docentes Activos', ${stats.docentesActivos}, 'En BD', 'success')}"></div>
-                <div th:replace="~{components/dashboard/stat-card :: statCard('clipboard-check', 'Asistencia Hoy', ${stats.asistenciaHoy}, 'Registrada', 'success')}"></div>
-                <div th:replace="~{components/dashboard/stat-card :: statCard('alert-triangle', 'Alertas del Sistema', ${stats.alertasSistema}, 'Pendientes', ${stats.alertasSistema > 0 ? 'warning' : 'success'})}"></div>
-            </section>
-
-            <!-- FILA 2: INDICADORES DE DESEMPEÑO Y ANALÍTICA ESTRATÉGICA -->
-            <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div th:replace="~{components/dashboard/performance-card :: performanceCard}"></div>
-                <div th:replace="~{components/dashboard/strategic-analytics-card :: strategicAnalyticsCard}"></div>
-            </section>
-
-            <!-- FILA 3: HISTÓRICO DE ASISTENCIA, DISTRIBUCIÓN Y EVENTOS -->
-            <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                <!-- Gráficos (col-span 2) -->
-                <div class="xl:col-span-2">
-                    <div th:replace="~{components/dashboard/charts-card :: chartsCard}"></div>
-                </div>
-                <!-- Próximos Eventos (col-span 1) -->
-                <div class="xl:col-span-1">
-                    <div th:replace="~{components/dashboard/events-card-list :: eventsCardList}"></div>
-                </div>
-            </section>
-
-            <!-- FILA 4: ÚLTIMOS MOVIMIENTOS (TIMELINE ANCHO COMPLETO) -->
-            <section class="w-full">
-                <div th:replace="~{components/dashboard/activity-timeline-card :: activityTimelineCard}"></div>
-            </section>
-
-            <!-- FILA 5: ESTUDIANTES EN RIESGO, ESTADO Y ALERTAS INSTITUCIONALES -->
-            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div th:replace="~{components/dashboard/attention-list-card :: attentionListCard}"></div>
-                <div th:replace="~{components/dashboard/institution-health-card :: institutionHealthCard}"></div>
-                <div th:replace="~{components/dashboard/alerts-needs-attention-card :: alertsNeedsAttentionCard}"></div>
-            </section>
-
+        <!-- FILA 1: KPIs GENERALES -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" aria-label="Indicadores Generales">
+            <div th:replace="~{components/dashboard/stat-card :: statCard('users', 'Estudiantes Activos', ${stats.estudiantesActivos}, null, 'success')}"></div>
+            <div th:replace="~{components/dashboard/stat-card :: statCard('graduation-cap', 'Docentes Activos', ${stats.docentesActivos}, null, 'success')}"></div>
+            <div th:replace="~{components/dashboard/stat-card :: statCard('clipboard-check', 'Asistencia Hoy', ${stats.asistenciaHoy}, 'Registrada', 'success')}"></div>
+            <div th:replace="~{components/dashboard/stat-card :: statCard('alert-triangle', 'Alertas del Sistema', ${stats.alertasSistema}, 'Pendientes', ${stats.alertasSistema > 0 ? 'warning' : 'success'})}"></div>
         </section>
-    </main>
 
-</div>
+        <!-- FILA 2: INDICADORES DE DESEMPEÑO Y ANALÍTICA ESTRATÉGICA -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div th:replace="~{components/dashboard/performance-card :: performanceCard}"></div>
+            <div th:replace="~{components/dashboard/strategic-analytics-card :: strategicAnalyticsCard}"></div>
+        </section>
 
-<!-- Dashboard Charts (archivo JS externo) -->
-<script th:src="@{/js/dashboard-charts.js}"></script>
+        <!-- FILA 3: HISTÓRICO DE ASISTENCIA, DISTRIBUCIÓN Y EVENTOS -->
+        <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <!-- Gráficos (col-span 2) -->
+            <div class="xl:col-span-2">
+                <div th:replace="~{components/dashboard/charts-card :: chartsCard}"></div>
+            </div>
+            <!-- Próximos Eventos (col-span 1) -->
+            <div class="xl:col-span-1">
+                <div th:replace="~{components/dashboard/events-card-list :: eventsCardList}"></div>
+            </div>
+        </section>
+
+        <!-- FILA 4: ÚLTIMOS MOVIMIENTOS (TIMELINE ANCHO COMPLETO) -->
+        <section class="w-full">
+            <div th:replace="~{components/dashboard/activity-timeline-card :: activityTimelineCard}"></div>
+        </section>
+
+        <!-- FILA 5: ESTUDIANTES EN RIESGO, ESTADO Y ALERTAS INSTITUCIONALES -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div th:replace="~{components/dashboard/attention-list-card :: attentionListCard}"></div>
+            <div th:replace="~{components/dashboard/institution-health-card :: institutionHealthCard}"></div>
+            <div th:replace="~{components/dashboard/alerts-needs-attention-card :: alertsNeedsAttentionCard}"></div>
+        </section>
+    </div>
+
+    <!-- Dashboard Charts (archivo JS externo) -->
+    <script th:src="@{/js/dashboard-charts.js}"></script>
+</th:block>
+
 </body>
 </html>

@@ -8,7 +8,8 @@
                   th:classappend="${tone == 'warning'} ? 'bg-icon-warning text-[#c93831]' : 'bg-icon-green text-sidebar'">
                 <i th:attr="data-lucide=${icon}" class="size-5 shrink-0 stroke-[2.2]"></i>
             </span>
-            <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide leading-none"
+            <span th:if="${meta != null and !#strings.isEmpty(meta)}"
+                  class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide leading-none"
                   th:classappend="${tone == 'warning'} ? 'bg-pill-red text-alert-red' : 'bg-pill-green text-sidebar'"
                   th:text="${meta}">+4%</span>
         </div>

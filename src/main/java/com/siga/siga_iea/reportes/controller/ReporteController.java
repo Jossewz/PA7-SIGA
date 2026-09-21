@@ -1,17 +1,15 @@
 package com.siga.siga_iea.reportes.controller;
 
+import com.siga.siga_iea.auth.service.CurrentUserContextService;
 import com.siga.siga_iea.reportes.entity.Reporte;
 import com.siga.siga_iea.reportes.service.ReportesService;
 import com.siga.siga_iea.usuarios.entity.Docente;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
 import com.siga.siga_iea.usuarios.entity.PersonalAdministrativo;
 import com.siga.siga_iea.usuarios.entity.Usuario;
-import com.siga.siga_iea.usuarios.repository.UsuarioRepository;
 import com.siga.siga_iea.usuarios.service.EstudianteService;
 import com.siga.siga_iea.usuarios.service.PersonalService;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -26,24 +24,20 @@ public class ReporteController {
     private final ReportesService reportesService;
     private final EstudianteService estudianteService;
     private final PersonalService personalService;
-    private final UsuarioRepository usuarioRepository;
+    private final CurrentUserContextService currentUserContextService;
 
     public ReporteController(ReportesService reportesService,
                              EstudianteService estudianteService,
                              PersonalService personalService,
-                             UsuarioRepository usuarioRepository) {
+                             CurrentUserContextService currentUserContextService) {
         this.reportesService = reportesService;
         this.estudianteService = estudianteService;
         this.personalService = personalService;
-        this.usuarioRepository = usuarioRepository;
+        this.currentUserContextService = currentUserContextService;
     }
 
     private Optional<Usuario> getUsuarioLogueado() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
-            return usuarioRepository.findByEmail(auth.getName());
-        }
-        return Optional.empty();
+        return currentUserContextService.getUsuarioAutenticado();
     }
 
     private Optional<Estudiante> getEstudianteLogueado() {
@@ -72,14 +66,13 @@ public class ReporteController {
         model.addAttribute("title", "Reportes de Estudiantes – IEACI");
         model.addAttribute("activePage", "reportes");
 
-        Optional<Usuario> userOpt = getUsuarioLogueado();
-        String userRole = userOpt.map(u -> com.siga.siga_iea.auth.security.CustomUserDetailsService.normalizeRole(u.getRol())).orElse("ESTUDIANTE");
+        String userRole = currentUserContextService.getRolAutenticado().name();
 
-        boolean esAdmin = "ADMIN".equals(userRole);
-        boolean esPersonal = "PERSONAL_ADMINISTRATIVO".equals(userRole);
-        boolean esDocente = "DOCENTE".equals(userRole);
+        boolean esAdmin = currentUserContextService.esAdmin();
+        boolean esPersonal = currentUserContextService.esPersonalAdministrativo();
+        boolean esDocente = currentUserContextService.esDocente();
         Optional<Estudiante> estLogueadoOpt = getEstudianteLogueado();
-        boolean esEstudiante = "ESTUDIANTE".equals(userRole) || estLogueadoOpt.isPresent();
+        boolean esEstudiante = currentUserContextService.getRolAutenticado().esEstudiante() || estLogueadoOpt.isPresent();
 
         model.addAttribute("esAdmin", esAdmin);
         model.addAttribute("esPersonal", esPersonal);

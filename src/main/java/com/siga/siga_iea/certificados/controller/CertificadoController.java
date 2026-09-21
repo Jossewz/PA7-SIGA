@@ -1,15 +1,13 @@
 package com.siga.siga_iea.certificados.controller;
 
+import com.siga.siga_iea.auth.service.CurrentUserContextService;
 import com.siga.siga_iea.certificados.entity.SolicitudCertificado;
 import com.siga.siga_iea.certificados.service.CertificadoService;
 import com.siga.siga_iea.matricula.entity.Matricula;
-import com.siga.siga_iea.matricula.repository.MatriculaRepository;
+import com.siga.siga_iea.matricula.service.MatriculaService;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
 import com.siga.siga_iea.usuarios.entity.Usuario;
-import com.siga.siga_iea.usuarios.repository.UsuarioRepository;
 import com.siga.siga_iea.usuarios.service.EstudianteService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,25 +21,21 @@ public class CertificadoController {
 
     private final CertificadoService certificadoService;
     private final EstudianteService estudianteService;
-    private final UsuarioRepository usuarioRepository;
-    private final MatriculaRepository matriculaRepository;
+    private final CurrentUserContextService currentUserContextService;
+    private final MatriculaService matriculaService;
 
     public CertificadoController(CertificadoService certificadoService,
                                  EstudianteService estudianteService,
-                                 UsuarioRepository usuarioRepository,
-                                 MatriculaRepository matriculaRepository) {
+                                 CurrentUserContextService currentUserContextService,
+                                 MatriculaService matriculaService) {
         this.certificadoService = certificadoService;
         this.estudianteService = estudianteService;
-        this.usuarioRepository = usuarioRepository;
-        this.matriculaRepository = matriculaRepository;
+        this.currentUserContextService = currentUserContextService;
+        this.matriculaService = matriculaService;
     }
 
     private Optional<Usuario> getUsuarioLogueado() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
-            return usuarioRepository.findByEmail(auth.getName());
-        }
-        return Optional.empty();
+        return currentUserContextService.getUsuarioAutenticado();
     }
 
     private Optional<Estudiante> getEstudianteLogueado() {
@@ -56,13 +50,11 @@ public class CertificadoController {
         model.addAttribute("title", "Certificados y Constancias – IEACI");
         model.addAttribute("activePage", "certificados");
 
-        Optional<Usuario> userOpt = getUsuarioLogueado();
-        String userRole = userOpt.map(u -> com.siga.siga_iea.auth.security.CustomUserDetailsService.normalizeRole(u.getRol())).orElse("ESTUDIANTE");
-
-        boolean esAdmin = "ADMIN".equals(userRole);
-        boolean esPersonal = "PERSONAL_ADMINISTRATIVO".equals(userRole);
+        String userRole = currentUserContextService.getRolAutenticado().name();
+        boolean esAdmin = currentUserContextService.esAdmin();
+        boolean esPersonal = currentUserContextService.esPersonalAdministrativo();
         Optional<Estudiante> estLogueadoOpt = getEstudianteLogueado();
-        boolean esEstudiante = "ESTUDIANTE".equals(userRole) || estLogueadoOpt.isPresent();
+        boolean esEstudiante = currentUserContextService.getRolAutenticado().esEstudiante() || estLogueadoOpt.isPresent();
 
         model.addAttribute("esAdmin", esAdmin);
         model.addAttribute("esPersonal", esPersonal);
@@ -88,7 +80,7 @@ public class CertificadoController {
 
         if (estudianteSeleccionado != null) {
             model.addAttribute("estudianteNombre", estudianteSeleccionado.getNombreCompleto());
-            Optional<Matricula> matOpt = matriculaRepository.findTopByEstudianteIdOrderByFechaMatriculaDesc(estudianteSeleccionado.getId());
+            Optional<Matricula> matOpt = matriculaService.buscarUltimaMatriculaEstudiante(estudianteSeleccionado.getId());
             String grado = matOpt.map(m -> m.getGrado() != null ? m.getGrado() : "11°").orElse("11°");
             model.addAttribute("estudianteGrado", grado);
             model.addAttribute("estudianteDocumento", estudianteSeleccionado.getNumeroDocumento());

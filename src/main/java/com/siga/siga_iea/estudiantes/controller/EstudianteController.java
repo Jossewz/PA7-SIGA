@@ -1,7 +1,7 @@
 package com.siga.siga_iea.estudiantes.controller;
 
 import com.siga.siga_iea.matricula.entity.Matricula;
-import com.siga.siga_iea.matricula.repository.MatriculaRepository;
+import com.siga.siga_iea.matricula.service.MatriculaService;
 import com.siga.siga_iea.storage.entity.Documento;
 import com.siga.siga_iea.storage.entity.TipoDocumento;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
@@ -19,14 +19,14 @@ import java.util.*;
 public class EstudianteController {
 
     private final EstudianteService estudianteService;
-    private final MatriculaRepository matriculaRepository;
+    private final MatriculaService matriculaService;
     private final UsuarioService usuarioService;
 
     public EstudianteController(EstudianteService estudianteService,
-                                MatriculaRepository matriculaRepository,
+                                MatriculaService matriculaService,
                                 UsuarioService usuarioService) {
         this.estudianteService = estudianteService;
-        this.matriculaRepository = matriculaRepository;
+        this.matriculaService = matriculaService;
         this.usuarioService = usuarioService;
     }
 
@@ -35,12 +35,14 @@ public class EstudianteController {
     public String index(
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "estado", required = false) String estado,
+            @RequestParam(value = "nivel", required = false) String nivel,
             Model model) {
 
         model.addAttribute("title", "Gestión de Estudiantes – IEACI");
         model.addAttribute("activePage", "estudiantes");
         model.addAttribute("search", search);
         model.addAttribute("estado", estado);
+        model.addAttribute("nivel", nivel);
 
         List<Estudiante> dbEstudiantes = estudianteService.buscar(search, estado);
 
@@ -48,6 +50,22 @@ public class EstudianteController {
 
         if (!dbEstudiantes.isEmpty()) {
             for (Estudiante e : dbEstudiantes) {
+                Optional<Matricula> matOpt = matriculaService.buscarUltimaMatriculaEstudiante(e.getId());
+                String grad = matOpt.map(m -> m.getGrado() != null ? m.getGrado() : "11°").orElse("11°");
+
+                if (nivel != null && !nivel.isBlank()) {
+                    boolean isPrimaria = grad.startsWith("1") || grad.startsWith("2") || grad.startsWith("3")
+                            || grad.startsWith("4") || grad.startsWith("5")
+                            || grad.toLowerCase().contains("primaria") || grad.toLowerCase().contains("transici")
+                            || grad.toLowerCase().contains("jard");
+                    if ("PRIMARIA".equalsIgnoreCase(nivel) && !isPrimaria) {
+                        continue;
+                    }
+                    if ("BACHILLERATO".equalsIgnoreCase(nivel) && isPrimaria) {
+                        continue;
+                    }
+                }
+
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", e.getId().toString());
                 map.put("codigo", e.getCodigo() != null ? e.getCodigo() : "N/A");
@@ -55,8 +73,6 @@ public class EstudianteController {
                 map.put("numeroDocumento", e.getNumeroDocumento());
                 map.put("estado", e.getEstado() != null ? e.getEstado() : "Activo");
 
-                Optional<Matricula> matOpt = matriculaRepository.findTopByEstudianteIdOrderByFechaMatriculaDesc(e.getId());
-                String grad = matOpt.map(m -> m.getGrado() != null ? m.getGrado() : "11°").orElse("11°");
                 String sal = matOpt.map(m -> m.getSalon() != null ? m.getSalon() : "01").orElse("01");
 
                 map.put("grado", grad);
@@ -116,16 +132,14 @@ public class EstudianteController {
             student.put("acudienteParentesco", e.getAcudiente().getParentesco() != null ? e.getAcudiente().getParentesco() : "Acudiente");
             student.put("acudienteDoc", (e.getAcudiente().getTipoDocumento() != null ? e.getAcudiente().getTipoDocumento() : "CC") + " - " + (e.getAcudiente().getNumeroDocumento() != null ? e.getAcudiente().getNumeroDocumento() : "N/A"));
             student.put("acudienteTel", e.getAcudiente().getTelefono() != null ? e.getAcudiente().getTelefono() : "N/A");
-            student.put("acudienteDir", e.getAcudiente().getDireccion() != null ? e.getAcudiente().getDireccion() : "N/A");
         } else {
             student.put("acudienteNombre", "No asignado");
             student.put("acudienteParentesco", "-");
             student.put("acudienteDoc", "-");
             student.put("acudienteTel", "-");
-            student.put("acudienteDir", "-");
         }
 
-        Optional<Matricula> matOpt = matriculaRepository.findTopByEstudianteIdOrderByFechaMatriculaDesc(e.getId());
+        Optional<Matricula> matOpt = matriculaService.buscarUltimaMatriculaEstudiante(e.getId());
         String grad = matOpt.map(m -> m.getGrado() != null ? m.getGrado() : "11°").orElse("11°");
         String sal = matOpt.map(m -> m.getSalon() != null ? m.getSalon() : "01").orElse("01");
 

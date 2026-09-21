@@ -32,6 +32,7 @@ public class PersonalController {
             @RequestParam(value = "cargo", required = false) String cargo,
             @RequestParam(value = "area", required = false) String area,
             @RequestParam(value = "estado", required = false) String estado,
+            @RequestParam(value = "tipo", required = false) String tipo,
             Model model) {
 
         model.addAttribute("title", "Gestión de Personal – IEACI");
@@ -40,49 +41,53 @@ public class PersonalController {
         model.addAttribute("cargo", cargo);
         model.addAttribute("area", area);
         model.addAttribute("estado", estado);
+        model.addAttribute("tipo", tipo);
 
         List<Map<String, Object>> personalList = new ArrayList<>();
 
         // Fetch Docentes
-        List<Docente> docentes = personalService.buscarDocentes(search, estado);
-        for (Docente d : docentes) {
-            if (cargo != null && !cargo.isBlank() && !"Docente".equalsIgnoreCase(cargo)) continue;
-            if (area != null && !area.isBlank() && !"Académica".equalsIgnoreCase(area)) continue;
+        if (tipo == null || tipo.isBlank() || "todos".equalsIgnoreCase(tipo) || "DOCENTE".equalsIgnoreCase(tipo)) {
+            List<Docente> docentes = personalService.buscarDocentes(search, estado);
+            for (Docente d : docentes) {
+                if (cargo != null && !cargo.isBlank() && !"Docente".equalsIgnoreCase(cargo)) continue;
+                if (area != null && !area.isBlank() && !"Académica".equalsIgnoreCase(area)) continue;
 
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", d.getId().toString());
-            map.put("tipo", "DOCENTE");
-            map.put("tipoPersona", "docente");
-            map.put("nombres", d.getNombres() != null ? d.getNombres() : "Docente");
-            map.put("apellidos", d.getApellidos() != null ? d.getApellidos() : "");
-            map.put("nombreCompleto", d.getNombreCompleto());
-            map.put("cargo", "Docente");
-            map.put("area", "Académica");
-            map.put("estado", d.getEstado() != null ? d.getEstado() : "Activo");
-            map.put("tipoDocumento", d.getTipoDocumento() != null ? d.getTipoDocumento() : "CC");
-            map.put("numeroDocumento", d.getNumeroDocumento());
-            map.put("telefono", d.getTelefono() != null ? d.getTelefono() : "3001234567");
-            map.put("foto", d.getFotoKey() != null ? "/storage/public/view?key=" + d.getFotoKey() : null);
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", d.getId().toString());
+                map.put("tipo", "DOCENTE");
+                map.put("tipoPersona", "docente");
+                map.put("nombres", d.getNombres() != null ? d.getNombres() : "Docente");
+                map.put("apellidos", d.getApellidos() != null ? d.getApellidos() : "");
+                map.put("nombreCompleto", d.getNombreCompleto());
+                map.put("cargo", "Docente");
+                map.put("area", "Académica");
+                map.put("estado", d.getEstado() != null ? d.getEstado() : "Activo");
+                map.put("tipoDocumento", d.getTipoDocumento() != null ? d.getTipoDocumento() : "CC");
+                map.put("numeroDocumento", d.getNumeroDocumento());
+                map.put("telefono", d.getTelefono() != null ? d.getTelefono() : "3001234567");
+                map.put("foto", d.getFotoKey() != null ? "/storage/public/view?key=" + d.getFotoKey() : null);
 
-            Optional<Usuario> usrOpt = personalService.obtenerUsuarioAcceso(d.getNumeroDocumento());
-            map.put("tieneCuenta", usrOpt.isPresent());
-            map.put("email", usrOpt.map(Usuario::getEmail).orElse("jrojas@ieaci.edu.co"));
-            map.put("correo", usrOpt.map(Usuario::getEmail).orElse("jrojas@ieaci.edu.co"));
-            map.put("usuarioEstado", usrOpt.map(Usuario::getEstado).orElse(null));
+                Optional<Usuario> usrOpt = personalService.obtenerUsuarioAcceso(d.getNumeroDocumento());
+                map.put("tieneCuenta", usrOpt.isPresent());
+                map.put("email", usrOpt.map(Usuario::getEmail).orElse("jrojas@ieaci.edu.co"));
+                map.put("correo", usrOpt.map(Usuario::getEmail).orElse("jrojas@ieaci.edu.co"));
+                map.put("usuarioEstado", usrOpt.map(Usuario::getEstado).orElse(null));
 
-            personalList.add(map);
+                personalList.add(map);
+            }
         }
 
         // Fetch PersonalAdministrativo
-        List<PersonalAdministrativo> personalAdmin = personalService.buscarPersonal(search, cargo, area, estado);
-        for (PersonalAdministrativo p : personalAdmin) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", p.getId().toString());
-            map.put("tipo", "ADMINISTRATIVO");
-            map.put("tipoPersona", "personal");
-            map.put("nombres", p.getNombres() != null ? p.getNombres() : "Personal");
-            map.put("apellidos", p.getApellidos() != null ? p.getApellidos() : "");
-            map.put("nombreCompleto", p.getNombreCompleto());
+        if (tipo == null || tipo.isBlank() || "todos".equalsIgnoreCase(tipo) || "ADMINISTRATIVO".equalsIgnoreCase(tipo)) {
+            List<PersonalAdministrativo> personalAdmin = personalService.buscarPersonal(search, cargo, area, estado);
+            for (PersonalAdministrativo p : personalAdmin) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", p.getId().toString());
+                map.put("tipo", "ADMINISTRATIVO");
+                map.put("tipoPersona", "personal");
+                map.put("nombres", p.getNombres() != null ? p.getNombres() : "Personal");
+                map.put("apellidos", p.getApellidos() != null ? p.getApellidos() : "");
+                map.put("nombreCompleto", p.getNombreCompleto());
             map.put("cargo", p.getCargo() != null ? p.getCargo() : "Administrativo");
             map.put("area", p.getArea() != null ? p.getArea() : "Administrativa");
             map.put("estado", p.getEstado() != null ? p.getEstado() : "Activo");
@@ -98,6 +103,7 @@ public class PersonalController {
             map.put("usuarioEstado", usrOpt.map(Usuario::getEstado).orElse(null));
 
             personalList.add(map);
+        }
         }
 
         model.addAttribute("personalList", personalList);

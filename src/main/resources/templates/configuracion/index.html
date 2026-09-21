@@ -209,32 +209,32 @@
                             </div>
                         </div>
 
-                        <div class="overflow-x-auto rounded-xl border border-[#c4eec0]/40">
-                            <table class="w-full text-left border-collapse text-[12px]">
-                                <thead>
-                                    <tr class="bg-[#f7fcf6] border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
-                                        <th class="p-3.5 pl-4">Nivel de Desempeño</th>
-                                        <th class="p-3.5 text-center">Nota Mínima</th>
-                                        <th class="p-3.5 text-center">Nota Máxima</th>
-                                        <th class="p-3.5 text-center">Muestra Visual (Badge)</th>
+                        <div class="overflow-x-auto rounded-surface border border-border bg-white shadow-card">
+                            <table class="tabla-siga w-full text-left text-sm bg-surface">
+                                <thead class="sticky top-0 z-20 border-b border-border-strong bg-surface-sunken text-[11px] font-bold uppercase tracking-wider text-brand-700 [&_th]:bg-surface-sunken">
+                                    <tr>
+                                        <th class="py-3 px-4 pl-5">Nivel de Desempeño</th>
+                                        <th class="py-3 px-4 text-center w-36">Nota Mínima</th>
+                                        <th class="py-3 px-4 text-center w-36">Nota Máxima</th>
+                                        <th class="py-3 px-4 text-center w-48">Muestra Visual (Badge)</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]">
-                                    <tr th:each="esc : ${escalas}" class="hover:bg-[#fcfdfb] transition-colors">
-                                        <td class="p-3.5 pl-4">
+                                <tbody class="text-brand-900">
+                                    <tr th:each="esc : ${escalas}" class="transition-colors">
+                                        <td class="py-3 px-4 pl-5">
                                             <input type="text" th:name="${'nom_' + esc.codigo}" th:value="${esc.nombre}" required
-                                                   class="h-9 px-3 rounded-lg bg-white border border-[#c5ecd4] text-xs font-black text-sidebar w-56 focus:ring-1 focus:ring-sidebar" />
+                                                   class="h-9 px-3 rounded-control bg-surface-muted border border-border text-xs font-black text-sidebar w-56 focus:ring-1 focus:ring-sidebar" />
                                         </td>
-                                        <td class="p-3.5 text-center">
+                                        <td class="py-3 px-4 text-center">
                                             <input type="number" step="0.01" min="0" max="5.0" th:name="${'min_' + esc.codigo}" th:value="${esc.notaMinima}" required
-                                                   class="w-20 h-9 text-center font-black text-xs bg-white border border-[#c5ecd4] rounded-lg focus:ring-1 focus:ring-sidebar" />
+                                                   class="w-20 h-9 text-center font-black text-xs bg-surface-muted border border-border rounded-control focus:ring-1 focus:ring-sidebar" />
                                         </td>
-                                        <td class="p-3.5 text-center">
+                                        <td class="py-3 px-4 text-center">
                                             <input type="number" step="0.01" min="0" max="5.0" th:name="${'max_' + esc.codigo}" th:value="${esc.notaMaxima}" required
-                                                   class="w-20 h-9 text-center font-black text-xs bg-white border border-[#c5ecd4] rounded-lg focus:ring-1 focus:ring-sidebar" />
+                                                   class="w-20 h-9 text-center font-black text-xs bg-surface-muted border border-border rounded-control focus:ring-1 focus:ring-sidebar" />
                                         </td>
-                                        <td class="p-3.5 text-center">
-                                            <span class="px-3 py-1.5 rounded-full text-[10.5px] font-black shadow-2xs inline-block"
+                                        <td class="py-3 px-4 text-center">
+                                            <span class="px-3 py-1 rounded-full text-[10.5px] font-black shadow-2xs inline-block"
                                                   th:classappend="${esc.colorBadge}" th:text="${esc.nombre}">
                                                 Desempeño
                                             </span>
@@ -301,37 +301,35 @@
                     </div>
 
                     <!-- Tabla de Asignaturas -->
-                    <div class="overflow-x-auto rounded-xl border border-[#c4eec0]/40">
-                        <table class="w-full text-left border-collapse text-[12.5px]">
-                            <thead>
-                                <tr class="bg-[#f7fcf6] border-b border-[#c4eec0]/40 text-text-secondary font-black uppercase tracking-wider text-[10px]">
-                                    <th class="p-3.5 pl-4">Asignatura</th>
-                                    <th class="p-3.5">Área</th>
-                                    <th class="p-3.5 text-center">Horas Semanales</th>
-                                    <th class="p-3.5 text-center">Estado</th>
-                                    <th class="p-3.5 pr-4 text-right">Acciones</th>
+                    <div class="overflow-x-auto rounded-surface border border-border bg-white shadow-card">
+                        <table class="tabla-siga w-full text-left text-sm bg-surface">
+                            <thead class="sticky top-0 z-20 border-b border-border-strong bg-surface-sunken text-[11px] font-bold uppercase tracking-wider text-brand-700 [&_th]:bg-surface-sunken">
+                                <tr>
+                                    <th class="py-3 px-4 pl-5">Asignatura</th>
+                                    <th class="py-3 px-4">Área Académica</th>
+                                    <th class="py-3 px-4 text-center w-36">Horas Semanales</th>
+                                    <th class="py-3 px-4 text-center w-28">Estado</th>
+                                    <th class="py-3 px-4 pr-5 text-right w-32">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-[#c4eec0]/20 text-[#243d28]">
-                                <tr th:if="${materias == null || #lists.isEmpty(materias)}">
-                                    <td colspan="5" class="p-6 text-center text-text-muted italic text-xs">
-                                        No hay asignaturas registradas en el sistema.
-                                    </td>
-                                </tr>
-                                <tr th:each="m : ${materias}" class="hover:bg-[#fcfdfb] transition-colors">
-                                    <td class="p-3.5 pl-4 font-black text-sidebar text-[13px]" th:text="${m.nombre}">Matemáticas</td>
-                                    <td class="p-3.5 font-semibold text-text-secondary" th:text="${m.area ?: 'General'}">Ciencias Exactas</td>
-                                    <td class="p-3.5 text-center font-bold text-sidebar" th:text="${(m.intensidadHoraria ?: 4) + ' h'}">4 h</td>
-                                    <td class="p-3.5 text-center">
-                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider leading-none shadow-2xs"
+                            <tbody class="text-brand-900">
+                                <th:block th:if="${materias == null || #lists.isEmpty(materias)}">
+                                    <tr th:replace="~{components/tables/empty-state :: emptyState(colspan=5, title='No hay asignaturas registradas', description='Registra asignaturas curriculares en el formulario anterior.', resetUrl='/configuracion')}"></tr>
+                                </th:block>
+                                <tr th:each="m : ${materias}" class="transition-colors">
+                                    <td class="py-3 px-4 pl-5 font-black text-sidebar text-xs" th:text="${m.nombre}">Matemáticas</td>
+                                    <td class="py-3 px-4 font-bold text-brand-800 text-xs" th:text="${m.area ?: 'General'}">Ciencias Exactas</td>
+                                    <td class="py-3 px-4 text-center font-bold text-sidebar text-xs" th:text="${(m.intensidadHoraria ?: 4) + ' h'}">4 h</td>
+                                    <td class="py-3 px-4 text-center">
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider leading-none shadow-2xs inline-block"
                                               th:classappend="${m.estado == 'Activo'} ? 'bg-pill-green text-sidebar border border-[#8ce383]' : 'bg-pill-red text-alert-red border border-red-300'"
                                               th:text="${m.estado ?: 'Activo'}">Activo</span>
                                     </td>
-                                    <td class="p-3.5 pr-4 text-right">
+                                    <td class="py-3 px-4 pr-5 text-right">
                                         <div class="flex items-center justify-end gap-2">
                                             <form th:action="@{/configuracion/materias/toggle-estado}" method="post" class="inline">
                                                 <input type="hidden" name="id" th:value="${m.id}" />
-                                                <button type="submit" class="px-2.5 py-1 rounded text-[11px] font-extrabold border transition-colors cursor-pointer"
+                                                <button type="submit" class="px-2.5 py-1 rounded-control text-xs font-bold border transition-colors cursor-pointer shadow-2xs"
                                                         th:classappend="${m.estado == 'Activo'} ? 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100' : 'bg-green-50 text-sidebar border-green-300 hover:bg-green-100'"
                                                         th:text="${m.estado == 'Activo' ? 'Desactivar' : 'Activar'}">
                                                     Desactivar

@@ -1,19 +1,14 @@
 package com.siga.siga_iea.configuracion.controller;
 
 import com.siga.siga_iea.clases.entity.Materia;
-import com.siga.siga_iea.clases.repository.MateriaRepository;
-import com.siga.siga_iea.configuracion.entity.ConfiguracionInstitucional;
-import com.siga.siga_iea.configuracion.entity.EscalaDesempeno;
-import com.siga.siga_iea.configuracion.entity.PeriodoAcademico;
-import com.siga.siga_iea.configuracion.entity.RolPermiso;
+import com.siga.siga_iea.clases.service.ClaseService;
+import com.siga.siga_iea.configuracion.entity.*;
 import com.siga.siga_iea.configuracion.service.EscalaDesempenoService;
 import com.siga.siga_iea.configuracion.service.PeriodoConfigService;
 import com.siga.siga_iea.configuracion.service.RolPermisoService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
@@ -25,16 +20,16 @@ public class ConfiguracionController {
     private final PeriodoConfigService periodoConfigService;
     private final EscalaDesempenoService escalaDesempenoService;
     private final RolPermisoService rolPermisoService;
-    private final MateriaRepository materiaRepository;
+    private final ClaseService claseService;
 
     public ConfiguracionController(PeriodoConfigService periodoConfigService,
                                    EscalaDesempenoService escalaDesempenoService,
                                    RolPermisoService rolPermisoService,
-                                   MateriaRepository materiaRepository) {
+                                   ClaseService claseService) {
         this.periodoConfigService = periodoConfigService;
         this.escalaDesempenoService = escalaDesempenoService;
         this.rolPermisoService = rolPermisoService;
-        this.materiaRepository = materiaRepository;
+        this.claseService = claseService;
     }
 
     @GetMapping("/configuracion")
@@ -70,7 +65,7 @@ public class ConfiguracionController {
         model.addAttribute("escalas", escalas);
 
         // 4. Asignaturas del Colegio
-        List<Materia> materias = materiaRepository.findAllByOrderByNombreAsc();
+        List<Materia> materias = claseService.listarTodasMateriasOrdenadas();
         model.addAttribute("materias", materias);
 
         // 5. Roles y Permisos
@@ -171,7 +166,7 @@ public class ConfiguracionController {
         try {
             Materia materia;
             if (id != null) {
-                materia = materiaRepository.findById(id).orElse(new Materia());
+                materia = claseService.buscarMateriaPorId(id).orElse(new Materia());
             } else {
                 materia = new Materia();
             }
@@ -179,7 +174,7 @@ public class ConfiguracionController {
             materia.setArea(area != null ? area.trim() : "General");
             materia.setIntensidadHoraria(intensidadHoraria != null ? intensidadHoraria : 4);
             materia.setEstado(estado);
-            materiaRepository.save(materia);
+            claseService.guardarMateria(materia);
 
             redirectAttributes.addFlashAttribute("mensajeExito", "Asignatura '" + materia.getNombre() + "' guardada correctamente.");
         } catch (Exception ex) {
@@ -195,11 +190,8 @@ public class ConfiguracionController {
             @RequestParam("id") UUID id,
             RedirectAttributes redirectAttributes) {
 
-        materiaRepository.findById(id).ifPresent(m -> {
-            String nuevoEstado = "Activo".equalsIgnoreCase(m.getEstado()) ? "Inactivo" : "Activo";
-            m.setEstado(nuevoEstado);
-            materiaRepository.save(m);
-            redirectAttributes.addFlashAttribute("mensajeExito", "Estado de '" + m.getNombre() + "' cambiado a " + nuevoEstado + ".");
+        claseService.toggleEstadoMateria(id).ifPresent(m -> {
+            redirectAttributes.addFlashAttribute("mensajeExito", "Estado de '" + m.getNombre() + "' cambiado a " + m.getEstado() + ".");
         });
 
         redirectAttributes.addFlashAttribute("activeTab", "cfg-asignaturas");

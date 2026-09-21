@@ -44,8 +44,8 @@ public class PermisoModuloInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        String rol = CustomUserDetailsService.normalizeRole(userOpt.get().getRol());
-        if ("ADMIN".equalsIgnoreCase(rol)) {
+        com.siga.siga_iea.auth.enums.RolEnum rolEnum = userOpt.get().getRolEnum();
+        if (rolEnum.esAdmin()) {
             return true;
         }
 
@@ -62,7 +62,7 @@ public class PermisoModuloInterceptor implements HandlerInterceptor {
 
         // Sub-ruta sensible: Mapear y promover estudiantes solo ADMIN y PERSONAL_ADMINISTRATIVO
         if ((uri.startsWith("/clases/mapear-estudiantes") || uri.startsWith("/clases/promover-estudiantes"))
-                && !"PERSONAL_ADMINISTRATIVO".equalsIgnoreCase(rol)) {
+                && !rolEnum.esPersonalAdministrativo()) {
             String isHx = request.getHeader("HX-Request");
             if (isHx != null && !isHx.isBlank()) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -72,7 +72,7 @@ public class PermisoModuloInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        boolean tieneAcceso = rolPermisoService.tieneAcceso(rol, moduloRequerido);
+        boolean tieneAcceso = rolPermisoService.tieneAcceso(rolEnum.name(), moduloRequerido);
         if (!tieneAcceso) {
             String isHx = request.getHeader("HX-Request");
             if (isHx != null && !isHx.isBlank()) {

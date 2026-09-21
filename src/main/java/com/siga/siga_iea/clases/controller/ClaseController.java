@@ -1,112 +1,60 @@
 package com.siga.siga_iea.clases.controller;
 
+import com.siga.siga_iea.asistencias.entity.Asistencia;
+import com.siga.siga_iea.asistencias.service.AsistenciaService;
+import com.siga.siga_iea.auth.service.CurrentUserContextService;
+import com.siga.siga_iea.calificaciones.service.CalificacionesService;
+import com.siga.siga_iea.clases.application.ClaseGestionAppService;
+import com.siga.siga_iea.clases.dto.ClaseGestionDetalleDTO;
+import com.siga.siga_iea.clases.dto.ClaseTablaNotasDTO;
 import com.siga.siga_iea.clases.entity.Clase;
 import com.siga.siga_iea.clases.entity.CursoEstudiante;
+import com.siga.siga_iea.clases.entity.CursoMateria;
 import com.siga.siga_iea.clases.entity.Horario;
 import com.siga.siga_iea.clases.service.ClaseService;
+import com.siga.siga_iea.usuarios.entity.Docente;
 import com.siga.siga_iea.usuarios.service.PersonalService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.siga.siga_iea.asistencias.entity.Asistencia;
-import com.siga.siga_iea.asistencias.service.AsistenciaService;
-import com.siga.siga_iea.calificaciones.entity.Evaluacion;
-import com.siga.siga_iea.calificaciones.service.CalificacionesService;
-import com.siga.siga_iea.clases.entity.CursoMateria;
-import com.siga.siga_iea.clases.entity.Materia;
-import com.siga.siga_iea.clases.repository.MateriaRepository;
-
-import com.siga.siga_iea.auth.security.CustomUserDetailsService;
-import com.siga.siga_iea.usuarios.entity.Docente;
-import com.siga.siga_iea.usuarios.entity.Usuario;
-import com.siga.siga_iea.usuarios.repository.DocenteRepository;
-import com.siga.siga_iea.usuarios.repository.UsuarioRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.*;
 
+/**
+ * Controlador Web para Cursos y Clases.
+ * Delegador liviano de peticiones HTTP hacia la capa de casos de uso y servicios de aplicación.
+ */
 @Controller
 public class ClaseController {
 
     private final ClaseService claseService;
+    private final ClaseGestionAppService claseGestionAppService;
     private final PersonalService personalService;
     private final CalificacionesService calificacionesService;
     private final AsistenciaService asistenciaService;
-    private final MateriaRepository materiaRepository;
-    private final UsuarioRepository usuarioRepository;
-    private final DocenteRepository docenteRepository;
+    private final CurrentUserContextService currentUserContextService;
 
     public ClaseController(ClaseService claseService,
+                           ClaseGestionAppService claseGestionAppService,
                            PersonalService personalService,
                            CalificacionesService calificacionesService,
                            AsistenciaService asistenciaService,
-                           MateriaRepository materiaRepository,
-                           UsuarioRepository usuarioRepository,
-                           DocenteRepository docenteRepository) {
+                           CurrentUserContextService currentUserContextService) {
         this.claseService = claseService;
+        this.claseGestionAppService = claseGestionAppService;
         this.personalService = personalService;
         this.calificacionesService = calificacionesService;
         this.asistenciaService = asistenciaService;
-        this.materiaRepository = materiaRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.docenteRepository = docenteRepository;
-    }
-
-    private Optional<Docente> getDocenteLogueado() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-            return Optional.empty();
-        }
-        return usuarioRepository.findByEmail(auth.getName())
-                .filter(u -> "DOCENTE".equalsIgnoreCase(CustomUserDetailsService.normalizeRole(u.getRol())))
-                .map(Usuario::getNumeroDocumento)
-                .filter(doc -> doc != null && !doc.isBlank())
-                .flatMap(docenteRepository::findByNumeroDocumento);
-    }
-
-    private boolean isUserAdmin() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-            return false;
-        }
-        return usuarioRepository.findByEmail(auth.getName())
-                .map(u -> "ADMIN".equalsIgnoreCase(CustomUserDetailsService.normalizeRole(u.getRol())))
-                .orElse(false);
-    }
-
-    private boolean isUserAdminOrAdministrativo() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-            return false;
-        }
-        return usuarioRepository.findByEmail(auth.getName())
-                .map(u -> {
-                    String role = CustomUserDetailsService.normalizeRole(u.getRol());
-                    return "ADMIN".equalsIgnoreCase(role) || "PERSONAL_ADMINISTRATIVO".equalsIgnoreCase(role);
-                })
-                .orElse(false);
+        this.currentUserContextService = currentUserContextService;
     }
 
     public static String obtenerNombreDiaEspanol(DayOfWeek dow) {
-        if (dow == null) return "Lunes";
-        switch (dow) {
-            case MONDAY: return "Lunes";
-            case TUESDAY: return "Martes";
-            case WEDNESDAY: return "Miércoles";
-            case THURSDAY: return "Jueves";
-            case FRIDAY: return "Viernes";
-            case SATURDAY: return "Sábado";
-            case SUNDAY: return "Domingo";
-            default: return "Lunes";
-        }
+        return ClaseGestionAppService.obtenerNombreDiaEspanol(dow);
     }
 
     @GetMapping("/clases/horarios/datos")
@@ -198,139 +146,35 @@ public class ClaseController {
         model.addAttribute("title", "Gestión de Curso " + codigo + " – IEACI");
         model.addAttribute("activePage", "clases");
 
-        Optional<Clase> claseOpt = claseService.buscarPorCodigo(codigo, "2026");
-        Clase c;
-        if (claseOpt.isPresent()) {
-            c = claseOpt.get();
-        } else {
-            String degree = codigo.contains("-") ? codigo.split("-")[0] + "°" : codigo;
-            String group = codigo.contains("-") ? codigo.split("-")[1] : "01";
-            c = claseService.crearCurso(degree, group, "Mañana", 35, null, "2026");
-        }
+        Optional<Docente> docLogueadoOpt = currentUserContextService.getDocenteAutenticado();
+        boolean esAdmin = currentUserContextService.esAdmin();
 
-        model.addAttribute("cursoId", c.getId().toString());
-        model.addAttribute("codigoCurso", c.getCodigoCurso());
-        model.addAttribute("gradoCurso", c.getGrado());
-        model.addAttribute("directorCurso", c.getDirector() != null ? c.getDirector().getNombreCompleto() : "Sin asignar");
-        model.addAttribute("jornadaCurso", c.getJornada());
+        ClaseGestionDetalleDTO detalle = claseGestionAppService.prepararGestionDetalle(codigo, docLogueadoOpt, esAdmin);
 
-        List<CursoEstudiante> estudiantesCE = claseService.listarEstudiantesDeCurso(c.getId());
-        List<Map<String, Object>> estudiantesData = new ArrayList<>();
-        int idx = 1;
-        for (CursoEstudiante ce : estudiantesCE) {
-            if (ce.getEstudiante() != null) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("id", ce.getEstudiante().getId().toString());
-                map.put("numIdx", idx++);
-                map.put("nombre", ce.getEstudiante().getNombreCompleto());
-                map.put("documento", ce.getEstudiante().getNumeroDocumento());
-                map.put("asistencia", "Presente");
-                estudiantesData.add(map);
-            }
-        }
-        model.addAttribute("estudiantesData", estudiantesData);
-        model.addAttribute("estudiantesMock", estudiantesData);
+        model.addAttribute("cursoId", detalle.getCursoId());
+        model.addAttribute("codigoCurso", detalle.getCodigoCurso());
+        model.addAttribute("gradoCurso", detalle.getGradoCurso());
+        model.addAttribute("directorCurso", detalle.getDirectorCurso());
+        model.addAttribute("jornadaCurso", detalle.getJornadaCurso());
+        model.addAttribute("estudiantesData", detalle.getEstudiantesData());
+        model.addAttribute("estudiantesMock", detalle.getEstudiantesData());
+        model.addAttribute("horariosData", detalle.getHorariosData());
+        model.addAttribute("esAdmin", detalle.isEsAdmin());
+        model.addAttribute("horarioBannerTexto", detalle.getHorarioBannerTexto());
 
-        List<Horario> horarios = claseService.listarHorariosDeCurso(c.getId());
-        List<Map<String, String>> horariosData = new ArrayList<>();
-        if (!horarios.isEmpty()) {
-            for (Horario h : horarios) {
-                Map<String, String> hm = new HashMap<>();
-                hm.put("dia", h.getDiaSemana());
-                hm.put("materia", h.getMateria() != null ? h.getMateria().getNombre() : "");
-                hm.put("docente", h.getDocente() != null ? h.getDocente().getNombreCompleto() : "Sin docente asignado");
-                hm.put("hora", (h.getHoraInicio() != null ? h.getHoraInicio().toString() : "07:00") + " - " + (h.getHoraFin() != null ? h.getHoraFin().toString() : "08:30"));
-                horariosData.add(hm);
-            }
-        }
-        model.addAttribute("horariosData", horariosData);
-
-        LocalDate hoy = LocalDate.now();
-        String diaHoy = obtenerNombreDiaEspanol(hoy.getDayOfWeek());
-
-        List<Horario> horariosDelDia = horarios.stream()
-                .filter(h -> h.getDiaSemana() != null && h.getDiaSemana().equalsIgnoreCase(diaHoy))
-                .toList();
-
-        boolean esAdmin = isUserAdmin();
-        Optional<Docente> docLogueadoOpt = getDocenteLogueado();
-        Horario primerH = null;
-
-        if (!esAdmin && docLogueadoOpt.isPresent()) {
-            Docente miDocente = docLogueadoOpt.get();
-            primerH = horariosDelDia.stream()
-                    .filter(h -> h.getDocente() != null && (
-                            h.getDocente().getId().equals(miDocente.getId()) ||
-                            (h.getDocente().getNumeroDocumento() != null && h.getDocente().getNumeroDocumento().equalsIgnoreCase(miDocente.getNumeroDocumento()))
-                    ))
-                    .findFirst()
-                    .orElse(null);
-        } else if (!horariosDelDia.isEmpty()) {
-            primerH = horariosDelDia.get(0);
-        }
-
-        boolean tieneHorarioHoy = (primerH != null);
-        model.addAttribute("tieneHorarioHoy", tieneHorarioHoy);
-        model.addAttribute("esAdmin", esAdmin);
-
-        String horarioBannerTexto;
-        if (!tieneHorarioHoy || primerH == null) {
-            horarioBannerTexto = esAdmin ? "No hay clases programadas en el horario para este día." : "No tienes clases programadas en este curso para este día.";
-        } else {
-            String horaStr = (primerH.getHoraInicio() != null ? primerH.getHoraInicio().toString() : "07:00") + " - " + (primerH.getHoraFin() != null ? primerH.getHoraFin().toString() : "08:30");
-            String docStr = (primerH.getDocente() != null) ? " • Docente: " + primerH.getDocente().getNombreCompleto() : "";
-            horarioBannerTexto = "Horario: " + horaStr + docStr;
-        }
-        model.addAttribute("horarioBannerTexto", horarioBannerTexto);
-
-        Integer periodo = 1;
-        model.addAttribute("periodo", periodo);
-        model.addAttribute("fecha", hoy.toString());
-        model.addAttribute("estudiantesCE", estudiantesCE);
-
-        if (tieneHorarioHoy && primerH != null) {
-            String materiaNombre = primerH.getMateria() != null ? primerH.getMateria().getNombre() : "";
-            UUID materiaId = primerH.getMateria() != null ? primerH.getMateria().getId() : null;
-
-            CursoMateria cm = (materiaId != null)
-                    ? calificacionesService.obtenerOCrearCursoMateria(c.getId(), materiaId, "2026")
-                    : calificacionesService.obtenerOCrearCursoMateriaPorNombre(c.getId(), materiaNombre, "2026");
-
-            List<Evaluacion> evaluaciones = calificacionesService.obtenerEvaluacionesPorCursoYMateria(cm.getId(), periodo);
-            BigDecimal sumaPesos = evaluaciones.stream()
-                    .map(e -> e.getPeso() != null ? e.getPeso() : BigDecimal.ZERO)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-            Map<UUID, Map<UUID, BigDecimal>> calificacionesMapa = calificacionesService.obtenerCalificacionesMapa(cm.getId(), periodo);
-            Map<UUID, String> asistenciasMapa = asistenciaService.obtenerMapaEstadosAsistencia(c.getId(), hoy, cm.getMateria().getId());
-
-            Map<UUID, BigDecimal> notasFinales = new HashMap<>();
-            for (CursoEstudiante ce : estudiantesCE) {
-                if (ce.getEstudiante() != null) {
-                    UUID estId = ce.getEstudiante().getId();
-                    BigDecimal notaFinal = calificacionesService.calcularNotaFinalPeriodo(estId, cm.getId(), periodo);
-                    notasFinales.put(estId, notaFinal);
-                }
-            }
-
-            model.addAttribute("cursoMateriaId", cm.getId());
-            model.addAttribute("materiaId", cm.getMateria().getId());
-            model.addAttribute("materiaNombre", cm.getMateria().getNombre());
-            model.addAttribute("evaluaciones", evaluaciones);
-            model.addAttribute("sumaPesos", sumaPesos);
-            model.addAttribute("calificacionesMapa", calificacionesMapa);
-            model.addAttribute("asistenciasMapa", asistenciasMapa);
-            model.addAttribute("notasFinales", notasFinales);
-        } else {
-            model.addAttribute("cursoMateriaId", null);
-            model.addAttribute("materiaId", null);
-            model.addAttribute("materiaNombre", "");
-            model.addAttribute("evaluaciones", Collections.emptyList());
-            model.addAttribute("sumaPesos", BigDecimal.ZERO);
-            model.addAttribute("calificacionesMapa", Collections.emptyMap());
-            model.addAttribute("asistenciasMapa", Collections.emptyMap());
-            model.addAttribute("notasFinales", Collections.emptyMap());
-        }
+        ClaseTablaNotasDTO tablaDTO = detalle.getTablaNotasDTO();
+        model.addAttribute("tieneHorarioHoy", tablaDTO.isTieneHorarioHoy());
+        model.addAttribute("periodo", tablaDTO.getPeriodo());
+        model.addAttribute("fecha", tablaDTO.getFecha().toString());
+        model.addAttribute("estudiantesCE", tablaDTO.getEstudiantesCE());
+        model.addAttribute("cursoMateriaId", tablaDTO.getCursoMateriaId());
+        model.addAttribute("materiaId", tablaDTO.getMateriaId());
+        model.addAttribute("materiaNombre", tablaDTO.getMateriaNombre());
+        model.addAttribute("evaluaciones", tablaDTO.getEvaluaciones());
+        model.addAttribute("sumaPesos", tablaDTO.getSumaPesos());
+        model.addAttribute("calificacionesMapa", tablaDTO.getCalificacionesMapa());
+        model.addAttribute("asistenciasMapa", tablaDTO.getAsistenciasMapa());
+        model.addAttribute("notasFinales", tablaDTO.getNotasFinales());
 
         return "clases/detalle";
     }
@@ -366,55 +210,7 @@ public class ClaseController {
             RedirectAttributes redirectAttributes) {
 
         try {
-            claseService.limpiarHorarioCurso(cursoId);
-
-            String[] dias = {"Lunes", "Martes", "Miércoles", "Jueves", "Viernes"};
-            int guardados = 0;
-
-            Set<Integer> slotIndices = new TreeSet<>();
-            for (String key : allParams.keySet()) {
-                if (key.startsWith("slot_") && key.endsWith("_inicio")) {
-                    try {
-                        String idxStr = key.substring(5, key.indexOf("_inicio"));
-                        slotIndices.add(Integer.parseInt(idxStr));
-                    } catch (Exception ignored) {}
-                }
-            }
-
-            for (Integer i : slotIndices) {
-                String horaInicio = allParams.get("slot_" + i + "_inicio");
-                String horaFin = allParams.get("slot_" + i + "_fin");
-                String salon = allParams.getOrDefault("slot_" + i + "_salon", "Aula 101");
-
-                if (horaInicio == null || horaFin == null || horaInicio.isBlank() || horaFin.isBlank()) continue;
-
-                for (String dia : dias) {
-                    String matKey = "slot_" + i + "_" + dia + "_materiaId";
-                    String docKey = "slot_" + i + "_" + dia + "_docenteId";
-
-                    String matIdStr = allParams.get(matKey);
-                    String docIdStr = allParams.get(docKey);
-
-                    if (matIdStr == null || matIdStr.isBlank()) {
-                        String diaAlt = dia.contains("é") ? dia.replace("é", "e") : dia.replace("e", "é");
-                        String matKeyAlt = "slot_" + i + "_" + diaAlt + "_materiaId";
-                        String docKeyAlt = "slot_" + i + "_" + diaAlt + "_docenteId";
-                        if (allParams.containsKey(matKeyAlt)) {
-                            matIdStr = allParams.get(matKeyAlt);
-                            docIdStr = allParams.get(docKeyAlt);
-                        }
-                    }
-
-                    if (matIdStr != null && !matIdStr.isBlank()) {
-                        UUID materiaId = UUID.fromString(matIdStr);
-                        UUID docenteId = (docIdStr != null && !docIdStr.isBlank()) ? UUID.fromString(docIdStr) : null;
-
-                        claseService.guardarHorarioBloque(cursoId, dia, materiaId, docenteId, horaInicio, horaFin, salon);
-                        guardados++;
-                    }
-                }
-            }
-
+            int guardados = claseGestionAppService.procesarGuardadoHorarioGrid(cursoId, allParams);
             if (guardados > 0) {
                 redirectAttributes.addFlashAttribute("mensajeExito", "Horario asignado exitosamente (" + guardados + " clases configuradas).");
             } else {
@@ -471,7 +267,7 @@ public class ClaseController {
 
     @PostMapping("/clases/mapear-estudiantes")
     public String mapearEstudiantes(@RequestParam("cursoId") UUID cursoId, RedirectAttributes redirectAttributes) {
-        if (!isUserAdminOrAdministrativo()) {
+        if (!currentUserContextService.esAdminOAdministrativo()) {
             redirectAttributes.addFlashAttribute("mensajeError", "Acceso denegado: solo Administradores y Personal Administrativo pueden auto-mapear estudiantes.");
             Optional<Clase> cOpt = claseService.buscarPorId(cursoId);
             String codigo = cOpt.map(Clase::getCodigoCurso).orElse("11-01");
@@ -494,7 +290,7 @@ public class ClaseController {
     public String promoverEstudiantes(@RequestParam("cursoId") UUID cursoId,
                                       @RequestParam(value = "notasJson", required = false) String notasJson,
                                       RedirectAttributes redirectAttributes) {
-        if (!isUserAdminOrAdministrativo()) {
+        if (!currentUserContextService.esAdminOAdministrativo()) {
             redirectAttributes.addFlashAttribute("mensajeError", "Acceso denegado: solo Administradores y Personal Administrativo pueden promover estudiantes.");
             Optional<Clase> cOpt = claseService.buscarPorId(cursoId);
             String codigo = cOpt.map(Clase::getCodigoCurso).orElse("11-01");
@@ -533,123 +329,28 @@ public class ClaseController {
             fecha = LocalDate.now();
         }
 
-        String diaSemana = obtenerNombreDiaEspanol(fecha.getDayOfWeek());
-        List<Horario> horarios = claseService.listarHorariosDeCurso(cursoId);
-        List<Horario> horariosDelDia = horarios.stream()
-                .filter(h -> h.getDiaSemana() != null && h.getDiaSemana().equalsIgnoreCase(diaSemana))
-                .toList();
+        Optional<Docente> docLogueadoOpt = currentUserContextService.getDocenteAutenticado();
+        boolean esAdmin = currentUserContextService.esAdmin();
 
-        List<CursoEstudiante> estudiantesCE = claseService.listarEstudiantesDeCurso(cursoId);
-        model.addAttribute("estudiantesCE", estudiantesCE);
-        model.addAttribute("cursoId", cursoId);
-        model.addAttribute("periodo", periodo);
-        model.addAttribute("fecha", fecha.toString());
+        ClaseTablaNotasDTO dto = claseGestionAppService.prepararTablaNotas(
+                cursoId, materiaNombre, materiaId, periodo, fecha, docLogueadoOpt, esAdmin
+        );
 
-        // Si no hay horario configurado para este día de la semana
-        if (horariosDelDia.isEmpty() || (materiaNombre != null && materiaNombre.isBlank() && materiaId == null)) {
-            model.addAttribute("tieneHorarioHoy", false);
-            model.addAttribute("materiaNombre", "");
-            model.addAttribute("materiaId", null);
-            model.addAttribute("cursoMateriaId", null);
-            model.addAttribute("evaluaciones", Collections.emptyList());
-            model.addAttribute("sumaPesos", BigDecimal.ZERO);
-            model.addAttribute("calificacionesMapa", Collections.emptyMap());
-            model.addAttribute("asistenciasMapa", Collections.emptyMap());
-            model.addAttribute("notasFinales", Collections.emptyMap());
-            return "clases/fragments/tabla-detalle-notas :: tablaDetalleNotas";
-        }
-
-        // Determinar qué horario/materia de las programadas para hoy se está consultando
-        final UUID targetMateriaId = materiaId;
-        final String targetMateriaNombre = materiaNombre;
-        Optional<Horario> horarioMatch = Optional.empty();
-        if (targetMateriaId != null) {
-            horarioMatch = horariosDelDia.stream()
-                    .filter(h -> h.getMateria() != null && h.getMateria().getId().equals(targetMateriaId))
-                    .findFirst();
-        } else if (targetMateriaNombre != null && !targetMateriaNombre.isBlank()) {
-            horarioMatch = horariosDelDia.stream()
-                    .filter(h -> h.getMateria() != null && h.getMateria().getNombre().equalsIgnoreCase(targetMateriaNombre))
-                    .findFirst();
-        }
-
-        boolean esAdmin = isUserAdmin();
-        Optional<Docente> docLogueadoOpt = getDocenteLogueado();
-        Horario hSeleccionado = null;
-
-        if (!esAdmin && docLogueadoOpt.isPresent()) {
-            Docente miDocente = docLogueadoOpt.get();
-            hSeleccionado = horariosDelDia.stream()
-                    .filter(h -> h.getDocente() != null && (
-                            h.getDocente().getId().equals(miDocente.getId()) ||
-                            (h.getDocente().getNumeroDocumento() != null && h.getDocente().getNumeroDocumento().equalsIgnoreCase(miDocente.getNumeroDocumento()))
-                    ))
-                    .findFirst()
-                    .orElse(null);
-        } else {
-            hSeleccionado = horarioMatch.orElse(!horariosDelDia.isEmpty() ? horariosDelDia.get(0) : null);
-        }
-
-        if (hSeleccionado == null) {
-            model.addAttribute("tieneHorarioHoy", false);
-            model.addAttribute("materiaNombre", "");
-            model.addAttribute("materiaId", null);
-            model.addAttribute("cursoMateriaId", null);
-            model.addAttribute("evaluaciones", Collections.emptyList());
-            model.addAttribute("sumaPesos", BigDecimal.ZERO);
-            model.addAttribute("calificacionesMapa", Collections.emptyMap());
-            model.addAttribute("asistenciasMapa", Collections.emptyMap());
-            model.addAttribute("notasFinales", Collections.emptyMap());
-            return "clases/fragments/tabla-detalle-notas :: tablaDetalleNotas";
-        }
-
-        String selectedMateriaNombre = hSeleccionado.getMateria() != null ? hSeleccionado.getMateria().getNombre() : "";
-        UUID selectedMateriaId = hSeleccionado.getMateria() != null ? hSeleccionado.getMateria().getId() : null;
-
-        if (selectedMateriaId == null && selectedMateriaNombre.isBlank()) {
-            model.addAttribute("tieneHorarioHoy", false);
-            model.addAttribute("materiaNombre", "");
-            model.addAttribute("materiaId", null);
-            model.addAttribute("cursoMateriaId", null);
-            model.addAttribute("evaluaciones", Collections.emptyList());
-            model.addAttribute("sumaPesos", BigDecimal.ZERO);
-            model.addAttribute("calificacionesMapa", Collections.emptyMap());
-            model.addAttribute("asistenciasMapa", Collections.emptyMap());
-            model.addAttribute("notasFinales", Collections.emptyMap());
-            return "clases/fragments/tabla-detalle-notas :: tablaDetalleNotas";
-        }
-
-        model.addAttribute("tieneHorarioHoy", true);
-
-        CursoMateria cm = (selectedMateriaId != null)
-                ? calificacionesService.obtenerOCrearCursoMateria(cursoId, selectedMateriaId, "2026")
-                : calificacionesService.obtenerOCrearCursoMateriaPorNombre(cursoId, selectedMateriaNombre, "2026");
-
-        List<Evaluacion> evaluaciones = calificacionesService.obtenerEvaluacionesPorCursoYMateria(cm.getId(), periodo);
-        BigDecimal sumaPesos = evaluaciones.stream()
-                .map(e -> e.getPeso() != null ? e.getPeso() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        Map<UUID, Map<UUID, BigDecimal>> calificacionesMapa = calificacionesService.obtenerCalificacionesMapa(cm.getId(), periodo);
-        Map<UUID, String> asistenciasMapa = asistenciaService.obtenerMapaEstadosAsistencia(cursoId, fecha, cm.getMateria().getId());
-
-        Map<UUID, BigDecimal> notasFinales = new HashMap<>();
-        for (CursoEstudiante ce : estudiantesCE) {
-            if (ce.getEstudiante() != null) {
-                UUID estId = ce.getEstudiante().getId();
-                BigDecimal notaFinal = calificacionesService.calcularNotaFinalPeriodo(estId, cm.getId(), periodo);
-                notasFinales.put(estId, notaFinal);
-            }
-        }
-
-        model.addAttribute("cursoMateriaId", cm.getId());
-        model.addAttribute("materiaId", cm.getMateria().getId());
-        model.addAttribute("materiaNombre", cm.getMateria().getNombre());
-        model.addAttribute("evaluaciones", evaluaciones);
-        model.addAttribute("sumaPesos", sumaPesos);
-        model.addAttribute("calificacionesMapa", calificacionesMapa);
-        model.addAttribute("asistenciasMapa", asistenciasMapa);
-        model.addAttribute("notasFinales", notasFinales);
+        model.addAttribute("cursoId", dto.getCursoId());
+        model.addAttribute("periodo", dto.getPeriodo());
+        model.addAttribute("fecha", dto.getFecha().toString());
+        model.addAttribute("diaSemana", dto.getDiaSemana());
+        model.addAttribute("tieneHorarioHoy", dto.isTieneHorarioHoy());
+        model.addAttribute("horarioBannerTexto", dto.getHorarioBannerTexto());
+        model.addAttribute("materiaNombre", dto.getMateriaNombre());
+        model.addAttribute("materiaId", dto.getMateriaId());
+        model.addAttribute("cursoMateriaId", dto.getCursoMateriaId());
+        model.addAttribute("estudiantesCE", dto.getEstudiantesCE());
+        model.addAttribute("evaluaciones", dto.getEvaluaciones());
+        model.addAttribute("sumaPesos", dto.getSumaPesos());
+        model.addAttribute("calificacionesMapa", dto.getCalificacionesMapa());
+        model.addAttribute("asistenciasMapa", dto.getAsistenciasMapa());
+        model.addAttribute("notasFinales", dto.getNotasFinales());
 
         return "clases/fragments/tabla-detalle-notas :: tablaDetalleNotas";
     }

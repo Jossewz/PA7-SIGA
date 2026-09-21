@@ -1,6 +1,6 @@
 /* =======================================================
    SIGA-IEA: GESTIÓN DE CURSO, HORARIOS Y TABLA HTMX
-   Las notas y asistencias son gestionadas por PostgreSQL vía HTMX.
+   Notas, asistencias y banners sincronizados por el servidor vía HTMX (OOB).
    ======================================================= */
 
 let horariosList = (window.horariosBDData && Array.isArray(window.horariosBDData)) 
@@ -52,20 +52,9 @@ function actualizarMateriaPorFecha(recargar = true) {
     const diaLabel = document.getElementById('dia-nombre');
     if (diaLabel) diaLabel.innerText = diaNombre;
 
-    const materiasDelDia = horariosList.filter(h => h.dia && h.dia.toLowerCase() === diaNombre.toLowerCase());
     const selectMateria = document.getElementById('select-materia');
-    const bannerInfo = document.getElementById('horario-info-text');
-    const bannerContainer = document.getElementById('status-horario-banner');
-    const btnAgregarNota = document.getElementById('btn-agregar-nota');
-    const textoAyuda = document.getElementById('texto-ayuda-porcentajes');
-
-    if (!selectMateria) return;
-
-    const isSelect = selectMateria.tagName && selectMateria.tagName.toLowerCase() === 'select';
-    const esAdmin = Boolean(window.esAdmin);
-
-    if (isSelect) {
-        // MODO ADMIN: Select interactivo para pruebas
+    if (selectMateria && selectMateria.tagName && selectMateria.tagName.toLowerCase() === 'select') {
+        const materiasDelDia = horariosList.filter(h => h.dia && h.dia.toLowerCase() === diaNombre.toLowerCase());
         selectMateria.innerHTML = '';
 
         if (materiasDelDia.length > 0) {
@@ -75,27 +64,10 @@ function actualizarMateriaPorFecha(recargar = true) {
                 opt.text = `${m.materia} (${m.hora})${m.docente ? ' – Docente: ' + m.docente : ''}`;
                 selectMateria.appendChild(opt);
             });
-
             selectMateria.disabled = false;
             selectMateria.classList.remove('opacity-50', 'bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
             selectMateria.classList.add('bg-[#f9fbf8]', 'text-text-primary');
             selectMateria.selectedIndex = 0;
-
-            if (bannerInfo) {
-                bannerInfo.innerText = `Horario: ${materiasDelDia[0].hora}${materiasDelDia[0].docente ? ' • Docente: ' + materiasDelDia[0].docente : ''}`;
-            }
-            if (bannerContainer) {
-                bannerContainer.className = "px-4 py-2.5 bg-[#f7fcf6] border border-[#c4eec0] rounded-lg text-[11px] font-bold text-sidebar flex items-center gap-2 shrink-0";
-            }
-            if (btnAgregarNota) {
-                btnAgregarNota.disabled = false;
-                btnAgregarNota.classList.remove('opacity-40', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-400');
-                btnAgregarNota.classList.add('bg-sidebar', 'hover:brightness-97', 'cursor-pointer');
-            }
-            if (textoAyuda) {
-                textoAyuda.innerHTML = 'Edite los porcentajes % en el encabezado de cada columna.';
-                textoAyuda.className = "text-[11px] font-semibold text-text-secondary";
-            }
         } else {
             const opt = document.createElement('option');
             opt.value = "";
@@ -104,97 +76,15 @@ function actualizarMateriaPorFecha(recargar = true) {
             selectMateria.disabled = true;
             selectMateria.classList.add('opacity-50', 'bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
             selectMateria.classList.remove('bg-[#f9fbf8]', 'text-text-primary');
-
-            if (bannerInfo) {
-                bannerInfo.innerText = "No hay clases programadas en el horario para este día.";
-            }
-            if (bannerContainer) {
-                bannerContainer.className = "px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-[11px] font-bold text-amber-800 flex items-center gap-2 shrink-0";
-            }
-            if (btnAgregarNota) {
-                btnAgregarNota.disabled = true;
-                btnAgregarNota.classList.add('opacity-40', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-400');
-                btnAgregarNota.classList.remove('bg-sidebar', 'hover:brightness-97', 'cursor-pointer');
-            }
-            if (textoAyuda) {
-                textoAyuda.innerHTML = '<span class="text-amber-700 font-bold">Sin horario asignado para esta fecha. Acciones bloqueadas.</span>';
-            }
-        }
-    } else {
-        // MODO DOCENTE: Muestra su asignatura asignada y horario en estático
-        const badgeTexto = document.getElementById('texto-materia-estatica');
-        const docNombre = (window.docenteLogueadoNombre || '').trim().toLowerCase();
-        let miHorario = null;
-
-        if (docNombre) {
-            miHorario = materiasDelDia.find(h => {
-                if (!h.docente) return false;
-                const hDoc = h.docente.trim().toLowerCase();
-                return hDoc.includes(docNombre) || docNombre.includes(hDoc);
-            });
-        }
-        if (!miHorario && !esAdmin && materiasDelDia.length === 1) {
-            miHorario = materiasDelDia[0];
-        }
-
-        if (miHorario) {
-            selectMateria.value = miHorario.materia;
-            if (badgeTexto) {
-                badgeTexto.innerText = miHorario.materia;
-            }
-            if (bannerInfo) {
-                bannerInfo.innerText = `Horario: ${miHorario.hora}${miHorario.docente ? ' • Docente: ' + miHorario.docente : ''}`;
-            }
-            if (bannerContainer) {
-                bannerContainer.className = "px-4 py-2.5 bg-[#f7fcf6] border border-[#c4eec0] rounded-lg text-[11px] font-bold text-sidebar flex items-center gap-2 shrink-0";
-            }
-            if (btnAgregarNota) {
-                btnAgregarNota.disabled = false;
-                btnAgregarNota.classList.remove('opacity-40', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-400');
-                btnAgregarNota.classList.add('bg-sidebar', 'hover:brightness-97', 'cursor-pointer');
-            }
-            if (textoAyuda) {
-                textoAyuda.innerHTML = 'Edite los porcentajes % en el encabezado de cada columna.';
-                textoAyuda.className = "text-[11px] font-semibold text-text-secondary";
-            }
-        } else {
-            selectMateria.value = '';
-            if (badgeTexto) {
-                badgeTexto.innerText = 'Sin Asignación Hoy';
-            }
-            if (bannerInfo) {
-                bannerInfo.innerText = "No tienes clases programadas en este curso para este día.";
-            }
-            if (bannerContainer) {
-                bannerContainer.className = "px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-[11px] font-bold text-amber-800 flex items-center gap-2 shrink-0";
-            }
-            if (btnAgregarNota) {
-                btnAgregarNota.disabled = true;
-                btnAgregarNota.classList.add('opacity-40', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-400');
-                btnAgregarNota.classList.remove('bg-sidebar', 'hover:brightness-97', 'cursor-pointer');
-            }
-            if (textoAyuda) {
-                textoAyuda.innerHTML = '<span class="text-amber-700 font-bold">Sin horario asignado para esta fecha. Acciones bloqueadas.</span>';
-            }
         }
     }
 
-    if (window.lucide) lucide.createIcons();
     if (recargar) {
         recargarTablaNotas();
     }
 }
 
 function cambiarMateriaSeleccionada(materiaNombre) {
-    const diaLabel = document.getElementById('dia-nombre');
-    const diaNombre = diaLabel ? diaLabel.innerText : 'Lunes';
-    const materiaObj = horariosList.find(h => h.dia && h.dia.toLowerCase() === diaNombre.toLowerCase() && h.materia === materiaNombre);
-
-    const bannerInfo = document.getElementById('horario-info-text');
-    if (bannerInfo && materiaObj) {
-        bannerInfo.innerText = `Horario: ${materiaObj.hora}${materiaObj.docente ? ' • Docente: ' + materiaObj.docente : ''}`;
-    }
-
     recargarTablaNotas();
 }
 

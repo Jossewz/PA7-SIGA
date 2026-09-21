@@ -32,9 +32,6 @@ public class Acudiente {
     private String telefono;
 
     @Column(columnDefinition = "VARCHAR")
-    private String direccion;
-
-    @Column(columnDefinition = "VARCHAR")
     private String email;
 
     @Column(name = "created_at", updatable = false)
@@ -48,14 +45,13 @@ public class Acudiente {
     public Acudiente() {
     }
 
-    public Acudiente(String nombres, String apellidos, String parentesco, String tipoDocumento, String numeroDocumento, String telefono, String direccion) {
+    public Acudiente(String nombres, String apellidos, String parentesco, String tipoDocumento, String numeroDocumento, String telefono) {
         this.nombres = nombres;
         this.apellidos = apellidos;
         this.parentesco = parentesco;
         this.tipoDocumento = tipoDocumento;
         this.numeroDocumento = numeroDocumento;
         this.telefono = telefono;
-        this.direccion = direccion;
     }
 
     public UUID getId() {
@@ -116,14 +112,6 @@ public class Acudiente {
 
     public void setTelefono(String telefono) {
         this.telefono = telefono;
-    }
-
-    public String getDireccion() {
-        return direccion;
-    }
-
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
     }
 
     public String getEmail() {

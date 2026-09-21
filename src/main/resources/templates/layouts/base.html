@@ -28,22 +28,87 @@ th:fragment="html(content)">
     <link rel="stylesheet"
           th:href="@{/css/output.css}">
 
-    <!-- HTMX v2 (pinned) -->
-    <script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js"></script>
+    <!-- Estilos defensivos para prevención de CLS y soporte Alpine x-cloak -->
+    <style>
+        [x-cloak] { display: none !important; }
+        html.sidebar-init-collapsed #sidebar-desktop {
+            width: 74px !important;
+            padding: 32px 8px 24px !important;
+        }
+        html.sidebar-init-collapsed #sidebar-desktop .sidebar-label,
+        html.sidebar-init-collapsed #sidebar-desktop .sidebar-brand-logo {
+            display: none !important;
+        }
+        html.sidebar-init-collapsed #sidebar-desktop .sidebar-brand-header {
+            justify-content: center !important;
+            align-items: center !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        html.sidebar-init-collapsed #sidebar-desktop #sidebar-toggle-btn {
+            margin: 0 auto !important;
+        }
+        html.sidebar-init-collapsed #sidebar-desktop .sidebar-nav-item {
+            justify-content: center !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        html.sidebar-init-collapsed #sidebar-desktop .sidebar-chevron {
+            transform: rotate(180deg) !important;
+        }
+    </style>
 
-    <!-- Lucide Icons (pinned) -->
-    <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+    <!-- Script temprano de prevención de parpadeo de layout (CLS = 0) -->
+    <script>
+        try {
+            if (localStorage.getItem('siga_sidebar_open') === 'false') {
+                document.documentElement.classList.add('sidebar-init-collapsed');
+            }
+        } catch(e) {}
+    </script>
+
+    <!-- Scripts locales (cero dependencias de CDN externas) -->
+    <script th:src="@{/js/htmx.min.js}"></script>
+    <script th:src="@{/js/lucide.min.js}"></script>
+    <script defer th:src="@{/js/alpine.min.js}"></script>
 </head>
 
 <body>
 
-<div class="flex min-h-screen bg-page-bg max-md:flex-col">
+<div class="flex min-h-screen bg-page-bg max-md:flex-col"
+     x-data="{
+         sidebarOpen: (function() {
+             try {
+                 var val = localStorage.getItem('siga_sidebar_open');
+                 return val !== null ? val === 'true' : (window.innerWidth >= 1024);
+             } catch(e) {
+                 return true;
+             }
+         })(),
+         mobileOpen: false,
+         toggleSidebar() {
+             this.sidebarOpen = !this.sidebarOpen;
+             try {
+                 localStorage.setItem('siga_sidebar_open', this.sidebarOpen);
+             } catch(e) {}
+             var aside = document.getElementById('sidebar-desktop');
+             if (aside) {
+                 if (this.sidebarOpen) {
+                     aside.classList.remove('is-collapsed');
+                     document.documentElement.classList.remove('sidebar-init-collapsed');
+                 } else {
+                     aside.classList.add('is-collapsed');
+                     document.documentElement.classList.add('sidebar-init-collapsed');
+                 }
+             }
+         }
+     }">
 
     <!-- SIDEBAR -->
     <aside
       th:replace="
       ~{layouts/sidebar :: sidebar(
-        activePage=${activePage ?: 'dashboard'},
+        activePage=${activePage ?: ''},
         bottomText='',
         bottomUrl=''
       )}">
@@ -78,7 +143,33 @@ th:fragment="html(content)">
 
 </div>
 
+<!-- Funciones globales de respaldo para interactividad garantizada -->
 <script>
+    window.toggleSigaSidebar = function() {
+        var aside = document.getElementById('sidebar-desktop');
+        if (!aside) return;
+        var isCurrentlyCollapsed = aside.classList.contains('is-collapsed') || document.documentElement.classList.contains('sidebar-init-collapsed');
+        if (isCurrentlyCollapsed) {
+            aside.classList.remove('is-collapsed');
+            document.documentElement.classList.remove('sidebar-init-collapsed');
+            try { localStorage.setItem('siga_sidebar_open', 'true'); } catch(e) {}
+        } else {
+            aside.classList.add('is-collapsed');
+            document.documentElement.classList.add('sidebar-init-collapsed');
+            try { localStorage.setItem('siga_sidebar_open', 'false'); } catch(e) {}
+        }
+    };
+
+    window.openSigaMobileDrawer = function() {
+        var drawer = document.getElementById('mobile-sidebar-drawer');
+        if (drawer) drawer.style.display = 'block';
+    };
+
+    window.closeSigaMobileDrawer = function() {
+        var drawer = document.getElementById('mobile-sidebar-drawer');
+        if (drawer) drawer.style.display = 'none';
+    };
+
     if (window.lucide) lucide.createIcons();
     document.addEventListener('htmx:afterSwap', function() {
         if (window.lucide) lucide.createIcons();

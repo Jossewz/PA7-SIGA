@@ -1,3 +1,9 @@
+/* =======================================================
+   SIGA-IEA: BOLETÍN DE CALIFICACIONES (CLIENT-SIDE HELPERS)
+   La información de calificaciones y la definitiva son procesadas
+   y renderizadas desde PostgreSQL en el servidor.
+   ======================================================= */
+
 function toggleEvaluaciones(index) {
     const row = document.getElementById('eval-row-' + index);
     const icon = document.getElementById('icon-chevron-' + index);
@@ -5,10 +11,10 @@ function toggleEvaluaciones(index) {
 
     if (row.classList.contains('hidden')) {
         row.classList.remove('hidden');
-        icon.classList.add('rotate-90');
+        if (icon) icon.classList.add('rotate-90');
     } else {
         row.classList.add('hidden');
-        icon.classList.remove('rotate-90');
+        if (icon) icon.classList.remove('rotate-90');
     }
 }
 

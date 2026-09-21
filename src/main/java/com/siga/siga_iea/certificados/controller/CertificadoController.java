@@ -1,107 +1,193 @@
 package com.siga.siga_iea.certificados.controller;
 
+import com.siga.siga_iea.auth.service.CurrentUserContextService;
+import com.siga.siga_iea.certificados.entity.SolicitudCertificado;
+import com.siga.siga_iea.certificados.service.CertificadoService;
+import com.siga.siga_iea.matricula.entity.Matricula;
+import com.siga.siga_iea.matricula.service.MatriculaService;
+import com.siga.siga_iea.usuarios.entity.Estudiante;
+import com.siga.siga_iea.usuarios.entity.Usuario;
+import com.siga.siga_iea.usuarios.service.EstudianteService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.*;
 
 @Controller
 public class CertificadoController {
+
+    private final CertificadoService certificadoService;
+    private final EstudianteService estudianteService;
+    private final CurrentUserContextService currentUserContextService;
+    private final MatriculaService matriculaService;
+
+    public CertificadoController(CertificadoService certificadoService,
+                                 EstudianteService estudianteService,
+                                 CurrentUserContextService currentUserContextService,
+                                 MatriculaService matriculaService) {
+        this.certificadoService = certificadoService;
+        this.estudianteService = estudianteService;
+        this.currentUserContextService = currentUserContextService;
+        this.matriculaService = matriculaService;
+    }
+
+    private Optional<Usuario> getUsuarioLogueado() {
+        return currentUserContextService.getUsuarioAutenticado();
+    }
+
+    private Optional<Estudiante> getEstudianteLogueado() {
+        return getUsuarioLogueado()
+                .map(Usuario::getNumeroDocumento)
+                .filter(doc -> doc != null && !doc.isBlank())
+                .flatMap(estudianteService::buscarPorNumeroDocumento);
+    }
 
     @GetMapping("/certificados")
     public String index(Model model) {
         model.addAttribute("title", "Certificados y Constancias – IEACI");
         model.addAttribute("activePage", "certificados");
 
-        // Student Logged In Mock Info
-        model.addAttribute("estudianteNombre", "Mateo Álvarez Restrepo");
-        model.addAttribute("estudianteGrado", "11° - 01");
-        model.addAttribute("estudianteDocumento", "1098432101");
+        String userRole = currentUserContextService.getRolAutenticado().name();
+        boolean esAdmin = currentUserContextService.esAdmin();
+        boolean esPersonal = currentUserContextService.esPersonalAdministrativo();
+        Optional<Estudiante> estLogueadoOpt = getEstudianteLogueado();
+        boolean esEstudiante = currentUserContextService.getRolAutenticado().esEstudiante() || estLogueadoOpt.isPresent();
 
-        // Mock list of certificate requests
-        List<Map<String, Object>> solicitudesMock = new ArrayList<>();
-        
-        solicitudesMock.add(createSolicitud(
-            "CERT-2026-001",
-            "Mateo Álvarez Restrepo",
-            "1098432101",
-            "11° - 01",
-            "Constancia de matrícula",
-            "Constancias Administrativas",
-            "Trámite de subsidio familiar en Caja de Compensación",
-            "2026-07-28",
-            "Resuelto",
-            "Se expide la constancia de matrícula activa para el año lectivo 2026 firmada por Rectoría.",
-            "Constancia_Matricula_MateoAlvarez.pdf",
-            "Coordinación Académica"
-        ));
+        model.addAttribute("esAdmin", esAdmin);
+        model.addAttribute("esPersonal", esPersonal);
+        model.addAttribute("esEstudiante", esEstudiante);
+        model.addAttribute("userRole", userRole);
+        model.addAttribute("listaEstudiantes", estudianteService.listarTodos());
 
-        solicitudesMock.add(createSolicitud(
-            "CERT-2026-002",
-            "Sofia Bermúdez Castro",
-            "1098432102",
-            "11° - 01",
-            "Certificado de notas",
-            "Certificados Académicos",
-            "Ingreso a procesos de selección universitaria",
-            "2026-07-30",
-            "Resuelto",
-            "Adjunto certificado con el historial de notas por asignaturas y períodos académicos.",
-            "Certificado_Notas_SofiaBermudez.pdf",
-            "Secretaría Académica"
-        ));
+        Estudiante estudianteSeleccionado = null;
+        List<SolicitudCertificado> solicitudesEstudianteDB;
 
-        solicitudesMock.add(createSolicitud(
-            "CERT-2026-003",
-            "Mateo Álvarez Restrepo",
-            "1098432101",
-            "11° - 01",
-            "Paz y salvo",
-            "Constancias Administrativas",
-            "Verificación de estado de pago de pensión y materiales",
-            "2026-07-31",
-            "Pendiente",
-            null,
-            null,
-            null
-        ));
+        if (esEstudiante) {
+            estudianteSeleccionado = estLogueadoOpt.get();
+            solicitudesEstudianteDB = certificadoService.listarPorEstudiante(estudianteSeleccionado.getId());
+        } else {
+            List<Estudiante> todosEstudiantes = estudianteService.listarTodos();
+            if (!todosEstudiantes.isEmpty()) {
+                estudianteSeleccionado = todosEstudiantes.get(0);
+                solicitudesEstudianteDB = certificadoService.listarPorEstudiante(estudianteSeleccionado.getId());
+            } else {
+                solicitudesEstudianteDB = Collections.emptyList();
+            }
+        }
 
-        solicitudesMock.add(createSolicitud(
-            "CERT-2026-004",
-            "Juan Diego Cárdenas",
-            "1098432103",
-            "11° - 01",
-            "Certificado de comportamiento o conducta",
-            "Constancias Administrativas",
-            "Soporte de conducta escolar institucioanl",
-            "2026-07-31",
-            "Pendiente",
-            null,
-            null,
-            null
-        ));
+        if (estudianteSeleccionado != null) {
+            model.addAttribute("estudianteNombre", estudianteSeleccionado.getNombreCompleto());
+            Optional<Matricula> matOpt = matriculaService.buscarUltimaMatriculaEstudiante(estudianteSeleccionado.getId());
+            String grado = matOpt.map(m -> m.getGrado() != null ? m.getGrado() : "11°").orElse("11°");
+            model.addAttribute("estudianteGrado", grado);
+            model.addAttribute("estudianteDocumento", estudianteSeleccionado.getNumeroDocumento());
+            model.addAttribute("estudianteId", estudianteSeleccionado.getId());
+        } else {
+            model.addAttribute("estudianteNombre", "Sin estudiantes registrados");
+            model.addAttribute("estudianteGrado", "-");
+            model.addAttribute("estudianteDocumento", "-");
+            model.addAttribute("estudianteId", null);
+        }
 
-        model.addAttribute("solicitudesMock", solicitudesMock);
+        // Listar solicitudes del estudiante (privadas)
+        List<Map<String, Object>> solicitudesEstudianteMock = mapearSolicitudes(solicitudesEstudianteDB);
+        model.addAttribute("solicitudesEstudianteMock", solicitudesEstudianteMock);
+
+        // Listar todas las solicitudes para el rol administrativo
+        List<SolicitudCertificado> solicitudesTodasDB = certificadoService.listarTodas();
+        List<Map<String, Object>> solicitudesAdminMock = mapearSolicitudes(solicitudesTodasDB);
+        model.addAttribute("solicitudesAdminMock", solicitudesAdminMock);
+
+        // Compatibilidad
+        model.addAttribute("solicitudesMock", solicitudesEstudianteMock);
+
         return "certificados/index";
     }
 
-    private Map<String, Object> createSolicitud(String id, String estudiante, String doc, String grado, String tipo, String categoria, String motivo, String fecha, String estado, String mensajeRespuesta, String archivoAdjunto, String respondidoPor) {
-        Map<String, Object> s = new HashMap<>();
-        s.put("id", id);
-        s.put("estudiante", estudiante);
-        s.put("documento", doc);
-        s.put("grado", grado);
-        s.put("tipo", tipo);
-        s.put("categoria", categoria);
-        s.put("motivo", motivo);
-        s.put("fecha", fecha);
-        s.put("estado", estado);
-        s.put("mensajeRespuesta", mensajeRespuesta);
-        s.put("archivoAdjunto", archivoAdjunto);
-        s.put("respondidoPor", respondidoPor);
-        return s;
+    private List<Map<String, Object>> mapearSolicitudes(List<SolicitudCertificado> lista) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (SolicitudCertificado s : lista) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", s.getCodigo());
+            map.put("estudiante", s.getEstudiante() != null ? s.getEstudiante().getNombreCompleto() : "N/A");
+            map.put("documento", s.getEstudiante() != null ? s.getEstudiante().getNumeroDocumento() : "N/A");
+            map.put("grado", s.getGradoReferencia() != null ? s.getGradoReferencia() : "11° - 01");
+            map.put("tipo", s.getTipo());
+            map.put("categoria", s.getCategoria());
+            map.put("motivo", s.getMotivo());
+            map.put("fecha", s.getCreatedAt() != null ? s.getCreatedAt().toLocalDate().toString() : "");
+            map.put("estado", s.getEstado());
+            map.put("mensajeRespuesta", s.getMensajeRespuesta());
+            map.put("archivoAdjunto", s.getArchivoAdjuntoKey() != null ? "/storage/public/view?key=" + s.getArchivoAdjuntoKey() : null);
+            map.put("respondidoPor", s.getRespondidoPor() != null ? s.getRespondidoPor().getNombreCompleto() : "Secretaría Académica");
+            result.add(map);
+        }
+        return result;
+    }
+
+    @PostMapping("/certificados/solicitar")
+    public String solicitarCertificado(
+            @RequestParam(value = "estudianteId", required = false) UUID estudianteId,
+            @RequestParam("tipo") String tipo,
+            @RequestParam(value = "categoria", required = false) String categoria,
+            @RequestParam("motivo") String motivo,
+            @RequestParam(value = "anoLectivo", required = false, defaultValue = "2026") String anoLectivo,
+            @RequestParam(value = "gradoReferencia", required = false, defaultValue = "11°") String gradoReferencia,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            if (estudianteId == null) {
+                Optional<Estudiante> estOpt = getEstudianteLogueado();
+                if (estOpt.isPresent()) {
+                    estudianteId = estOpt.get().getId();
+                } else {
+                    throw new IllegalArgumentException("Debe seleccionar un estudiante para generar la solicitud.");
+                }
+            }
+
+            SolicitudCertificado sol = certificadoService.crearSolicitud(estudianteId, tipo, categoria, motivo, anoLectivo, gradoReferencia);
+            redirectAttributes.addFlashAttribute("mensajeExito", "Solicitud (" + sol.getCodigo() + ") de " + tipo + " enviada correctamente.");
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al solicitar certificado: " + ex.getMessage());
+        }
+
+        return "redirect:/certificados";
+    }
+
+    @PostMapping("/certificados/responder")
+    public String responderSolicitud(
+            @RequestParam("solicitudId") String solicitudIdStr,
+            @RequestParam("mensajeRespuesta") String mensajeRespuesta,
+            @RequestParam(value = "archivoPDF", required = false) MultipartFile archivoPDF,
+            @RequestParam(value = "adminId", required = false) UUID adminId,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            Optional<SolicitudCertificado> solOpt = Optional.empty();
+
+            try {
+                UUID uuid = UUID.fromString(solicitudIdStr);
+                solOpt = certificadoService.buscarPorId(uuid);
+            } catch (IllegalArgumentException ignored) {}
+
+            if (solOpt.isEmpty()) {
+                solOpt = certificadoService.buscarPorCodigo(solicitudIdStr);
+            }
+
+            if (solOpt.isEmpty()) {
+                throw new IllegalArgumentException("No se encontró la solicitud de certificado especificada.");
+            }
+
+            SolicitudCertificado sol = solOpt.get();
+            certificadoService.responderSolicitud(sol.getId(), mensajeRespuesta, archivoPDF, adminId);
+            redirectAttributes.addFlashAttribute("mensajeExito", "Solicitud " + sol.getCodigo() + " resuelta y documento adjuntado exitosamente.");
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al responder solicitud: " + ex.getMessage());
+        }
+
+        return "redirect:/certificados";
     }
 }

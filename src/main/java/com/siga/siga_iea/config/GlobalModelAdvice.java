@@ -1,52 +1,72 @@
 package com.siga.siga_iea.config;
 
-import com.siga.siga_iea.auth.security.CustomUserDetailsService;
+import com.siga.siga_iea.auth.enums.RolEnum;
+import com.siga.siga_iea.auth.service.CurrentUserContextService;
+import com.siga.siga_iea.configuracion.service.RolPermisoService;
+import com.siga.siga_iea.usuarios.entity.Docente;
 import com.siga.siga_iea.usuarios.entity.Usuario;
-import com.siga.siga_iea.usuarios.repository.UsuarioRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
-import java.util.Optional;
+import java.util.Collections;
+import java.util.Set;
 
 @ControllerAdvice
 public class GlobalModelAdvice {
 
-    private final UsuarioRepository usuarioRepository;
+    private final CurrentUserContextService userContextService;
+    private final RolPermisoService rolPermisoService;
 
-    public GlobalModelAdvice(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
+    public GlobalModelAdvice(CurrentUserContextService userContextService,
+                             RolPermisoService rolPermisoService) {
+        this.userContextService = userContextService;
+        this.rolPermisoService = rolPermisoService;
+    }
+
+    @ModelAttribute("modulosPermitidos")
+    public Set<String> populateModulosPermitidos() {
+        if (userContextService.getAuthentication().isPresent()) {
+            RolEnum rol = userContextService.getRolAutenticado();
+            return rolPermisoService.obtenerModulosPermitidos(rol.name());
+        }
+        return Collections.emptySet();
     }
 
     @ModelAttribute("currentUser")
     public Usuario populateCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
-            String email = auth.getName();
-            Optional<Usuario> userOpt = usuarioRepository.findByEmail(email);
-            return userOpt.orElse(null);
-        }
-        return null;
+        return userContextService.getUsuarioAutenticado().orElse(null);
     }
 
     @ModelAttribute("currentRoleName")
     public String populateRoleName() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
-            String email = auth.getName();
-            Optional<Usuario> userOpt = usuarioRepository.findByEmail(email);
-            if (userOpt.isPresent()) {
-                String role = CustomUserDetailsService.normalizeRole(userOpt.get().getRol());
-                return switch (role) {
-                    case "ADMIN" -> "Administrador";
-                    case "PERSONAL_ADMINISTRATIVO" -> "Personal Administrativo";
-                    case "DOCENTE" -> "Docente";
-                    case "ESTUDIANTE" -> "Estudiante";
-                    default -> role;
-                };
-            }
+        if (userContextService.getAuthentication().isPresent()) {
+            return userContextService.getRolAutenticado().getEtiqueta();
         }
         return "";
+    }
+
+    @ModelAttribute("esAdmin")
+    public boolean populateEsAdmin() {
+        return userContextService.esAdmin();
+    }
+
+    @ModelAttribute("esDocente")
+    public boolean populateEsDocente() {
+        return userContextService.esDocente();
+    }
+
+    @ModelAttribute("esAdministrativo")
+    public boolean populateEsAdministrativo() {
+        return userContextService.esPersonalAdministrativo();
+    }
+
+    @ModelAttribute("puedeAdministrarCursos")
+    public boolean populatePuedeAdministrarCursos() {
+        return userContextService.esAdminOAdministrativo();
+    }
+
+    @ModelAttribute("docenteLogueado")
+    public Docente populateDocenteLogueado() {
+        return userContextService.getDocenteAutenticado().orElse(null);
     }
 }

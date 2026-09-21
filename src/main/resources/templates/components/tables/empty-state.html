@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+    Componente Reutilizable: Estado Vacío de Tabla (Inspirado en SEGI)
+    Uso:
+    <tr th:replace="~{components/tables/empty-state :: emptyState(colspan=9, title='No se encontraron estudiantes', description='Prueba cambiando los criterios de filtro seleccionados o la búsqueda.', resetUrl='/estudiantes')}"></tr>
+-->
+<th:block th:fragment="emptyState(colspan, title, description, resetUrl)">
+    <tr>
+        <td th:colspan="${colspan ?: 7}" class="px-4 py-12 text-center">
+            <div class="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-surface-sunken text-brand-600 border border-border shadow-xs">
+                <i data-lucide="filter-x" class="size-6 stroke-2 text-brand-600"></i>
+            </div>
+            <p class="text-base font-bold text-brand-900" th:text="${title ?: 'No se encontraron registros'}">No se encontraron registros</p>
+            <p class="mt-1 text-sm text-brand-500" th:text="${description ?: 'Prueba cambiando los criterios de filtro seleccionados o el término de búsqueda.'}">Prueba cambiando los criterios de filtro seleccionados o el término de búsqueda.</p>
+            <div th:if="${resetUrl != null and !#strings.isEmpty(resetUrl)}" class="mt-4">
+                <a th:href="@{${resetUrl}}"
+                   class="inline-flex items-center gap-2 rounded-control border border-border bg-white px-4 py-2 text-xs font-bold text-brand-700 shadow-xs hover:bg-surface-muted transition cursor-pointer">
+                    <i data-lucide="rotate-ccw" class="size-3.5 stroke-2"></i>
+                    <span>Restablecer Filtros</span>
+                </a>
+            </div>
+        </td>
+    </tr>
+</th:block>
+
+</body>
+</html>

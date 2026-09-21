@@ -17,6 +17,8 @@ public interface EstudianteRepository extends JpaRepository<Estudiante, UUID> {
 
     Optional<Estudiante> findByCodigo(String codigo);
 
+    boolean existsByCodigo(String codigo);
+
     boolean existsByNumeroDocumento(String numeroDocumento);
 
     @Query("SELECT e FROM Estudiante e WHERE " +

@@ -1,7 +1,7 @@
 package com.siga.siga_iea.estudiantes.controller;
 
 import com.siga.siga_iea.matricula.entity.Matricula;
-import com.siga.siga_iea.matricula.repository.MatriculaRepository;
+import com.siga.siga_iea.matricula.service.MatriculaService;
 import com.siga.siga_iea.storage.entity.Documento;
 import com.siga.siga_iea.storage.entity.TipoDocumento;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
@@ -19,14 +19,14 @@ import java.util.*;
 public class EstudianteController {
 
     private final EstudianteService estudianteService;
-    private final MatriculaRepository matriculaRepository;
+    private final MatriculaService matriculaService;
     private final UsuarioService usuarioService;
 
     public EstudianteController(EstudianteService estudianteService,
-                                MatriculaRepository matriculaRepository,
+                                MatriculaService matriculaService,
                                 UsuarioService usuarioService) {
         this.estudianteService = estudianteService;
-        this.matriculaRepository = matriculaRepository;
+        this.matriculaService = matriculaService;
         this.usuarioService = usuarioService;
     }
 
@@ -35,12 +35,14 @@ public class EstudianteController {
     public String index(
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "estado", required = false) String estado,
+            @RequestParam(value = "nivel", required = false) String nivel,
             Model model) {
 
         model.addAttribute("title", "Gestión de Estudiantes – IEACI");
         model.addAttribute("activePage", "estudiantes");
         model.addAttribute("search", search);
         model.addAttribute("estado", estado);
+        model.addAttribute("nivel", nivel);
 
         List<Estudiante> dbEstudiantes = estudianteService.buscar(search, estado);
 
@@ -48,6 +50,22 @@ public class EstudianteController {
 
         if (!dbEstudiantes.isEmpty()) {
             for (Estudiante e : dbEstudiantes) {
+                Optional<Matricula> matOpt = matriculaService.buscarUltimaMatriculaEstudiante(e.getId());
+                String grad = matOpt.map(m -> m.getGrado() != null ? m.getGrado() : "11°").orElse("11°");
+
+                if (nivel != null && !nivel.isBlank()) {
+                    boolean isPrimaria = grad.startsWith("1") || grad.startsWith("2") || grad.startsWith("3")
+                            || grad.startsWith("4") || grad.startsWith("5")
+                            || grad.toLowerCase().contains("primaria") || grad.toLowerCase().contains("transici")
+                            || grad.toLowerCase().contains("jard");
+                    if ("PRIMARIA".equalsIgnoreCase(nivel) && !isPrimaria) {
+                        continue;
+                    }
+                    if ("BACHILLERATO".equalsIgnoreCase(nivel) && isPrimaria) {
+                        continue;
+                    }
+                }
+
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", e.getId().toString());
                 map.put("codigo", e.getCodigo() != null ? e.getCodigo() : "N/A");
@@ -55,8 +73,6 @@ public class EstudianteController {
                 map.put("numeroDocumento", e.getNumeroDocumento());
                 map.put("estado", e.getEstado() != null ? e.getEstado() : "Activo");
 
-                Optional<Matricula> matOpt = matriculaRepository.findTopByEstudianteIdOrderByFechaMatriculaDesc(e.getId());
-                String grad = matOpt.map(m -> m.getGrado() != null ? m.getGrado() : "11°").orElse("11°");
                 String sal = matOpt.map(m -> m.getSalon() != null ? m.getSalon() : "01").orElse("01");
 
                 map.put("grado", grad);
@@ -71,13 +87,6 @@ public class EstudianteController {
 
                 estudiantesList.add(map);
             }
-        } else {
-            // Fallback demo items when DB has no records yet
-            estudiantesList.add(createSampleStudent("1", "2026001", "Santiago Alejandro Gómez Pérez", "1088456123", "9°", "01", "Activo", null, null));
-            estudiantesList.add(createSampleStudent("2", "2026002", "Valeria Sofía Rodríguez Silva", "1045328901", "10°", "02", "Activo", "valeria.rodriguez@ieaci.edu.co", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80"));
-            estudiantesList.add(createSampleStudent("3", "2026003", "Mateo David Hernández Ruiz", "1045328902", "9°", "01", "Activo", null, null));
-            estudiantesList.add(createSampleStudent("4", "2026004", "Isabella López Castro", "1045328903", "11°", "01", "Activo", "isabella.lopez@ieaci.edu.co", "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=120&h=120&q=80"));
-            estudiantesList.add(createSampleStudent("5", "2026005", "Juan Sebastián Pérez Díaz", "1045328904", "8°", "03", "Retirado", null, null));
         }
 
         model.addAttribute("estudiantesList", estudiantesList);
@@ -97,120 +106,61 @@ public class EstudianteController {
             estOpt = estudianteService.buscarPorId(uuid);
         } catch (IllegalArgumentException ignored) {}
 
+        if (estOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Estudiante no encontrado.");
+            return "redirect:/estudiantes";
+        }
+
         Map<String, Object> student = new HashMap<>();
+        Estudiante e = estOpt.get();
+        student.put("id", e.getId().toString());
+        student.put("codigo", e.getCodigo() != null ? e.getCodigo() : "Sin código");
+        student.put("nombres", e.getNombres());
+        student.put("apellidos", e.getApellidos());
+        student.put("nombreCompleto", e.getNombreCompleto());
+        student.put("tipoDocumento", e.getTipoDocumento() != null ? e.getTipoDocumento() : "TI");
+        student.put("documento", (e.getTipoDocumento() != null ? e.getTipoDocumento() : "TI") + " - " + (e.getNumeroDocumento() != null ? e.getNumeroDocumento() : "Sin Doc"));
+        student.put("numeroDocumento", e.getNumeroDocumento());
+        student.put("genero", e.getGenero() != null ? e.getGenero() : "No especificado");
+        student.put("telefono", e.getTelefono() != null ? e.getTelefono() : "No especificado");
+        student.put("fechaNac", e.getFechaNacimiento() != null ? e.getFechaNacimiento().toString() : "No registrada");
+        student.put("direccion", e.getDireccion() != null ? e.getDireccion() : "No registrada");
+        student.put("estado", e.getEstado() != null ? e.getEstado() : "Activo");
 
-        if (estOpt.isPresent()) {
-            Estudiante e = estOpt.get();
-            student.put("id", e.getId().toString());
-            student.put("codigo", e.getCodigo() != null ? e.getCodigo() : "Sin código");
-            student.put("nombres", e.getNombres());
-            student.put("apellidos", e.getApellidos());
-            student.put("nombreCompleto", e.getNombreCompleto());
-            student.put("tipoDocumento", e.getTipoDocumento() != null ? e.getTipoDocumento() : "TI");
-            student.put("documento", (e.getTipoDocumento() != null ? e.getTipoDocumento() : "TI") + " - " + (e.getNumeroDocumento() != null ? e.getNumeroDocumento() : "Sin Doc"));
-            student.put("numeroDocumento", e.getNumeroDocumento());
-            student.put("genero", e.getGenero() != null ? e.getGenero() : "No especificado");
-            student.put("telefono", e.getTelefono() != null ? e.getTelefono() : "No especificado");
-            student.put("fechaNac", e.getFechaNacimiento() != null ? e.getFechaNacimiento().toString() : "No registrada");
-            student.put("direccion", e.getDireccion() != null ? e.getDireccion() : "No registrada");
-            student.put("estado", e.getEstado() != null ? e.getEstado() : "Activo");
-
-            if (e.getAcudiente() != null) {
-                student.put("acudienteNombre", e.getAcudiente().getNombreCompleto());
-                student.put("acudienteParentesco", e.getAcudiente().getParentesco() != null ? e.getAcudiente().getParentesco() : "Acudiente");
-                student.put("acudienteDoc", (e.getAcudiente().getTipoDocumento() != null ? e.getAcudiente().getTipoDocumento() : "CC") + " - " + (e.getAcudiente().getNumeroDocumento() != null ? e.getAcudiente().getNumeroDocumento() : "N/A"));
-                student.put("acudienteTel", e.getAcudiente().getTelefono() != null ? e.getAcudiente().getTelefono() : "N/A");
-                student.put("acudienteDir", e.getAcudiente().getDireccion() != null ? e.getAcudiente().getDireccion() : "N/A");
-            } else {
-                student.put("acudienteNombre", "No asignado");
-                student.put("acudienteParentesco", "-");
-                student.put("acudienteDoc", "-");
-                student.put("acudienteTel", "-");
-                student.put("acudienteDir", "-");
-            }
-
-            Optional<Matricula> matOpt = matriculaRepository.findTopByEstudianteIdOrderByFechaMatriculaDesc(e.getId());
-            String grad = matOpt.map(m -> m.getGrado() != null ? m.getGrado() : "11°").orElse("11°");
-            String sal = matOpt.map(m -> m.getSalon() != null ? m.getSalon() : "01").orElse("01");
-
-            student.put("grado", grad);
-            student.put("salon", sal);
-            student.put("curso", grad + " - " + sal);
-            student.put("anoLectivo", matOpt.map(Matricula::getAnoLectivo).orElse("-"));
-            student.put("estadoMatricula", matOpt.map(Matricula::getEstado).orElse("SIN_MATRICULA"));
-            student.put("foto", resolverFotoUrl(e, matOpt));
-
-            Optional<Usuario> usrOpt = estudianteService.obtenerUsuarioAcceso(e.getNumeroDocumento());
-            if (usrOpt.isPresent()) {
-                Usuario u = usrOpt.get();
-                student.put("tieneCuenta", true);
-                student.put("usuarioId", u.getId().toString());
-                student.put("usuarioEmail", u.getEmail());
-                student.put("usuarioRol", u.getRol());
-                student.put("usuarioEstado", u.getEstado());
-            } else {
-                student.put("tieneCuenta", false);
-                student.put("emailSugerido", estudianteService.generarEmailSugerido(e.getNombres(), e.getApellidos()));
-            }
+        if (e.getAcudiente() != null) {
+            student.put("acudienteNombre", e.getAcudiente().getNombreCompleto());
+            student.put("acudienteParentesco", e.getAcudiente().getParentesco() != null ? e.getAcudiente().getParentesco() : "Acudiente");
+            student.put("acudienteDoc", (e.getAcudiente().getTipoDocumento() != null ? e.getAcudiente().getTipoDocumento() : "CC") + " - " + (e.getAcudiente().getNumeroDocumento() != null ? e.getAcudiente().getNumeroDocumento() : "N/A"));
+            student.put("acudienteTel", e.getAcudiente().getTelefono() != null ? e.getAcudiente().getTelefono() : "N/A");
         } else {
-            // Render full sample student details
-            if ("2".equals(id)) {
-                student.put("id", "2");
-                student.put("codigo", "2026002");
-                student.put("nombres", "Valeria Sofía");
-                student.put("apellidos", "Rodríguez Silva");
-                student.put("nombreCompleto", "Valeria Sofía Rodríguez Silva");
-                student.put("tipoDocumento", "TI");
-                student.put("numeroDocumento", "1045328901");
-                student.put("documento", "TI - 1045328901");
-                student.put("genero", "Femenino");
-                student.put("fechaNac", "2010-04-14");
-                student.put("telefono", "311 456 7890");
-                student.put("direccion", "Calle 45 # 12 - 34");
-                student.put("estado", "Activo");
-                student.put("foto", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80");
-                student.put("acudienteNombre", "Martha Cecilia Silva");
-                student.put("acudienteParentesco", "Madre");
-                student.put("acudienteDoc", "CC - 45.321.456");
-                student.put("acudienteTel", "311 456 7890");
-                student.put("acudienteDir", "Calle 45 # 12 - 34");
-                student.put("grado", "10°");
-                student.put("salon", "02");
-                student.put("curso", "10° - 02");
-                student.put("anoLectivo", "2026");
-                student.put("estadoMatricula", "VIGENTE");
-                student.put("tieneCuenta", true);
-                student.put("usuarioEmail", "valeria.rodriguez@ieaci.edu.co");
-                student.put("usuarioRol", "ESTUDIANTE");
-                student.put("usuarioEstado", "Activo");
-            } else {
-                student.put("id", id);
-                student.put("codigo", "2026001");
-                student.put("nombres", "Santiago Alejandro");
-                student.put("apellidos", "Gómez Pérez");
-                student.put("nombreCompleto", "Santiago Alejandro Gómez Pérez");
-                student.put("tipoDocumento", "TI");
-                student.put("numeroDocumento", "1088456123");
-                student.put("documento", "TI - 1088456123");
-                student.put("genero", "Masculino");
-                student.put("fechaNac", "2011-08-25");
-                student.put("telefono", "300 123 4567");
-                student.put("direccion", "Manzana A Lote 5, San José");
-                student.put("estado", "Activo");
-                student.put("foto", null);
-                student.put("acudienteNombre", "Felipe Gómez Rivas");
-                student.put("acudienteParentesco", "Padre");
-                student.put("acudienteDoc", "CC - 73.123.456");
-                student.put("acudienteTel", "300 123 4567");
-                student.put("acudienteDir", "Manzana A Lote 5, San José");
-                student.put("grado", "9°");
-                student.put("salon", "01");
-                student.put("curso", "9° - 01");
-                student.put("anoLectivo", "2026");
-                student.put("estadoMatricula", "VIGENTE");
-                student.put("tieneCuenta", false);
-                student.put("emailSugerido", "santiago.gomez@ieaci.edu.co");
-            }
+            student.put("acudienteNombre", "No asignado");
+            student.put("acudienteParentesco", "-");
+            student.put("acudienteDoc", "-");
+            student.put("acudienteTel", "-");
+        }
+
+        Optional<Matricula> matOpt = matriculaService.buscarUltimaMatriculaEstudiante(e.getId());
+        String grad = matOpt.map(m -> m.getGrado() != null ? m.getGrado() : "11°").orElse("11°");
+        String sal = matOpt.map(m -> m.getSalon() != null ? m.getSalon() : "01").orElse("01");
+
+        student.put("grado", grad);
+        student.put("salon", sal);
+        student.put("curso", grad + " - " + sal);
+        student.put("anoLectivo", matOpt.map(Matricula::getAnoLectivo).orElse("-"));
+        student.put("estadoMatricula", matOpt.map(Matricula::getEstado).orElse("SIN_MATRICULA"));
+        student.put("foto", resolverFotoUrl(e, matOpt));
+
+        Optional<Usuario> usrOpt = estudianteService.obtenerUsuarioAcceso(e.getNumeroDocumento());
+        if (usrOpt.isPresent()) {
+            Usuario u = usrOpt.get();
+            student.put("tieneCuenta", true);
+            student.put("usuarioId", u.getId().toString());
+            student.put("usuarioEmail", u.getEmail());
+            student.put("usuarioRol", u.getRol());
+            student.put("usuarioEstado", u.getEstado());
+        } else {
+            student.put("tieneCuenta", false);
+            student.put("emailSugerido", estudianteService.generarEmailSugerido(e.getNombres(), e.getApellidos()));
         }
 
         model.addAttribute("student", student);
@@ -256,6 +206,19 @@ public class EstudianteController {
         return "redirect:/estudiantes/perfil/" + id;
     }
 
+    @PostMapping("/estudiantes/{id}/eliminar")
+    public String eliminarEstudiante(@PathVariable String id, RedirectAttributes redirectAttributes) {
+        try {
+            UUID uuid = UUID.fromString(id);
+            estudianteService.eliminarEstudiante(uuid);
+            redirectAttributes.addFlashAttribute("mensajeExito", "Estudiante y todos sus registros vinculados fueron eliminados correctamente.");
+        } catch (Exception ex) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al eliminar estudiante: " + ex.getMessage());
+        }
+
+        return "redirect:/estudiantes";
+    }
+
     private String resolverFotoUrl(Estudiante e, Optional<Matricula> matOpt) {
         String key = e.getFotoKey();
 
@@ -272,21 +235,5 @@ public class EstudianteController {
 
         if (key == null || key.isBlank()) return null;
         return key.startsWith("http") ? key : "/storage/public/view?key=" + key;
-    }
-
-    private Map<String, Object> createSampleStudent(String id, String codigo, String nombreCompleto, String doc, String grado, String salon, String estado, String email, String foto) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", id);
-        map.put("codigo", codigo);
-        map.put("nombreCompleto", nombreCompleto);
-        map.put("numeroDocumento", doc);
-        map.put("grado", grado);
-        map.put("salon", salon);
-        map.put("curso", grado + " - " + salon);
-        map.put("estado", estado);
-        map.put("tieneCuenta", email != null);
-        map.put("usuarioEmail", email);
-        map.put("foto", foto);
-        return map;
     }
 }

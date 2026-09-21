@@ -13,10 +13,10 @@
             <div>
                 <div class="flex justify-between items-center mb-1.5">
                     <span class="text-xs font-extrabold text-text-primary">Índice de Asistencia</span>
-                    <span class="text-xs font-black text-sidebar">94%</span>
+                    <span class="text-xs font-black text-sidebar" th:text="${stats.asistenciaHoy}">0%</span>
                 </div>
                 <div class="w-full bg-[#f1f5f1] h-2.5 rounded-full overflow-hidden">
-                    <div class="bg-sidebar h-full rounded-full transition-all duration-500" style="width: 94%"></div>
+                    <div class="bg-sidebar h-full rounded-full transition-all duration-500" style="width: 0%"></div>
                 </div>
             </div>
 
@@ -24,19 +24,19 @@
             <div class="grid grid-cols-2 gap-4 mt-1">
                 <div class="p-3 bg-[#eafbe4]/40 border border-[#c4eec0]/20 rounded-lg">
                     <span class="block text-[10px] font-bold text-text-secondary uppercase">Inasistencias Semana</span>
-                    <strong class="text-lg font-black text-sidebar">182</strong>
+                    <strong class="text-lg font-black text-sidebar">0</strong>
                 </div>
                 <div class="p-3 bg-[#eafbe4]/40 border border-[#c4eec0]/20 rounded-lg">
                     <span class="block text-[10px] font-bold text-text-secondary uppercase">Promedio General</span>
-                    <strong class="text-lg font-black text-sidebar">4.1 <span class="text-[10px] font-semibold text-text-secondary">/ 5.0</span></strong>
+                    <strong class="text-lg font-black text-sidebar">0.0 <span class="text-[10px] font-semibold text-text-secondary">/ 5.0</span></strong>
                 </div>
                 <div class="p-3 bg-[#eafbe4]/40 border border-[#c4eec0]/20 rounded-lg">
                     <span class="block text-[10px] font-bold text-text-secondary uppercase">Estudiantes en Riesgo</span>
-                    <strong class="text-lg font-black text-alert-red">27</strong>
+                    <strong class="text-lg font-black text-alert-red" th:text="${#lists.size(stats.estudiantesAtencion)}">0</strong>
                 </div>
                 <div class="p-3 bg-[#eafbe4]/40 border border-[#c4eec0]/20 rounded-lg">
                     <span class="block text-[10px] font-bold text-text-secondary uppercase">Posible Deserción</span>
-                    <strong class="text-lg font-black text-alert-red">5</strong>
+                    <strong class="text-lg font-black text-alert-red">0</strong>
                 </div>
             </div>
 
@@ -45,7 +45,8 @@
                     <i data-lucide="scale" class="size-4.5 text-text-secondary stroke-[2]"></i>
                     <span class="font-bold text-text-primary">Convivencia Escolar</span>
                 </div>
-                <span class="font-extrabold px-2.5 py-0.5 rounded-full bg-pill-red text-alert-red text-[10px]">14 reportes disciplinarios</span>
+                <span class="font-extrabold px-2.5 py-0.5 rounded-full bg-pill-red text-alert-red text-[10px]"
+                      th:text="${stats.totalReportes + ' reportes disciplinarios'}">0 reportes disciplinarios</span>
             </div>
         </div>
     </article>

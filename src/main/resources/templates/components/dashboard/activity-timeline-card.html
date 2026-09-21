@@ -9,35 +9,14 @@
         </h3>
 
         <div class="relative border-l border-[#c4eec0]/40 ml-2.5 pl-6 space-y-4 flex-1">
-            <!-- Movimiento 1 -->
-            <div class="relative">
-                <span class="absolute -left-[30px] top-1 flex items-center justify-center w-[12px] h-[12px] rounded-full bg-sidebar border-2 border-white"></span>
-                <p class="text-xs font-extrabold text-text-primary leading-snug">Matrícula nueva registrada en sistema</p>
-                <time class="text-[10px] text-text-muted font-bold uppercase tracking-wider">Hace 15 mins</time>
+            <div th:if="${#lists.isEmpty(stats.actividadTimeline)}" class="py-4 text-xs text-text-muted italic">
+                Sin actividad reciente registrada en el sistema.
             </div>
-            <!-- Movimiento 2 -->
-            <div class="relative">
+            
+            <div th:each="item : ${stats.actividadTimeline}" class="relative">
                 <span class="absolute -left-[30px] top-1 flex items-center justify-center w-[12px] h-[12px] rounded-full bg-sidebar border-2 border-white"></span>
-                <p class="text-xs font-extrabold text-text-primary leading-snug">Certificado académico generado</p>
-                <time class="text-[10px] text-text-muted font-bold uppercase tracking-wider">Hace 2 horas</time>
-            </div>
-            <!-- Movimiento 3 -->
-            <div class="relative">
-                <span class="absolute -left-[30px] top-1 flex items-center justify-center w-[12px] h-[12px] rounded-full bg-sidebar border-2 border-white"></span>
-                <p class="text-xs font-extrabold text-text-primary leading-snug">Docente registrado: Lic. Clara Inés</p>
-                <time class="text-[10px] text-text-muted font-bold uppercase tracking-wider">Hace 4 horas</time>
-            </div>
-            <!-- Movimiento 4 -->
-            <div class="relative">
-                <span class="absolute -left-[30px] top-1 flex items-center justify-center w-[12px] h-[12px] rounded-full bg-sidebar border-2 border-white"></span>
-                <p class="text-xs font-extrabold text-text-primary leading-snug">Curso creado: Grado 8-B (Jornada Mañana)</p>
-                <time class="text-[10px] text-text-muted font-bold uppercase tracking-wider">Ayer</time>
-            </div>
-            <!-- Movimiento 5 -->
-            <div class="relative">
-                <span class="absolute -left-[30px] top-1 flex items-center justify-center w-[12px] h-[12px] rounded-full bg-sidebar border-2 border-white"></span>
-                <p class="text-xs font-extrabold text-text-primary leading-snug">Calificación periódica consolidada</p>
-                <time class="text-[10px] text-text-muted font-bold uppercase tracking-wider">Ayer</time>
+                <p class="text-xs font-extrabold text-text-primary leading-snug" th:text="${item.titulo}">Actividad registrada</p>
+                <time class="text-[10px] text-text-muted font-bold uppercase tracking-wider" th:text="${item.tiempo}">Tiempo</time>
             </div>
         </div>
     </article>

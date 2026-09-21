@@ -77,6 +77,10 @@ public class Usuario {
         return rol;
     }
 
+    public com.siga.siga_iea.auth.enums.RolEnum getRolEnum() {
+        return com.siga.siga_iea.auth.enums.RolEnum.from(this.rol);
+    }
+
     public void setRol(String rol) {
         this.rol = rol;
     }

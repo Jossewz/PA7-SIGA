@@ -17,4 +17,9 @@ public class MatriculaService {
     public Matricula guardar(Matricula matricula) {
         return matriculaRepository.save(matricula);
     }
+
+    @Transactional(readOnly = true)
+    public java.util.Optional<Matricula> buscarUltimaMatriculaEstudiante(java.util.UUID estudianteId) {
+        return matriculaRepository.findTopByEstudianteIdOrderByFechaMatriculaDesc(estudianteId);
+    }
 }

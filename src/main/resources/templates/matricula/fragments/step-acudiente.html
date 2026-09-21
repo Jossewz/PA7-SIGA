@@ -23,7 +23,6 @@
                 <div th:replace="~{components/forms/field-input :: fieldInput('Número de Identificación', 'parent-id', 'parentId', ${parentId}, 'CC / CE / Nit', true, 'text', null, null, null, null)}"></div>
                 <div th:replace="~{components/forms/field-select :: fieldSelect('Parentesco', 'parent-relation', 'parentRelation', ${parentRelation}, ${ { 'madre': 'Madre', 'padre': 'Padre', 'tutor': 'Tutor Legal', 'otro': 'Otro' } }, true)}"></div>
                 <div th:replace="~{components/forms/field-phone :: fieldPhone('Teléfono de Contacto', 'parent-phone', 'parentPhone', ${parentPhone}, '+57 300 000 0000', true)}"></div>
-                <div class="col-span-2 max-md:col-span-1" th:replace="~{components/forms/field-input :: fieldInput('Dirección de Residencia', 'parent-address', 'parentAddress', ${parentAddress}, 'Calle, Carrera, Barrio', true, 'text', null, null, null, null)}"></div>
             </form>
 
             <!-- Upload Section -->

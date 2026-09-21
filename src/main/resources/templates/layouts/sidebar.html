@@ -3,132 +3,247 @@ th:fragment="sidebar(activePage, bottomText, bottomUrl)"
 xmlns:th="http://www.thymeleaf.org"
 xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-    <aside class="sticky top-0 w-[244px] h-screen p-[32px_16px_24px] flex flex-col bg-sidebar text-sidebar-text shadow-[inset_-1px_0_0_rgba(255,255,255,0.08)] overflow-hidden max-md:static max-md:w-full max-md:h-auto max-md:p-4 max-md:overflow-visible">
+    <!-- ═══ DESKTOP SIDEBAR (Colapsable y Persistente - Estilo SEGI) ═══ -->
+    <aside id="sidebar-desktop"
+           class="sticky top-0 h-screen flex flex-col bg-sidebar text-sidebar-text shadow-[inset_-1px_0_0_rgba(255,255,255,0.08)] overflow-hidden shrink-0 hidden md:flex"
+           :class="{ 'is-collapsed': !sidebarOpen }">
 
-        <a th:href="@{/}" class="flex items-center gap-3 m-[4px_20px_40px] text-sidebar-text uppercase max-md:m-[0_4px_16px]" aria-label="IEACI Institutional">
-            <span class="grid place-items-center w-5.5 h-5.5" aria-hidden="true">
-                <i data-lucide="leaf" class="size-[18px] stroke-2 fill-sidebar-text"></i>
-            </span>
+        <!-- Logo / Marca + Toggle Único (Estilo SEGI: al colapsar se oculta el logo y solo queda el botón toggle centrado) -->
+        <div class="flex items-center mb-8 transition-all duration-200 px-0.5 sidebar-brand-header w-full"
+             :class="sidebarOpen ? 'justify-between' : 'justify-center'">
+            <a th:href="@{/}" 
+               x-show="sidebarOpen" 
+               x-cloak 
+               class="sidebar-brand-logo flex items-center gap-2.5 text-sidebar-text uppercase min-w-0" 
+               aria-label="IEACI Institutional">
+                <span class="grid place-items-center size-8 rounded-lg bg-white/10 shrink-0 text-sidebar-text" aria-hidden="true">
+                    <i data-lucide="leaf" class="size-5 stroke-2 fill-sidebar-text"></i>
+                </span>
 
-            <span class="grid gap-[2px]">
-                <strong class="text-[15px] leading-[0.92] font-black tracking-normal">IEACI<br>Institutional</strong>
-                <small class="text-[8px] leading-none font-extrabold tracking-[0.6px] opacity-86">Editorial Archive</small>
-            </span>
-        </a>
+                <span class="grid gap-[2px] whitespace-nowrap transition-opacity sidebar-label">
+                    <strong class="text-[13px] leading-[0.95] font-black tracking-normal">IEACI<br>Institutional</strong>
+                    <small class="text-[8px] leading-none font-extrabold tracking-[0.6px] opacity-80">Editorial Archive</small>
+                </span>
+            </a>
 
-        <nav class="sidebar-nav flex flex-col gap-2 min-h-0 overflow-y-auto pr-0.5 max-md:grid max-md:grid-cols-3 max-md:overflow-visible max-md:pr-0 max-sm:grid-cols-2" aria-label="Navegacion principal">
+            <!-- Botón Toggle Único -->
+            <button id="sidebar-toggle-btn"
+                    type="button"
+                    @click.stop.prevent="toggleSidebar()"
+                    class="size-8 rounded-lg bg-white/10 hover:bg-white/20 text-sidebar-text/90 hover:text-white grid place-items-center transition cursor-pointer shrink-0"
+                    :class="sidebarOpen ? 'ml-1' : 'mx-auto'"
+                    :title="sidebarOpen ? 'Contraer menú lateral' : 'Expandir menú lateral'">
+                <i data-lucide="chevron-left" class="size-4.5 stroke-2 transition-transform duration-200 sidebar-chevron" :class="sidebarOpen ? '' : 'rotate-180'"></i>
+            </button>
+        </div>
 
-            <!-- Inicio: Todos los usuarios -->
+        <!-- Navegación Principal -->
+        <nav class="sidebar-nav flex flex-col gap-1.5 min-h-0 overflow-y-auto pr-0.5" aria-label="Navegación principal">
+
+            <!-- Inicio -->
             <a th:href="@{/}"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
-               th:classappend="${activePage == 'dashboard'} ? 'bg-white/12 text-white'">
-                <i data-lucide="home" class="size-[18px] shrink-0 stroke-2"></i>
-                <span>Inicio</span>
+               class="sidebar-nav-item"
+               th:classappend="${(activePage == 'dashboard' or (#httpServletRequest != null and #strings.equals(#httpServletRequest.requestURI, '/'))) ? 'is-active' : ''}"
+               title="Inicio">
+                <i data-lucide="home" class="size-5 shrink-0 stroke-2"></i>
+                <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Inicio</span>
             </a>
 
-            <!-- Matricula: ADMIN, PERSONAL_ADMINISTRATIVO -->
+            <!-- Matrícula -->
             <a th:href="@{/matricula}"
-               sec:authorize="hasAnyRole('ADMIN', 'PERSONAL_ADMINISTRATIVO')"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
-               th:classappend="${activePage == 'matricula'} ? 'bg-white/12 text-white'">
-                <i data-lucide="user-plus" class="size-[18px] shrink-0 stroke-2"></i>
-                <span>Matricula</span>
+               th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MATRICULAS'))}"
+               class="sidebar-nav-item"
+               th:classappend="${(activePage == 'matricula' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/matricula'))) ? 'is-active' : ''}"
+               title="Matrícula">
+                <i data-lucide="user-plus" class="size-5 shrink-0 stroke-2"></i>
+                <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Matrícula</span>
             </a>
 
-            <!-- Calificaciones: Todos -->
+            <!-- Calificaciones -->
             <a th:href="@{/calificaciones}"
-               sec:authorize="hasAnyRole('ADMIN', 'PERSONAL_ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
-               th:classappend="${activePage == 'calificaciones'} ? 'bg-white/12 text-white'">
-                <i data-lucide="star" class="size-[18px] shrink-0 stroke-2"></i>
-                <span>Calificaciones</span>
+               th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CALIFICACIONES'))}"
+               class="sidebar-nav-item"
+               th:classappend="${(activePage == 'calificaciones' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/calificaciones'))) ? 'is-active' : ''}"
+               title="Calificaciones">
+                <i data-lucide="star" class="size-5 shrink-0 stroke-2"></i>
+                <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Calificaciones</span>
             </a>
 
-
-            <!-- Certificados: ADMIN, PERSONAL_ADMINISTRATIVO, ESTUDIANTE -->
+            <!-- Certificados -->
             <a th:href="@{/certificados}"
-               sec:authorize="hasAnyRole('ADMIN', 'PERSONAL_ADMINISTRATIVO', 'ESTUDIANTE')"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
-               th:classappend="${activePage == 'certificados'} ? 'bg-white/12 text-white'">
-                <i data-lucide="badge-check" class="size-[18px] shrink-0 stroke-2"></i>
-                <span>Certificados</span>
+               th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CERTIFICADOS'))}"
+               class="sidebar-nav-item"
+               th:classappend="${(activePage == 'certificados' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/certificados'))) ? 'is-active' : ''}"
+               title="Certificados">
+                <i data-lucide="badge-check" class="size-5 shrink-0 stroke-2"></i>
+                <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Certificados</span>
             </a>
 
-            <!-- Reportes: Todos -->
+            <!-- Reportes -->
             <a th:href="@{/reportes}"
-               sec:authorize="hasAnyRole('ADMIN', 'PERSONAL_ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
-               th:classappend="${activePage == 'reportes'} ? 'bg-white/12 text-white'">
-                <i data-lucide="bar-chart-3" class="size-[18px] shrink-0 stroke-2"></i>
-                <span>Reportes</span>
+               th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('REPORTES'))}"
+               class="sidebar-nav-item"
+               th:classappend="${(activePage == 'reportes' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/reportes'))) ? 'is-active' : ''}"
+               title="Reportes">
+                <i data-lucide="bar-chart-3" class="size-5 shrink-0 stroke-2"></i>
+                <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Reportes</span>
             </a>
 
-            <!-- Modulo Ambiental: ADMIN, PERSONAL_ADMINISTRATIVO -->
+            <!-- Módulo Ambiental -->
             <a th:href="@{/ambiental}"
-               sec:authorize="hasAnyRole('ADMIN', 'PERSONAL_ADMINISTRATIVO')"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
-               th:classappend="${activePage == 'ambiental'} ? 'bg-white/12 text-white'">
-                <i data-lucide="sprout" class="size-[18px] shrink-0 stroke-2"></i>
-                <span>Modulo Ambiental</span>
+               th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MODULO_AMBIENTAL'))}"
+               class="sidebar-nav-item"
+               th:classappend="${(activePage == 'ambiental' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/ambiental'))) ? 'is-active' : ''}"
+               title="Módulo Ambiental">
+                <i data-lucide="sprout" class="size-5 shrink-0 stroke-2"></i>
+                <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Módulo Ambiental</span>
             </a>
 
-            <!-- Personal: ADMIN, PERSONAL_ADMINISTRATIVO -->
+            <!-- Personal -->
             <a th:href="@{/personal}"
-               sec:authorize="hasAnyRole('ADMIN', 'PERSONAL_ADMINISTRATIVO')"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
-               th:classappend="${activePage == 'personal'} ? 'bg-white/12 text-white'">
-                <i data-lucide="users" class="size-[18px] shrink-0 stroke-2"></i>
-                <span>Personal</span>
+               th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('PERSONAL'))}"
+               class="sidebar-nav-item"
+               th:classappend="${(activePage == 'personal' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/personal'))) ? 'is-active' : ''}"
+               title="Personal">
+                <i data-lucide="users" class="size-5 shrink-0 stroke-2"></i>
+                <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Personal</span>
             </a>
 
-            <!-- Estudiantes: ADMIN, PERSONAL_ADMINISTRATIVO, DOCENTE -->
+            <!-- Estudiantes -->
             <a th:href="@{/estudiantes}"
-               sec:authorize="hasAnyRole('ADMIN', 'PERSONAL_ADMINISTRATIVO', 'DOCENTE')"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
-               th:classappend="${activePage == 'estudiantes'} ? 'bg-white/12 text-white'">
-                <i data-lucide="user-check" class="size-[18px] shrink-0 stroke-2"></i>
-                <span>Estudiantes</span>
+               th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MATRICULAS'))}"
+               class="sidebar-nav-item"
+               th:classappend="${(activePage == 'estudiantes' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/estudiantes'))) ? 'is-active' : ''}"
+               title="Estudiantes">
+                <i data-lucide="user-check" class="size-5 shrink-0 stroke-2"></i>
+                <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Estudiantes</span>
             </a>
 
-            <!-- Cursos: ADMIN, PERSONAL_ADMINISTRATIVO, DOCENTE -->
+            <!-- Cursos -->
             <a th:href="@{/clases}"
-               sec:authorize="hasAnyRole('ADMIN', 'PERSONAL_ADMINISTRATIVO', 'DOCENTE')"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
-               th:classappend="${activePage == 'clases'} ? 'bg-white/12 text-white'">
-                <i data-lucide="graduation-cap" class="size-[18px] shrink-0 stroke-2"></i>
-                <span>Cursos</span>
+               th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CURSOS_HORARIOS'))}"
+               class="sidebar-nav-item"
+               th:classappend="${(activePage == 'clases' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/clases'))) ? 'is-active' : ''}"
+               title="Cursos">
+                <i data-lucide="graduation-cap" class="size-5 shrink-0 stroke-2"></i>
+                <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Cursos</span>
             </a>
 
-            <!-- Configuracion: ADMIN, PERSONAL_ADMINISTRATIVO -->
+            <!-- Configuración -->
             <a th:href="@{/configuracion}"
-               sec:authorize="hasAnyRole('ADMIN', 'PERSONAL_ADMINISTRATIVO')"
-               class="min-h-[46px] flex items-center gap-3 px-[18px] rounded-[7px] text-sidebar-text/72 text-sm font-medium transition-all duration-200 hover:bg-white/12 hover:text-white max-md:justify-center max-md:px-2.5"
-               th:classappend="${activePage == 'configuracion'} ? 'bg-white/12 text-white'">
-                <i data-lucide="settings" class="size-[18px] shrink-0 stroke-2"></i>
-                <span>Configuración</span>
+               th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CONFIGURACION'))}"
+               class="sidebar-nav-item"
+               th:classappend="${(activePage == 'configuracion' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/configuracion'))) ? 'is-active' : ''}"
+               title="Configuración">
+                <i data-lucide="settings" class="size-5 shrink-0 stroke-2"></i>
+                <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Configuración</span>
             </a>
 
         </nav>
 
-        <div class="mt-auto flex flex-col gap-3.5 max-md:hidden">
-
-            <a th:href="${bottomUrl}"
-               class="min-h-[44px] flex items-center gap-3 px-[18px] rounded-lg text-[13px] font-semibold bg-action-btn text-action-btn-text hover:brightness-97 transition-all">
-                <i data-lucide="headphones" class="size-[18px] shrink-0 stroke-2"></i>
-                <span th:text="${bottomText}">Soporte Tecnico</span>
-            </a>
-
-            <form th:action="@{/logout}" method="post" class="w-full">
-                <button type="submit"
-                        class="w-full min-h-[44px] flex items-center gap-3 px-[18px] rounded-lg text-[13px] font-semibold text-sidebar-text/72 hover:text-white hover:bg-white/12 transition-all cursor-pointer">
-                    <i data-lucide="log-out" class="size-[18px] shrink-0 stroke-2"></i>
-                    <span>Cerrar Sesión</span>
-                </button>
-            </form>
-
-        </div>
-
     </aside>
 
-</th:block>
+    <!-- ═══ DRAWER MÓVIL (<768px) ═══ -->
+    <div id="mobile-sidebar-drawer" x-show="mobileOpen" x-cloak class="md:hidden">
+        <!-- Backdrop oscuro -->
+        <div class="fixed inset-0 z-50 bg-black/50 transition-opacity"
+             x-show="mobileOpen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="mobileOpen = false"
+             onclick="window.closeSigaMobileDrawer && window.closeSigaMobileDrawer()"></div>
 
+        <!-- Panel lateral deslizante -->
+        <div class="fixed inset-y-0 left-0 z-50 flex w-[280px] max-w-[85vw] flex-col bg-sidebar text-sidebar-text shadow-2xl p-5"
+             x-show="mobileOpen"
+             x-transition:enter="transition ease-out duration-250"
+             x-transition:enter-start="-translate-x-full"
+             x-transition:enter-end="translate-x-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="translate-x-0"
+             x-transition:leave-end="-translate-x-full"
+             @click="if ($event.target.closest('a')) mobileOpen = false">
+
+            <!-- Cabecera del drawer móvil -->
+            <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <span class="grid place-items-center size-8 rounded-lg bg-white/10 shrink-0 text-sidebar-text">
+                        <i data-lucide="leaf" class="size-5 stroke-2 fill-sidebar-text"></i>
+                    </span>
+                    <strong class="text-sm font-black uppercase tracking-tight">IEACI Institutional</strong>
+                </div>
+                <button type="button" @click="mobileOpen = false" onclick="window.closeSigaMobileDrawer && window.closeSigaMobileDrawer()" class="size-8 rounded-lg bg-white/10 hover:bg-white/20 text-sidebar-text grid place-items-center transition cursor-pointer">
+                    <i data-lucide="x" class="size-4 stroke-2"></i>
+                </button>
+            </div>
+
+            <!-- Navegación móvil -->
+            <nav class="flex-1 overflow-y-auto space-y-1">
+                <a th:href="@{/}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
+                   th:classappend="${(activePage == 'dashboard' or (#httpServletRequest != null and #strings.equals(#httpServletRequest.requestURI, '/'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                    <i data-lucide="home" class="size-5 stroke-2"></i>
+                    <span>Inicio</span>
+                </a>
+                <a th:href="@{/matricula}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MATRICULAS'))}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
+                   th:classappend="${(activePage == 'matricula' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/matricula'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                    <i data-lucide="user-plus" class="size-5 stroke-2"></i>
+                    <span>Matrícula</span>
+                </a>
+                <a th:href="@{/calificaciones}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CALIFICACIONES'))}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
+                   th:classappend="${(activePage == 'calificaciones' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/calificaciones'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                    <i data-lucide="star" class="size-5 stroke-2"></i>
+                    <span>Calificaciones</span>
+                </a>
+                <a th:href="@{/certificados}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CERTIFICADOS'))}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
+                   th:classappend="${(activePage == 'certificados' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/certificados'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                    <i data-lucide="badge-check" class="size-5 stroke-2"></i>
+                    <span>Certificados</span>
+                </a>
+                <a th:href="@{/reportes}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('REPORTES'))}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
+                   th:classappend="${(activePage == 'reportes' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/reportes'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                    <i data-lucide="bar-chart-3" class="size-5 stroke-2"></i>
+                    <span>Reportes</span>
+                </a>
+                <a th:href="@{/ambiental}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MODULO_AMBIENTAL'))}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
+                   th:classappend="${(activePage == 'ambiental' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/ambiental'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                    <i data-lucide="sprout" class="size-5 stroke-2"></i>
+                    <span>Módulo Ambiental</span>
+                </a>
+                <a th:href="@{/personal}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('PERSONAL'))}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
+                   th:classappend="${(activePage == 'personal' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/personal'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                    <i data-lucide="users" class="size-5 stroke-2"></i>
+                    <span>Personal</span>
+                </a>
+                <a th:href="@{/estudiantes}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MATRICULAS'))}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
+                   th:classappend="${(activePage == 'estudiantes' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/estudiantes'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                    <i data-lucide="user-check" class="size-5 stroke-2"></i>
+                    <span>Estudiantes</span>
+                </a>
+                <a th:href="@{/clases}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CURSOS_HORARIOS'))}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
+                   th:classappend="${(activePage == 'clases' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/clases'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                    <i data-lucide="graduation-cap" class="size-5 stroke-2"></i>
+                    <span>Cursos</span>
+                </a>
+                <a th:href="@{/configuracion}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CONFIGURACION'))}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
+                   th:classappend="${(activePage == 'configuracion' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/configuracion'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                    <i data-lucide="settings" class="size-5 stroke-2"></i>
+                    <span>Configuración</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+
+</th:block>

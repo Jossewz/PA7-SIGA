@@ -32,6 +32,7 @@ public class PersonalController {
             @RequestParam(value = "cargo", required = false) String cargo,
             @RequestParam(value = "area", required = false) String area,
             @RequestParam(value = "estado", required = false) String estado,
+            @RequestParam(value = "tipo", required = false) String tipo,
             Model model) {
 
         model.addAttribute("title", "Gestión de Personal – IEACI");
@@ -40,49 +41,53 @@ public class PersonalController {
         model.addAttribute("cargo", cargo);
         model.addAttribute("area", area);
         model.addAttribute("estado", estado);
+        model.addAttribute("tipo", tipo);
 
         List<Map<String, Object>> personalList = new ArrayList<>();
 
         // Fetch Docentes
-        List<Docente> docentes = personalService.buscarDocentes(search, estado);
-        for (Docente d : docentes) {
-            if (cargo != null && !cargo.isBlank() && !"Docente".equalsIgnoreCase(cargo)) continue;
-            if (area != null && !area.isBlank() && !"Académica".equalsIgnoreCase(area)) continue;
+        if (tipo == null || tipo.isBlank() || "todos".equalsIgnoreCase(tipo) || "DOCENTE".equalsIgnoreCase(tipo)) {
+            List<Docente> docentes = personalService.buscarDocentes(search, estado);
+            for (Docente d : docentes) {
+                if (cargo != null && !cargo.isBlank() && !"Docente".equalsIgnoreCase(cargo)) continue;
+                if (area != null && !area.isBlank() && !"Académica".equalsIgnoreCase(area)) continue;
 
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", d.getId().toString());
-            map.put("tipo", "DOCENTE");
-            map.put("tipoPersona", "docente");
-            map.put("nombres", d.getNombres() != null ? d.getNombres() : "Docente");
-            map.put("apellidos", d.getApellidos() != null ? d.getApellidos() : "");
-            map.put("nombreCompleto", d.getNombreCompleto());
-            map.put("cargo", "Docente");
-            map.put("area", "Académica");
-            map.put("estado", d.getEstado() != null ? d.getEstado() : "Activo");
-            map.put("tipoDocumento", d.getTipoDocumento() != null ? d.getTipoDocumento() : "CC");
-            map.put("numeroDocumento", d.getNumeroDocumento());
-            map.put("telefono", d.getTelefono() != null ? d.getTelefono() : "3001234567");
-            map.put("foto", d.getFotoKey() != null ? "/storage/public/view?key=" + d.getFotoKey() : null);
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", d.getId().toString());
+                map.put("tipo", "DOCENTE");
+                map.put("tipoPersona", "docente");
+                map.put("nombres", d.getNombres() != null ? d.getNombres() : "Docente");
+                map.put("apellidos", d.getApellidos() != null ? d.getApellidos() : "");
+                map.put("nombreCompleto", d.getNombreCompleto());
+                map.put("cargo", "Docente");
+                map.put("area", "Académica");
+                map.put("estado", d.getEstado() != null ? d.getEstado() : "Activo");
+                map.put("tipoDocumento", d.getTipoDocumento() != null ? d.getTipoDocumento() : "CC");
+                map.put("numeroDocumento", d.getNumeroDocumento());
+                map.put("telefono", d.getTelefono() != null ? d.getTelefono() : "3001234567");
+                map.put("foto", d.getFotoKey() != null ? "/storage/public/view?key=" + d.getFotoKey() : null);
 
-            Optional<Usuario> usrOpt = personalService.obtenerUsuarioAcceso(d.getNumeroDocumento());
-            map.put("tieneCuenta", usrOpt.isPresent());
-            map.put("email", usrOpt.map(Usuario::getEmail).orElse("jrojas@ieaci.edu.co"));
-            map.put("correo", usrOpt.map(Usuario::getEmail).orElse("jrojas@ieaci.edu.co"));
-            map.put("usuarioEstado", usrOpt.map(Usuario::getEstado).orElse(null));
+                Optional<Usuario> usrOpt = personalService.obtenerUsuarioAcceso(d.getNumeroDocumento());
+                map.put("tieneCuenta", usrOpt.isPresent());
+                map.put("email", usrOpt.map(Usuario::getEmail).orElse("jrojas@ieaci.edu.co"));
+                map.put("correo", usrOpt.map(Usuario::getEmail).orElse("jrojas@ieaci.edu.co"));
+                map.put("usuarioEstado", usrOpt.map(Usuario::getEstado).orElse(null));
 
-            personalList.add(map);
+                personalList.add(map);
+            }
         }
 
         // Fetch PersonalAdministrativo
-        List<PersonalAdministrativo> personalAdmin = personalService.buscarPersonal(search, cargo, area, estado);
-        for (PersonalAdministrativo p : personalAdmin) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", p.getId().toString());
-            map.put("tipo", "ADMINISTRATIVO");
-            map.put("tipoPersona", "personal");
-            map.put("nombres", p.getNombres() != null ? p.getNombres() : "Personal");
-            map.put("apellidos", p.getApellidos() != null ? p.getApellidos() : "");
-            map.put("nombreCompleto", p.getNombreCompleto());
+        if (tipo == null || tipo.isBlank() || "todos".equalsIgnoreCase(tipo) || "ADMINISTRATIVO".equalsIgnoreCase(tipo)) {
+            List<PersonalAdministrativo> personalAdmin = personalService.buscarPersonal(search, cargo, area, estado);
+            for (PersonalAdministrativo p : personalAdmin) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", p.getId().toString());
+                map.put("tipo", "ADMINISTRATIVO");
+                map.put("tipoPersona", "personal");
+                map.put("nombres", p.getNombres() != null ? p.getNombres() : "Personal");
+                map.put("apellidos", p.getApellidos() != null ? p.getApellidos() : "");
+                map.put("nombreCompleto", p.getNombreCompleto());
             map.put("cargo", p.getCargo() != null ? p.getCargo() : "Administrativo");
             map.put("area", p.getArea() != null ? p.getArea() : "Administrativa");
             map.put("estado", p.getEstado() != null ? p.getEstado() : "Activo");
@@ -99,64 +104,76 @@ public class PersonalController {
 
             personalList.add(map);
         }
-
-        // Fallback sample items if DB is empty
-        if (personalList.isEmpty()) {
-            personalList.add(createSampleStaff("1", "Carlos", "Mendoza", "1088123456", "Docente", "DOCENTE", "carlos.mendoza@ieaci.edu.co", "Activo", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&h=120&q=80"));
-            personalList.add(createSampleStaff("2", "Ana María", "Sánchez", "1045321456", "Coordinador", "ADMINISTRATIVO", "ana.sanchez@ieaci.edu.co", "Activo", "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&h=120&q=80"));
-            personalList.add(createSampleStaff("3", "Luis Felipe", "Gómez", "1073123987", "Secretario", "ADMINISTRATIVO", "luis.gomez@ieaci.edu.co", "Activo", "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=120&h=120&q=80"));
-            personalList.add(createSampleStaff("4", "Patricia", "López", "1045987123", "Bibliotecario", "ADMINISTRATIVO", "patricia.lopez@ieaci.edu.co", "Inactivo", "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=120&h=120&q=80"));
-            personalList.add(createSampleStaff("5", "Jorge Eliécer", "Rojas", "1012345678", "Rector", "DOCENTE", "jorge.rojas@ieaci.edu.co", "Activo", "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=120&h=120&q=80"));
         }
 
         model.addAttribute("personalList", personalList);
         return "personal/index";
     }
 
-    @PostMapping("/personal/registrar")
+    @PostMapping({"/personal", "/personal/registrar"})
     public String registrarPersonal(
-            @RequestParam("primerNombre") String primerNombre,
-            @RequestParam(value = "segundoNombre", required = false) String segundoNombre,
-            @RequestParam("primerApellido") String primerApellido,
-            @RequestParam(value = "segundoApellido", required = false) String segundoApellido,
-            @RequestParam("tipoDoc") String tipoDoc,
-            @RequestParam("numDoc") String numDoc,
-            @RequestParam(value = "sexo", required = false) String sexo,
+            @RequestParam(value = "tipo", required = false) String tipo,
+            @RequestParam(value = "nombres", required = false) String nombres,
+            @RequestParam(value = "apellidos", required = false) String apellidos,
+            @RequestParam(value = "tipoDocumento", required = false) String tipoDocumento,
+            @RequestParam(value = "numeroDocumento", required = false) String numeroDocumento,
+            @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "telefono", required = false) String telefono,
             @RequestParam(value = "direccion", required = false) String direccion,
-            @RequestParam("cargo") String cargo,
+            @RequestParam(value = "cargo", required = false) String cargo,
             @RequestParam(value = "area", required = false) String area,
+            @RequestParam(value = "estudios", required = false) String estudios,
             @RequestParam(value = "profesion", required = false) String profesion,
             @RequestParam(value = "especialidad", required = false) String especialidad,
+            @RequestParam(value = "sexo", required = false) String sexo,
             @RequestParam(value = "fotoFile", required = false) MultipartFile fotoFile,
             @RequestParam(value = "createUser", required = false, defaultValue = "false") boolean createUser,
             @RequestParam(value = "userEmail", required = false) String userEmail,
             @RequestParam(value = "passwordTemp", required = false) String passwordTemp,
             @RequestParam(value = "role", required = false) String role,
+
+            @RequestParam(value = "primerNombre", required = false) String primerNombre,
+            @RequestParam(value = "segundoNombre", required = false) String segundoNombre,
+            @RequestParam(value = "primerApellido", required = false) String primerApellido,
+            @RequestParam(value = "segundoApellido", required = false) String segundoApellido,
+            @RequestParam(value = "tipoDoc", required = false) String tipoDoc,
+            @RequestParam(value = "numDoc", required = false) String numDoc,
             RedirectAttributes redirectAttributes) {
 
         try {
-            String nombresFull = (primerNombre + (segundoNombre != null && !segundoNombre.isBlank() ? " " + segundoNombre : "")).trim();
-            String apellidosFull = (primerApellido + (segundoApellido != null && !segundoApellido.isBlank() ? " " + segundoApellido : "")).trim();
+            String nombresFull = (nombres != null && !nombres.isBlank()) ? nombres.trim() :
+                    ((primerNombre != null ? primerNombre : "") + (segundoNombre != null && !segundoNombre.isBlank() ? " " + segundoNombre : "")).trim();
+
+            String apellidosFull = (apellidos != null && !apellidos.isBlank()) ? apellidos.trim() :
+                    ((primerApellido != null ? primerApellido : "") + (segundoApellido != null && !segundoApellido.isBlank() ? " " + segundoApellido : "")).trim();
+
+            String docType = (tipoDocumento != null && !tipoDocumento.isBlank()) ? tipoDocumento.trim() : (tipoDoc != null ? tipoDoc.trim() : "CC");
+            String docNum = (numeroDocumento != null && !numeroDocumento.isBlank()) ? numeroDocumento.trim() : (numDoc != null ? numDoc.trim() : "");
+
+            if (nombresFull.isBlank() || apellidosFull.isBlank() || docNum.isBlank()) {
+                throw new IllegalArgumentException("Nombres, apellidos y número de documento son obligatorios.");
+            }
 
             String uploadedFotoKey = null;
             if (fotoFile != null && !fotoFile.isEmpty()) {
                 storageService.validateSize(fotoFile, 10 * 1024 * 1024);
                 storageService.validateExtension(fotoFile, "jpg", "jpeg", "png");
-                UploadResult result = storageService.upload(fotoFile, StorageFolder.DOCENTES, numDoc);
+                UploadResult result = storageService.upload(fotoFile, StorageFolder.DOCENTES, docNum);
                 uploadedFotoKey = result.getKey();
             }
 
-            if ("Docente".equalsIgnoreCase(cargo)) {
+            boolean esDocente = "DOCENTE".equalsIgnoreCase(tipo) || "Docente".equalsIgnoreCase(cargo);
+
+            if (esDocente) {
                 Docente d = new Docente();
                 d.setNombres(nombresFull);
                 d.setApellidos(apellidosFull);
-                d.setTipoDocumento(tipoDoc);
-                d.setNumeroDocumento(numDoc);
+                d.setTipoDocumento(docType);
+                d.setNumeroDocumento(docNum);
                 d.setGenero(sexo);
                 d.setTelefono(telefono);
                 d.setDireccion(direccion);
-                d.setTitulo(profesion);
+                d.setTitulo((estudios != null && !estudios.isBlank()) ? estudios : profesion);
                 d.setEspecialidad(especialidad);
                 d.setFotoKey(uploadedFotoKey);
                 d.setEstado("Activo");
@@ -165,10 +182,10 @@ public class PersonalController {
                 PersonalAdministrativo p = new PersonalAdministrativo();
                 p.setNombres(nombresFull);
                 p.setApellidos(apellidosFull);
-                p.setTipoDocumento(tipoDoc);
-                p.setNumeroDocumento(numDoc);
-                p.setCargo(cargo);
-                p.setArea(area != null ? area : "Administrativa");
+                p.setTipoDocumento(docType);
+                p.setNumeroDocumento(docNum);
+                p.setCargo((cargo != null && !cargo.isBlank()) ? cargo : ("DIRECTIVO".equalsIgnoreCase(tipo) ? "Directivo" : "Administrativo"));
+                p.setArea((area != null && !area.isBlank()) ? area : ("DIRECTIVO".equalsIgnoreCase(tipo) ? "Directiva" : "Administrativa"));
                 p.setGenero(sexo);
                 p.setTelefono(telefono);
                 p.setDireccion(direccion);
@@ -177,10 +194,11 @@ public class PersonalController {
                 personalService.guardarPersonal(p);
             }
 
-            if (createUser) {
+            String targetEmail = (email != null && !email.isBlank()) ? email.trim() : userEmail;
+            if (createUser || (targetEmail != null && !targetEmail.isBlank())) {
                 String pass = (passwordTemp != null && !passwordTemp.isBlank()) ? passwordTemp : "IEACI" + java.time.Year.now().getValue() + "*";
-                String targetRole = (role != null && !role.isBlank()) ? role : ("Docente".equalsIgnoreCase(cargo) ? "DOCENTE" : "ADMIN");
-                personalService.crearOCambiarCuentaAcceso(numDoc, nombresFull, apellidosFull, userEmail, pass, targetRole);
+                String targetRole = (role != null && !role.isBlank()) ? role : (esDocente ? "DOCENTE" : "PERSONAL_ADMINISTRATIVO");
+                personalService.crearOCambiarCuentaAcceso(docNum, nombresFull, apellidosFull, targetEmail, pass, targetRole);
             }
 
             redirectAttributes.addFlashAttribute("mensajeExito", "Personal registrado exitosamente.");
@@ -234,11 +252,14 @@ public class PersonalController {
                 Usuario u = usrOpt.get();
                 staff.put("tieneCuenta", true);
                 staff.put("correo", u.getEmail());
-                staff.put("usuarioRol", u.getRol());
-                staff.put("usuarioEstado", u.getEstado());
+                staff.put("usuarioRol", u.getRol() != null ? u.getRol() : "DOCENTE");
+                staff.put("usuarioEstado", u.getEstado() != null ? u.getEstado() : "Activo");
+                staff.put("emailSugerido", u.getEmail());
             } else {
                 staff.put("tieneCuenta", false);
                 staff.put("correo", "Sin cuenta creada");
+                staff.put("usuarioRol", "DOCENTE");
+                staff.put("usuarioEstado", "Inactivo");
                 staff.put("emailSugerido", personalService.generarEmailSugerido(d.getNombres(), d.getApellidos()));
             }
         } else if (adminOpt.isPresent()) {
@@ -256,6 +277,8 @@ public class PersonalController {
             staff.put("numeroDocumento", p.getNumeroDocumento());
             staff.put("telefono", p.getTelefono() != null ? p.getTelefono() : "N/A");
             staff.put("direccion", p.getDireccion() != null ? p.getDireccion() : "N/A");
+            staff.put("profesion", "Administrativo");
+            staff.put("especialidad", "N/A");
             staff.put("estado", p.getEstado() != null ? p.getEstado() : "Activo");
             staff.put("foto", p.getFotoKey() != null ? "/storage/public/view?key=" + p.getFotoKey() : null);
 
@@ -264,54 +287,19 @@ public class PersonalController {
                 Usuario u = usrOpt.get();
                 staff.put("tieneCuenta", true);
                 staff.put("correo", u.getEmail());
-                staff.put("usuarioRol", u.getRol());
-                staff.put("usuarioEstado", u.getEstado());
+                staff.put("usuarioRol", u.getRol() != null ? u.getRol() : "PERSONAL_ADMINISTRATIVO");
+                staff.put("usuarioEstado", u.getEstado() != null ? u.getEstado() : "Activo");
+                staff.put("emailSugerido", u.getEmail());
             } else {
                 staff.put("tieneCuenta", false);
                 staff.put("correo", "Sin cuenta creada");
+                staff.put("usuarioRol", "PERSONAL_ADMINISTRATIVO");
+                staff.put("usuarioEstado", "Inactivo");
                 staff.put("emailSugerido", personalService.generarEmailSugerido(p.getNombres(), p.getApellidos()));
             }
         } else {
-            // Render full sample staff profile
-            if ("2".equals(id)) {
-                staff.put("id", "2");
-                staff.put("nombreCompleto", "Ana María Sánchez");
-                staff.put("primerNombre", "Ana María");
-                staff.put("primerApellido", "Sánchez");
-                staff.put("cargo", "Coordinador");
-                staff.put("area", "Académica");
-                staff.put("tipoDoc", "CC");
-                staff.put("numDoc", "1.045.321.456");
-                staff.put("telefono", "311 456 7890");
-                staff.put("direccion", "Calle 45 # 12 - 34");
-                staff.put("profesion", "Licenciada en Educación");
-                staff.put("especialidad", "Gestión Educativa");
-                staff.put("estado", "Activo");
-                staff.put("correo", "ana.sanchez@ieaci.edu.co");
-                staff.put("tieneCuenta", true);
-                staff.put("usuarioRol", "COORDINADOR");
-                staff.put("usuarioEstado", "Activo");
-                staff.put("foto", "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&h=120&q=80");
-            } else {
-                staff.put("id", id);
-                staff.put("nombreCompleto", "Carlos Mendoza");
-                staff.put("primerNombre", "Carlos");
-                staff.put("primerApellido", "Mendoza");
-                staff.put("cargo", "Docente");
-                staff.put("area", "Académica");
-                staff.put("tipoDoc", "CC");
-                staff.put("numDoc", "1.088.123.456");
-                staff.put("telefono", "300 123 4567");
-                staff.put("direccion", "Manzana A Lote 5, San José");
-                staff.put("profesion", "Licenciado en Matemáticas");
-                staff.put("especialidad", "Álgebra y Cálculo");
-                staff.put("estado", "Activo");
-                staff.put("correo", "carlos.mendoza@ieaci.edu.co");
-                staff.put("tieneCuenta", true);
-                staff.put("usuarioRol", "DOCENTE");
-                staff.put("usuarioEstado", "Activo");
-                staff.put("foto", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&h=120&q=80");
-            }
+            redirectAttributes.addFlashAttribute("mensajeError", "Personal no encontrado.");
+            return "redirect:/personal";
         }
 
         model.addAttribute("staff", staff);
@@ -357,24 +345,5 @@ public class PersonalController {
         }
 
         return "redirect:/personal/perfil/" + id;
-    }
-
-    private Map<String, Object> createSampleStaff(String id, String nombres, String apellidos, String doc, String cargo, String tipo, String correo, String estado, String foto) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", id);
-        map.put("nombres", nombres);
-        map.put("apellidos", apellidos);
-        map.put("nombreCompleto", nombres + " " + apellidos);
-        map.put("tipoDocumento", "CC");
-        map.put("numeroDocumento", doc);
-        map.put("cargo", cargo);
-        map.put("tipo", tipo);
-        map.put("email", correo);
-        map.put("correo", correo);
-        map.put("telefono", "3001234567");
-        map.put("estado", estado);
-        map.put("tieneCuenta", true);
-        map.put("foto", foto);
-        return map;
     }
 }

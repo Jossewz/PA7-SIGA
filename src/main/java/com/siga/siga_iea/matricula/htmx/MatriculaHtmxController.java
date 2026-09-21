@@ -89,7 +89,6 @@ public class MatriculaHtmxController {
             @RequestParam(value = "parentId", required = false) String parentId,
             @RequestParam(value = "parentRelation", required = false) String parentRelation,
             @RequestParam(value = "parentPhone", required = false) String parentPhone,
-            @RequestParam(value = "parentAddress", required = false) String parentAddress,
             HttpSession session,
             Model model) {
 
@@ -108,7 +107,6 @@ public class MatriculaHtmxController {
         if (parentId != null) session.setAttribute("parentId", parentId);
         if (parentRelation != null) session.setAttribute("parentRelation", parentRelation);
         if (parentPhone != null) session.setAttribute("parentPhone", parentPhone);
-        if (parentAddress != null) session.setAttribute("parentAddress", parentAddress);
 
         populateModelFromSession(session, model);
         model.addAttribute("currentStep", step);
@@ -192,19 +190,28 @@ public class MatriculaHtmxController {
         String parentId = (String) session.getAttribute("parentId");
         String parentRelation = (String) session.getAttribute("parentRelation");
         String parentPhone = (String) session.getAttribute("parentPhone");
-        String parentAddress = (String) session.getAttribute("parentAddress");
 
         Acudiente acudiente = acudienteService.buscarOCrear(
                 parentNames, parentSurnames, parentRelation,
-                parentDocType, parentId, parentPhone, parentAddress
+                parentDocType, parentId, parentPhone
         );
 
         // 2. Guardar Estudiante con sus datos reales
+        String studentNames = (String) session.getAttribute("studentNames");
+        String studentDocNumber = (String) session.getAttribute("studentDocNumber");
+
+        if (studentNames == null || studentNames.isBlank() || studentDocNumber == null || studentDocNumber.isBlank()) {
+            model.addAttribute("error", "Por favor regrese al Paso 1 e ingrese los nombres y el número de documento del estudiante.");
+            model.addAttribute("currentStep", 1);
+            populateModelFromSession(session, model);
+            return "matricula/htmx-step";
+        }
+
         Estudiante estudiante = new Estudiante();
-        estudiante.setNombres((String) session.getAttribute("studentNames"));
+        estudiante.setNombres(studentNames);
         estudiante.setApellidos((String) session.getAttribute("studentSurnames"));
         estudiante.setTipoDocumento((String) session.getAttribute("studentDocType"));
-        estudiante.setNumeroDocumento((String) session.getAttribute("studentDocNumber"));
+        estudiante.setNumeroDocumento(studentDocNumber);
         estudiante.setGenero((String) session.getAttribute("studentGender"));
         estudiante.setTelefono((String) session.getAttribute("studentPhone"));
 
@@ -220,46 +227,53 @@ public class MatriculaHtmxController {
         estudiante.setAcudiente(acudiente);
         estudiante.setEstado("Activo");
 
-        estudiante = estudianteService.guardar(estudiante);
+        try {
+            estudiante = estudianteService.guardar(estudiante);
 
-        // 3. Guardar Matrícula
-        Matricula nuevaMatricula = new Matricula();
-        nuevaMatricula.setEstudiante(estudiante);
+            // 3. Guardar Matrícula
+            Matricula nuevaMatricula = new Matricula();
+            nuevaMatricula.setEstudiante(estudiante);
 
-        String grado = (String) session.getAttribute("grado");
-        nuevaMatricula.setGrado(grado != null ? grado : "No Asignado");
-        nuevaMatricula.setAnoLectivo(String.valueOf(Year.now().getValue()));
-        nuevaMatricula.setEstado("PENDIENTE_DE_REVISION");
-        nuevaMatricula.setFechaMatricula(LocalDate.now());
+            String grado = (String) session.getAttribute("grado");
+            nuevaMatricula.setGrado(grado != null ? grado : "No Asignado");
+            nuevaMatricula.setAnoLectivo(String.valueOf(Year.now().getValue()));
+            nuevaMatricula.setEstado("PENDIENTE_DE_REVISION");
+            nuevaMatricula.setFechaMatricula(LocalDate.now());
 
-        matriculaService.guardar(nuevaMatricula);
+            matriculaService.guardar(nuevaMatricula);
 
-        // 4. Vincular documentos a la matrícula
-        Map<String, TipoDocumento> fieldToTipo = Map.of(
-                "parentDoc", TipoDocumento.DOCUMENTO_ACUDIENTE,
-                "civilDoc", TipoDocumento.REGISTRO_CIVIL,
-                "saludFile", TipoDocumento.CERTIFICADO_SALUD,
-                "fotoFile", TipoDocumento.FOTO_ESTUDIANTE,
-                "historialFile", TipoDocumento.HISTORIAL_ACADEMICO
-        );
+            // 4. Vincular documentos a la matrícula
+            Map<String, TipoDocumento> fieldToTipo = Map.of(
+                    "parentDoc", TipoDocumento.DOCUMENTO_ACUDIENTE,
+                    "civilDoc", TipoDocumento.REGISTRO_CIVIL,
+                    "saludFile", TipoDocumento.CERTIFICADO_SALUD,
+                    "fotoFile", TipoDocumento.FOTO_ESTUDIANTE,
+                    "historialFile", TipoDocumento.HISTORIAL_ACADEMICO
+            );
 
-        for (var entry : fieldToTipo.entrySet()) {
-            String field = entry.getKey();
-            String tempKey = (String) session.getAttribute(field + "Key");
-            if (tempKey != null) {
-                Documento doc = documentoService.vincularAMatricula(
-                        tempKey,
-                        nuevaMatricula,
-                        entry.getValue(),
-                        (String) session.getAttribute(field + "Name"),
-                        (String) session.getAttribute(field + "ContentType"),
-                        (Long) session.getAttribute(field + "Size")
-                );
-                if ("fotoFile".equals(field)) {
-                    estudiante.setFotoKey(doc.getStorageKey());
-                    estudianteService.guardar(estudiante);
+            for (var entry : fieldToTipo.entrySet()) {
+                String field = entry.getKey();
+                String tempKey = (String) session.getAttribute(field + "Key");
+                if (tempKey != null) {
+                    Documento doc = documentoService.vincularAMatricula(
+                            tempKey,
+                            nuevaMatricula,
+                            entry.getValue(),
+                            (String) session.getAttribute(field + "Name"),
+                            (String) session.getAttribute(field + "ContentType"),
+                            (Long) session.getAttribute(field + "Size")
+                    );
+                    if ("fotoFile".equals(field)) {
+                        estudiante.setFotoKey(doc.getStorageKey());
+                        estudianteService.guardar(estudiante);
+                    }
                 }
             }
+        } catch (Exception ex) {
+            model.addAttribute("error", "Error al procesar la matrícula: " + ex.getMessage());
+            model.addAttribute("currentStep", 4);
+            populateModelFromSession(session, model);
+            return "matricula/htmx-step";
         }
 
         // 5. Limpiar sesión
@@ -267,7 +281,7 @@ public class MatriculaHtmxController {
                 "studentNames", "studentSurnames", "studentDocType", "studentDocNumber",
                 "studentGender", "studentPhone", "studentBirthday", "studentAddress",
                 "parentNames", "parentSurnames", "parentDocType", "parentId", "parentRelation",
-                "parentPhone", "parentAddress", "parentDocName", "civilDocName",
+                "parentPhone", "parentDocName", "civilDocName",
                 "saludFileName", "fotoFileName", "historialFileName"
         );
         keysToRemove.forEach(session::removeAttribute);
@@ -291,13 +305,16 @@ public class MatriculaHtmxController {
         model.addAttribute("studentBirthday", session.getAttribute("studentBirthday"));
         model.addAttribute("studentAddress", session.getAttribute("studentAddress"));
 
-        model.addAttribute("parentNames", session.getAttribute("parentNames"));
-        model.addAttribute("parentSurnames", session.getAttribute("parentSurnames"));
+        String pNames = (String) session.getAttribute("parentNames");
+        String pSurnames = (String) session.getAttribute("parentSurnames");
+        String pFullName = ((pNames != null ? pNames : "") + " " + (pSurnames != null ? pSurnames : "")).trim();
+        model.addAttribute("parentNames", pNames);
+        model.addAttribute("parentName", pFullName.isEmpty() ? null : pFullName);
+        model.addAttribute("parentSurnames", pSurnames);
         model.addAttribute("parentDocType", session.getAttribute("parentDocType"));
         model.addAttribute("parentId", session.getAttribute("parentId"));
         model.addAttribute("parentRelation", session.getAttribute("parentRelation"));
         model.addAttribute("parentPhone", session.getAttribute("parentPhone"));
-        model.addAttribute("parentAddress", session.getAttribute("parentAddress"));
 
         model.addAttribute("sede", session.getAttribute("sede"));
         model.addAttribute("grado", session.getAttribute("grado"));

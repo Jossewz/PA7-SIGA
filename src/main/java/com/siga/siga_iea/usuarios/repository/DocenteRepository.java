@@ -19,7 +19,8 @@ public interface DocenteRepository extends JpaRepository<Docente, UUID> {
            "(:search IS NULL OR :search = '' OR " +
            " LOWER(d.nombres) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            " LOWER(d.apellidos) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           " LOWER(d.numeroDocumento) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+           " LOWER(d.numeroDocumento) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           " (d.especialidad IS NOT NULL AND LOWER(d.especialidad) LIKE LOWER(CONCAT('%', :search, '%')))) AND " +
            "(:estado IS NULL OR :estado = '' OR d.estado = :estado) " +
            "ORDER BY d.createdAt DESC")
     List<Docente> searchDocentes(@Param("search") String search, @Param("estado") String estado);

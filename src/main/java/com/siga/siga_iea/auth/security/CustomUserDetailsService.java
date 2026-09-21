@@ -1,5 +1,6 @@
 package com.siga.siga_iea.auth.security;
 
+import com.siga.siga_iea.auth.enums.RolEnum;
 import com.siga.siga_iea.usuarios.entity.Usuario;
 import com.siga.siga_iea.usuarios.repository.UsuarioRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -29,33 +30,17 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("El usuario se encuentra inactivo");
         }
 
-        String roleName = normalizeRole(usuario.getRol());
+        RolEnum rolEnum = RolEnum.from(usuario.getRol());
 
         return new User(
                 usuario.getEmail(),
                 usuario.getPassword() != null ? usuario.getPassword() : "",
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + roleName))
+                Collections.singletonList(new SimpleGrantedAuthority(rolEnum.getAuthority()))
         );
     }
 
     public static String normalizeRole(String rawRole) {
-        if (rawRole == null || rawRole.isBlank()) {
-            return "ESTUDIANTE";
-        }
-        String clean = rawRole.trim().toUpperCase().replace(" ", "_");
-        if (clean.contains("ADMIN") && !clean.contains("PERSONAL")) {
-            return "ADMIN";
-        }
-        if (clean.contains("PERSONAL") || clean.contains("RECTOR") || clean.contains("COORDINADOR") || clean.contains("SECRETARI")) {
-            return "PERSONAL_ADMINISTRATIVO";
-        }
-        if (clean.contains("DOCENTE")) {
-            return "DOCENTE";
-        }
-        if (clean.contains("ESTUDIANTE")) {
-            return "ESTUDIANTE";
-        }
-        return clean;
+        return RolEnum.from(rawRole).name();
     }
 }
 

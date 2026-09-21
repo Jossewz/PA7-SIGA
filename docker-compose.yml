@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:18.3
+    image: postgres:16
     container_name: siga-postgres
     environment:
       POSTGRES_DB: siga
@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: siga
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5433:5432"
+      - "5434:5432"
     volumes:
       - siga_postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -20,6 +20,7 @@ services:
   app:
     build:
       context: .
+      dockerfile: Dockerfile
     container_name: siga-app
     depends_on:
       db:
@@ -39,7 +40,7 @@ services:
     volumes:
       - .:/workspace
       - siga_maven_cache:/root/.m2
-    command: sh ./mvnw spring-boot:run -Dtailwind.phase=none
+    command: sh -c "./mvnw tailwind:compile && ./mvnw spring-boot:run -Dtailwind.phase=none"
 
   pgadmin:
     image: dpage/pgadmin4
@@ -57,7 +58,7 @@ services:
       - siga_pgadmin_data:/var/lib/pgadmin
 
   minio:
-    image: minio/minio
+    image: quay.io/minio/minio
     container_name: siga-minio
     ports:
       - "9000:9000"

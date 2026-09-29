@@ -34,6 +34,12 @@ public class Acudiente {
     @Column(columnDefinition = "VARCHAR")
     private String email;
 
+    @Column(name = "email_secundario", columnDefinition = "VARCHAR")
+    private String emailSecundario;
+
+    @Column(name = "autoriza_notificaciones")
+    private Boolean autorizaNotificaciones = true;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -120,6 +126,22 @@ public class Acudiente {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getEmailSecundario() {
+        return emailSecundario;
+    }
+
+    public void setEmailSecundario(String emailSecundario) {
+        this.emailSecundario = emailSecundario;
+    }
+
+    public Boolean getAutorizaNotificaciones() {
+        return autorizaNotificaciones;
+    }
+
+    public void setAutorizaNotificaciones(Boolean autorizaNotificaciones) {
+        this.autorizaNotificaciones = autorizaNotificaciones;
     }
 
     public LocalDateTime getCreatedAt() {

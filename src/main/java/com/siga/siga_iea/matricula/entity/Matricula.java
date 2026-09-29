@@ -1,10 +1,12 @@
 package com.siga.siga_iea.matricula.entity;
 
+import com.siga.siga_iea.clases.entity.Curso;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
 import com.siga.siga_iea.storage.entity.Documento;
 import jakarta.persistence.*;
 import java.util.UUID;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -21,6 +23,10 @@ public class Matricula {
     @JoinColumn(name = "estudiante_id", nullable = false)
     private Estudiante estudiante;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "curso_id")
+    private Curso curso;
+
     @Column(columnDefinition = "VARCHAR", nullable = false)
     private String grado;
 
@@ -36,8 +42,21 @@ public class Matricula {
     @Column(name = "fecha_matricula")
     private LocalDate fechaMatricula;
 
+    @Column(name = "autoriza_tratamiento_datos")
+    private Boolean autorizaTratamientoDatos = true;
+
+    @Column(name = "fecha_autorizacion_datos")
+    private LocalDateTime fechaAutorizacionDatos;
+
     @OneToMany(mappedBy = "matricula", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Documento> documentos = new ArrayList<>();
+
+    @PrePersist
+    protected void onCreate() {
+        if (fechaAutorizacionDatos == null) {
+            fechaAutorizacionDatos = LocalDateTime.now();
+        }
+    }
 
     public Matricula() {
     }
@@ -56,6 +75,30 @@ public class Matricula {
 
     public void setEstudiante(Estudiante estudiante) {
         this.estudiante = estudiante;
+    }
+
+    public Curso getCurso() {
+        return curso;
+    }
+
+    public void setCurso(Curso curso) {
+        this.curso = curso;
+    }
+
+    public Boolean getAutorizaTratamientoDatos() {
+        return autorizaTratamientoDatos;
+    }
+
+    public void setAutorizaTratamientoDatos(Boolean autorizaTratamientoDatos) {
+        this.autorizaTratamientoDatos = autorizaTratamientoDatos;
+    }
+
+    public LocalDateTime getFechaAutorizacionDatos() {
+        return fechaAutorizacionDatos;
+    }
+
+    public void setFechaAutorizacionDatos(LocalDateTime fechaAutorizacionDatos) {
+        this.fechaAutorizacionDatos = fechaAutorizacionDatos;
     }
 
     public String getGrado() {

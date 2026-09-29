@@ -25,6 +25,12 @@ public class AcudienteService {
     @Transactional
     public Acudiente buscarOCrear(String nombres, String apellidos, String parentesco,
                                   String tipoDoc, String numDoc, String telefono, String email) {
+        return buscarOCrear(nombres, apellidos, parentesco, tipoDoc, numDoc, telefono, email, null);
+    }
+
+    @Transactional
+    public Acudiente buscarOCrear(String nombres, String apellidos, String parentesco,
+                                  String tipoDoc, String numDoc, String telefono, String email, String emailSecundario) {
         if (numDoc != null && !numDoc.isBlank()) {
             Optional<Acudiente> existente = acudienteRepository.findByNumeroDocumento(numDoc.trim());
             if (existente.isPresent()) {
@@ -34,6 +40,7 @@ public class AcudienteService {
                 if (parentesco != null && !parentesco.isBlank()) ac.setParentesco(parentesco.trim());
                 if (telefono != null && !telefono.isBlank()) ac.setTelefono(telefono.trim());
                 if (email != null && !email.isBlank()) ac.setEmail(email.trim());
+                if (emailSecundario != null && !emailSecundario.isBlank()) ac.setEmailSecundario(emailSecundario.trim());
                 return acudienteRepository.save(ac);
             }
         }
@@ -46,6 +53,8 @@ public class AcudienteService {
         nuevo.setNumeroDocumento(numDoc != null ? numDoc.trim() : null);
         nuevo.setTelefono(telefono != null ? telefono.trim() : "");
         nuevo.setEmail(email != null && !email.isBlank() ? email.trim() : null);
+        nuevo.setEmailSecundario(emailSecundario != null && !emailSecundario.isBlank() ? emailSecundario.trim() : null);
+        nuevo.setAutorizaNotificaciones(true);
 
         return acudienteRepository.save(nuevo);
     }

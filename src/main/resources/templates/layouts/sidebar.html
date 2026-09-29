@@ -3,9 +3,9 @@ th:fragment="sidebar(activePage, bottomText, bottomUrl)"
 xmlns:th="http://www.thymeleaf.org"
 xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-    <!-- ═══ DESKTOP SIDEBAR (Colapsable y Persistente - Estilo SEGI) ═══ -->
+    <!-- ═══ DESKTOP SIDEBAR (Colapsable y Persistente - Estilo Biophilic SEGI) ═══ -->
     <aside id="sidebar-desktop"
-           class="sticky top-0 h-screen flex flex-col bg-sidebar text-sidebar-text shadow-[inset_-1px_0_0_rgba(255,255,255,0.08)] overflow-hidden shrink-0 hidden md:flex"
+           class="sticky top-0 h-screen flex flex-col bg-sidebar-container text-sidebar-text border-r border-sidebar-border overflow-hidden shrink-0 hidden md:flex"
            :class="{ 'is-collapsed': !sidebarOpen }">
 
         <!-- Logo / Marca + Toggle Único (Estilo SEGI: al colapsar se oculta el logo y solo queda el botón toggle centrado) -->
@@ -14,15 +14,15 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             <a th:href="@{/}" 
                x-show="sidebarOpen" 
                x-cloak 
-               class="sidebar-brand-logo flex items-center gap-2.5 text-sidebar-text uppercase min-w-0" 
+               class="sidebar-brand-logo flex items-center gap-2.5 text-forest-green uppercase min-w-0" 
                aria-label="IEACI Institutional">
-                <span class="grid place-items-center size-8 rounded-lg bg-white/10 shrink-0 text-sidebar-text" aria-hidden="true">
-                    <i data-lucide="leaf" class="size-5 stroke-2 fill-sidebar-text"></i>
+                <span class="grid place-items-center size-8 rounded-lg bg-forest-green/10 shrink-0 text-forest-green" aria-hidden="true">
+                    <i data-lucide="leaf" class="size-5 stroke-2 fill-forest-green"></i>
                 </span>
 
                 <span class="grid gap-[2px] whitespace-nowrap transition-opacity sidebar-label">
-                    <strong class="text-[13px] leading-[0.95] font-black tracking-normal">IEACI<br>Institutional</strong>
-                    <small class="text-[8px] leading-none font-extrabold tracking-[0.6px] opacity-80">Editorial Archive</small>
+                    <strong class="text-[13px] leading-[0.95] font-black tracking-normal text-forest-green">IEACI<br>Institutional</strong>
+                    <small class="text-[8px] leading-none font-extrabold tracking-[0.6px] opacity-80 text-forest-green/80">Editorial Archive</small>
                 </span>
             </a>
 
@@ -30,7 +30,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             <button id="sidebar-toggle-btn"
                     type="button"
                     @click.stop.prevent="toggleSidebar()"
-                    class="size-8 rounded-lg bg-white/10 hover:bg-white/20 text-sidebar-text/90 hover:text-white grid place-items-center transition cursor-pointer shrink-0"
+                    class="size-8 rounded-lg bg-black/5 hover:bg-black/10 text-forest-green grid place-items-center transition cursor-pointer shrink-0"
                     :class="sidebarOpen ? 'ml-1' : 'mx-auto'"
                     :title="sidebarOpen ? 'Contraer menú lateral' : 'Expandir menú lateral'">
                 <i data-lucide="chevron-left" class="size-4.5 stroke-2 transition-transform duration-200 sidebar-chevron" :class="sidebarOpen ? '' : 'rotate-180'"></i>
@@ -158,7 +158,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
              onclick="window.closeSigaMobileDrawer && window.closeSigaMobileDrawer()"></div>
 
         <!-- Panel lateral deslizante -->
-        <div class="fixed inset-y-0 left-0 z-50 flex w-[280px] max-w-[85vw] flex-col bg-sidebar text-sidebar-text shadow-2xl p-5"
+        <div class="fixed inset-y-0 left-0 z-50 flex w-[280px] max-w-[85vw] flex-col bg-sidebar-container text-sidebar-text shadow-2xl p-5 border-r border-sidebar-border"
              x-show="mobileOpen"
              x-transition:enter="transition ease-out duration-250"
              x-transition:enter-start="-translate-x-full"
@@ -169,76 +169,76 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
              @click="if ($event.target.closest('a')) mobileOpen = false">
 
             <!-- Cabecera del drawer móvil -->
-            <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+            <div class="flex items-center justify-between pb-4 mb-4 border-b border-sidebar-border">
                 <div class="flex items-center gap-3">
-                    <span class="grid place-items-center size-8 rounded-lg bg-white/10 shrink-0 text-sidebar-text">
-                        <i data-lucide="leaf" class="size-5 stroke-2 fill-sidebar-text"></i>
+                    <span class="grid place-items-center size-8 rounded-lg bg-forest-green/10 shrink-0 text-forest-green">
+                        <i data-lucide="leaf" class="size-5 stroke-2 fill-forest-green"></i>
                     </span>
-                    <strong class="text-sm font-black uppercase tracking-tight">IEACI Institutional</strong>
+                    <strong class="text-sm font-black uppercase tracking-tight text-forest-green">IEACI Institutional</strong>
                 </div>
-                <button type="button" @click="mobileOpen = false" onclick="window.closeSigaMobileDrawer && window.closeSigaMobileDrawer()" class="size-8 rounded-lg bg-white/10 hover:bg-white/20 text-sidebar-text grid place-items-center transition cursor-pointer">
+                <button type="button" @click="mobileOpen = false" onclick="window.closeSigaMobileDrawer && window.closeSigaMobileDrawer()" class="size-8 rounded-lg bg-black/5 hover:bg-black/10 text-forest-green grid place-items-center transition cursor-pointer">
                     <i data-lucide="x" class="size-4 stroke-2"></i>
                 </button>
             </div>
 
             <!-- Navegación móvil -->
             <nav class="flex-1 overflow-y-auto space-y-1">
-                <a th:href="@{/}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
-                   th:classappend="${(activePage == 'dashboard' or (#httpServletRequest != null and #strings.equals(#httpServletRequest.requestURI, '/'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                <a th:href="@{/}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
+                   th:classappend="${(activePage == 'dashboard' or (#httpServletRequest != null and #strings.equals(#httpServletRequest.requestURI, '/'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="home" class="size-5 stroke-2"></i>
                     <span>Inicio</span>
                 </a>
                 <a th:href="@{/matricula}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MATRICULAS'))}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
-                   th:classappend="${(activePage == 'matricula' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/matricula'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
+                   th:classappend="${(activePage == 'matricula' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/matricula'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="user-plus" class="size-5 stroke-2"></i>
                     <span>Matrícula</span>
                 </a>
                 <a th:href="@{/calificaciones}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CALIFICACIONES'))}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
-                   th:classappend="${(activePage == 'calificaciones' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/calificaciones'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
+                   th:classappend="${(activePage == 'calificaciones' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/calificaciones'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="star" class="size-5 stroke-2"></i>
                     <span>Calificaciones</span>
                 </a>
                 <a th:href="@{/certificados}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CERTIFICADOS'))}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
-                   th:classappend="${(activePage == 'certificados' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/certificados'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
+                   th:classappend="${(activePage == 'certificados' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/certificados'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="badge-check" class="size-5 stroke-2"></i>
                     <span>Certificados</span>
                 </a>
                 <a th:href="@{/reportes}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('REPORTES'))}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
-                   th:classappend="${(activePage == 'reportes' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/reportes'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
+                   th:classappend="${(activePage == 'reportes' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/reportes'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="bar-chart-3" class="size-5 stroke-2"></i>
                     <span>Reportes</span>
                 </a>
                 <a th:href="@{/ambiental}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MODULO_AMBIENTAL'))}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
-                   th:classappend="${(activePage == 'ambiental' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/ambiental'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
+                   th:classappend="${(activePage == 'ambiental' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/ambiental'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="sprout" class="size-5 stroke-2"></i>
                     <span>Módulo Ambiental</span>
                 </a>
                 <a th:href="@{/personal}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('PERSONAL'))}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
-                   th:classappend="${(activePage == 'personal' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/personal'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
+                   th:classappend="${(activePage == 'personal' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/personal'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="users" class="size-5 stroke-2"></i>
                     <span>Personal</span>
                 </a>
                 <a th:href="@{/estudiantes}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MATRICULAS'))}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
-                   th:classappend="${(activePage == 'estudiantes' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/estudiantes'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
+                   th:classappend="${(activePage == 'estudiantes' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/estudiantes'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="user-check" class="size-5 stroke-2"></i>
                     <span>Estudiantes</span>
                 </a>
                 <a th:href="@{/clases}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CURSOS_HORARIOS'))}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
-                   th:classappend="${(activePage == 'clases' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/clases'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
+                   th:classappend="${(activePage == 'clases' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/clases'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="graduation-cap" class="size-5 stroke-2"></i>
                     <span>Cursos</span>
                 </a>
                 <a th:href="@{/configuracion}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CONFIGURACION'))}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-text/80 text-sm font-medium hover:bg-white/12 hover:text-white"
-                   th:classappend="${(activePage == 'configuracion' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/configuracion'))) ? 'bg-white/14 text-white font-bold' : ''}">
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
+                   th:classappend="${(activePage == 'configuracion' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/configuracion'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="settings" class="size-5 stroke-2"></i>
                     <span>Configuración</span>
                 </a>

@@ -2,47 +2,47 @@
 
     <!-- ESTADO DE LA INSTITUCIÓN (SEMÁFOROS) -->
     <article th:fragment="institutionHealthCard()" 
-             class="p-6 rounded-xl bg-white border border-[#c4eec0]/40 shadow-soft flex flex-col h-full">
+             class="p-6 rounded-xl bg-white border border-border shadow-soft flex flex-col h-full">
         <h3 class="flex items-center gap-2 text-sidebar text-base font-black uppercase tracking-wider mb-5">
             <i data-lucide="activity" class="size-[18px] stroke-[2.2]"></i>
             Semáforos de Estado
         </h3>
 
         <ul class="grid gap-3.5 flex-1 justify-center">
-            <li class="flex items-center justify-between gap-6 py-1.5 border-b border-[#c4eec0]/25">
+            <li class="flex items-center justify-between gap-6 py-1.5 border-b border-border">
                 <span class="text-xs font-bold text-text-primary flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-[#148f2b] shadow shadow-[#148f2b]/40"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#1b6327] shadow-xs"></span>
                     Asistencia General
                 </span>
-                <span class="text-[10px] font-black text-[#148f2b] uppercase tracking-wider bg-green-50 px-2 py-0.5 rounded">Óptimo</span>
+                <span class="text-[10px] font-black text-sidebar uppercase tracking-wider bg-pill-green border border-[#cbe5c7] px-2 py-0.5 rounded">Óptimo</span>
             </li>
-            <li class="flex items-center justify-between gap-6 py-1.5 border-b border-[#c4eec0]/25">
+            <li class="flex items-center justify-between gap-6 py-1.5 border-b border-border">
                 <span class="text-xs font-bold text-text-primary flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-[#148f2b] shadow shadow-[#148f2b]/40"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#1b6327] shadow-xs"></span>
                     Proceso de Matrícula
                 </span>
-                <span class="text-[10px] font-black text-[#148f2b] uppercase tracking-wider bg-green-50 px-2 py-0.5 rounded">Al día</span>
+                <span class="text-[10px] font-black text-sidebar uppercase tracking-wider bg-pill-green border border-[#cbe5c7] px-2 py-0.5 rounded">Al día</span>
             </li>
-            <li class="flex items-center justify-between gap-6 py-1.5 border-b border-[#c4eec0]/25">
+            <li class="flex items-center justify-between gap-6 py-1.5 border-b border-border">
                 <span class="text-xs font-bold text-text-primary flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-[#e6a100] shadow shadow-[#e6a100]/40"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#8f5b12] shadow-xs"></span>
                     Certificados Pendientes
                 </span>
-                <span class="text-[10px] font-black text-[#e6a100] uppercase tracking-wider bg-amber-50 px-2 py-0.5 rounded">Pendientes</span>
+                <span class="text-[10px] font-black text-[#8f5b12] uppercase tracking-wider bg-pill-warning border border-[#f0dec0] px-2 py-0.5 rounded">Pendientes</span>
             </li>
-            <li class="flex items-center justify-between gap-6 py-1.5 border-b border-[#c4eec0]/25">
+            <li class="flex items-center justify-between gap-6 py-1.5 border-b border-border">
                 <span class="text-xs font-bold text-text-primary flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-[#148f2b] shadow shadow-[#148f2b]/40"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#1b6327] shadow-xs"></span>
                     Carga de Calificaciones
                 </span>
-                <span class="text-[10px] font-black text-[#148f2b] uppercase tracking-wider bg-green-50 px-2 py-0.5 rounded">Al día</span>
+                <span class="text-[10px] font-black text-sidebar uppercase tracking-wider bg-pill-green border border-[#cbe5c7] px-2 py-0.5 rounded">Al día</span>
             </li>
             <li class="flex items-center justify-between gap-6 py-1.5">
                 <span class="text-xs font-bold text-text-primary flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-[#c82333] shadow shadow-[#c82333]/40"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#a82a2a] shadow-xs"></span>
                     Alertas Disciplinarias
                 </span>
-                <span class="text-[10px] font-black text-[#c82333] uppercase tracking-wider bg-red-50 px-2 py-0.5 rounded">Atención</span>
+                <span class="text-[10px] font-black text-alert-red uppercase tracking-wider bg-pill-red border border-[#f5cece] px-2 py-0.5 rounded">Atención</span>
             </li>
         </ul>
     </article>

@@ -75,12 +75,12 @@
                 </div>
 
                 <!-- Alert Messages -->
-                <div th:if="${errorMessage}" class="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2.5">
+                <div th:if="${errorMessage}" class="p-3.5 rounded-xl bg-pill-red border border-[#f5cece] text-alert-red text-xs font-semibold flex items-center gap-2.5">
                     <i data-lucide="alert-circle" class="size-4 shrink-0 stroke-[2.5]"></i>
                     <span th:text="${errorMessage}">Error de autenticación</span>
                 </div>
 
-                <div th:if="${logoutMessage}" class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2.5">
+                <div th:if="${logoutMessage}" class="p-3.5 rounded-xl bg-pill-green border border-[#cbe5c7] text-sidebar text-xs font-semibold flex items-center gap-2.5">
                     <i data-lucide="check-circle-2" class="size-4 shrink-0 stroke-[2.5]"></i>
                     <span th:text="${logoutMessage}">Sesión cerrada</span>
                 </div>

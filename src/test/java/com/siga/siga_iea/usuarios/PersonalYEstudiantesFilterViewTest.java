@@ -43,7 +43,7 @@ class PersonalYEstudiantesFilterViewTest {
                 .andExpect(content().string(containsString("x-show=\"showFilters\"")))
                 .andExpect(content().string(containsString("Aplicar filtro")))
                 .andExpect(content().string(containsString("h-9 px-3.5 text-xs font-black text-white bg-sidebar")))
-                .andExpect(content().string(containsString("h-9 px-3.5 text-xs font-black text-text-secondary bg-[#f1f5f1]")));
+                .andExpect(content().string(containsString("h-9 px-3.5 text-xs font-black text-text-secondary bg-surface-sunken")));
     }
 
     @Test
@@ -61,7 +61,7 @@ class PersonalYEstudiantesFilterViewTest {
                 .andExpect(content().string(containsString("x-show=\"showFilters\"")))
                 .andExpect(content().string(containsString("Aplicar filtro")))
                 .andExpect(content().string(containsString("h-9 px-3.5 text-xs font-black text-white bg-sidebar")))
-                .andExpect(content().string(containsString("h-9 px-3.5 text-xs font-black text-text-secondary bg-[#f1f5f1]")));
+                .andExpect(content().string(containsString("h-9 px-3.5 text-xs font-black text-text-secondary bg-surface-sunken")));
     }
 
     @Test

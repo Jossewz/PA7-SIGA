@@ -67,8 +67,22 @@ th:fragment="html(content)">
         } catch(e) {}
     </script>
 
+    <!-- Metadatos de Seguridad CSRF -->
+    <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}">
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}">
+
     <!-- Scripts locales (cero dependencias de CDN externas) -->
     <script th:src="@{/js/htmx.min.js}"></script>
+    <script>
+        // Inyectar automáticamente el token CSRF en todas las peticiones asíncronas de HTMX
+        document.addEventListener('htmx:configRequest', function(evt) {
+            const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+            if (token && header) {
+                evt.detail.headers[header] = token;
+            }
+        });
+    </script>
     <script th:src="@{/js/lucide.min.js}"></script>
     <script defer th:src="@{/js/alpine.min.js}"></script>
 </head>

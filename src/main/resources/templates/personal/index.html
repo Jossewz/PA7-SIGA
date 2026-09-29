@@ -118,7 +118,7 @@
 
                     <!-- Botón Limpiar en la barra principal -->
                     <a th:href="@{/personal}" 
-                       class="h-9 px-3.5 text-xs font-black text-text-secondary bg-[#f1f5f1] hover:bg-[#e4ede4] rounded-lg transition-all flex items-center justify-center cursor-pointer shadow-2xs shrink-0"
+                       class="h-9 px-3.5 text-xs font-black text-text-secondary bg-surface-sunken hover:bg-surface-muted border border-border rounded-lg transition-all flex items-center justify-center cursor-pointer shadow-2xs shrink-0"
                        title="Restablecer filtros">
                         Limpiar
                     </a>
@@ -181,7 +181,7 @@
                             <!-- Tipo / Rol Badge -->
                             <td class="py-3 px-4 text-center">
                                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-2xs"
-                                      th:classappend="${p.tipo == 'DOCENTE'} ? 'bg-pill-green text-sidebar border-[#8ce383]' : 'bg-blue-50 text-blue-800 border-blue-200'"
+                                      th:classappend="${p.tipo == 'DOCENTE'} ? 'bg-pill-green text-sidebar border-[#cbe5c7]' : 'bg-surface-sunken text-text-secondary border-border'"
                                       th:text="${p.tipo != null ? p.tipo : 'DOCENTE'}">DOCENTE</span>
                             </td>
 

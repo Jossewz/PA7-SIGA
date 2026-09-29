@@ -1,8 +1,8 @@
 <th:block xmlns:th="http://www.thymeleaf.org">
 
-    <!-- PANEL DE BIENVENIDA (Versión un poco más clara y luminosa) -->
+    <!-- PANEL DE BIENVENIDA (Verde institucional sólido de alto contraste - Estilo Biophilic) -->
     <section th:fragment="welcomePanel(adminName, dateText)" 
-             class="relative min-h-[140px] flex items-center justify-between p-8 rounded-2xl overflow-hidden bg-gradient-to-r from-[#18662b] via-[#1c7532] to-[#155a26] text-white shadow-soft border border-white/15">
+             class="relative min-h-[140px] flex items-center justify-between p-8 rounded-2xl overflow-hidden bg-[#134e1e] text-white shadow-soft border border-white/10">
         <div class="z-10">
             <h1 class="mb-2 text-white text-3xl md:text-4xl leading-none font-black tracking-tight" 
                 th:text="'Bienvenido, ' + ${adminName} + '.'">Bienvenido, Admin.</h1>

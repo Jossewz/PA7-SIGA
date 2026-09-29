@@ -26,19 +26,19 @@
             </div>
 
             <!-- Selector / Toggle de Rol para Pruebas (Solo visible para ADMIN) -->
-            <div th:if="${esAdmin}" class="bg-white rounded-xl border border-[#c4eec0]/60 p-1.5 flex items-center gap-1 shadow-2xs">
+            <div th:if="${esAdmin}" class="bg-white rounded-xl border border-border p-1.5 flex items-center gap-1 shadow-2xs">
                 <button type="button" onclick="cambiarRolSimulado('docente')" id="btn-rol-docente"
                         class="px-3 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer bg-sidebar text-white shadow-2xs">
                     <i data-lucide="user-check" class="size-4 stroke-[2.5]"></i>
                     <span>Rol Docente</span>
                 </button>
                 <button type="button" onclick="cambiarRolSimulado('admin')" id="btn-rol-admin"
-                        class="px-3 py-1.5 rounded-lg text-xs font-bold text-text-secondary hover:text-sidebar hover:bg-[#f7fcf6] transition-all flex items-center gap-1.5 cursor-pointer">
+                        class="px-3 py-1.5 rounded-lg text-xs font-bold text-text-secondary hover:text-sidebar hover:bg-brand-100 transition-all flex items-center gap-1.5 cursor-pointer">
                     <i data-lucide="shield-check" class="size-4 stroke-[2.5]"></i>
                     <span>Rol Personal Administrativo</span>
                 </button>
                 <button type="button" onclick="cambiarRolSimulado('estudiante')" id="btn-rol-estudiante"
-                        class="px-3 py-1.5 rounded-lg text-xs font-bold text-text-secondary hover:text-sidebar hover:bg-[#f7fcf6] transition-all flex items-center gap-1.5 cursor-pointer">
+                        class="px-3 py-1.5 rounded-lg text-xs font-bold text-text-secondary hover:text-sidebar hover:bg-brand-100 transition-all flex items-center gap-1.5 cursor-pointer">
                     <i data-lucide="graduation-cap" class="size-4 stroke-[2.5]"></i>
                     <span>Rol Estudiante</span>
                 </button>
@@ -52,10 +52,10 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
                 <!-- Formulario de Nuevo Reporte de Estudiante -->
-                <div class="lg:col-span-5 bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-6 flex flex-col justify-between">
+                <div class="lg:col-span-5 bg-white rounded-xl border border-border shadow-soft p-6 flex flex-col justify-between">
                     <div>
-                        <div class="flex items-center gap-2.5 pb-4 mb-4 border-b border-[#c4eec0]/40">
-                            <div class="size-9 rounded-lg bg-[#eafbe4] text-sidebar grid place-items-center border border-[#c4eec0]">
+                        <div class="flex items-center gap-2.5 pb-4 mb-4 border-b border-border">
+                            <div class="size-9 rounded-lg bg-surface-sunken text-sidebar grid place-items-center border border-border">
                                 <i data-lucide="alert-triangle" class="size-5 stroke-[2.5]"></i>
                             </div>
                             <div>
@@ -166,8 +166,8 @@
                                         <div class="text-[11px] font-medium text-brand-500" th:text="${rep.categoria}">Razones Académicas</div>
                                     </td>
                                     <td class="py-3 px-4 text-center">
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide inline-block shadow-2xs"
-                                              th:classappend="${rep.estado == 'Aceptado'} ? 'bg-pill-green text-sidebar border border-[#8ce383]' : (${rep.estado == 'Rechazado'} ? 'bg-pill-red text-alert-red border border-red-300' : 'bg-amber-100 text-amber-800 border border-amber-300')"
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide inline-block shadow-2xs border"
+                                              th:classappend="${rep.estado == 'Aceptado'} ? 'bg-pill-green text-sidebar border-[#cbe5c7]' : (${rep.estado == 'Rechazado'} ? 'bg-pill-red text-alert-red border-[#f5cece]' : 'bg-pill-warning text-[#8f5b12] border-[#f0dec0]')"
                                               th:text="${rep.estado}">Aceptado</span>
                                     </td>
                                     <td class="py-3 px-4 pr-5 text-right font-bold text-xs">
@@ -234,8 +234,8 @@
                                     <div class="text-[11px] font-medium text-brand-500" th:text="${rep.categoria}">Razones Académicas</div>
                                 </td>
                                 <td class="py-3 px-4 text-center">
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide inline-block shadow-2xs"
-                                          th:classappend="${rep.estado == 'Aceptado'} ? 'bg-pill-green text-sidebar border border-[#8ce383]' : (${rep.estado == 'Rechazado'} ? 'bg-pill-red text-alert-red border border-red-300' : 'bg-amber-100 text-amber-800 border border-amber-300')"
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide inline-block shadow-2xs border"
+                                          th:classappend="${rep.estado == 'Aceptado'} ? 'bg-pill-green text-sidebar border-[#cbe5c7]' : (${rep.estado == 'Rechazado'} ? 'bg-pill-red text-alert-red border-[#f5cece]' : 'bg-pill-warning text-[#8f5b12] border-[#f0dec0]')"
                                           th:text="${rep.estado}">Pendiente</span>
                                 </td>
                                 <td class="py-3 px-4 pr-5 text-right">

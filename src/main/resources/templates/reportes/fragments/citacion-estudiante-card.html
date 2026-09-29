@@ -1,8 +1,8 @@
 <th:block xmlns:th="http://www.thymeleaf.org">
     <!-- VISTA ROL ESTUDIANTE: Visualización de Citación a Dirección -->
     <div th:fragment="citacionEstudianteCard" id="vista-estudiante" class="space-y-6" th:classappend="${esEstudiante} ? '' : 'hidden'">
-        <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-6 space-y-6">
-            <div class="flex items-center justify-between pb-4 border-b border-[#c4eec0]/40">
+        <div class="bg-white rounded-xl border border-border shadow-soft p-6 space-y-6">
+            <div class="flex items-center justify-between pb-4 border-b border-border">
                 <div class="flex items-center gap-3">
                     <div class="size-10 rounded-xl bg-sidebar text-white grid place-items-center shadow-md">
                         <i data-lucide="user-check" class="size-5 stroke-[2.5]"></i>
@@ -12,12 +12,12 @@
                         <p class="text-text-secondary text-xs font-semibold">Notificaciones de citación oficial a Dirección o Coordinación.</p>
                     </div>
                 </div>
-                <span class="px-3 py-1 bg-[#eafbe4] text-sidebar border border-[#c4eec0] rounded-md font-bold text-xs">Mis Notificaciones</span>
+                <span class="px-3 py-1 bg-pill-green text-sidebar border border-[#cbe5c7] rounded-md font-bold text-xs">Mis Notificaciones</span>
             </div>
 
             <!-- Banner cuando NO HAY citaciones activas -->
-            <div th:if="${#lists.isEmpty(reportesMock)}" class="p-8 rounded-2xl bg-[#f7fcf6] border border-[#c4eec0]/60 text-center space-y-2">
-                <div class="size-12 rounded-full bg-[#eafbe4] text-sidebar grid place-items-center mx-auto border border-[#c4eec0]">
+            <div th:if="${#lists.isEmpty(reportesMock)}" class="p-8 rounded-2xl bg-surface-sunken border border-border text-center space-y-2">
+                <div class="size-12 rounded-full bg-pill-green text-sidebar grid place-items-center mx-auto border border-[#cbe5c7]">
                     <i data-lucide="check-circle-2" class="size-6 stroke-2"></i>
                 </div>
                 <h4 class="text-sidebar text-base font-black">Sin citaciones ni observaciones pendientes</h4>
@@ -25,7 +25,7 @@
             </div>
 
             <!-- Tarjeta de Citaciones Activas -->
-            <div th:each="rep : ${reportesMock}" class="p-6 rounded-2xl bg-[#f7fcf6] border-2 border-[#8ce383] shadow-md space-y-4 mb-4">
+            <div th:each="rep : ${reportesMock}" class="p-6 rounded-2xl bg-surface-muted border-2 border-[#cbe5c7] shadow-md space-y-4 mb-4">
                 <div class="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
                     <div class="flex items-center gap-3">
                         <div class="size-12 rounded-xl bg-sidebar text-white grid place-items-center shadow-md shrink-0">
@@ -38,28 +38,28 @@
                     </div>
 
                     <!-- Badge Indicador de Acudiente -->
-                    <div th:if="${rep.requiereAcudiente}" class="px-4 py-2 bg-pill-red text-alert-red border border-red-300 rounded-xl text-xs font-black flex items-center gap-2 shadow-2xs shrink-0">
+                    <div th:if="${rep.requiereAcudiente}" class="px-4 py-2 bg-pill-red text-alert-red border border-[#f5cece] rounded-xl text-xs font-black flex items-center gap-2 shadow-2xs shrink-0">
                         <i data-lucide="users" class="size-4 stroke-[2.5]"></i>
                         <span>CITACIÓN CON ACUDIENTE / PADRE DE FAMILIA</span>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-[#c4eec0]/60">
-                    <div class="p-3 bg-white rounded-xl border border-[#c4eec0]/40">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-border">
+                    <div class="p-3 bg-white rounded-xl border border-border">
                         <span class="text-[10px] font-black uppercase text-text-secondary block">Fecha y Hora de la Cita</span>
                         <strong class="text-sidebar text-sm font-black" th:text="${rep.fechaCitacion != null ? rep.fechaCitacion : 'Fecha por definir'}">2026-08-04 - 08:30 AM</strong>
                     </div>
-                    <div class="p-3 bg-white rounded-xl border border-[#c4eec0]/40">
+                    <div class="p-3 bg-white rounded-xl border border-border">
                         <span class="text-[10px] font-black uppercase text-text-secondary block">Motivo del Reporte</span>
                         <strong class="text-text-primary text-xs font-bold" th:text="${rep.razon + ' (' + rep.categoria + ')'}">Bajo rendimiento (Razones Académicas)</strong>
                     </div>
-                    <div class="p-3 bg-white rounded-xl border border-[#c4eec0]/40">
+                    <div class="p-3 bg-white rounded-xl border border-border">
                         <span class="text-[10px] font-black uppercase text-text-secondary block">Reportado Por</span>
                         <strong class="text-text-primary text-xs font-bold" th:text="${rep.docente}">Prof. Jorge Eliécer Rojas</strong>
                     </div>
                 </div>
 
-                <div class="p-3.5 bg-white rounded-xl border border-[#c4eec0]/40">
+                <div class="p-3.5 bg-white rounded-xl border border-border">
                     <span class="text-[10px] font-black uppercase text-sidebar block mb-1">Observaciones e Indicaciones de Dirección:</span>
                     <p class="text-text-primary text-xs font-semibold leading-relaxed" th:text="${rep.observacionesAdmin != null && rep.observacionesAdmin != '' ? rep.observacionesAdmin : rep.detalles}">
                         Se requiere presencia obligatoria del acudiente por bajo desempeño acumulado...

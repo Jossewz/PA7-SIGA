@@ -19,6 +19,11 @@ th:fragment="html(content)">
         SIGA
     </title>
 
+    <!-- Metadatos de seguridad CSRF para Fetch/AJAX -->
+    <meta name="_csrf" th:if="${_csrf}" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:if="${_csrf}" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf_param" th:if="${_csrf}" th:content="${_csrf.parameterName}"/>
+
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -57,6 +57,19 @@ public class CursoController {
         return CursoGestionAppService.obtenerNombreDiaEspanol(dow);
     }
 
+    private static final String[] PALETA_COLORES = {
+            "#0d4117", // Verde Bosque SIGA
+            "#059669", // Esmeralda
+            "#0284c7", // Azul Cielo
+            "#4f46e5", // Índigo
+            "#7c3aed", // Púrpura
+            "#d97706", // Ámbar
+            "#dc2626", // Carmesí
+            "#0d9488", // Verde Azulado
+            "#c026d3", // Fucsia
+            "#334155"  // Pizarra
+    };
+
     @GetMapping("/clases/horarios/datos")
     @ResponseBody
     public List<Map<String, Object>> obtenerHorariosDatosJson(@RequestParam("cursoId") UUID cursoId) {
@@ -69,11 +82,92 @@ public class CursoController {
             map.put("horaInicio", h.getHoraInicio() != null ? h.getHoraInicio().toString() : "07:00");
             map.put("horaFin", h.getHoraFin() != null ? h.getHoraFin().toString() : "08:30");
             map.put("materiaId", h.getMateria() != null ? h.getMateria().getId().toString() : "");
-            map.put("materiaNombre", h.getMateria() != null ? h.getMateria().getNombre() : "");
+            map.put("materiaNombre", h.getMateria() != null ? h.getMateria().getNombre() : "Sin Asignatura");
             map.put("docenteId", h.getDocente() != null ? h.getDocente().getId().toString() : "");
-            map.put("docenteNombre", h.getDocente() != null ? h.getDocente().getNombreCompleto() : "");
-            map.put("salon", h.getSalon() != null ? h.getSalon() : "Aula 101");
+            map.put("docenteNombre", h.getDocente() != null ? h.getDocente().getNombreCompleto() : "Sin Docente");
+            map.put("salon", h.getSalon() != null ? h.getSalon() : (h.getSalonEntidad() != null ? h.getSalonEntidad().getNombre() : "Aula 101"));
+            map.put("salonId", h.getSalonEntidad() != null ? h.getSalonEntidad().getId().toString() : "");
+
+            // Color determinista según el nombre de la materia
+            int hash = Math.abs(h.getMateria() != null ? h.getMateria().getNombre().hashCode() : 0);
+            String color = PALETA_COLORES[hash % PALETA_COLORES.length];
+            map.put("color", color);
+
             res.add(map);
+        }
+        return res;
+    }
+
+    @PostMapping("/clases/horarios/guardar-item")
+    @ResponseBody
+    public Map<String, Object> guardarHorarioItem(
+            @RequestParam("cursoId") UUID cursoId,
+            @RequestParam("diaSemana") String diaSemana,
+            @RequestParam(value = "horarioId", required = false) String horarioIdStr,
+            @RequestParam("materiaId") UUID materiaId,
+            @RequestParam(value = "docenteId", required = false) String docenteIdStr,
+            @RequestParam("horaInicio") String horaInicio,
+            @RequestParam("horaFin") String horaFin,
+            @RequestParam(value = "salon", required = false) String salon) {
+
+        Map<String, Object> res = new HashMap<>();
+        try {
+            UUID horarioId = (horarioIdStr != null && !horarioIdStr.isBlank() && !horarioIdStr.equals("null")) 
+                    ? UUID.fromString(horarioIdStr) : null;
+            UUID docenteId = (docenteIdStr != null && !docenteIdStr.isBlank() && !docenteIdStr.equals("null")) 
+                    ? UUID.fromString(docenteIdStr) : null;
+
+            Horario h;
+            if (horarioId != null) {
+                h = cursoService.actualizarHorario(horarioId, cursoId, diaSemana, materiaId, docenteId, horaInicio, horaFin, salon);
+            } else {
+                h = cursoService.guardarHorarioBloque(cursoId, diaSemana, materiaId, docenteId, horaInicio, horaFin, salon);
+            }
+
+            res.put("success", true);
+            res.put("id", h.getId().toString());
+            res.put("dia", h.getDiaSemana());
+            res.put("horaInicio", h.getHoraInicio() != null ? h.getHoraInicio().toString() : horaInicio);
+            res.put("horaFin", h.getHoraFin() != null ? h.getHoraFin().toString() : horaFin);
+            res.put("materiaId", h.getMateria() != null ? h.getMateria().getId().toString() : "");
+            res.put("materiaNombre", h.getMateria() != null ? h.getMateria().getNombre() : "");
+            res.put("docenteId", h.getDocente() != null ? h.getDocente().getId().toString() : "");
+            res.put("docenteNombre", h.getDocente() != null ? h.getDocente().getNombreCompleto() : "Sin Docente");
+            res.put("salon", h.getSalon() != null ? h.getSalon() : "Aula 101");
+
+            int hash = Math.abs(h.getMateria() != null ? h.getMateria().getNombre().hashCode() : 0);
+            res.put("color", PALETA_COLORES[hash % PALETA_COLORES.length]);
+        } catch (Exception ex) {
+            res.put("success", false);
+            res.put("error", ex.getMessage());
+        }
+        return res;
+    }
+
+    @PostMapping("/clases/horarios/eliminar-item")
+    @ResponseBody
+    public Map<String, Object> eliminarHorarioItem(@RequestParam("horarioId") UUID horarioId) {
+        Map<String, Object> res = new HashMap<>();
+        try {
+            cursoService.eliminarHorario(horarioId);
+            res.put("success", true);
+        } catch (Exception ex) {
+            res.put("success", false);
+            res.put("error", ex.getMessage());
+        }
+        return res;
+    }
+
+    @PostMapping("/clases/horarios/limpiar")
+    @ResponseBody
+    public Map<String, Object> limpiarHorario(@RequestParam("cursoId") UUID cursoId) {
+        Map<String, Object> res = new HashMap<>();
+        try {
+            cursoService.limpiarHorarioCurso(cursoId);
+            res.put("success", true);
+        } catch (Exception ex) {
+            res.put("success", false);
+            res.put("error", ex.getMessage());
         }
         return res;
     }
@@ -110,6 +204,8 @@ public class CursoController {
         model.addAttribute("cursosList", cursosList);
         model.addAttribute("docentesList", personalService.listarDocentes());
         model.addAttribute("materiasList", cursoService.listarMateriasActivas());
+        model.addAttribute("salonesList", cursoService.listarSalonesActivos());
+        model.addAttribute("bloquesList", cursoService.listarBloquesPorJornada("Mañana"));
         return "clases/index";
     }
 

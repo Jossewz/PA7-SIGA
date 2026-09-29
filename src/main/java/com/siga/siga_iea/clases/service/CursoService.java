@@ -237,6 +237,21 @@ public class CursoService {
         return horarioRepository.save(h);
     }
 
+    @Transactional
+    public void eliminarHorario(UUID horarioId) {
+        if (horarioId != null && horarioRepository.existsById(horarioId)) {
+            horarioRepository.deleteById(horarioId);
+        }
+    }
+
+    @Transactional
+    public Horario actualizarHorario(UUID horarioId, UUID cursoId, String diaSemana, UUID materiaId, UUID docenteId, String horaInicioStr, String horaFinStr, String salon) {
+        if (horarioId != null && horarioRepository.existsById(horarioId)) {
+            horarioRepository.deleteById(horarioId);
+        }
+        return guardarHorarioBloque(cursoId, diaSemana, materiaId, docenteId, horaInicioStr, horaFinStr, salon);
+    }
+
     public List<Salon> listarSalonesActivos() {
         return salonRepository.findByEstado("Activo");
     }

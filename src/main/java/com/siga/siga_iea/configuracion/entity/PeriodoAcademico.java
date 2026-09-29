@@ -6,7 +6,9 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "periodos_academicos")
+@Table(name = "periodos_academicos", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_periodo_anio_numero", columnNames = {"anio_lectivo_id", "numero_periodo"})
+})
 public class PeriodoAcademico {
 
     @Id
@@ -14,7 +16,11 @@ public class PeriodoAcademico {
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "numero_periodo", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "anio_lectivo_id", nullable = false)
+    private AnioLectivo anioLectivo;
+
+    @Column(name = "numero_periodo", nullable = false)
     private Integer numeroPeriodo;
 
     @Column(columnDefinition = "VARCHAR", nullable = false)
@@ -34,6 +40,16 @@ public class PeriodoAcademico {
 
     public PeriodoAcademico() {}
 
+    public PeriodoAcademico(AnioLectivo anioLectivo, Integer numeroPeriodo, String nombre, BigDecimal pesoPorcentaje, LocalDate fechaInicio, LocalDate fechaFin, String estado) {
+        this.anioLectivo = anioLectivo;
+        this.numeroPeriodo = numeroPeriodo;
+        this.nombre = nombre;
+        this.pesoPorcentaje = pesoPorcentaje;
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
+        this.estado = estado;
+    }
+
     public PeriodoAcademico(Integer numeroPeriodo, String nombre, BigDecimal pesoPorcentaje, LocalDate fechaInicio, LocalDate fechaFin, String estado) {
         this.numeroPeriodo = numeroPeriodo;
         this.nombre = nombre;
@@ -45,6 +61,9 @@ public class PeriodoAcademico {
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
+
+    public AnioLectivo getAnioLectivo() { return anioLectivo; }
+    public void setAnioLectivo(AnioLectivo anioLectivo) { this.anioLectivo = anioLectivo; }
 
     public Integer getNumeroPeriodo() { return numeroPeriodo; }
     public void setNumeroPeriodo(Integer numeroPeriodo) { this.numeroPeriodo = numeroPeriodo; }

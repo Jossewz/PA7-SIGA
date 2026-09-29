@@ -4,7 +4,9 @@ import com.siga.siga_iea.matricula.entity.Matricula;
 import com.siga.siga_iea.matricula.service.MatriculaService;
 import com.siga.siga_iea.storage.entity.Documento;
 import com.siga.siga_iea.storage.entity.TipoDocumento;
+import com.siga.siga_iea.usuarios.entity.Acudiente;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
+import com.siga.siga_iea.usuarios.entity.EstudianteAcudiente;
 import com.siga.siga_iea.usuarios.entity.Usuario;
 import com.siga.siga_iea.usuarios.service.EstudianteService;
 import com.siga.siga_iea.usuarios.service.UsuarioService;
@@ -141,11 +143,23 @@ public class EstudianteController {
         student.put("direccion", e.getDireccion() != null ? e.getDireccion() : "No registrada");
         student.put("estado", e.getEstado() != null ? e.getEstado() : "Activo");
 
-        if (e.getAcudiente() != null) {
-            student.put("acudienteNombre", e.getAcudiente().getNombreCompleto());
-            student.put("acudienteParentesco", e.getAcudiente().getParentesco() != null ? e.getAcudiente().getParentesco() : "Acudiente");
-            student.put("acudienteDoc", (e.getAcudiente().getTipoDocumento() != null ? e.getAcudiente().getTipoDocumento() : "CC") + " - " + (e.getAcudiente().getNumeroDocumento() != null ? e.getAcudiente().getNumeroDocumento() : "N/A"));
-            student.put("acudienteTel", e.getAcudiente().getTelefono() != null ? e.getAcudiente().getTelefono() : "N/A");
+        Acudiente acuPrincipal = e.getAcudiente();
+        List<EstudianteAcudiente> relacionesAcu = estudianteService.listarAcudientesDeEstudiante(e.getId());
+        model.addAttribute("relacionesAcudientes", relacionesAcu);
+
+        if (acuPrincipal == null && !relacionesAcu.isEmpty()) {
+            acuPrincipal = relacionesAcu.stream()
+                    .filter(r -> Boolean.TRUE.equals(r.getEsPrincipal()))
+                    .findFirst()
+                    .map(EstudianteAcudiente::getAcudiente)
+                    .orElse(relacionesAcu.get(0).getAcudiente());
+        }
+
+        if (acuPrincipal != null) {
+            student.put("acudienteNombre", acuPrincipal.getNombreCompleto());
+            student.put("acudienteParentesco", acuPrincipal.getParentesco() != null ? acuPrincipal.getParentesco() : "Acudiente");
+            student.put("acudienteDoc", (acuPrincipal.getTipoDocumento() != null ? acuPrincipal.getTipoDocumento() : "CC") + " - " + (acuPrincipal.getNumeroDocumento() != null ? acuPrincipal.getNumeroDocumento() : "N/A"));
+            student.put("acudienteTel", acuPrincipal.getTelefono() != null ? acuPrincipal.getTelefono() : "N/A");
         } else {
             student.put("acudienteNombre", "No asignado");
             student.put("acudienteParentesco", "-");

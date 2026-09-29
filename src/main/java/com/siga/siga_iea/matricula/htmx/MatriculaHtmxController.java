@@ -237,6 +237,11 @@ public class MatriculaHtmxController {
         try {
             estudiante = estudianteService.guardar(estudiante);
 
+            if (acudiente != null) {
+                estudianteService.asociarAcudiente(estudiante.getId(), acudiente.getId(),
+                        parentRelation != null ? parentRelation : "Acudiente Principal", true);
+            }
+
             // 3. Guardar Matrícula
             Matricula nuevaMatricula = new Matricula();
             nuevaMatricula.setEstudiante(estudiante);

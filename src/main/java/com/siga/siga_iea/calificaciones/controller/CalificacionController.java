@@ -2,8 +2,8 @@ package com.siga.siga_iea.calificaciones.controller;
 
 import com.siga.siga_iea.calificaciones.dto.BoletinMateriaDTO;
 import com.siga.siga_iea.calificaciones.service.CalificacionesService;
-import com.siga.siga_iea.clases.entity.Clase;
-import com.siga.siga_iea.clases.service.ClaseService;
+import com.siga.siga_iea.clases.entity.Curso;
+import com.siga.siga_iea.clases.service.CursoService;
 import com.siga.siga_iea.configuracion.service.PeriodoConfigService;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
 import com.siga.siga_iea.usuarios.service.EstudianteService;
@@ -20,16 +20,16 @@ public class CalificacionController {
 
     private final CalificacionesService calificacionesService;
     private final EstudianteService estudianteService;
-    private final ClaseService claseService;
+    private final CursoService cursoService;
     private final PeriodoConfigService periodoConfigService;
 
     public CalificacionController(CalificacionesService calificacionesService, 
                                   EstudianteService estudianteService,
-                                  ClaseService claseService,
+                                  CursoService cursoService,
                                   PeriodoConfigService periodoConfigService) {
         this.calificacionesService = calificacionesService;
         this.estudianteService = estudianteService;
-        this.claseService = claseService;
+        this.cursoService = cursoService;
         this.periodoConfigService = periodoConfigService;
     }
 
@@ -71,7 +71,7 @@ public class CalificacionController {
             model.addAttribute("boletin", Collections.emptyList());
         }
 
-        List<Clase> cursos = claseService.listarTodosLosCursos();
+        List<Curso> cursos = cursoService.listarTodosLosCursos();
         model.addAttribute("cursosList", cursos);
 
         return "calificaciones/index";

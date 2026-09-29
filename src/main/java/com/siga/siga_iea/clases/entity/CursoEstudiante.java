@@ -15,7 +15,7 @@ public class CursoEstudiante {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "curso_id", nullable = false)
-    private Clase curso;
+    private Curso curso;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "estudiante_id", nullable = false)
@@ -26,7 +26,7 @@ public class CursoEstudiante {
 
     public CursoEstudiante() {}
 
-    public CursoEstudiante(Clase curso, Estudiante estudiante, String anoLectivo) {
+    public CursoEstudiante(Curso curso, Estudiante estudiante, String anoLectivo) {
         this.curso = curso;
         this.estudiante = estudiante;
         this.anoLectivo = anoLectivo;
@@ -35,8 +35,8 @@ public class CursoEstudiante {
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
-    public Clase getCurso() { return curso; }
-    public void setCurso(Clase curso) { this.curso = curso; }
+    public Curso getCurso() { return curso; }
+    public void setCurso(Curso curso) { this.curso = curso; }
 
     public Estudiante getEstudiante() { return estudiante; }
     public void setEstudiante(Estudiante estudiante) { this.estudiante = estudiante; }

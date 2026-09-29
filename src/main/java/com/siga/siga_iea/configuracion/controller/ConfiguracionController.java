@@ -1,7 +1,7 @@
 package com.siga.siga_iea.configuracion.controller;
 
 import com.siga.siga_iea.clases.entity.Materia;
-import com.siga.siga_iea.clases.service.ClaseService;
+import com.siga.siga_iea.clases.service.CursoService;
 import com.siga.siga_iea.configuracion.entity.*;
 import com.siga.siga_iea.configuracion.service.EscalaDesempenoService;
 import com.siga.siga_iea.configuracion.service.PeriodoConfigService;
@@ -20,16 +20,16 @@ public class ConfiguracionController {
     private final PeriodoConfigService periodoConfigService;
     private final EscalaDesempenoService escalaDesempenoService;
     private final RolPermisoService rolPermisoService;
-    private final ClaseService claseService;
+    private final CursoService cursoService;
 
     public ConfiguracionController(PeriodoConfigService periodoConfigService,
                                    EscalaDesempenoService escalaDesempenoService,
                                    RolPermisoService rolPermisoService,
-                                   ClaseService claseService) {
+                                   CursoService cursoService) {
         this.periodoConfigService = periodoConfigService;
         this.escalaDesempenoService = escalaDesempenoService;
         this.rolPermisoService = rolPermisoService;
-        this.claseService = claseService;
+        this.cursoService = cursoService;
     }
 
     @GetMapping("/configuracion")
@@ -65,7 +65,7 @@ public class ConfiguracionController {
         model.addAttribute("escalas", escalas);
 
         // 4. Asignaturas del Colegio
-        List<Materia> materias = claseService.listarTodasMateriasOrdenadas();
+        List<Materia> materias = cursoService.listarTodasMateriasOrdenadas();
         model.addAttribute("materias", materias);
 
         // 5. Roles y Permisos
@@ -166,7 +166,7 @@ public class ConfiguracionController {
         try {
             Materia materia;
             if (id != null) {
-                materia = claseService.buscarMateriaPorId(id).orElse(new Materia());
+                materia = cursoService.buscarMateriaPorId(id).orElse(new Materia());
             } else {
                 materia = new Materia();
             }
@@ -174,7 +174,7 @@ public class ConfiguracionController {
             materia.setArea(area != null ? area.trim() : "General");
             materia.setIntensidadHoraria(intensidadHoraria != null ? intensidadHoraria : 4);
             materia.setEstado(estado);
-            claseService.guardarMateria(materia);
+            cursoService.guardarMateria(materia);
 
             redirectAttributes.addFlashAttribute("mensajeExito", "Asignatura '" + materia.getNombre() + "' guardada correctamente.");
         } catch (Exception ex) {
@@ -190,7 +190,7 @@ public class ConfiguracionController {
             @RequestParam("id") UUID id,
             RedirectAttributes redirectAttributes) {
 
-        claseService.toggleEstadoMateria(id).ifPresent(m -> {
+        cursoService.toggleEstadoMateria(id).ifPresent(m -> {
             redirectAttributes.addFlashAttribute("mensajeExito", "Estado de '" + m.getNombre() + "' cambiado a " + m.getEstado() + ".");
         });
 

@@ -8,12 +8,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class ClaseViewRenderTest {
+class CursoViewRenderTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -56,7 +57,7 @@ class ClaseViewRenderTest {
     }
 
     @Autowired
-    private com.siga.siga_iea.clases.repository.ClaseRepository claseRepository;
+    private com.siga.siga_iea.clases.repository.CursoRepository cursoRepository;
 
     @Autowired
     private com.siga.siga_iea.clases.repository.CursoEstudianteRepository cursoEstudianteRepository;
@@ -81,7 +82,7 @@ class ClaseViewRenderTest {
         est = estudianteRepository.save(est);
 
         // Obtenemos un curso existente
-        java.util.List<com.siga.siga_iea.clases.entity.Clase> clases = claseRepository.findAll();
+        java.util.List<com.siga.siga_iea.clases.entity.Curso> clases = cursoRepository.findAll();
         if (!clases.isEmpty()) {
             var curso = clases.get(0);
             com.siga.siga_iea.clases.entity.CursoEstudiante ce = new com.siga.siga_iea.clases.entity.CursoEstudiante();
@@ -98,7 +99,7 @@ class ClaseViewRenderTest {
     }
 
     @Autowired
-    private com.siga.siga_iea.clases.service.ClaseService claseService;
+    private com.siga.siga_iea.clases.service.CursoService cursoService;
 
     @Autowired
     private com.siga.siga_iea.clases.repository.MateriaRepository materiaRepository;
@@ -115,11 +116,11 @@ class ClaseViewRenderTest {
         // Aseguramos que el curso tenga un horario configurado para el día actual
         com.siga.siga_iea.clases.entity.Materia mat = materiaRepository.findByNombre("Matemáticas")
                 .orElseGet(() -> materiaRepository.save(new com.siga.siga_iea.clases.entity.Materia("Matemáticas", "Ciencias Exactas")));
-        String diaHoy = com.siga.siga_iea.clases.controller.ClaseController.obtenerNombreDiaEspanol(java.time.LocalDate.now().getDayOfWeek());
-        claseService.guardarHorarioBloque(java.util.UUID.fromString(cursoIdStr), diaHoy, mat.getId(), null, "07:00", "08:30", "Aula 101");
+        String diaHoy = com.siga.siga_iea.clases.controller.CursoController.obtenerNombreDiaEspanol(java.time.LocalDate.now().getDayOfWeek());
+        cursoService.guardarHorarioBloque(java.util.UUID.fromString(cursoIdStr), diaHoy, mat.getId(), null, "07:00", "08:30", "Aula 101");
 
         // Crear una evaluacion
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/clases/evaluaciones/crear")
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/clases/evaluaciones/crear").with(csrf())
                         .param("cursoId", cursoIdStr)
                         .param("materiaNombre", "Matemáticas")
                         .param("periodo", "1"))
@@ -145,7 +146,7 @@ class ClaseViewRenderTest {
         est.setNumeroDocumento("DOC-TEST-" + System.currentTimeMillis());
         est = estudianteRepository.save(est);
         
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/clases/calificaciones/guardar")
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/clases/calificaciones/guardar").with(csrf())
                         .param("evaluacionId", ev.getId().toString())
                         .param("estudianteId", est.getId().toString())
                         .param("nota", "4,75")
@@ -164,7 +165,7 @@ class ClaseViewRenderTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String cursoIdStr = (String) mvcResult.getModelAndView().getModel().get("cursoId");
-        var curso = claseRepository.findById(java.util.UUID.fromString(cursoIdStr)).orElseThrow();
+        var curso = cursoRepository.findById(java.util.UUID.fromString(cursoIdStr)).orElseThrow();
 
         // Creamos un estudiante asociado al curso para probar los botones bloqueados
         com.siga.siga_iea.usuarios.entity.Estudiante est = new com.siga.siga_iea.usuarios.entity.Estudiante();

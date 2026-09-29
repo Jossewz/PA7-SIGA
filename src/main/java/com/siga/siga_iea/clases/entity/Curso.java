@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "cursos")
-public class Clase {
+public class Curso {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -44,7 +44,7 @@ public class Clase {
         this.createdAt = LocalDateTime.now();
     }
 
-    public Clase() {}
+    public Curso() {}
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }

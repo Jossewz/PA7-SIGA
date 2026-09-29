@@ -2,7 +2,7 @@ package com.siga.siga_iea.configuracion;
 
 import com.siga.siga_iea.clases.entity.Materia;
 import com.siga.siga_iea.clases.repository.MateriaRepository;
-import com.siga.siga_iea.clases.service.ClaseService;
+import com.siga.siga_iea.clases.service.CursoService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -30,7 +31,7 @@ class ConfiguracionParametrosViewTest {
     private MateriaRepository materiaRepository;
 
     @Autowired
-    private ClaseService claseService;
+    private CursoService cursoService;
 
     @Test
     @WithMockUser(roles = "ADMIN")
@@ -64,7 +65,7 @@ class ConfiguracionParametrosViewTest {
     @DisplayName("POST /configuracion/periodos debe validar que la suma sea 100%")
     void testValidacionSumaPonderaciones() throws Exception {
         // Suma errónea (90%)
-        mockMvc.perform(post("/configuracion/periodos")
+        mockMvc.perform(post("/configuracion/periodos").with(csrf())
                         .param("pesoP1", "30")
                         .param("pesoP2", "30")
                         .param("pesoP3", "30")
@@ -78,7 +79,7 @@ class ConfiguracionParametrosViewTest {
                 .andExpect(flash().attributeExists("mensajeError"));
 
         // Suma válida (100%)
-        mockMvc.perform(post("/configuracion/periodos")
+        mockMvc.perform(post("/configuracion/periodos").with(csrf())
                         .param("pesoP1", "30")
                         .param("pesoP2", "35")
                         .param("pesoP3", "35")
@@ -106,7 +107,7 @@ class ConfiguracionParametrosViewTest {
         activa.setEstado("Activo");
         materiaRepository.save(activa);
 
-        List<Materia> activasParaHorarios = claseService.listarMateriasActivas();
+        List<Materia> activasParaHorarios = cursoService.listarMateriasActivas();
 
         assertTrue(activasParaHorarios.stream().anyMatch(m -> m.getNombre().equals("Biología Molecular")));
         assertFalse(activasParaHorarios.stream().anyMatch(m -> m.getNombre().equals("Astronomía Experimental")));
@@ -117,7 +118,7 @@ class ConfiguracionParametrosViewTest {
     @DisplayName("Actualizar permisos de ESTUDIANTE debe habilitar dinámicamente el acceso al módulo PERSONAL")
     void testPermisosRolesActualizacionYAccesoDinamico() throws Exception {
         // Asignar acceso al módulo PERSONAL para el rol ESTUDIANTE
-        mockMvc.perform(post("/configuracion/roles/permisos")
+        mockMvc.perform(post("/configuracion/roles/permisos").with(csrf())
                         .param("rol", "ESTUDIANTE")
                         .param("modulosAcceso", "MATRICULAS", "PERSONAL", "CURSOS_HORARIOS"))
                 .andExpect(status().is3xxRedirection())

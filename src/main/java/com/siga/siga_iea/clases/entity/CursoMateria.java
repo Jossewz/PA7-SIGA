@@ -15,7 +15,7 @@ public class CursoMateria {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "curso_id", nullable = false)
-    private Clase curso;
+    private Curso curso;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "materia_id", nullable = false)
@@ -30,7 +30,7 @@ public class CursoMateria {
 
     public CursoMateria() {}
 
-    public CursoMateria(Clase curso, Materia materia, Docente docente, String anoLectivo) {
+    public CursoMateria(Curso curso, Materia materia, Docente docente, String anoLectivo) {
         this.curso = curso;
         this.materia = materia;
         this.docente = docente;
@@ -40,8 +40,8 @@ public class CursoMateria {
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
-    public Clase getCurso() { return curso; }
-    public void setCurso(Clase curso) { this.curso = curso; }
+    public Curso getCurso() { return curso; }
+    public void setCurso(Curso curso) { this.curso = curso; }
 
     public Materia getMateria() { return materia; }
     public void setMateria(Materia materia) { this.materia = materia; }

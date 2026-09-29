@@ -2,9 +2,9 @@ package com.siga.siga_iea.asistencias.service;
 
 import com.siga.siga_iea.asistencias.entity.Asistencia;
 import com.siga.siga_iea.asistencias.repository.AsistenciaRepository;
-import com.siga.siga_iea.clases.entity.Clase;
+import com.siga.siga_iea.clases.entity.Curso;
 import com.siga.siga_iea.clases.entity.Materia;
-import com.siga.siga_iea.clases.repository.ClaseRepository;
+import com.siga.siga_iea.clases.repository.CursoRepository;
 import com.siga.siga_iea.clases.repository.MateriaRepository;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
 import com.siga.siga_iea.usuarios.repository.EstudianteRepository;
@@ -18,16 +18,16 @@ import java.util.*;
 public class AsistenciaService {
 
     private final AsistenciaRepository asistenciaRepository;
-    private final ClaseRepository claseRepository;
+    private final CursoRepository cursoRepository;
     private final MateriaRepository materiaRepository;
     private final EstudianteRepository estudianteRepository;
 
     public AsistenciaService(AsistenciaRepository asistenciaRepository,
-                             ClaseRepository claseRepository,
+                             CursoRepository cursoRepository,
                              MateriaRepository materiaRepository,
                              EstudianteRepository estudianteRepository) {
         this.asistenciaRepository = asistenciaRepository;
-        this.claseRepository = claseRepository;
+        this.cursoRepository = cursoRepository;
         this.materiaRepository = materiaRepository;
         this.estudianteRepository = estudianteRepository;
     }
@@ -70,7 +70,7 @@ public class AsistenciaService {
             }
             asistencia.setEstado(siguiente);
         } else {
-            Clase curso = claseRepository.findById(cursoId)
+            Curso curso = cursoRepository.findById(cursoId)
                     .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
             Estudiante estudiante = estudianteRepository.findById(estudianteId)
                     .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
@@ -94,7 +94,7 @@ public class AsistenciaService {
             asistencia.setEstado(estado);
             if (observaciones != null) asistencia.setObservaciones(observaciones);
         } else {
-            Clase curso = claseRepository.findById(cursoId)
+            Curso curso = cursoRepository.findById(cursoId)
                     .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
             Estudiante estudiante = estudianteRepository.findById(estudianteId)
                     .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));

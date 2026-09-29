@@ -6,11 +6,11 @@ import com.siga.siga_iea.calificaciones.entity.Calificacion;
 import com.siga.siga_iea.calificaciones.entity.Evaluacion;
 import com.siga.siga_iea.calificaciones.repository.CalificacionesRepository;
 import com.siga.siga_iea.calificaciones.repository.EvaluacionRepository;
-import com.siga.siga_iea.clases.entity.Clase;
+import com.siga.siga_iea.clases.entity.Curso;
 import com.siga.siga_iea.clases.entity.CursoEstudiante;
 import com.siga.siga_iea.clases.entity.CursoMateria;
 import com.siga.siga_iea.clases.entity.Materia;
-import com.siga.siga_iea.clases.repository.ClaseRepository;
+import com.siga.siga_iea.clases.repository.CursoRepository;
 import com.siga.siga_iea.clases.repository.CursoEstudianteRepository;
 import com.siga.siga_iea.clases.repository.CursoMateriaRepository;
 import com.siga.siga_iea.clases.repository.MateriaRepository;
@@ -34,7 +34,7 @@ public class CalificacionesService {
     private final EvaluacionRepository evaluacionRepository;
     private final CursoMateriaRepository cursoMateriaRepository;
     private final EstudianteRepository estudianteRepository;
-    private final ClaseRepository claseRepository;
+    private final CursoRepository cursoRepository;
     private final MateriaRepository materiaRepository;
     private final CursoEstudianteRepository cursoEstudianteRepository;
     private final EscalaDesempenoService escalaDesempenoService;
@@ -43,7 +43,7 @@ public class CalificacionesService {
                                  EvaluacionRepository evaluacionRepository,
                                  CursoMateriaRepository cursoMateriaRepository,
                                  EstudianteRepository estudianteRepository,
-                                 ClaseRepository claseRepository,
+                                 CursoRepository cursoRepository,
                                  MateriaRepository materiaRepository,
                                  CursoEstudianteRepository cursoEstudianteRepository,
                                  EscalaDesempenoService escalaDesempenoService) {
@@ -51,7 +51,7 @@ public class CalificacionesService {
         this.evaluacionRepository = evaluacionRepository;
         this.cursoMateriaRepository = cursoMateriaRepository;
         this.estudianteRepository = estudianteRepository;
-        this.claseRepository = claseRepository;
+        this.cursoRepository = cursoRepository;
         this.materiaRepository = materiaRepository;
         this.cursoEstudianteRepository = cursoEstudianteRepository;
         this.escalaDesempenoService = escalaDesempenoService;
@@ -65,7 +65,7 @@ public class CalificacionesService {
     public CursoMateria obtenerOCrearCursoMateria(UUID cursoId, UUID materiaId, String anoLectivo) {
         return cursoMateriaRepository.findByCursoIdAndMateriaIdAndAnoLectivo(cursoId, materiaId, anoLectivo)
                 .orElseGet(() -> {
-                    Clase curso = claseRepository.findById(cursoId)
+                    Curso curso = cursoRepository.findById(cursoId)
                             .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
                     Materia materia = materiaRepository.findById(materiaId)
                             .orElseThrow(() -> new IllegalArgumentException("Materia no encontrada"));

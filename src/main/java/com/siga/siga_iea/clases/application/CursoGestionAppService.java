@@ -3,10 +3,10 @@ package com.siga.siga_iea.clases.application;
 import com.siga.siga_iea.asistencias.service.AsistenciaService;
 import com.siga.siga_iea.calificaciones.entity.Evaluacion;
 import com.siga.siga_iea.calificaciones.service.CalificacionesService;
-import com.siga.siga_iea.clases.dto.ClaseGestionDetalleDTO;
-import com.siga.siga_iea.clases.dto.ClaseTablaNotasDTO;
+import com.siga.siga_iea.clases.dto.CursoGestionDetalleDTO;
+import com.siga.siga_iea.clases.dto.CursoTablaNotasDTO;
 import com.siga.siga_iea.clases.entity.*;
-import com.siga.siga_iea.clases.service.ClaseService;
+import com.siga.siga_iea.clases.service.CursoService;
 import com.siga.siga_iea.usuarios.entity.Docente;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,21 +17,21 @@ import java.time.LocalDate;
 import java.util.*;
 
 /**
- * Servicio de Aplicación (Capa de Casos de Uso) para la Gestión de Clases.
+ * Servicio de Aplicación (Capa de Casos de Uso) para la Gestión de Cursos.
  * Extrae y desacopla la orquestación de negocio pesada que anteriormente
- * residía dentro de ClaseController.
+ * residía dentro de CursoController.
  */
 @Service
-public class ClaseGestionAppService {
+public class CursoGestionAppService {
 
-    private final ClaseService claseService;
+    private final CursoService cursoService;
     private final CalificacionesService calificacionesService;
     private final AsistenciaService asistenciaService;
 
-    public ClaseGestionAppService(ClaseService claseService,
+    public CursoGestionAppService(CursoService cursoService,
                                   CalificacionesService calificacionesService,
                                   AsistenciaService asistenciaService) {
-        this.claseService = claseService;
+        this.cursoService = cursoService;
         this.calificacionesService = calificacionesService;
         this.asistenciaService = asistenciaService;
     }
@@ -50,18 +50,18 @@ public class ClaseGestionAppService {
     }
 
     @Transactional
-    public ClaseGestionDetalleDTO prepararGestionDetalle(String codigo, Optional<Docente> docenteLogueadoOpt, boolean esAdmin) {
-        Optional<Clase> claseOpt = claseService.buscarPorCodigo(codigo, "2026");
-        Clase c;
-        if (claseOpt.isPresent()) {
-            c = claseOpt.get();
+    public CursoGestionDetalleDTO prepararGestionDetalle(String codigo, Optional<Docente> docenteLogueadoOpt, boolean esAdmin) {
+        Optional<Curso> cursoOpt = cursoService.buscarPorCodigo(codigo, "2026");
+        Curso c;
+        if (cursoOpt.isPresent()) {
+            c = cursoOpt.get();
         } else {
             String degree = (codigo != null && codigo.contains("-")) ? codigo.split("-")[0] + "°" : (codigo != null ? codigo : "11°");
             String group = (codigo != null && codigo.contains("-")) ? codigo.split("-")[1] : "01";
-            c = claseService.crearCurso(degree, group, "Mañana", 35, null, "2026");
+            c = cursoService.crearCurso(degree, group, "Mañana", 35, null, "2026");
         }
 
-        ClaseGestionDetalleDTO detalleDTO = new ClaseGestionDetalleDTO();
+        CursoGestionDetalleDTO detalleDTO = new CursoGestionDetalleDTO();
         detalleDTO.setCursoId(c.getId().toString());
         detalleDTO.setCodigoCurso(c.getCodigoCurso());
         detalleDTO.setGradoCurso(c.getGrado());
@@ -69,7 +69,7 @@ public class ClaseGestionAppService {
         detalleDTO.setJornadaCurso(c.getJornada());
         detalleDTO.setEsAdmin(esAdmin);
 
-        List<CursoEstudiante> estudiantesCE = claseService.listarEstudiantesDeCurso(c.getId());
+        List<CursoEstudiante> estudiantesCE = cursoService.listarEstudiantesDeCurso(c.getId());
         List<Map<String, Object>> estudiantesData = new ArrayList<>();
         int idx = 1;
         for (CursoEstudiante ce : estudiantesCE) {
@@ -85,7 +85,7 @@ public class ClaseGestionAppService {
         }
         detalleDTO.setEstudiantesData(estudiantesData);
 
-        List<Horario> horarios = claseService.listarHorariosDeCurso(c.getId());
+        List<Horario> horarios = cursoService.listarHorariosDeCurso(c.getId());
         List<Map<String, String>> horariosData = new ArrayList<>();
         for (Horario h : horarios) {
             Map<String, String> hm = new HashMap<>();
@@ -98,7 +98,7 @@ public class ClaseGestionAppService {
         detalleDTO.setHorariosData(horariosData);
 
         LocalDate hoy = LocalDate.now();
-        ClaseTablaNotasDTO tablaDTO = prepararTablaNotas(c.getId(), null, null, 1, hoy, docenteLogueadoOpt, esAdmin);
+        CursoTablaNotasDTO tablaDTO = prepararTablaNotas(c.getId(), null, null, 1, hoy, docenteLogueadoOpt, esAdmin);
         detalleDTO.setTablaNotasDTO(tablaDTO);
         detalleDTO.setHorarioBannerTexto(tablaDTO.getHorarioBannerTexto());
 
@@ -106,7 +106,7 @@ public class ClaseGestionAppService {
     }
 
     @Transactional
-    public ClaseTablaNotasDTO prepararTablaNotas(UUID cursoId,
+    public CursoTablaNotasDTO prepararTablaNotas(UUID cursoId,
                                                 String materiaNombre,
                                                 UUID materiaId,
                                                 Integer periodo,
@@ -116,7 +116,7 @@ public class ClaseGestionAppService {
         if (fecha == null) fecha = LocalDate.now();
         if (periodo == null) periodo = 1;
 
-        ClaseTablaNotasDTO dto = new ClaseTablaNotasDTO();
+        CursoTablaNotasDTO dto = new CursoTablaNotasDTO();
         dto.setCursoId(cursoId);
         dto.setPeriodo(periodo);
         dto.setFecha(fecha);
@@ -124,12 +124,12 @@ public class ClaseGestionAppService {
         String diaSemana = obtenerNombreDiaEspanol(fecha.getDayOfWeek());
         dto.setDiaSemana(diaSemana);
 
-        List<Horario> horarios = claseService.listarHorariosDeCurso(cursoId);
+        List<Horario> horarios = cursoService.listarHorariosDeCurso(cursoId);
         List<Horario> horariosDelDia = horarios.stream()
                 .filter(h -> h.getDiaSemana() != null && h.getDiaSemana().equalsIgnoreCase(diaSemana))
                 .toList();
 
-        List<CursoEstudiante> estudiantesCE = claseService.listarEstudiantesDeCurso(cursoId);
+        List<CursoEstudiante> estudiantesCE = cursoService.listarEstudiantesDeCurso(cursoId);
         dto.setEstudiantesCE(estudiantesCE);
 
         if (horariosDelDia.isEmpty() || (materiaNombre != null && materiaNombre.isBlank() && materiaId == null)) {
@@ -233,7 +233,7 @@ public class ClaseGestionAppService {
 
     @Transactional
     public int procesarGuardadoHorarioGrid(UUID cursoId, Map<String, String> allParams) {
-        claseService.limpiarHorarioCurso(cursoId);
+        cursoService.limpiarHorarioCurso(cursoId);
 
         String[] dias = {"Lunes", "Martes", "Miércoles", "Jueves", "Viernes"};
         int guardados = 0;
@@ -276,7 +276,7 @@ public class ClaseGestionAppService {
                     UUID materiaId = UUID.fromString(matIdStr);
                     UUID docenteId = (docIdStr != null && !docIdStr.isBlank()) ? UUID.fromString(docIdStr) : null;
 
-                    claseService.guardarHorarioBloque(cursoId, dia, materiaId, docenteId, horaInicio, horaFin, salon);
+                    cursoService.guardarHorarioBloque(cursoId, dia, materiaId, docenteId, horaInicio, horaFin, salon);
                     guardados++;
                 }
             }

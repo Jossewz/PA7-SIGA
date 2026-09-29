@@ -1,6 +1,6 @@
 package com.siga.siga_iea.asistencias.entity;
 
-import com.siga.siga_iea.clases.entity.Clase;
+import com.siga.siga_iea.clases.entity.Curso;
 import com.siga.siga_iea.clases.entity.Materia;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
 import jakarta.persistence.*;
@@ -20,7 +20,7 @@ public class Asistencia {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "curso_id", nullable = false)
-    private Clase curso;
+    private Curso curso;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "materia_id")
@@ -61,7 +61,7 @@ public class Asistencia {
 
     public Asistencia() {}
 
-    public Asistencia(Clase curso, Materia materia, Estudiante estudiante, LocalDate fecha, String estado) {
+    public Asistencia(Curso curso, Materia materia, Estudiante estudiante, LocalDate fecha, String estado) {
         this.curso = curso;
         this.materia = materia;
         this.estudiante = estudiante;
@@ -72,8 +72,8 @@ public class Asistencia {
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
-    public Clase getCurso() { return curso; }
-    public void setCurso(Clase curso) { this.curso = curso; }
+    public Curso getCurso() { return curso; }
+    public void setCurso(Curso curso) { this.curso = curso; }
 
     public Materia getMateria() { return materia; }
     public void setMateria(Materia materia) { this.materia = materia; }

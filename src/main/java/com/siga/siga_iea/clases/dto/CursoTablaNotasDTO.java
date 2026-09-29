@@ -11,7 +11,7 @@ import java.util.*;
  * DTO que transporta los datos necesarios para renderizar el fragmento
  * HTMX de la tabla de notas y asistencias de un curso.
  */
-public class ClaseTablaNotasDTO {
+public class CursoTablaNotasDTO {
 
     private UUID cursoId;
     private UUID cursoMateriaId;
@@ -29,7 +29,7 @@ public class ClaseTablaNotasDTO {
     private Map<UUID, String> asistenciasMapa = new HashMap<>();
     private Map<UUID, BigDecimal> notasFinales = new HashMap<>();
 
-    public ClaseTablaNotasDTO() {
+    public CursoTablaNotasDTO() {
     }
 
     public UUID getCursoId() {

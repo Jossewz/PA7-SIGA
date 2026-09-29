@@ -19,9 +19,9 @@ import com.siga.siga_iea.calificaciones.entity.Calificacion;
 import com.siga.siga_iea.calificaciones.repository.CalificacionesRepository;
 
 @Service
-public class ClaseService {
+public class CursoService {
 
-    private final ClaseRepository claseRepository;
+    private final CursoRepository cursoRepository;
     private final MateriaRepository materiaRepository;
     private final CursoMateriaRepository cursoMateriaRepository;
     private final CursoEstudianteRepository cursoEstudianteRepository;
@@ -31,7 +31,7 @@ public class ClaseService {
     private final MatriculaRepository matriculaRepository;
     private final CalificacionesRepository calificacionesRepository;
 
-    public ClaseService(ClaseRepository claseRepository,
+    public CursoService(CursoRepository cursoRepository,
                         MateriaRepository materiaRepository,
                         CursoMateriaRepository cursoMateriaRepository,
                         CursoEstudianteRepository cursoEstudianteRepository,
@@ -40,7 +40,7 @@ public class ClaseService {
                         EstudianteRepository estudianteRepository,
                         MatriculaRepository matriculaRepository,
                         CalificacionesRepository calificacionesRepository) {
-        this.claseRepository = claseRepository;
+        this.cursoRepository = cursoRepository;
         this.materiaRepository = materiaRepository;
         this.cursoMateriaRepository = cursoMateriaRepository;
         this.cursoEstudianteRepository = cursoEstudianteRepository;
@@ -51,35 +51,35 @@ public class ClaseService {
         this.calificacionesRepository = calificacionesRepository;
     }
 
-    public List<Clase> listarTodosLosCursos() {
-        return claseRepository.findAll();
+    public List<Curso> listarTodosLosCursos() {
+        return cursoRepository.findAll();
     }
 
-    public List<Clase> listarCursosPorAno(String anoLectivo) {
-        return claseRepository.findByAnoLectivo(anoLectivo);
+    public List<Curso> listarCursosPorAno(String anoLectivo) {
+        return cursoRepository.findByAnoLectivo(anoLectivo);
     }
 
-    public Optional<Clase> buscarPorId(UUID id) {
-        return claseRepository.findById(id);
+    public Optional<Curso> buscarPorId(UUID id) {
+        return cursoRepository.findById(id);
     }
 
-    public Optional<Clase> buscarPorCodigo(String codigo, String anoLectivo) {
+    public Optional<Curso> buscarPorCodigo(String codigo, String anoLectivo) {
         if (codigo == null || !codigo.contains("-")) return Optional.empty();
         String[] parts = codigo.split("-");
         String degreeNum = parts[0].replaceAll("[^0-9]", "");
         String grado = (degreeNum.isEmpty() ? "11" : degreeNum) + "°";
         String grupo = parts[1];
-        return claseRepository.findByGradoAndGrupoAndAnoLectivo(grado, grupo, anoLectivo);
+        return cursoRepository.findByGradoAndGrupoAndAnoLectivo(grado, grupo, anoLectivo);
     }
 
     @Transactional
-    public Clase guardarCurso(Clase clase) {
-        return claseRepository.save(clase);
+    public Curso guardarCurso(Curso curso) {
+        return cursoRepository.save(curso);
     }
 
     @Transactional
-    public Clase crearCurso(String grado, String grupo, String jornada, Integer cupos, UUID directorId, String anoLectivo) {
-        Clase c = new Clase();
+    public Curso crearCurso(String grado, String grupo, String jornada, Integer cupos, UUID directorId, String anoLectivo) {
+        Curso c = new Curso();
         c.setGrado(grado);
         c.setGrupo(grupo != null && !grupo.isBlank() ? grupo : "01");
         c.setJornada(jornada != null ? jornada : "Mañana");
@@ -89,12 +89,12 @@ public class ClaseService {
         if (directorId != null) {
             docenteRepository.findById(directorId).ifPresent(c::setDirector);
         }
-        return claseRepository.save(c);
+        return cursoRepository.save(c);
     }
 
     @Transactional
-    public Clase actualizarCurso(UUID cursoId, String grado, String jornada, Integer cupos, UUID directorId, String anoLectivo) {
-        Clase c = claseRepository.findById(cursoId)
+    public Curso actualizarCurso(UUID cursoId, String grado, String jornada, Integer cupos, UUID directorId, String anoLectivo) {
+        Curso c = cursoRepository.findById(cursoId)
                 .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
 
         c.setGrado(grado);
@@ -108,7 +108,7 @@ public class ClaseService {
             c.setDirector(null);
         }
 
-        return claseRepository.save(c);
+        return cursoRepository.save(c);
     }
 
     public List<Materia> listarTodasMaterias() {
@@ -178,7 +178,7 @@ public class ClaseService {
 
     @Transactional
     public Horario agregarHorario(UUID cursoId, UUID materiaId, String diaSemana, LocalTime horaInicio, LocalTime horaFin, String salon) {
-        Clase curso = claseRepository.findById(cursoId)
+        Curso curso = cursoRepository.findById(cursoId)
                 .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
 
         Horario h = new Horario();
@@ -197,7 +197,7 @@ public class ClaseService {
 
     @Transactional
     public Horario guardarHorarioBloque(UUID cursoId, String diaSemana, UUID materiaId, UUID docenteId, String horaInicioStr, String horaFinStr, String salon) {
-        Clase curso = claseRepository.findById(cursoId)
+        Curso curso = cursoRepository.findById(cursoId)
                 .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
 
         LocalTime inicio = (horaInicioStr != null && !horaInicioStr.isBlank()) ? LocalTime.parse(horaInicioStr) : LocalTime.of(7, 0);
@@ -222,7 +222,7 @@ public class ClaseService {
 
     @Transactional
     public void matricularEstudianteEnCurso(UUID cursoId, UUID estudianteId, String anoLectivo) {
-        Clase c = claseRepository.findById(cursoId).orElseThrow();
+        Curso c = cursoRepository.findById(cursoId).orElseThrow();
         Estudiante e = estudianteRepository.findById(estudianteId).orElseThrow();
 
         if (e.getEstado() != null && "Graduado".equalsIgnoreCase(e.getEstado())) {
@@ -238,7 +238,7 @@ public class ClaseService {
 
     @Transactional
     public int mapearEstudiantesMatriculados(UUID cursoId) {
-        Clase curso = claseRepository.findById(cursoId)
+        Curso curso = cursoRepository.findById(cursoId)
                 .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
 
         String grado = curso.getGrado();
@@ -248,6 +248,7 @@ public class ClaseService {
 
         List<CursoEstudiante> inscritosActuales = cursoEstudianteRepository.findByCursoId(cursoId);
         int disponibles = cuposMaximos - inscritosActuales.size();
+
         if (disponibles <= 0) return 0;
 
         Set<Matricula> candidatosMatricula = new LinkedHashSet<>();
@@ -309,7 +310,7 @@ public class ClaseService {
 
     @Transactional
     public String promoverEstudiantesAprobados(UUID cursoId, String notasJson) {
-        Clase cursoOrigen = claseRepository.findById(cursoId)
+        Curso cursoOrigen = cursoRepository.findById(cursoId)
                 .orElseThrow(() -> new IllegalArgumentException("Curso origen no encontrado"));
 
         List<CursoEstudiante> inscritos = cursoEstudianteRepository.findByCursoId(cursoId);
@@ -376,17 +377,17 @@ public class ClaseService {
         }
 
         // PARA OTROS GRADOS (1° a 10°): Buscar el curso destino existente con el mismo grupo (ej. 10-01 -> 11-01)
-        Clase cursoDestino = claseRepository.findAll().stream()
+        Curso cursoDestino = cursoRepository.findAll().stream()
                 .filter(c -> siguienteGrado.equalsIgnoreCase(c.getGrado()) && grupoActual.equalsIgnoreCase(c.getGrupo()))
                 .findFirst()
                 .orElseGet(() -> {
-                    Clase nuevo = new Clase();
+                    Curso nuevo = new Curso();
                     nuevo.setGrado(siguienteGrado);
                     nuevo.setGrupo(grupoActual);
                     nuevo.setJornada(cursoOrigen.getJornada());
                     nuevo.setCuposMaximos(cursoOrigen.getCuposMaximos());
                     nuevo.setDirector(cursoOrigen.getDirector());
-                    return claseRepository.save(nuevo);
+                    return cursoRepository.save(nuevo);
                 });
 
         for (CursoEstudiante ce : inscritos) {
@@ -444,7 +445,7 @@ public class ClaseService {
         List<Horario> horarios = horarioRepository.findByCursoId(cursoId);
         horarioRepository.deleteAll(horarios);
 
-        claseRepository.deleteById(cursoId);
+        cursoRepository.deleteById(cursoId);
     }
 
     private String calcularSiguienteGrado(String gradoActual) {

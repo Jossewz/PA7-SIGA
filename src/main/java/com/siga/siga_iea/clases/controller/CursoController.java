@@ -4,14 +4,14 @@ import com.siga.siga_iea.asistencias.entity.Asistencia;
 import com.siga.siga_iea.asistencias.service.AsistenciaService;
 import com.siga.siga_iea.auth.service.CurrentUserContextService;
 import com.siga.siga_iea.calificaciones.service.CalificacionesService;
-import com.siga.siga_iea.clases.application.ClaseGestionAppService;
-import com.siga.siga_iea.clases.dto.ClaseGestionDetalleDTO;
-import com.siga.siga_iea.clases.dto.ClaseTablaNotasDTO;
-import com.siga.siga_iea.clases.entity.Clase;
+import com.siga.siga_iea.clases.application.CursoGestionAppService;
+import com.siga.siga_iea.clases.dto.CursoGestionDetalleDTO;
+import com.siga.siga_iea.clases.dto.CursoTablaNotasDTO;
+import com.siga.siga_iea.clases.entity.Curso;
 import com.siga.siga_iea.clases.entity.CursoEstudiante;
 import com.siga.siga_iea.clases.entity.CursoMateria;
 import com.siga.siga_iea.clases.entity.Horario;
-import com.siga.siga_iea.clases.service.ClaseService;
+import com.siga.siga_iea.clases.service.CursoService;
 import com.siga.siga_iea.usuarios.entity.Docente;
 import com.siga.siga_iea.usuarios.service.PersonalService;
 import org.springframework.stereotype.Controller;
@@ -30,23 +30,23 @@ import java.util.*;
  * Delegador liviano de peticiones HTTP hacia la capa de casos de uso y servicios de aplicación.
  */
 @Controller
-public class ClaseController {
+public class CursoController {
 
-    private final ClaseService claseService;
-    private final ClaseGestionAppService claseGestionAppService;
+    private final CursoService cursoService;
+    private final CursoGestionAppService cursoGestionAppService;
     private final PersonalService personalService;
     private final CalificacionesService calificacionesService;
     private final AsistenciaService asistenciaService;
     private final CurrentUserContextService currentUserContextService;
 
-    public ClaseController(ClaseService claseService,
-                           ClaseGestionAppService claseGestionAppService,
+    public CursoController(CursoService cursoService,
+                           CursoGestionAppService cursoGestionAppService,
                            PersonalService personalService,
                            CalificacionesService calificacionesService,
                            AsistenciaService asistenciaService,
                            CurrentUserContextService currentUserContextService) {
-        this.claseService = claseService;
-        this.claseGestionAppService = claseGestionAppService;
+        this.cursoService = cursoService;
+        this.cursoGestionAppService = cursoGestionAppService;
         this.personalService = personalService;
         this.calificacionesService = calificacionesService;
         this.asistenciaService = asistenciaService;
@@ -54,13 +54,13 @@ public class ClaseController {
     }
 
     public static String obtenerNombreDiaEspanol(DayOfWeek dow) {
-        return ClaseGestionAppService.obtenerNombreDiaEspanol(dow);
+        return CursoGestionAppService.obtenerNombreDiaEspanol(dow);
     }
 
     @GetMapping("/clases/horarios/datos")
     @ResponseBody
     public List<Map<String, Object>> obtenerHorariosDatosJson(@RequestParam("cursoId") UUID cursoId) {
-        List<Horario> horarios = claseService.listarHorariosDeCurso(cursoId);
+        List<Horario> horarios = cursoService.listarHorariosDeCurso(cursoId);
         List<Map<String, Object>> res = new ArrayList<>();
         for (Horario h : horarios) {
             Map<String, Object> map = new HashMap<>();
@@ -83,10 +83,10 @@ public class ClaseController {
         model.addAttribute("title", "Gestión de Cursos – IEACI");
         model.addAttribute("activePage", "clases");
 
-        List<Clase> cursosDB = claseService.listarCursosPorAno("2026");
+        List<Curso> cursosDB = cursoService.listarCursosPorAno("2026");
         List<Map<String, Object>> cursosList = new ArrayList<>();
 
-        for (Clase c : cursosDB) {
+        for (Curso c : cursosDB) {
             Map<String, Object> map = new HashMap<>();
             map.put("id", c.getId().toString());
             map.put("grado", c.getGrado());
@@ -96,10 +96,10 @@ public class ClaseController {
             map.put("directorId", c.getDirector() != null ? c.getDirector().getId().toString() : "");
             map.put("cuposMaximos", c.getCuposMaximos());
 
-            List<CursoEstudiante> estudiantes = claseService.listarEstudiantesDeCurso(c.getId());
+            List<CursoEstudiante> estudiantes = cursoService.listarEstudiantesDeCurso(c.getId());
             map.put("estudiantes", estudiantes.size());
 
-            List<Horario> horarios = claseService.listarHorariosDeCurso(c.getId());
+            List<Horario> horarios = cursoService.listarHorariosDeCurso(c.getId());
             boolean tieneHorario = !horarios.isEmpty();
             map.put("tieneHorario", tieneHorario);
             map.put("horarioResumen", tieneHorario ? "Lun-Vie: 07:00 - 12:30" : "Sin Horario");
@@ -109,7 +109,7 @@ public class ClaseController {
 
         model.addAttribute("cursosList", cursosList);
         model.addAttribute("docentesList", personalService.listarDocentes());
-        model.addAttribute("materiasList", claseService.listarMateriasActivas());
+        model.addAttribute("materiasList", cursoService.listarMateriasActivas());
         return "clases/index";
     }
 
@@ -128,10 +128,10 @@ public class ClaseController {
             UUID directorId = (directorIdStr != null && !directorIdStr.isBlank()) ? UUID.fromString(directorIdStr) : null;
             if (idStr != null && !idStr.isBlank()) {
                 UUID cursoId = UUID.fromString(idStr);
-                claseService.actualizarCurso(cursoId, grado, jornada, cupos, directorId, anoLectivo);
+                cursoService.actualizarCurso(cursoId, grado, jornada, cupos, directorId, anoLectivo);
                 redirectAttributes.addFlashAttribute("mensajeExito", "Curso actualizado exitosamente.");
             } else {
-                claseService.crearCurso(grado, grupo, jornada, cupos, directorId, anoLectivo);
+                cursoService.crearCurso(grado, grupo, jornada, cupos, directorId, anoLectivo);
                 redirectAttributes.addFlashAttribute("mensajeExito", "Curso creado exitosamente.");
             }
         } catch (Exception ex) {
@@ -149,7 +149,7 @@ public class ClaseController {
         Optional<Docente> docLogueadoOpt = currentUserContextService.getDocenteAutenticado();
         boolean esAdmin = currentUserContextService.esAdmin();
 
-        ClaseGestionDetalleDTO detalle = claseGestionAppService.prepararGestionDetalle(codigo, docLogueadoOpt, esAdmin);
+        CursoGestionDetalleDTO detalle = cursoGestionAppService.prepararGestionDetalle(codigo, docLogueadoOpt, esAdmin);
 
         model.addAttribute("cursoId", detalle.getCursoId());
         model.addAttribute("codigoCurso", detalle.getCodigoCurso());
@@ -162,7 +162,7 @@ public class ClaseController {
         model.addAttribute("esAdmin", detalle.isEsAdmin());
         model.addAttribute("horarioBannerTexto", detalle.getHorarioBannerTexto());
 
-        ClaseTablaNotasDTO tablaDTO = detalle.getTablaNotasDTO();
+        CursoTablaNotasDTO tablaDTO = detalle.getTablaNotasDTO();
         model.addAttribute("tieneHorarioHoy", tablaDTO.isTieneHorarioHoy());
         model.addAttribute("periodo", tablaDTO.getPeriodo());
         model.addAttribute("fecha", tablaDTO.getFecha().toString());
@@ -194,7 +194,7 @@ public class ClaseController {
             UUID materiaId = (materiaIdStr != null && !materiaIdStr.isBlank()) ? UUID.fromString(materiaIdStr) : null;
             UUID docenteId = (docenteIdStr != null && !docenteIdStr.isBlank()) ? UUID.fromString(docenteIdStr) : null;
 
-            claseService.guardarHorarioBloque(cursoId, diaSemana, materiaId, docenteId, horaInicio, horaFin, salon);
+            cursoService.guardarHorarioBloque(cursoId, diaSemana, materiaId, docenteId, horaInicio, horaFin, salon);
             redirectAttributes.addFlashAttribute("mensajeExito", "Horario asignado exitosamente para el día " + diaSemana);
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("mensajeError", "Error al asignar horario: " + ex.getMessage());
@@ -210,7 +210,7 @@ public class ClaseController {
             RedirectAttributes redirectAttributes) {
 
         try {
-            int guardados = claseGestionAppService.procesarGuardadoHorarioGrid(cursoId, allParams);
+            int guardados = cursoGestionAppService.procesarGuardadoHorarioGrid(cursoId, allParams);
             if (guardados > 0) {
                 redirectAttributes.addFlashAttribute("mensajeExito", "Horario asignado exitosamente (" + guardados + " clases configuradas).");
             } else {
@@ -237,10 +237,10 @@ public class ClaseController {
             UUID dirId = (directorId != null && !directorId.isBlank()) ? UUID.fromString(directorId) : null;
 
             if (id != null && !id.isBlank()) {
-                claseService.actualizarCurso(UUID.fromString(id), grado, jornada, cupos, dirId, "2026");
+                cursoService.actualizarCurso(UUID.fromString(id), grado, jornada, cupos, dirId, "2026");
                 redirectAttributes.addFlashAttribute("mensajeExito", "Curso actualizado exitosamente.");
             } else {
-                claseService.crearCurso(grado, grupo, jornada, cupos, dirId, "2026");
+                cursoService.crearCurso(grado, grupo, jornada, cupos, dirId, "2026");
                 redirectAttributes.addFlashAttribute("mensajeExito", "Curso creado exitosamente.");
             }
         } catch (Exception ex) {
@@ -256,7 +256,7 @@ public class ClaseController {
             RedirectAttributes redirectAttributes) {
 
         try {
-            claseService.eliminarCurso(id);
+            cursoService.eliminarCurso(id);
             redirectAttributes.addFlashAttribute("mensajeExito", "Curso eliminado exitosamente.");
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("mensajeError", "Error al eliminar el curso: " + ex.getMessage());
@@ -269,20 +269,20 @@ public class ClaseController {
     public String mapearEstudiantes(@RequestParam("cursoId") UUID cursoId, RedirectAttributes redirectAttributes) {
         if (!currentUserContextService.esAdminOAdministrativo()) {
             redirectAttributes.addFlashAttribute("mensajeError", "Acceso denegado: solo Administradores y Personal Administrativo pueden auto-mapear estudiantes.");
-            Optional<Clase> cOpt = claseService.buscarPorId(cursoId);
-            String codigo = cOpt.map(Clase::getCodigoCurso).orElse("11-01");
+            Optional<Curso> cOpt = cursoService.buscarPorId(cursoId);
+            String codigo = cOpt.map(Curso::getCodigoCurso).orElse("11-01");
             return "redirect:/clases/gestion?codigo=" + codigo;
         }
 
         try {
-            int count = claseService.mapearEstudiantesMatriculados(cursoId);
+            int count = cursoService.mapearEstudiantesMatriculados(cursoId);
             redirectAttributes.addFlashAttribute("mensajeExito", "Se han auto-mapeado " + count + " estudiantes matriculados a este curso.");
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("mensajeError", "Error al mapear estudiantes: " + ex.getMessage());
         }
 
-        Optional<Clase> cOpt = claseService.buscarPorId(cursoId);
-        String codigo = cOpt.map(Clase::getCodigoCurso).orElse("11-01");
+        Optional<Curso> cOpt = cursoService.buscarPorId(cursoId);
+        String codigo = cOpt.map(Curso::getCodigoCurso).orElse("11-01");
         return "redirect:/clases/gestion?codigo=" + codigo;
     }
 
@@ -292,20 +292,20 @@ public class ClaseController {
                                       RedirectAttributes redirectAttributes) {
         if (!currentUserContextService.esAdminOAdministrativo()) {
             redirectAttributes.addFlashAttribute("mensajeError", "Acceso denegado: solo Administradores y Personal Administrativo pueden promover estudiantes.");
-            Optional<Clase> cOpt = claseService.buscarPorId(cursoId);
-            String codigo = cOpt.map(Clase::getCodigoCurso).orElse("11-01");
+            Optional<Curso> cOpt = cursoService.buscarPorId(cursoId);
+            String codigo = cOpt.map(Curso::getCodigoCurso).orElse("11-01");
             return "redirect:/clases/gestion?codigo=" + codigo;
         }
 
         try {
-            String resultado = claseService.promoverEstudiantesAprobados(cursoId, notasJson);
+            String resultado = cursoService.promoverEstudiantesAprobados(cursoId, notasJson);
             redirectAttributes.addFlashAttribute("mensajeExito", resultado);
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("mensajeError", "Error al promover estudiantes: " + ex.getMessage());
         }
 
-        Optional<Clase> cOpt = claseService.buscarPorId(cursoId);
-        String codigo = cOpt.map(Clase::getCodigoCurso).orElse("11-01");
+        Optional<Curso> cOpt = cursoService.buscarPorId(cursoId);
+        String codigo = cOpt.map(Curso::getCodigoCurso).orElse("11-01");
         return "redirect:/clases/gestion?codigo=" + codigo;
     }
 
@@ -332,7 +332,7 @@ public class ClaseController {
         Optional<Docente> docLogueadoOpt = currentUserContextService.getDocenteAutenticado();
         boolean esAdmin = currentUserContextService.esAdmin();
 
-        ClaseTablaNotasDTO dto = claseGestionAppService.prepararTablaNotas(
+        CursoTablaNotasDTO dto = cursoGestionAppService.prepararTablaNotas(
                 cursoId, materiaNombre, materiaId, periodo, fecha, docLogueadoOpt, esAdmin
         );
 

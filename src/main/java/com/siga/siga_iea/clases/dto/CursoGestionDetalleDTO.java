@@ -6,7 +6,7 @@ import java.util.*;
  * DTO que transporta los datos requeridos para renderizar la vista
  * principal de gestión de curso (clases/detalle).
  */
-public class ClaseGestionDetalleDTO {
+public class CursoGestionDetalleDTO {
 
     private String cursoId;
     private String codigoCurso;
@@ -17,9 +17,9 @@ public class ClaseGestionDetalleDTO {
     private List<Map<String, String>> horariosData = new ArrayList<>();
     private boolean esAdmin;
     private String horarioBannerTexto;
-    private ClaseTablaNotasDTO tablaNotasDTO;
+    private CursoTablaNotasDTO tablaNotasDTO;
 
-    public ClaseGestionDetalleDTO() {
+    public CursoGestionDetalleDTO() {
     }
 
     public String getCursoId() {
@@ -94,11 +94,11 @@ public class ClaseGestionDetalleDTO {
         this.horarioBannerTexto = horarioBannerTexto;
     }
 
-    public ClaseTablaNotasDTO getTablaNotasDTO() {
+    public CursoTablaNotasDTO getTablaNotasDTO() {
         return tablaNotasDTO;
     }
 
-    public void setTablaNotasDTO(ClaseTablaNotasDTO tablaNotasDTO) {
+    public void setTablaNotasDTO(CursoTablaNotasDTO tablaNotasDTO) {
         this.tablaNotasDTO = tablaNotasDTO;
     }
 }

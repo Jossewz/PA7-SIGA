@@ -89,6 +89,7 @@ public class MatriculaHtmxController {
             @RequestParam(value = "parentId", required = false) String parentId,
             @RequestParam(value = "parentRelation", required = false) String parentRelation,
             @RequestParam(value = "parentPhone", required = false) String parentPhone,
+            @RequestParam(value = "parentEmail", required = false) String parentEmail,
             @RequestParam(value = "sede", required = false) String sede,
             @RequestParam(value = "grado", required = false) String grado,
             @RequestParam(value = "jornada", required = false) String jornada,
@@ -110,6 +111,7 @@ public class MatriculaHtmxController {
         if (parentId != null) session.setAttribute("parentId", parentId);
         if (parentRelation != null) session.setAttribute("parentRelation", parentRelation);
         if (parentPhone != null) session.setAttribute("parentPhone", parentPhone);
+        if (parentEmail != null) session.setAttribute("parentEmail", parentEmail);
 
         if (sede != null && !sede.isBlank()) session.setAttribute("sede", sede);
         if (grado != null && !grado.isBlank()) session.setAttribute("grado", grado);
@@ -197,10 +199,11 @@ public class MatriculaHtmxController {
         String parentId = (String) session.getAttribute("parentId");
         String parentRelation = (String) session.getAttribute("parentRelation");
         String parentPhone = (String) session.getAttribute("parentPhone");
+        String parentEmail = (String) session.getAttribute("parentEmail");
 
         Acudiente acudiente = acudienteService.buscarOCrear(
                 parentNames, parentSurnames, parentRelation,
-                parentDocType, parentId, parentPhone
+                parentDocType, parentId, parentPhone, parentEmail
         );
 
         // 2. Guardar Estudiante con sus datos reales
@@ -293,7 +296,7 @@ public class MatriculaHtmxController {
                 "studentNames", "studentSurnames", "studentDocType", "studentDocNumber",
                 "studentGender", "studentPhone", "studentBirthday", "studentAddress",
                 "parentNames", "parentSurnames", "parentDocType", "parentId", "parentRelation",
-                "parentPhone", "parentDocName", "civilDocName",
+                "parentPhone", "parentEmail", "parentDocName", "civilDocName",
                 "saludFileName", "fotoFileName", "historialFileName"
         );
         keysToRemove.forEach(session::removeAttribute);
@@ -327,6 +330,7 @@ public class MatriculaHtmxController {
         model.addAttribute("parentId", session.getAttribute("parentId"));
         model.addAttribute("parentRelation", session.getAttribute("parentRelation"));
         model.addAttribute("parentPhone", session.getAttribute("parentPhone"));
+        model.addAttribute("parentEmail", session.getAttribute("parentEmail"));
 
         model.addAttribute("sede", session.getAttribute("sede"));
         model.addAttribute("grado", session.getAttribute("grado"));

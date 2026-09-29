@@ -160,11 +160,13 @@ public class EstudianteController {
             student.put("acudienteParentesco", acuPrincipal.getParentesco() != null ? acuPrincipal.getParentesco() : "Acudiente");
             student.put("acudienteDoc", (acuPrincipal.getTipoDocumento() != null ? acuPrincipal.getTipoDocumento() : "CC") + " - " + (acuPrincipal.getNumeroDocumento() != null ? acuPrincipal.getNumeroDocumento() : "N/A"));
             student.put("acudienteTel", acuPrincipal.getTelefono() != null ? acuPrincipal.getTelefono() : "N/A");
+            student.put("acudienteEmail", acuPrincipal.getEmail() != null && !acuPrincipal.getEmail().isBlank() ? acuPrincipal.getEmail() : "No registrado");
         } else {
             student.put("acudienteNombre", "No asignado");
             student.put("acudienteParentesco", "-");
             student.put("acudienteDoc", "-");
             student.put("acudienteTel", "-");
+            student.put("acudienteEmail", "No registrado");
         }
 
         List<com.siga.siga_iea.clases.entity.CursoEstudiante> ces = cursoEstudianteRepository.findByEstudianteId(e.getId());

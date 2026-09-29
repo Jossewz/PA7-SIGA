@@ -89,6 +89,9 @@ public class MatriculaHtmxController {
             @RequestParam(value = "parentId", required = false) String parentId,
             @RequestParam(value = "parentRelation", required = false) String parentRelation,
             @RequestParam(value = "parentPhone", required = false) String parentPhone,
+            @RequestParam(value = "sede", required = false) String sede,
+            @RequestParam(value = "grado", required = false) String grado,
+            @RequestParam(value = "jornada", required = false) String jornada,
             HttpSession session,
             Model model) {
 
@@ -107,6 +110,10 @@ public class MatriculaHtmxController {
         if (parentId != null) session.setAttribute("parentId", parentId);
         if (parentRelation != null) session.setAttribute("parentRelation", parentRelation);
         if (parentPhone != null) session.setAttribute("parentPhone", parentPhone);
+
+        if (sede != null && !sede.isBlank()) session.setAttribute("sede", sede);
+        if (grado != null && !grado.isBlank()) session.setAttribute("grado", grado);
+        if (jornada != null && !jornada.isBlank()) session.setAttribute("jornada", jornada);
 
         populateModelFromSession(session, model);
         model.addAttribute("currentStep", step);

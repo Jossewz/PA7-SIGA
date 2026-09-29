@@ -255,15 +255,14 @@ public class CursoService {
         candidatosMatricula.addAll(matriculaRepository.filterMatriculas(grado, null));
         candidatosMatricula.addAll(matriculaRepository.filterMatriculas(gradoLiso, null));
         candidatosMatricula.addAll(matriculaRepository.filterMatriculas(gradoLiso + "°", null));
+        candidatosMatricula.addAll(matriculaRepository.filterMatriculas("Grado " + gradoLiso, null));
 
         List<Matricula> listaMatriculas = new ArrayList<>(candidatosMatricula);
         List<Estudiante> candidatosEstudiantes = new ArrayList<>();
-        if (!listaMatriculas.isEmpty()) {
-            for (Matricula m : listaMatriculas) {
-                if (m.getEstudiante() != null) candidatosEstudiantes.add(m.getEstudiante());
+        for (Matricula m : listaMatriculas) {
+            if (m.getEstudiante() != null) {
+                candidatosEstudiantes.add(m.getEstudiante());
             }
-        } else {
-            candidatosEstudiantes.addAll(estudianteRepository.findAll());
         }
 
         Collections.shuffle(candidatosEstudiantes);

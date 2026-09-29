@@ -26,6 +26,14 @@ public class Horario {
     @JoinColumn(name = "docente_id")
     private Docente docente;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "salon_id")
+    private Salon salonEntidad;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "bloque_id")
+    private Bloque bloque;
+
     @Column(name = "dia_semana", columnDefinition = "VARCHAR", nullable = false)
     private String diaSemana;
 
@@ -51,6 +59,12 @@ public class Horario {
 
     public Docente getDocente() { return docente; }
     public void setDocente(Docente docente) { this.docente = docente; }
+
+    public Salon getSalonEntidad() { return salonEntidad; }
+    public void setSalonEntidad(Salon salonEntidad) { this.salonEntidad = salonEntidad; }
+
+    public Bloque getBloque() { return bloque; }
+    public void setBloque(Bloque bloque) { this.bloque = bloque; }
 
     public String getDiaSemana() { return diaSemana; }
     public void setDiaSemana(String diaSemana) { this.diaSemana = diaSemana; }

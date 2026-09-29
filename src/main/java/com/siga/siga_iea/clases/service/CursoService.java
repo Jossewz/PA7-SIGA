@@ -30,6 +30,8 @@ public class CursoService {
     private final EstudianteRepository estudianteRepository;
     private final MatriculaRepository matriculaRepository;
     private final CalificacionesRepository calificacionesRepository;
+    private final SalonRepository salonRepository;
+    private final BloqueRepository bloqueRepository;
 
     public CursoService(CursoRepository cursoRepository,
                         MateriaRepository materiaRepository,
@@ -39,7 +41,9 @@ public class CursoService {
                         DocenteRepository docenteRepository,
                         EstudianteRepository estudianteRepository,
                         MatriculaRepository matriculaRepository,
-                        CalificacionesRepository calificacionesRepository) {
+                        CalificacionesRepository calificacionesRepository,
+                        SalonRepository salonRepository,
+                        BloqueRepository bloqueRepository) {
         this.cursoRepository = cursoRepository;
         this.materiaRepository = materiaRepository;
         this.cursoMateriaRepository = cursoMateriaRepository;
@@ -49,6 +53,8 @@ public class CursoService {
         this.estudianteRepository = estudianteRepository;
         this.matriculaRepository = matriculaRepository;
         this.calificacionesRepository = calificacionesRepository;
+        this.salonRepository = salonRepository;
+        this.bloqueRepository = bloqueRepository;
     }
 
     public List<Curso> listarTodosLosCursos() {
@@ -208,7 +214,18 @@ public class CursoService {
         h.setDiaSemana(diaSemana);
         h.setHoraInicio(inicio);
         h.setHoraFin(fin);
-        h.setSalon(salon != null && !salon.isBlank() ? salon : "Aula 101");
+        String salonStr = (salon != null && !salon.isBlank()) ? salon : "Aula 101";
+        h.setSalon(salonStr);
+
+        salonRepository.findByCodigo(salonStr.trim())
+                .or(() -> salonRepository.findAll().stream().filter(s -> s.getNombre().equalsIgnoreCase(salonStr.trim()) || s.getCodigo().equalsIgnoreCase(salonStr.trim())).findFirst())
+                .ifPresent(h::setSalonEntidad);
+
+        bloqueRepository.findByJornadaOrderByNumeroAsc(curso.getJornada() != null ? curso.getJornada() : "Mañana")
+                .stream()
+                .filter(b -> b.getHoraInicio().equals(inicio))
+                .findFirst()
+                .ifPresent(h::setBloque);
 
         if (materiaId != null) {
             materiaRepository.findById(materiaId).ifPresent(h::setMateria);
@@ -218,6 +235,22 @@ public class CursoService {
         }
 
         return horarioRepository.save(h);
+    }
+
+    public List<Salon> listarSalonesActivos() {
+        return salonRepository.findByEstado("Activo");
+    }
+
+    public List<Bloque> listarBloquesPorJornada(String jornada) {
+        return bloqueRepository.findByJornadaOrderByNumeroAsc(jornada != null ? jornada : "Mañana");
+    }
+
+    public Salon guardarSalon(Salon salon) {
+        return salonRepository.save(salon);
+    }
+
+    public Bloque guardarBloque(Bloque bloque) {
+        return bloqueRepository.save(bloque);
     }
 
     @Transactional

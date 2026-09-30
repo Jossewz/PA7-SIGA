@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+    Componente Reutilizable: Paginación Estándar SEGI
+    Uso:
+    <div th:replace="~{components/tables/pagination :: pagination(
+        page=${pageData},
+        baseUrl='/estudiantes',
+        extraParams='&search=' + (${search ?: ''}) + '&estado=' + (${estado ?: ''}) + '&nivel=' + (${nivel ?: ''})
+    )}"></div>
+-->
+<th:block th:fragment="pagination(page, baseUrl, extraParams)">
+    <div th:if="${page != null and page.totalElements > 0}"
+         class="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-border bg-white text-xs font-semibold text-text-secondary select-none">
+        
+        <!-- Contador de registros -->
+        <div class="flex items-center gap-1.5 text-text-secondary">
+            <span>Mostrando</span>
+            <strong class="text-text-primary font-black" th:text="${page.number * page.size + 1}">1</strong>
+            <span>a</span>
+            <strong class="text-text-primary font-black" th:text="${(page.number + 1) * page.size > page.totalElements ? page.totalElements : (page.number + 1) * page.size}">15</strong>
+            <span>de</span>
+            <strong class="text-sidebar font-black" th:text="${page.totalElements}">1200</strong>
+            <span>registros</span>
+        </div>
+
+        <!-- Controles de navegación -->
+        <nav th:if="${page.totalPages > 1}" class="flex items-center gap-1.5" aria-label="Paginación de resultados">
+            <!-- Botón Anterior -->
+            <a th:href="@{${baseUrl}(page=${page.number - 1}, size=${page.size})} + ${extraParams ?: ''}"
+               th:classappend="${page.first} ? 'opacity-40 pointer-events-none cursor-not-allowed bg-surface-sunken/50 text-text-muted border-border/50' : 'bg-surface-sunken hover:bg-brand-100 text-brand-700 border-border cursor-pointer shadow-2xs'"
+               class="inline-flex items-center gap-1 h-8 px-2.5 rounded-lg border text-xs font-bold transition-all"
+               title="Página anterior">
+                <i data-lucide="chevron-left" class="size-3.5 stroke-[2.5]"></i>
+                <span class="max-sm:hidden">Anterior</span>
+            </a>
+
+            <!-- Números de Página (Ventana dinámica de 5 páginas) -->
+            <th:block th:with="startPage=${T(java.lang.Math).max(0, page.number - 2)}, endPage=${T(java.lang.Math).min(page.totalPages - 1, page.number + 2)}">
+                
+                <!-- Primera página si está fuera del rango -->
+                <a th:if="${startPage > 0}"
+                   th:href="@{${baseUrl}(page=0, size=${page.size})} + ${extraParams ?: ''}"
+                   class="size-8 grid place-items-center rounded-lg border border-border bg-surface-sunken text-brand-700 hover:bg-brand-100 font-bold transition shadow-2xs cursor-pointer">1</a>
+                
+                <span th:if="${startPage > 1}" class="px-1 text-text-muted font-bold">...</span>
+
+                <!-- Rango de páginas visibles -->
+                <th:block th:each="p : ${#numbers.sequence(startPage, endPage)}">
+                    <a th:if="${p == page.number}"
+                       class="size-8 grid place-items-center rounded-lg bg-sidebar text-white font-black shadow-xs cursor-default"
+                       th:text="${p + 1}">1</a>
+                    <a th:unless="${p == page.number}"
+                       th:href="@{${baseUrl}(page=${p}, size=${page.size})} + ${extraParams ?: ''}"
+                       class="size-8 grid place-items-center rounded-lg border border-border bg-surface-sunken text-brand-700 hover:bg-brand-100 font-bold transition shadow-2xs cursor-pointer"
+                       th:text="${p + 1}">2</a>
+                </th:block>
+
+                <span th:if="${endPage < page.totalPages - 2}" class="px-1 text-text-muted font-bold">...</span>
+
+                <!-- Última página si está fuera del rango -->
+                <a th:if="${endPage < page.totalPages - 1}"
+                   th:href="@{${baseUrl}(page=${page.totalPages - 1}, size=${page.size})} + ${extraParams ?: ''}"
+                   class="size-8 grid place-items-center rounded-lg border border-border bg-surface-sunken text-brand-700 hover:bg-brand-100 font-bold transition shadow-2xs cursor-pointer"
+                   th:text="${page.totalPages}">10</a>
+            </th:block>
+
+            <!-- Botón Siguiente -->
+            <a th:href="@{${baseUrl}(page=${page.number + 1}, size=${page.size})} + ${extraParams ?: ''}"
+               th:classappend="${page.last} ? 'opacity-40 pointer-events-none cursor-not-allowed bg-surface-sunken/50 text-text-muted border-border/50' : 'bg-surface-sunken hover:bg-brand-100 text-brand-700 border-border cursor-pointer shadow-2xs'"
+               class="inline-flex items-center gap-1 h-8 px-2.5 rounded-lg border text-xs font-bold transition-all"
+               title="Página siguiente">
+                <span class="max-sm:hidden">Siguiente</span>
+                <i data-lucide="chevron-right" class="size-3.5 stroke-[2.5]"></i>
+            </a>
+        </nav>
+    </div>
+</th:block>
+
+</body>
+</html>

@@ -13,4 +13,5 @@ public interface BloqueRepository extends JpaRepository<Bloque, UUID> {
     List<Bloque> findByJornadaOrderByNumeroAsc(String jornada);
     Optional<Bloque> findByNumeroAndJornada(Integer numero, String jornada);
     List<Bloque> findAllByOrderByNumeroAsc();
+    List<Bloque> findByTipoIgnoreCase(String tipo);
 }

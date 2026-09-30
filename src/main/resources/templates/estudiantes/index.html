@@ -141,7 +141,7 @@
                 <div class="flex flex-wrap items-center gap-3">
                     <h2 class="text-base font-bold uppercase tracking-wider text-brand-900">Listado General</h2>
                     <span class="inline-flex items-center rounded-full bg-surface-sunken border border-border px-2.5 py-0.5 text-xs font-bold uppercase text-brand-700 shadow-2xs">
-                        <span th:text="${#lists.size(estudiantesList) + ' ESTUDIANTES'}">0 ESTUDIANTES</span>
+                        <span th:text="${(pageData != null ? pageData.totalElements : #lists.size(estudiantesList)) + ' ESTUDIANTES'}">0 ESTUDIANTES</span>
                     </span>
                 </div>
             </div>
@@ -225,6 +225,13 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Paginación Desktop -->
+            <div class="hidden lg:block" th:replace="~{components/tables/pagination :: pagination(
+                page=${pageData},
+                baseUrl='/estudiantes',
+                extraParams=${(search != null and !#strings.isEmpty(search) ? '&search=' + search : '') + (estado != null and !#strings.isEmpty(estado) ? '&estado=' + estado : '') + (nivel != null and !#strings.isEmpty(nivel) ? '&nivel=' + nivel : '')}
+            )}"></div>
         </div>
 
         <!-- ======================== CARDS (Mobile / Tablet < lg) ======================== -->
@@ -277,6 +284,13 @@
                     </a>
                 </div>
             </div>
+
+            <!-- Paginación Mobile -->
+            <div th:replace="~{components/tables/pagination :: pagination(
+                page=${pageData},
+                baseUrl='/estudiantes',
+                extraParams=${(search != null and !#strings.isEmpty(search) ? '&search=' + search : '') + (estado != null and !#strings.isEmpty(estado) ? '&estado=' + estado : '') + (nivel != null and !#strings.isEmpty(nivel) ? '&nivel=' + nivel : '')}
+            )}"></div>
         </div>
     </div>
 

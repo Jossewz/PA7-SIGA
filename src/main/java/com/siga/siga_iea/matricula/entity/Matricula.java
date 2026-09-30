@@ -48,6 +48,12 @@ public class Matricula {
     @Column(name = "fecha_autorizacion_datos")
     private LocalDateTime fechaAutorizacionDatos;
 
+    @Column(name = "autorizado_por_nombre", columnDefinition = "VARCHAR")
+    private String autorizadoPorNombre;
+
+    @Column(name = "autorizado_por_documento", columnDefinition = "VARCHAR")
+    private String autorizadoPorDocumento;
+
     @OneToMany(mappedBy = "matricula", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Documento> documentos = new ArrayList<>();
 
@@ -140,6 +146,12 @@ public class Matricula {
     public void setFechaMatricula(LocalDate fechaMatricula) {
         this.fechaMatricula = fechaMatricula;
     }
+
+    public String getAutorizadoPorNombre() { return autorizadoPorNombre; }
+    public void setAutorizadoPorNombre(String autorizadoPorNombre) { this.autorizadoPorNombre = autorizadoPorNombre; }
+
+    public String getAutorizadoPorDocumento() { return autorizadoPorDocumento; }
+    public void setAutorizadoPorDocumento(String autorizadoPorDocumento) { this.autorizadoPorDocumento = autorizadoPorDocumento; }
 
     public List<Documento> getDocumentos() {
         return documentos;

@@ -31,7 +31,19 @@ public class MatriculaService {
 
     @Transactional
     public Matricula guardar(Matricula matricula) {
+        if (matricula != null && "APROBADA".equalsIgnoreCase(matricula.getEstado()) && Boolean.TRUE.equals(matricula.getAutorizaTratamientoDatos())) {
+            validarLey1581(matricula);
+        }
         return matriculaRepository.save(matricula);
+    }
+
+    private void validarLey1581(Matricula matricula) {
+        if (matricula.getAutorizadoPorNombre() == null || matricula.getAutorizadoPorNombre().isBlank()) {
+            throw new IllegalStateException("Para autorizar el tratamiento de datos (Ley 1581), el nombre del autorizante es obligatorio.");
+        }
+        if (matricula.getAutorizadoPorDocumento() == null || matricula.getAutorizadoPorDocumento().isBlank()) {
+            throw new IllegalStateException("Para autorizar el tratamiento de datos (Ley 1581), el documento del autorizante es obligatorio.");
+        }
     }
 
     @Transactional(readOnly = true)
@@ -59,6 +71,10 @@ public class MatriculaService {
                 .orElseThrow(() -> new IllegalArgumentException("Matrícula no encontrada: " + matriculaId));
         Curso curso = cursoRepository.findById(cursoId)
                 .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado: " + cursoId));
+
+        if (Boolean.TRUE.equals(matricula.getAutorizaTratamientoDatos())) {
+            validarLey1581(matricula);
+        }
 
         matricula.setEstado("APROBADA");
         matricula.setCurso(curso);

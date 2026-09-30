@@ -7,8 +7,8 @@ import io.minio.errors.ErrorResponseException;
 import io.minio.http.Method;
 import io.minio.messages.Item;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -20,13 +20,18 @@ import java.util.concurrent.TimeUnit;
  * MinIO-specific implementation of {@link StorageProvider}.
  * Uses the MinIO Java SDK to interact with the configured bucket.
  */
-@Slf4j
 @Component
-@RequiredArgsConstructor
 public class MinioStorageProvider implements StorageProvider {
+
+    private static final Logger log = LoggerFactory.getLogger(MinioStorageProvider.class);
 
     private final MinioClient minioClient;
     private final StorageProperties properties;
+
+    public MinioStorageProvider(MinioClient minioClient, StorageProperties properties) {
+        this.minioClient = minioClient;
+        this.properties = properties;
+    }
 
     /**
      * On application startup, ensure the bucket exists.

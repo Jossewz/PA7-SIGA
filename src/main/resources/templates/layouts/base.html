@@ -189,10 +189,14 @@ th:fragment="html(content)">
         if (drawer) drawer.style.display = 'none';
     };
 
-    if (window.lucide) lucide.createIcons();
-    document.addEventListener('htmx:afterSwap', function() {
-        if (window.lucide) lucide.createIcons();
-    });
+    function initLucideIcons() {
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+        }
+    }
+    document.addEventListener('DOMContentLoaded', initLucideIcons);
+    initLucideIcons();
+    document.addEventListener('htmx:afterSwap', initLucideIcons);
 </script>
 
 </body>

@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -68,6 +69,8 @@ class MatriculaCursoSincronizacionTest {
         matricula.setEstado("PENDIENTE_DE_REVISION");
         matricula.setFechaMatricula(LocalDate.now());
         matricula.setAutorizaTratamientoDatos(true);
+        matricula.setAutorizadoPorNombre("Acudiente de Mateo");
+        matricula.setAutorizadoPorDocumento("71223344");
         matricula = matriculaRepository.save(matricula);
 
         assertNull(matricula.getCurso(), "Inicialmente no debe tener curso asociado");
@@ -124,6 +127,8 @@ class MatriculaCursoSincronizacionTest {
         matricula.setAnoLectivo("2026");
         matricula.setEstado("PENDIENTE_DE_REVISION");
         matricula.setFechaMatricula(LocalDate.now());
+        matricula.setAutorizadoPorNombre("Acudiente de Valentina");
+        matricula.setAutorizadoPorDocumento("71334455");
         matricula = matriculaRepository.save(matricula);
 
         matriculaService.aprobarMatricula(matricula.getId(), cursoA.getId());
@@ -138,5 +143,56 @@ class MatriculaCursoSincronizacionTest {
         Optional<CursoEstudiante> ceActualizado = cursoEstudianteRepository.findByEstudianteIdAndAnoLectivo(est.getId(), "2026");
         assertTrue(ceActualizado.isPresent());
         assertEquals(cursoB.getId(), ceActualizado.get().getCurso().getId(), "CursoEstudiante debe haber sido migrado al curso B");
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("Aprobar una matrícula con autorización marcada y sin nombre o documento debe fallar (Ley 1581)")
+    void testAprobacionSinDatosAutorizanteFallaLey1581() {
+        Estudiante est = new Estudiante();
+        est.setNombres("Camilo");
+        est.setApellidos("Torres");
+        est.setNumeroDocumento("1055667788");
+        est = estudianteRepository.save(est);
+
+        Curso curso = new Curso();
+        curso.setGrado("9°");
+        curso.setGrupo("01");
+        curso.setJornada("Mañana");
+        curso.setAnoLectivo("2026");
+        curso = cursoRepository.save(curso);
+        final UUID cursoId = curso.getId();
+
+        // Caso 1: Sin nombre de autorizante
+        Matricula mSinNombre = new Matricula();
+        mSinNombre.setEstudiante(est);
+        mSinNombre.setGrado("9°");
+        mSinNombre.setAnoLectivo("2026");
+        mSinNombre.setEstado("PENDIENTE_DE_REVISION");
+        mSinNombre.setAutorizaTratamientoDatos(true);
+        mSinNombre.setAutorizadoPorNombre(null);
+        mSinNombre.setAutorizadoPorDocumento("12345678");
+        mSinNombre = matriculaRepository.save(mSinNombre);
+
+        final UUID mSinNombreId = mSinNombre.getId();
+        IllegalStateException ex1 = assertThrows(IllegalStateException.class, () ->
+                matriculaService.aprobarMatricula(mSinNombreId, cursoId));
+        assertTrue(ex1.getMessage().contains("nombre del autorizante es obligatorio"));
+
+        // Caso 2: Sin documento de autorizante
+        Matricula mSinDoc = new Matricula();
+        mSinDoc.setEstudiante(est);
+        mSinDoc.setGrado("9°");
+        mSinDoc.setAnoLectivo("2026");
+        mSinDoc.setEstado("PENDIENTE_DE_REVISION");
+        mSinDoc.setAutorizaTratamientoDatos(true);
+        mSinDoc.setAutorizadoPorNombre("Acudiente Principal");
+        mSinDoc.setAutorizadoPorDocumento("");
+        mSinDoc = matriculaRepository.save(mSinDoc);
+
+        final UUID mSinDocId = mSinDoc.getId();
+        IllegalStateException ex2 = assertThrows(IllegalStateException.class, () ->
+                matriculaService.aprobarMatricula(mSinDocId, cursoId));
+        assertTrue(ex2.getMessage().contains("documento del autorizante es obligatorio"));
     }
 }

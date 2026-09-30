@@ -138,10 +138,10 @@
                             <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-[#f9fbf8] flex flex-col gap-3.5">
                                 <div class="flex items-center justify-between border-b border-[#c4eec0]/30 pb-2">
                                     <span class="text-xs font-black text-sidebar uppercase">Primer Período</span>
-                                    <div class="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-[#c4eec0]">
-                                        <span class="text-[10px] font-bold text-text-secondary">Peso:</span>
-                                        <input type="number" id="cfg-peso-p1" name="pesoP1" th:value="${pesoP1 ?: 30}" min="1" max="100" step="1" oninput="recalcularSumaPeriodosCfg()" class="w-10 text-center font-black text-sidebar text-xs focus:outline-none" required />
-                                        <span class="text-[10px] font-bold text-sidebar">%</span>
+                                    <div class="flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-[#c4eec0] shadow-2xs">
+                                        <span class="text-[11px] font-bold text-text-secondary select-none">Peso:</span>
+                                        <input type="number" id="cfg-peso-p1" name="pesoP1" th:value="${pesoP1 != null ? (pesoP1.stripTrailingZeros().scale() <= 0 ? pesoP1.intValue() : pesoP1) : 30}" min="1" max="100" step="any" oninput="recalcularSumaPeriodosCfg()" class="w-14 text-center font-black text-sidebar text-xs focus:outline-none bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" required />
+                                        <span class="text-[11px] font-bold text-sidebar select-none">%</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-2 text-[11px]">
@@ -156,10 +156,10 @@
                             <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-[#f9fbf8] flex flex-col gap-3.5">
                                 <div class="flex items-center justify-between border-b border-[#c4eec0]/30 pb-2">
                                     <span class="text-xs font-black text-sidebar uppercase">Segundo Período</span>
-                                    <div class="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-[#c4eec0]">
-                                        <span class="text-[10px] font-bold text-text-secondary">Peso:</span>
-                                        <input type="number" id="cfg-peso-p2" name="pesoP2" th:value="${pesoP2 ?: 35}" min="1" max="100" step="1" oninput="recalcularSumaPeriodosCfg()" class="w-10 text-center font-black text-sidebar text-xs focus:outline-none" required />
-                                        <span class="text-[10px] font-bold text-sidebar">%</span>
+                                    <div class="flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-[#c4eec0] shadow-2xs">
+                                        <span class="text-[11px] font-bold text-text-secondary select-none">Peso:</span>
+                                        <input type="number" id="cfg-peso-p2" name="pesoP2" th:value="${pesoP2 != null ? (pesoP2.stripTrailingZeros().scale() <= 0 ? pesoP2.intValue() : pesoP2) : 35}" min="1" max="100" step="any" oninput="recalcularSumaPeriodosCfg()" class="w-14 text-center font-black text-sidebar text-xs focus:outline-none bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" required />
+                                        <span class="text-[11px] font-bold text-sidebar select-none">%</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-2 text-[11px]">
@@ -174,10 +174,10 @@
                             <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-[#f9fbf8] flex flex-col gap-3.5">
                                 <div class="flex items-center justify-between border-b border-[#c4eec0]/30 pb-2">
                                     <span class="text-xs font-black text-sidebar uppercase">Tercer Período</span>
-                                    <div class="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-[#c4eec0]">
-                                        <span class="text-[10px] font-bold text-text-secondary">Peso:</span>
-                                        <input type="number" id="cfg-peso-p3" name="pesoP3" th:value="${pesoP3 ?: 35}" min="1" max="100" step="1" oninput="recalcularSumaPeriodosCfg()" class="w-10 text-center font-black text-sidebar text-xs focus:outline-none" required />
-                                        <span class="text-[10px] font-bold text-sidebar">%</span>
+                                    <div class="flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-[#c4eec0] shadow-2xs">
+                                        <span class="text-[11px] font-bold text-text-secondary select-none">Peso:</span>
+                                        <input type="number" id="cfg-peso-p3" name="pesoP3" th:value="${pesoP3 != null ? (pesoP3.stripTrailingZeros().scale() <= 0 ? pesoP3.intValue() : pesoP3) : 35}" min="1" max="100" step="any" oninput="recalcularSumaPeriodosCfg()" class="w-14 text-center font-black text-sidebar text-xs focus:outline-none bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" required />
+                                        <span class="text-[11px] font-bold text-sidebar select-none">%</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-2 text-[11px]">

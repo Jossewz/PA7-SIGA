@@ -88,7 +88,7 @@ class PersonalYEstudiantesFilterViewTest {
                 .andExpect(content().string(containsString("id=\"sidebar-toggle-btn\"")))
                 .andExpect(content().string(containsString("@click.stop.prevent=\"toggleSidebar()\"")))
                 .andExpect(content().string(containsString("alpine.min.js")))
-                .andExpect(content().string(containsString("href=\"/matricula\"\n               class=\"sidebar-nav-item is-active\"")))
-                .andExpect(content().string(containsString("href=\"/\"\n               class=\"sidebar-nav-item\"")));
+                .andExpect(content().string(org.hamcrest.Matchers.matchesPattern("(?s).*href=\"/matricula\"\\s+class=\"sidebar-nav-item is-active\".*")))
+                .andExpect(content().string(org.hamcrest.Matchers.matchesPattern("(?s).*href=\"/\"\\s+class=\"sidebar-nav-item\".*")));
     }
 }

@@ -3,8 +3,8 @@ package com.siga.siga_iea.storage;
 import com.siga.siga_iea.storage.dto.FileMetadata;
 import com.siga.siga_iea.storage.dto.UploadResult;
 import com.siga.siga_iea.storage.exception.StorageException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,13 +21,18 @@ import java.util.stream.Collectors;
  * Implementation of {@link StorageService} that delegates
  * all low-level operations to a {@link StorageProvider}.
  */
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class StorageServiceImpl implements StorageService {
+
+    private static final Logger log = LoggerFactory.getLogger(StorageServiceImpl.class);
 
     private final StorageProvider provider;
     private final StorageProperties properties;
+
+    public StorageServiceImpl(StorageProvider provider, StorageProperties properties) {
+        this.provider = provider;
+        this.properties = properties;
+    }
 
     // ====================== Upload ======================
 

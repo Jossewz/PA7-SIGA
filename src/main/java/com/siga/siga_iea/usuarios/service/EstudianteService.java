@@ -18,6 +18,8 @@ import com.siga.siga_iea.usuarios.repository.AcudienteRepository;
 import com.siga.siga_iea.usuarios.repository.EstudianteAcudienteRepository;
 import com.siga.siga_iea.usuarios.repository.EstudianteRepository;
 import com.siga.siga_iea.usuarios.repository.UsuarioRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,6 +71,10 @@ public class EstudianteService {
 
     public List<Estudiante> buscar(String search, String estado) {
         return estudianteRepository.searchEstudiantes(search, estado);
+    }
+
+    public Page<Estudiante> buscarPaginado(String search, String estado, String nivel, Pageable pageable) {
+        return estudianteRepository.searchEstudiantesPaginado(search, estado, nivel, pageable);
     }
 
     public Optional<Estudiante> buscarPorId(UUID id) {

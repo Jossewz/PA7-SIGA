@@ -1,7 +1,9 @@
 package com.siga.siga_iea.clases.service;
 
+import com.siga.siga_iea.clases.dto.HorarioDto;
 import com.siga.siga_iea.clases.entity.*;
 import com.siga.siga_iea.clases.repository.*;
+import com.siga.siga_iea.clases.validation.HorarioValidator;
 import com.siga.siga_iea.usuarios.entity.Docente;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
 import com.siga.siga_iea.usuarios.repository.DocenteRepository;
@@ -32,6 +34,7 @@ public class CursoService {
     private final CalificacionesRepository calificacionesRepository;
     private final SalonRepository salonRepository;
     private final BloqueRepository bloqueRepository;
+    private final HorarioValidator horarioValidator;
 
     public CursoService(CursoRepository cursoRepository,
                         MateriaRepository materiaRepository,
@@ -43,7 +46,8 @@ public class CursoService {
                         MatriculaRepository matriculaRepository,
                         CalificacionesRepository calificacionesRepository,
                         SalonRepository salonRepository,
-                        BloqueRepository bloqueRepository) {
+                        BloqueRepository bloqueRepository,
+                        HorarioValidator horarioValidator) {
         this.cursoRepository = cursoRepository;
         this.materiaRepository = materiaRepository;
         this.cursoMateriaRepository = cursoMateriaRepository;
@@ -55,6 +59,7 @@ public class CursoService {
         this.calificacionesRepository = calificacionesRepository;
         this.salonRepository = salonRepository;
         this.bloqueRepository = bloqueRepository;
+        this.horarioValidator = horarioValidator;
     }
 
     public List<Curso> listarTodosLosCursos() {
@@ -187,6 +192,9 @@ public class CursoService {
         Curso curso = cursoRepository.findById(cursoId)
                 .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
 
+        HorarioDto dto = new HorarioDto(cursoId, diaSemana, horaInicio, horaFin, materiaId, null, null, salon);
+        horarioValidator.validar(dto, null);
+
         Horario h = new Horario();
         h.setCurso(curso);
         h.setDiaSemana(diaSemana);
@@ -209,17 +217,26 @@ public class CursoService {
         LocalTime inicio = (horaInicioStr != null && !horaInicioStr.isBlank()) ? LocalTime.parse(horaInicioStr) : LocalTime.of(7, 0);
         LocalTime fin = (horaFinStr != null && !horaFinStr.isBlank()) ? LocalTime.parse(horaFinStr) : LocalTime.of(8, 30);
 
+        String salonStr = (salon != null && !salon.isBlank()) ? salon : "Aula 101";
+
+        Salon salonEnt = salonRepository.findByCodigo(salonStr.trim())
+                .or(() -> salonRepository.findAll().stream().filter(s -> s.getNombre().equalsIgnoreCase(salonStr.trim()) || s.getCodigo().equalsIgnoreCase(salonStr.trim())).findFirst())
+                .orElse(null);
+
+        UUID salonId = salonEnt != null ? salonEnt.getId() : null;
+
+        HorarioDto dto = new HorarioDto(cursoId, diaSemana, inicio, fin, materiaId, docenteId, salonId, salonStr);
+        horarioValidator.validar(dto, null);
+
         Horario h = new Horario();
         h.setCurso(curso);
         h.setDiaSemana(diaSemana);
         h.setHoraInicio(inicio);
         h.setHoraFin(fin);
-        String salonStr = (salon != null && !salon.isBlank()) ? salon : "Aula 101";
         h.setSalon(salonStr);
-
-        salonRepository.findByCodigo(salonStr.trim())
-                .or(() -> salonRepository.findAll().stream().filter(s -> s.getNombre().equalsIgnoreCase(salonStr.trim()) || s.getCodigo().equalsIgnoreCase(salonStr.trim())).findFirst())
-                .ifPresent(h::setSalonEntidad);
+        if (salonEnt != null) {
+            h.setSalonEntidad(salonEnt);
+        }
 
         bloqueRepository.findByJornadaOrderByNumeroAsc(curso.getJornada() != null ? curso.getJornada() : "Mañana")
                 .stream()
@@ -234,6 +251,8 @@ public class CursoService {
             docenteRepository.findById(docenteId).ifPresent(h::setDocente);
         }
 
+        sincronizarCursoMateriaDocente(curso, materiaId, docenteId);
+
         return horarioRepository.save(h);
     }
 
@@ -246,10 +265,73 @@ public class CursoService {
 
     @Transactional
     public Horario actualizarHorario(UUID horarioId, UUID cursoId, String diaSemana, UUID materiaId, UUID docenteId, String horaInicioStr, String horaFinStr, String salon) {
-        if (horarioId != null && horarioRepository.existsById(horarioId)) {
-            horarioRepository.deleteById(horarioId);
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
+
+        LocalTime inicio = (horaInicioStr != null && !horaInicioStr.isBlank()) ? LocalTime.parse(horaInicioStr) : LocalTime.of(7, 0);
+        LocalTime fin = (horaFinStr != null && !horaFinStr.isBlank()) ? LocalTime.parse(horaFinStr) : LocalTime.of(8, 30);
+        String salonStr = (salon != null && !salon.isBlank()) ? salon : "Aula 101";
+
+        Salon salonEnt = salonRepository.findByCodigo(salonStr.trim())
+                .or(() -> salonRepository.findAll().stream().filter(s -> s.getNombre().equalsIgnoreCase(salonStr.trim()) || s.getCodigo().equalsIgnoreCase(salonStr.trim())).findFirst())
+                .orElse(null);
+
+        UUID salonId = salonEnt != null ? salonEnt.getId() : null;
+
+        HorarioDto dto = new HorarioDto(cursoId, diaSemana, inicio, fin, materiaId, docenteId, salonId, salonStr);
+        horarioValidator.validar(dto, horarioId);
+
+        Horario h = horarioRepository.findById(horarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Horario no encontrado con ID: " + horarioId));
+
+        h.setCurso(curso);
+        h.setDiaSemana(diaSemana);
+        h.setHoraInicio(inicio);
+        h.setHoraFin(fin);
+        h.setSalon(salonStr);
+        h.setSalonEntidad(salonEnt);
+
+        bloqueRepository.findByJornadaOrderByNumeroAsc(curso.getJornada() != null ? curso.getJornada() : "Mañana")
+                .stream()
+                .filter(b -> b.getHoraInicio().equals(inicio))
+                .findFirst()
+                .ifPresentOrElse(h::setBloque, () -> h.setBloque(null));
+
+        if (materiaId != null) {
+            materiaRepository.findById(materiaId).ifPresent(h::setMateria);
+        } else {
+            h.setMateria(null);
         }
-        return guardarHorarioBloque(cursoId, diaSemana, materiaId, docenteId, horaInicioStr, horaFinStr, salon);
+        if (docenteId != null) {
+            docenteRepository.findById(docenteId).ifPresent(h::setDocente);
+        } else {
+            h.setDocente(null);
+        }
+
+        sincronizarCursoMateriaDocente(curso, materiaId, docenteId);
+
+        return horarioRepository.save(h);
+    }
+
+    private void sincronizarCursoMateriaDocente(Curso curso, UUID materiaId, UUID docenteId) {
+        if (curso != null && materiaId != null && docenteId != null) {
+            String ano = curso.getAnoLectivo() != null ? curso.getAnoLectivo() : "2026";
+            var cmOpt = cursoMateriaRepository.findByCursoIdAndMateriaIdAndAnoLectivo(curso.getId(), materiaId, ano);
+            if (cmOpt.isPresent()) {
+                CursoMateria cm = cmOpt.get();
+                if (cm.getDocente() == null || !cm.getDocente().getId().equals(docenteId)) {
+                    docenteRepository.findById(docenteId).ifPresent(cm::setDocente);
+                    cursoMateriaRepository.save(cm);
+                }
+            } else {
+                Materia mat = materiaRepository.findById(materiaId).orElse(null);
+                Docente doc = docenteRepository.findById(docenteId).orElse(null);
+                if (mat != null && doc != null) {
+                    CursoMateria cm = new CursoMateria(curso, mat, doc, ano);
+                    cursoMateriaRepository.save(cm);
+                }
+            }
+        }
     }
 
     public List<Salon> listarSalonesActivos() {

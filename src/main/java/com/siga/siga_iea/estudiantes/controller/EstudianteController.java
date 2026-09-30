@@ -10,6 +10,9 @@ import com.siga.siga_iea.usuarios.entity.EstudianteAcudiente;
 import com.siga.siga_iea.usuarios.entity.Usuario;
 import com.siga.siga_iea.usuarios.service.EstudianteService;
 import com.siga.siga_iea.usuarios.service.UsuarioService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +44,8 @@ public class EstudianteController {
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "estado", required = false) String estado,
             @RequestParam(value = "nivel", required = false) String nivel,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "15") int size,
             Model model) {
 
         model.addAttribute("title", "Gestión de Estudiantes – IEACI");
@@ -49,63 +54,50 @@ public class EstudianteController {
         model.addAttribute("estado", estado);
         model.addAttribute("nivel", nivel);
 
-        List<Estudiante> dbEstudiantes = estudianteService.buscar(search, estado);
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, Math.min(size, 100)));
+        Page<Estudiante> pagedEstudiantes = estudianteService.buscarPaginado(search, estado, nivel, pageable);
 
         List<Map<String, Object>> estudiantesList = new ArrayList<>();
 
-        if (!dbEstudiantes.isEmpty()) {
-            for (Estudiante e : dbEstudiantes) {
-                List<com.siga.siga_iea.clases.entity.CursoEstudiante> ces = cursoEstudianteRepository.findByEstudianteId(e.getId());
-                Optional<Matricula> matOpt = matriculaService.buscarUltimaMatriculaEstudiante(e.getId());
-                String grad;
-                String sal;
-                if (!ces.isEmpty()) {
-                    com.siga.siga_iea.clases.entity.Curso c = ces.get(ces.size() - 1).getCurso();
-                    grad = c.getGrado();
-                    sal = c.getGrupo() != null ? c.getGrupo() : "01";
-                } else if (matOpt.isPresent() && matOpt.get().getGrado() != null) {
-                    grad = matOpt.get().getGrado();
-                    sal = matOpt.get().getSalon() != null ? matOpt.get().getSalon() : "01";
-                } else {
-                    grad = "Sin grado";
-                    sal = "01";
-                }
-
-                if (nivel != null && !nivel.isBlank()) {
-                    boolean isPrimaria = grad.startsWith("1") || grad.startsWith("2") || grad.startsWith("3")
-                            || grad.startsWith("4") || grad.startsWith("5")
-                            || grad.toLowerCase().contains("primaria") || grad.toLowerCase().contains("transici")
-                            || grad.toLowerCase().contains("jard");
-                    if ("PRIMARIA".equalsIgnoreCase(nivel) && !isPrimaria) {
-                        continue;
-                    }
-                    if ("BACHILLERATO".equalsIgnoreCase(nivel) && isPrimaria) {
-                        continue;
-                    }
-                }
-
-                Map<String, Object> map = new HashMap<>();
-                map.put("id", e.getId().toString());
-                map.put("codigo", e.getCodigo() != null ? e.getCodigo() : "N/A");
-                map.put("nombreCompleto", e.getNombreCompleto());
-                map.put("numeroDocumento", e.getNumeroDocumento());
-                map.put("estado", e.getEstado() != null ? e.getEstado() : "Activo");
-
-                map.put("grado", grad);
-                map.put("salon", sal);
-                map.put("curso", grad + " - " + sal);
-                map.put("foto", resolverFotoUrl(e, matOpt));
-
-                Optional<Usuario> usrOpt = estudianteService.obtenerUsuarioAcceso(e.getNumeroDocumento());
-                map.put("tieneCuenta", usrOpt.isPresent());
-                map.put("usuarioEmail", usrOpt.map(Usuario::getEmail).orElse(null));
-                map.put("usuarioEstado", usrOpt.map(Usuario::getEstado).orElse(null));
-
-                estudiantesList.add(map);
+        for (Estudiante e : pagedEstudiantes.getContent()) {
+            List<com.siga.siga_iea.clases.entity.CursoEstudiante> ces = cursoEstudianteRepository.findByEstudianteId(e.getId());
+            Optional<Matricula> matOpt = matriculaService.buscarUltimaMatriculaEstudiante(e.getId());
+            String grad;
+            String sal;
+            if (!ces.isEmpty()) {
+                com.siga.siga_iea.clases.entity.Curso c = ces.get(ces.size() - 1).getCurso();
+                grad = c.getGrado();
+                sal = c.getGrupo() != null ? c.getGrupo() : "01";
+            } else if (matOpt.isPresent() && matOpt.get().getGrado() != null) {
+                grad = matOpt.get().getGrado();
+                sal = matOpt.get().getSalon() != null ? matOpt.get().getSalon() : "01";
+            } else {
+                grad = "Sin grado";
+                sal = "01";
             }
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", e.getId().toString());
+            map.put("codigo", e.getCodigo() != null ? e.getCodigo() : "N/A");
+            map.put("nombreCompleto", e.getNombreCompleto());
+            map.put("numeroDocumento", e.getNumeroDocumento());
+            map.put("estado", e.getEstado() != null ? e.getEstado() : "Activo");
+
+            map.put("grado", grad);
+            map.put("salon", sal);
+            map.put("curso", grad + " - " + sal);
+            map.put("foto", resolverFotoUrl(e, matOpt));
+
+            Optional<Usuario> usrOpt = estudianteService.obtenerUsuarioAcceso(e.getNumeroDocumento());
+            map.put("tieneCuenta", usrOpt.isPresent());
+            map.put("usuarioEmail", usrOpt.map(Usuario::getEmail).orElse(null));
+            map.put("usuarioEstado", usrOpt.map(Usuario::getEstado).orElse(null));
+
+            estudiantesList.add(map);
         }
 
         model.addAttribute("estudiantesList", estudiantesList);
+        model.addAttribute("pageData", pagedEstudiantes);
         return "estudiantes/index";
     }
 

@@ -88,6 +88,7 @@ public class SecurityConfig {
                                 "/reportes/**",
                                 "/calificaciones/**",
                                 "/certificados/**",
+                                "/mi-jornada/**",
                                 "/soporte/**",
                                 "/"
                         ).authenticated()

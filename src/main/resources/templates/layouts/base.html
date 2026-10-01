@@ -197,6 +197,13 @@ th:fragment="html(content)">
     document.addEventListener('DOMContentLoaded', initLucideIcons);
     initLucideIcons();
     document.addEventListener('htmx:afterSwap', initLucideIcons);
+
+    document.body.addEventListener('htmx:beforeSwap', function(e) {
+        if ([403, 409].includes(e.detail.xhr.status)) {
+            e.detail.shouldSwap = true;
+            e.detail.isError = false;
+        }
+    });
 </script>
 
 </body>

@@ -19,4 +19,8 @@ public interface CursoRepository extends JpaRepository<Curso, UUID> {
 
     @Query("SELECT c FROM Curso c WHERE c.grado = :grado AND c.grupo = :grupo")
     Optional<Curso> findByGradoAndGrupo(@Param("grado") String grado, @Param("grupo") String grupo);
+
+    List<Curso> findByDirectorId(UUID directorId);
+
+    List<Curso> findByDirectorIdAndAnoLectivo(UUID directorId, String anoLectivo);
 }

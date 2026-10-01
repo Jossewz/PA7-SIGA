@@ -1,5 +1,6 @@
 package com.siga.siga_iea.clases.repository;
 
+import com.siga.siga_iea.clases.entity.Curso;
 import com.siga.siga_iea.clases.entity.Horario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -107,4 +108,15 @@ public interface HorarioRepository extends JpaRepository<Horario, UUID> {
             @Param("horaInicio") LocalTime horaInicio,
             @Param("horaFin") LocalTime horaFin,
             @Param("excluirId") UUID excluirId);
+
+    // ==========================================
+    // CURSOS DEL DOCENTE POR DÍA (MI JORNADA)
+    // ==========================================
+    @Query("SELECT DISTINCT h.curso FROM Horario h " +
+           "JOIN h.curso c " +
+           "JOIN CursoMateria cm ON (cm.curso = c AND cm.materia = h.materia AND cm.anoLectivo = c.anoLectivo) " +
+           "WHERE cm.docente.id = :docenteId AND LOWER(h.diaSemana) = LOWER(:diaSemana)")
+    List<Curso> findCursosDocentePorDia(
+            @Param("docenteId") UUID docenteId,
+            @Param("diaSemana") String diaSemana);
 }

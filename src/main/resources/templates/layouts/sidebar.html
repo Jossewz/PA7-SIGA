@@ -49,6 +49,15 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
                 <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Inicio</span>
             </a>
 
+            <!-- Mi Jornada -->
+            <a th:href="@{/mi-jornada}"
+               class="sidebar-nav-item"
+               th:classappend="${(activePage == 'mi-jornada' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/mi-jornada'))) ? 'is-active' : ''}"
+               title="Mi Jornada">
+                <i data-lucide="clipboard-check" class="size-5 shrink-0 stroke-2"></i>
+                <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Mi Jornada</span>
+            </a>
+
             <!-- Matrícula -->
             <a th:href="@{/matricula}"
                th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MATRICULAS'))}"
@@ -187,6 +196,11 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
                    th:classappend="${(activePage == 'dashboard' or (#httpServletRequest != null and #strings.equals(#httpServletRequest.requestURI, '/'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="home" class="size-5 stroke-2"></i>
                     <span>Inicio</span>
+                </a>
+                <a th:href="@{/mi-jornada}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
+                   th:classappend="${(activePage == 'mi-jornada' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/mi-jornada'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
+                    <i data-lucide="clipboard-check" class="size-5 stroke-2"></i>
+                    <span>Mi Jornada</span>
                 </a>
                 <a th:href="@{/matricula}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MATRICULAS'))}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"

@@ -31,8 +31,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @Service
@@ -50,10 +52,36 @@ public class AsistenciaService {
     private final DocenteRepository docenteRepository;
     private final HorarioValidator horarioValidator;
     private final CurrentUserContextService currentUserContextService;
+    private final Clock clock;
 
     @Autowired
     @Lazy
     private AsistenciaService self;
+
+    @Autowired
+    public AsistenciaService(SesionClaseRepository sesionClaseRepository,
+                             AsistenciaRepository asistenciaRepository,
+                             CursoRepository cursoRepository,
+                             HorarioRepository horarioRepository,
+                             CursoMateriaRepository cursoMateriaRepository,
+                             CursoEstudianteRepository cursoEstudianteRepository,
+                             EstudianteRepository estudianteRepository,
+                             DocenteRepository docenteRepository,
+                             HorarioValidator horarioValidator,
+                             CurrentUserContextService currentUserContextService,
+                             Clock clock) {
+        this.sesionClaseRepository = sesionClaseRepository;
+        this.asistenciaRepository = asistenciaRepository;
+        this.cursoRepository = cursoRepository;
+        this.horarioRepository = horarioRepository;
+        this.cursoMateriaRepository = cursoMateriaRepository;
+        this.cursoEstudianteRepository = cursoEstudianteRepository;
+        this.estudianteRepository = estudianteRepository;
+        this.docenteRepository = docenteRepository;
+        this.horarioValidator = horarioValidator;
+        this.currentUserContextService = currentUserContextService;
+        this.clock = clock != null ? clock : Clock.system(ZoneId.of("America/Bogota"));
+    }
 
     public AsistenciaService(SesionClaseRepository sesionClaseRepository,
                              AsistenciaRepository asistenciaRepository,
@@ -65,16 +93,10 @@ public class AsistenciaService {
                              DocenteRepository docenteRepository,
                              HorarioValidator horarioValidator,
                              CurrentUserContextService currentUserContextService) {
-        this.sesionClaseRepository = sesionClaseRepository;
-        this.asistenciaRepository = asistenciaRepository;
-        this.cursoRepository = cursoRepository;
-        this.horarioRepository = horarioRepository;
-        this.cursoMateriaRepository = cursoMateriaRepository;
-        this.cursoEstudianteRepository = cursoEstudianteRepository;
-        this.estudianteRepository = estudianteRepository;
-        this.docenteRepository = docenteRepository;
-        this.horarioValidator = horarioValidator;
-        this.currentUserContextService = currentUserContextService;
+        this(sesionClaseRepository, asistenciaRepository, cursoRepository, horarioRepository,
+             cursoMateriaRepository, cursoEstudianteRepository, estudianteRepository,
+             docenteRepository, horarioValidator, currentUserContextService,
+             Clock.system(ZoneId.of("America/Bogota")));
     }
 
     /**
@@ -313,15 +335,42 @@ public class AsistenciaService {
         return guardadas;
     }
 
+    /**
+     * Valida que el operador tenga permiso para consultar/ver una sesión de clase:
+     * - Admin y Personal Administrativo tienen acceso a cualquier sesión.
+     * - El docente únicamente puede acceder a sus propias sesiones.
+     */
+    public void autorizarAccesoSesion(SesionClase sesion, Docente docenteOperador, RolEnum rolOperador) {
+        if (sesion == null) {
+            throw new IllegalArgumentException("Sesión no encontrada");
+        }
+        if (rolOperador != null && rolOperador.esAdminOAdministrativo()) {
+            return;
+        }
+        if (docenteOperador == null) {
+            throw new SecurityException("Acceso denegado: Se requiere docente autenticado o rol administrativo.");
+        }
+        Docente docenteSesion = sesion.getDocente();
+        if (docenteSesion == null || !docenteSesion.getId().equals(docenteOperador.getId())) {
+            throw new SecurityException("Acceso denegado: No tienes permiso sobre esta sesión de clase ajena.");
+        }
+    }
+
     private void validarAutorizacionRegistro(SesionClase sesion, Docente docenteOperador, RolEnum rolOperador) {
         // Si no se pasaron datos de operador ni hay contexto de seguridad activo (ej. pruebas sin auth), se permite
         if (docenteOperador == null && rolOperador == null) {
             return;
         }
 
-        // Admin o Coordinación/Personal Administrativo tienen acceso pleno
+        // Admin o Coordinación/Personal Administrativo tienen acceso pleno (incluso fechas anteriores)
         if (rolOperador != null && rolOperador.esAdminOAdministrativo()) {
             return;
+        }
+
+        // Ventana de edición: Docentes solo pueden registrar o modificar el día actual
+        LocalDate hoy = LocalDate.now(clock);
+        if (!sesion.getFecha().equals(hoy)) {
+            throw new SecurityException("Ventana de edición cerrada: Los docentes solo pueden registrar o modificar asistencia para la fecha de hoy (" + hoy + ").");
         }
 
         // Docente asignado a la sesión (sea titular o reemplazo)

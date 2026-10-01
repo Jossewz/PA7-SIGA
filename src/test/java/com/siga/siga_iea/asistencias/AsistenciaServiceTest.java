@@ -306,16 +306,18 @@ class AsistenciaServiceTest {
 
         cursoMateriaRepository.save(new CursoMateria(curso, mat, titular, "2026"));
 
+        LocalDate hoy = LocalDate.now(clock);
+        String diaSemana = com.siga.siga_iea.clases.application.CursoGestionAppService.obtenerNombreDiaEspanol(hoy.getDayOfWeek());
+
         Horario h = new Horario();
         h.setCurso(curso);
         h.setMateria(mat);
-        h.setDiaSemana("Martes");
+        h.setDiaSemana(diaSemana);
         h.setHoraInicio(LocalTime.of(7, 0));
         h.setHoraFin(LocalTime.of(8, 30));
         horarioRepository.save(h);
 
-        LocalDate martes = LocalDate.of(2026, 3, 3);
-        List<SesionClase> sesiones = asistenciaService.abrirDia(curso.getId(), martes);
+        List<SesionClase> sesiones = asistenciaService.abrirDia(curso.getId(), hoy);
         UUID sesionId = sesiones.get(0).getId();
 
         Estudiante est = crearEstudiante("Estudiante", "Dos", "EST-002-" + UUID.randomUUID());
@@ -338,6 +340,9 @@ class AsistenciaServiceTest {
         assertEquals(1, asistencias.size());
     }
 
+    @Autowired
+    private java.time.Clock clock;
+
     @Test
     @Transactional
     @DisplayName("Prueba 8: Autorización estricta: docente ajeno es rechazado, docente titular o admin son permitidos")
@@ -349,16 +354,18 @@ class AsistenciaServiceTest {
 
         cursoMateriaRepository.save(new CursoMateria(curso, mat, titular, "2026"));
 
+        LocalDate hoy = LocalDate.now(clock);
+        String diaSemana = com.siga.siga_iea.clases.application.CursoGestionAppService.obtenerNombreDiaEspanol(hoy.getDayOfWeek());
+
         Horario h = new Horario();
         h.setCurso(curso);
         h.setMateria(mat);
-        h.setDiaSemana("Miércoles");
+        h.setDiaSemana(diaSemana);
         h.setHoraInicio(LocalTime.of(7, 0));
         h.setHoraFin(LocalTime.of(8, 30));
         horarioRepository.save(h);
 
-        LocalDate miercoles = LocalDate.of(2026, 3, 4);
-        List<SesionClase> sesiones = asistenciaService.abrirDia(curso.getId(), miercoles);
+        List<SesionClase> sesiones = asistenciaService.abrirDia(curso.getId(), hoy);
         UUID sesionId = sesiones.get(0).getId();
 
         Estudiante est = crearEstudiante("Estudiante", "Tres", "EST-003-" + UUID.randomUUID());
@@ -391,6 +398,54 @@ class AsistenciaServiceTest {
         );
         assertEquals(1, guardadasAdmin.size());
         assertEquals("AUSENTE", guardadasAdmin.get(0).getEstado());
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("Prueba 10: Ventana de edición: docente no puede registrar en una sesión de fecha distinta a hoy")
+    void testVentanaEdicionDocenteRechazadoEnFechaDistintaAHoy() {
+        Curso curso = crearCurso("10°", "01", "Mañana", "2026");
+        Materia mat = crearMateria("Química 10", "QUI-10-" + UUID.randomUUID());
+        Docente titular = crearDocente("Docente", "Química", "DOC-QUI-" + UUID.randomUUID());
+        cursoMateriaRepository.save(new CursoMateria(curso, mat, titular, "2026"));
+
+        // Fecha de ayer (fuera de la ventana del docente)
+        LocalDate ayer = LocalDate.now(clock).minusDays(1);
+        String diaAyer = com.siga.siga_iea.clases.application.CursoGestionAppService.obtenerNombreDiaEspanol(ayer.getDayOfWeek());
+
+        Horario h = new Horario();
+        h.setCurso(curso);
+        h.setMateria(mat);
+        h.setDiaSemana(diaAyer);
+        h.setHoraInicio(LocalTime.of(8, 0));
+        h.setHoraFin(LocalTime.of(9, 30));
+        horarioRepository.save(h);
+
+        List<SesionClase> sesiones = asistenciaService.abrirDia(curso.getId(), ayer);
+        UUID sesionId = sesiones.get(0).getId();
+
+        Estudiante est = crearEstudiante("Est", "Ayer", "EST-AYER-" + UUID.randomUUID());
+        cursoEstudianteRepository.save(new CursoEstudiante(curso, est, "2026"));
+
+        // Docente intenta registrar en fecha pasada -> SecurityException
+        SecurityException ex = assertThrows(SecurityException.class, () ->
+                asistenciaService.registrar(
+                        sesionId,
+                        List.of(new AsistenciaItemDto(est.getId(), "PRESENTE")),
+                        titular,
+                        RolEnum.DOCENTE
+                ));
+        assertTrue(ex.getMessage().contains("Ventana de edición cerrada"));
+
+        // Admin sí puede registrar fuera de la ventana de edición
+        List<Asistencia> asistenciasAdmin = asistenciaService.registrar(
+                sesionId,
+                List.of(new AsistenciaItemDto(est.getId(), "EXCUSADO", "Autorizado por coordinación")),
+                null,
+                RolEnum.ADMIN
+        );
+        assertEquals(1, asistenciasAdmin.size());
+        assertEquals("EXCUSADO", asistenciasAdmin.get(0).getEstado());
     }
 
     @Test

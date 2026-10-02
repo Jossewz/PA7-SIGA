@@ -1,6 +1,8 @@
 package com.siga.siga_iea.matricula.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.siga.siga_iea.clases.entity.Curso;
+import com.siga.siga_iea.configuracion.entity.AnioLectivo;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
 import com.siga.siga_iea.storage.entity.Documento;
 import jakarta.persistence.*;
@@ -27,12 +29,18 @@ public class Matricula {
     @JoinColumn(name = "curso_id")
     private Curso curso;
 
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "anio_lectivo_id")
+    private AnioLectivo anioLectivo;
+
     @Column(columnDefinition = "VARCHAR", nullable = false)
     private String grado;
 
     @Column(columnDefinition = "VARCHAR")
     private String salon = "01";
 
+    @Deprecated
     @Column(columnDefinition = "VARCHAR", nullable = false)
     private String anoLectivo;
 
@@ -62,6 +70,12 @@ public class Matricula {
         if (fechaAutorizacionDatos == null) {
             fechaAutorizacionDatos = LocalDateTime.now();
         }
+        syncDerivations();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        syncDerivations();
     }
 
     public Matricula() {
@@ -123,12 +137,37 @@ public class Matricula {
         this.salon = salon;
     }
 
+    @JsonIgnore
+    public AnioLectivo getAnioLectivo() {
+        return anioLectivo;
+    }
+
+    public void setAnioLectivo(AnioLectivo anioLectivo) {
+        this.anioLectivo = anioLectivo;
+        if (anioLectivo != null && anioLectivo.getAnio() != null) {
+            this.anoLectivo = anioLectivo.getAnio().toString();
+        }
+    }
+
+    public void syncDerivations() {
+        if (this.anioLectivo != null && this.anioLectivo.getAnio() != null) {
+            this.anoLectivo = this.anioLectivo.getAnio().toString();
+        } else if (this.curso != null && this.curso.getAnioLectivo() != null) {
+            this.anioLectivo = this.curso.getAnioLectivo();
+            this.anoLectivo = this.anioLectivo.getAnio().toString();
+        }
+    }
+
+    @Deprecated
     public String getAnoLectivo() {
         return anoLectivo;
     }
 
+    @Deprecated
     public void setAnoLectivo(String anoLectivo) {
-        this.anoLectivo = anoLectivo;
+        if (this.anioLectivo == null) {
+            this.anoLectivo = anoLectivo;
+        }
     }
 
     public String getEstado() {

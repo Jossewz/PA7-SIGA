@@ -36,3 +36,6 @@ build/
 
 ### Temporary Scripts & Playwright Scratch ###
 scratch/
+*.dump
+backup_*.sql
+

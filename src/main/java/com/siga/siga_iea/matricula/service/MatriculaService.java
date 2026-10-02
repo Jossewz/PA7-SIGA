@@ -84,7 +84,9 @@ public class MatriculaService {
         if (curso.getGrupo() != null) {
             matricula.setSalon(curso.getGrupo());
         }
-        if (curso.getAnoLectivo() != null) {
+        if (curso.getAnioLectivo() != null) {
+            matricula.setAnioLectivo(curso.getAnioLectivo());
+        } else if (curso.getAnoLectivo() != null) {
             matricula.setAnoLectivo(curso.getAnoLectivo());
         }
 
@@ -96,9 +98,15 @@ public class MatriculaService {
             if (existente.isPresent()) {
                 CursoEstudiante ce = existente.get();
                 ce.setCurso(curso);
+                if (curso.getAnioLectivo() != null) {
+                    ce.setAnioLectivo(curso.getAnioLectivo());
+                }
                 cursoEstudianteRepository.save(ce);
             } else {
                 CursoEstudiante ce = new CursoEstudiante(curso, estudiante, ano);
+                if (curso.getAnioLectivo() != null) {
+                    ce.setAnioLectivo(curso.getAnioLectivo());
+                }
                 cursoEstudianteRepository.save(ce);
             }
         }
@@ -126,8 +134,7 @@ public class MatriculaService {
         if (cursoOpt.isPresent()) {
             return aprobarMatricula(matriculaId, cursoOpt.get().getId());
         }
-        matricula.setEstado("APROBADA");
-        return matriculaRepository.save(matricula);
+        throw new IllegalStateException("No se puede aprobar la matrícula sin un curso asignado para grado: " + grado + ", año: " + ano);
     }
 
     /**
@@ -148,7 +155,9 @@ public class MatriculaService {
         if (nuevoCurso.getGrupo() != null) {
             matricula.setSalon(nuevoCurso.getGrupo());
         }
-        if (nuevoCurso.getAnoLectivo() != null) {
+        if (nuevoCurso.getAnioLectivo() != null) {
+            matricula.setAnioLectivo(nuevoCurso.getAnioLectivo());
+        } else if (nuevoCurso.getAnoLectivo() != null) {
             matricula.setAnoLectivo(nuevoCurso.getAnoLectivo());
         }
 
@@ -159,9 +168,15 @@ public class MatriculaService {
             if (existente.isPresent()) {
                 CursoEstudiante ce = existente.get();
                 ce.setCurso(nuevoCurso);
+                if (nuevoCurso.getAnioLectivo() != null) {
+                    ce.setAnioLectivo(nuevoCurso.getAnioLectivo());
+                }
                 cursoEstudianteRepository.save(ce);
             } else {
                 CursoEstudiante ce = new CursoEstudiante(nuevoCurso, estudiante, ano);
+                if (nuevoCurso.getAnioLectivo() != null) {
+                    ce.setAnioLectivo(nuevoCurso.getAnioLectivo());
+                }
                 cursoEstudianteRepository.save(ce);
             }
         }

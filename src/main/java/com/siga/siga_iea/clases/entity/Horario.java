@@ -22,6 +22,11 @@ public class Horario {
     @JoinColumn(name = "materia_id")
     private Materia materia;
 
+    /**
+     * @deprecated El docente responsable de la asignatura se define en {@link CursoMateria}.
+     * Este campo persiste por compatibilidad transitoria con esquemas legacy.
+     */
+    @Deprecated
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "docente_id")
     private Docente docente;
@@ -43,38 +48,111 @@ public class Horario {
     @Column(name = "hora_fin", nullable = false)
     private LocalTime horaFin;
 
+    /**
+     * @deprecated Usar {@link #salonEntidad} (FK a Salon) como fuente de verdad.
+     */
+    @Deprecated
     @Column(columnDefinition = "VARCHAR")
     private String salon;
 
-    public Horario() {}
+    public Horario() {
+    }
 
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+    public UUID getId() {
+        return id;
+    }
 
-    public Curso getCurso() { return curso; }
-    public void setCurso(Curso curso) { this.curso = curso; }
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
-    public Materia getMateria() { return materia; }
-    public void setMateria(Materia materia) { this.materia = materia; }
+    public Curso getCurso() {
+        return curso;
+    }
 
-    public Docente getDocente() { return docente; }
-    public void setDocente(Docente docente) { this.docente = docente; }
+    public void setCurso(Curso curso) {
+        this.curso = curso;
+    }
 
-    public Salon getSalonEntidad() { return salonEntidad; }
-    public void setSalonEntidad(Salon salonEntidad) { this.salonEntidad = salonEntidad; }
+    public Materia getMateria() {
+        return materia;
+    }
 
-    public Bloque getBloque() { return bloque; }
-    public void setBloque(Bloque bloque) { this.bloque = bloque; }
+    public void setMateria(Materia materia) {
+        this.materia = materia;
+    }
 
-    public String getDiaSemana() { return diaSemana; }
-    public void setDiaSemana(String diaSemana) { this.diaSemana = diaSemana; }
+    /** @deprecated El docente se gestiona en {@link CursoMateria}. */
+    @Deprecated
+    public Docente getDocente() {
+        return docente;
+    }
 
-    public LocalTime getHoraInicio() { return horaInicio; }
-    public void setHoraInicio(LocalTime horaInicio) { this.horaInicio = horaInicio; }
+    /** @deprecated El docente se gestiona en {@link CursoMateria}. */
+    @Deprecated
+    public void setDocente(Docente docente) {
+        this.docente = docente;
+    }
 
-    public LocalTime getHoraFin() { return horaFin; }
-    public void setHoraFin(LocalTime horaFin) { this.horaFin = horaFin; }
+    public Salon getSalonEntidad() {
+        return salonEntidad;
+    }
 
-    public String getSalon() { return salon; }
-    public void setSalon(String salon) { this.salon = salon; }
+    public void setSalonEntidad(Salon salonEntidad) {
+        this.salonEntidad = salonEntidad;
+    }
+
+    public Bloque getBloque() {
+        return bloque;
+    }
+
+    public void setBloque(Bloque bloque) {
+        this.bloque = bloque;
+    }
+
+    public String getDiaSemana() {
+        return diaSemana;
+    }
+
+    public void setDiaSemana(String diaSemana) {
+        this.diaSemana = diaSemana;
+    }
+
+    public LocalTime getHoraInicio() {
+        return horaInicio;
+    }
+
+    public void setHoraInicio(LocalTime horaInicio) {
+        this.horaInicio = horaInicio;
+    }
+
+    public LocalTime getHoraFin() {
+        return horaFin;
+    }
+
+    public void setHoraFin(LocalTime horaFin) {
+        this.horaFin = horaFin;
+    }
+
+    /** @deprecated Usar {@link #getSalonEntidad()} */
+    @Deprecated
+    public String getSalon() {
+        return salon;
+    }
+
+    /** @deprecated Usar {@link #setSalonEntidad(Salon)} */
+    @Deprecated
+    public void setSalon(String salon) {
+        this.salon = salon;
+    }
+
+    /**
+     * Retorna el nombre del salón prefiriendo la entidad salón foránea sobre el campo de texto legacy.
+     */
+    public String getSalonNombre() {
+        if (salonEntidad != null && salonEntidad.getNombre() != null) {
+            return salonEntidad.getNombre();
+        }
+        return salon != null ? salon : "Aula 101";
+    }
 }

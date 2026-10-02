@@ -35,6 +35,7 @@ public class CursoService {
     private final SalonRepository salonRepository;
     private final BloqueRepository bloqueRepository;
     private final HorarioValidator horarioValidator;
+    private final com.siga.siga_iea.configuracion.repository.AnioLectivoRepository anioLectivoRepository;
 
     public CursoService(CursoRepository cursoRepository,
                         MateriaRepository materiaRepository,
@@ -47,7 +48,8 @@ public class CursoService {
                         CalificacionesRepository calificacionesRepository,
                         SalonRepository salonRepository,
                         BloqueRepository bloqueRepository,
-                        HorarioValidator horarioValidator) {
+                        HorarioValidator horarioValidator,
+                        com.siga.siga_iea.configuracion.repository.AnioLectivoRepository anioLectivoRepository) {
         this.cursoRepository = cursoRepository;
         this.materiaRepository = materiaRepository;
         this.cursoMateriaRepository = cursoMateriaRepository;
@@ -60,6 +62,7 @@ public class CursoService {
         this.salonRepository = salonRepository;
         this.bloqueRepository = bloqueRepository;
         this.horarioValidator = horarioValidator;
+        this.anioLectivoRepository = anioLectivoRepository;
     }
 
     public List<Curso> listarTodosLosCursos() {
@@ -95,7 +98,21 @@ public class CursoService {
         c.setGrupo(grupo != null && !grupo.isBlank() ? grupo : "01");
         c.setJornada(jornada != null ? jornada : "Mañana");
         c.setCuposMaximos(cupos != null ? cupos : 35);
-        c.setAnoLectivo(anoLectivo != null ? anoLectivo : "2026");
+
+        com.siga.siga_iea.configuracion.entity.AnioLectivo al = null;
+        if (anoLectivo != null && !anoLectivo.isBlank()) {
+            try {
+                al = anioLectivoRepository.findByAnio(Integer.parseInt(anoLectivo.trim())).orElse(null);
+            } catch (NumberFormatException ignored) {}
+        }
+        if (al == null) {
+            al = anioLectivoRepository.findByEsActualTrue().orElse(null);
+        }
+        if (al != null) {
+            c.setAnioLectivo(al);
+        } else {
+            c.setAnoLectivo(anoLectivo != null ? anoLectivo : "2026");
+        }
 
         if (directorId != null) {
             docenteRepository.findById(directorId).ifPresent(c::setDirector);
@@ -110,8 +127,13 @@ public class CursoService {
 
         c.setGrado(grado);
         if (jornada != null && !jornada.isBlank()) c.setJornada(jornada);
-        if (cupos != null && cupos > 0) c.setCuposMaximos(cupos);
-        if (anoLectivo != null && !anoLectivo.isBlank()) c.setAnoLectivo(anoLectivo);
+        if (anoLectivo != null && !anoLectivo.isBlank()) {
+            try {
+                anioLectivoRepository.findByAnio(Integer.parseInt(anoLectivo.trim()))
+                        .ifPresent(c::setAnioLectivo);
+            } catch (NumberFormatException ignored) {}
+            c.setAnoLectivo(anoLectivo);
+        }
 
         if (directorId != null) {
             docenteRepository.findById(directorId).ifPresent(c::setDirector);

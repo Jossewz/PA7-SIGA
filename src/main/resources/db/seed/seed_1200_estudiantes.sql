@@ -5,6 +5,7 @@
 
 DO $$
 DECLARE
+    v_anio_lectivo_id UUID;
     v_admin_id UUID := 'a0000000-0000-0000-0000-000000000001';
     v_docente1_id UUID := 'd0000000-0000-0000-0000-000000000001';
     v_docente2_id UUID := 'd0000000-0000-0000-0000-000000000002';
@@ -26,6 +27,15 @@ DECLARE
     v_est_ape TEXT;
     v_est_gen VARCHAR(10);
 BEGIN
+    -- 0. Asegurar año lectivo 2026
+    SELECT id INTO v_anio_lectivo_id FROM anios_lectivos WHERE anio = 2026;
+    IF v_anio_lectivo_id IS NULL THEN
+        v_anio_lectivo_id := 'e0000000-0000-0000-0000-000000002026';
+        INSERT INTO anios_lectivos (id, anio, estado, es_actual)
+        VALUES (v_anio_lectivo_id, 2026, 'ACTIVO', true)
+        ON CONFLICT (anio) DO NOTHING;
+    END IF;
+
     -- 1. Super Admin (admin@ieaci.edu.co / admin)
     INSERT INTO usuarios (id, email, password, rol, numero_documento, estado, created_at)
     VALUES (
@@ -72,27 +82,27 @@ BEGIN
             v_grupo := LPAD(grp::text, 2, '0');
             v_curso_id := gen_random_uuid();
             
-            INSERT INTO cursos (id, grado, grupo, jornada, cupos_maximos, ano_lectivo, estado, director_id, created_at)
-            VALUES (v_curso_id, v_grado, v_grupo, 'Mañana', 40, '2026', 'Activo', v_docentes_array[(g % 3) + 1], NOW());
+            INSERT INTO cursos (id, grado, grupo, jornada, cupos_maximos, ano_lectivo, anio_lectivo_id, estado, director_id, created_at)
+            VALUES (v_curso_id, v_grado, v_grupo, 'Mañana', 40, '2026', v_anio_lectivo_id, 'Activo', v_docentes_array[(g % 3) + 1], NOW());
 
             v_cursos_array := array_append(v_cursos_array, v_curso_id);
 
             -- Si es secundaria (6° en adelante), vincular CursoMateria y Horarios
             IF g >= 6 THEN
-                INSERT INTO curso_materia (id, curso_id, materia_id, docente_id, ano_lectivo)
+                INSERT INTO curso_materia (id, curso_id, materia_id, docente_id, ano_lectivo, anio_lectivo_id)
                 VALUES
-                    (gen_random_uuid(), v_curso_id, v_mat_id, v_docente1_id, '2026'),
-                    (gen_random_uuid(), v_curso_id, v_esp_id, v_docente2_id, '2026'),
-                    (gen_random_uuid(), v_curso_id, v_cie_id, v_docente3_id, '2026')
-                ON CONFLICT (curso_id, materia_id, ano_lectivo) DO NOTHING;
+                    (gen_random_uuid(), v_curso_id, v_mat_id, v_docente1_id, '2026', v_anio_lectivo_id),
+                    (gen_random_uuid(), v_curso_id, v_esp_id, v_docente2_id, '2026', v_anio_lectivo_id),
+                    (gen_random_uuid(), v_curso_id, v_cie_id, v_docente3_id, '2026', v_anio_lectivo_id)
+                ON CONFLICT (curso_id, materia_id, anio_lectivo_id) DO NOTHING;
 
                 -- Horarios base (Lunes a Viernes)
                 FOR d IN 1..5 LOOP
-                    INSERT INTO horarios (id, curso_id, materia_id, docente_id, dia_semana, hora_inicio, hora_fin, salon)
+                    INSERT INTO horarios (id, curso_id, materia_id, docente_id, dia_semana, hora_inicio, hora_fin, salon, salon_id)
                     VALUES
-                        (gen_random_uuid(), v_curso_id, v_mat_id, v_docente1_id, (ARRAY['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'])[d], '07:00:00', '08:30:00', 'Aula ' || g || '-' || grp),
-                        (gen_random_uuid(), v_curso_id, v_esp_id, v_docente2_id, (ARRAY['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'])[d], '08:30:00', '10:00:00', 'Aula ' || g || '-' || grp),
-                        (gen_random_uuid(), v_curso_id, v_cie_id, v_docente3_id, (ARRAY['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'])[d], '10:30:00', '12:00:00', 'Aula ' || g || '-' || grp);
+                        (gen_random_uuid(), v_curso_id, v_mat_id, v_docente1_id, (ARRAY['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'])[d], '07:00:00', '08:30:00', 'Aula 101', 'b0000000-0000-0000-0000-000000000101'),
+                        (gen_random_uuid(), v_curso_id, v_esp_id, v_docente2_id, (ARRAY['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'])[d], '08:30:00', '10:00:00', 'Aula 102', 'b0000000-0000-0000-0000-000000000102'),
+                        (gen_random_uuid(), v_curso_id, v_cie_id, v_docente3_id, (ARRAY['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'])[d], '10:30:00', '12:00:00', 'Aula 201', 'b0000000-0000-0000-0000-000000000201');
                 END LOOP;
             END IF;
         END LOOP;
@@ -130,12 +140,13 @@ BEGIN
             NOW()
         );
 
-        INSERT INTO curso_estudiante (id, curso_id, estudiante_id, ano_lectivo)
+        INSERT INTO curso_estudiante (id, curso_id, estudiante_id, ano_lectivo, anio_lectivo_id)
         VALUES (
             gen_random_uuid(),
             v_cursos_array[v_curso_idx],
             v_estudiante_id,
-            '2026'
+            '2026',
+            v_anio_lectivo_id
         );
     END LOOP;
 

@@ -1,5 +1,6 @@
 package com.siga.siga_iea.configuracion.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -7,6 +8,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "anios_lectivos")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class AnioLectivo {
 
     @Id

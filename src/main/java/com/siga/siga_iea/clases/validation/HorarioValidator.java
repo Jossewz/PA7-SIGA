@@ -169,7 +169,9 @@ public class HorarioValidator {
         }
 
         // 3. Resolución del año lectivo (del curso o del AnioLectivo actual)
-        String anoLectivo = curso.getAnoLectivo();
+        String anoLectivo = (curso.getAnioLectivo() != null && curso.getAnioLectivo().getAnio() != null)
+                ? String.valueOf(curso.getAnioLectivo().getAnio())
+                : curso.getAnoLectivo();
         if (anoLectivo == null || anoLectivo.isBlank()) {
             anoLectivo = anioLectivoRepository.findByEsActualTrue()
                     .map(a -> String.valueOf(a.getAnio()))

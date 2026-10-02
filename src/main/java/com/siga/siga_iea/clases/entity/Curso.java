@@ -1,8 +1,12 @@
 package com.siga.siga_iea.clases.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.siga.siga_iea.clases.enums.GradoAcademico;
+import com.siga.siga_iea.configuracion.entity.AnioLectivo;
 import com.siga.siga_iea.usuarios.entity.Docente;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Entity
@@ -30,6 +34,12 @@ public class Curso {
     @JoinColumn(name = "director_id")
     private Docente director;
 
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "anio_lectivo_id")
+    private AnioLectivo anioLectivo;
+
+    @Deprecated
     @Column(name = "ano_lectivo", columnDefinition = "VARCHAR", nullable = false)
     private String anoLectivo;
 
@@ -42,46 +52,134 @@ public class Curso {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        syncDerivations();
     }
 
-    public Curso() {}
+    @PreUpdate
+    protected void onUpdate() {
+        syncDerivations();
+    }
 
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+    public Curso() {
+    }
 
-    public String getGrado() { return grado; }
-    public void setGrado(String grado) { 
-        if (grado == null) {
-            this.grado = "11°";
-        } else {
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getGrado() {
+        return grado;
+    }
+
+    /**
+     * Asigna el grado académico validándolo contra el catálogo institucional cerrado {@link GradoAcademico}.
+     * 
+     * @param grado Nombre del grado.
+     * @throws IllegalArgumentException si el valor es nulo, vacío o no reconocido.
+     */
+    public void setGrado(String grado) {
+        GradoAcademico g = GradoAcademico.from(grado);
+        this.grado = g.getNombre();
+    }
+
+    public GradoAcademico getGradoAcademico() {
+        return grado != null ? GradoAcademico.find(grado).orElse(null) : null;
+    }
+
+    public String getGrupo() {
+        return grupo;
+    }
+
+    public void setGrupo(String grupo) {
+        this.grupo = grupo;
+    }
+
+    public String getCodigoCurso() {
+        String grupoStr = (grupo != null && !grupo.isBlank()) ? grupo : "01";
+        if (grado != null && !grado.isBlank()) {
+            Optional<GradoAcademico> gOpt = GradoAcademico.find(grado);
+            if (gOpt.isPresent()) {
+                return gOpt.get().getCodigoPrefijo() + "-" + grupoStr;
+            }
             String num = grado.replaceAll("[^0-9]", "");
-            this.grado = num.isEmpty() ? "11°" : num + "°";
+            if (!num.isEmpty()) {
+                return num + "-" + grupoStr;
+            }
+        }
+        return "11-" + grupoStr;
+    }
+
+    public String getJornada() {
+        return jornada;
+    }
+
+    public void setJornada(String jornada) {
+        this.jornada = jornada;
+    }
+
+    public Integer getCuposMaximos() {
+        return cuposMaximos != null ? cuposMaximos : 35;
+    }
+
+    public void setCuposMaximos(Integer cuposMaximos) {
+        this.cuposMaximos = cuposMaximos;
+    }
+
+    public Docente getDirector() {
+        return director;
+    }
+
+    public void setDirector(Docente director) {
+        this.director = director;
+    }
+
+    @JsonIgnore
+    public AnioLectivo getAnioLectivo() {
+        return anioLectivo;
+    }
+
+    public void setAnioLectivo(AnioLectivo anioLectivo) {
+        this.anioLectivo = anioLectivo;
+        if (anioLectivo != null && anioLectivo.getAnio() != null) {
+            this.anoLectivo = anioLectivo.getAnio().toString();
         }
     }
 
-    public String getGrupo() { return grupo; }
-    public void setGrupo(String grupo) { this.grupo = grupo; }
-
-    public String getCodigoCurso() { 
-        String num = grado != null ? grado.replaceAll("[^0-9]", "") : "11";
-        return num + "-" + (grupo != null ? grupo : "01");
+    public void syncDerivations() {
+        if (this.anioLectivo != null && this.anioLectivo.getAnio() != null) {
+            this.anoLectivo = this.anioLectivo.getAnio().toString();
+        }
     }
 
-    public String getJornada() { return jornada; }
-    public void setJornada(String jornada) { this.jornada = jornada; }
+    @Deprecated
+    public String getAnoLectivo() {
+        return anoLectivo;
+    }
 
-    public Integer getCuposMaximos() { return cuposMaximos != null ? cuposMaximos : 35; }
-    public void setCuposMaximos(Integer cuposMaximos) { this.cuposMaximos = cuposMaximos; }
+    @Deprecated
+    public void setAnoLectivo(String anoLectivo) {
+        if (this.anioLectivo == null) {
+            this.anoLectivo = anoLectivo;
+        }
+    }
 
-    public Docente getDirector() { return director; }
-    public void setDirector(Docente director) { this.director = director; }
+    public String getEstado() {
+        return estado;
+    }
 
-    public String getAnoLectivo() { return anoLectivo; }
-    public void setAnoLectivo(String anoLectivo) { this.anoLectivo = anoLectivo; }
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
 
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }

@@ -27,7 +27,8 @@ import java.util.*;
 
 /**
  * Controlador Web para Cursos y Clases.
- * Delegador liviano de peticiones HTTP hacia la capa de casos de uso y servicios de aplicación.
+ * Delegador liviano de peticiones HTTP hacia la capa de casos de uso y
+ * servicios de aplicación.
  */
 @Controller
 public class CursoController {
@@ -40,11 +41,11 @@ public class CursoController {
     private final CurrentUserContextService currentUserContextService;
 
     public CursoController(CursoService cursoService,
-                           CursoGestionAppService cursoGestionAppService,
-                           PersonalService personalService,
-                           CalificacionesService calificacionesService,
-                           AsistenciaService asistenciaService,
-                           CurrentUserContextService currentUserContextService) {
+            CursoGestionAppService cursoGestionAppService,
+            PersonalService personalService,
+            CalificacionesService calificacionesService,
+            AsistenciaService asistenciaService,
+            CurrentUserContextService currentUserContextService) {
         this.cursoService = cursoService;
         this.cursoGestionAppService = cursoGestionAppService;
         this.personalService = personalService;
@@ -67,7 +68,7 @@ public class CursoController {
             "#dc2626", // Carmesí
             "#0d9488", // Verde Azulado
             "#c026d3", // Fucsia
-            "#334155"  // Pizarra
+            "#334155" // Pizarra
     };
 
     @GetMapping("/clases/horarios/datos")
@@ -85,7 +86,7 @@ public class CursoController {
             map.put("materiaNombre", h.getMateria() != null ? h.getMateria().getNombre() : "Sin Asignatura");
             map.put("docenteId", h.getDocente() != null ? h.getDocente().getId().toString() : "");
             map.put("docenteNombre", h.getDocente() != null ? h.getDocente().getNombreCompleto() : "Sin Docente");
-            map.put("salon", h.getSalon() != null ? h.getSalon() : (h.getSalonEntidad() != null ? h.getSalonEntidad().getNombre() : "Aula 101"));
+            map.put("salon", h.getSalonNombre());
             map.put("salonId", h.getSalonEntidad() != null ? h.getSalonEntidad().getId().toString() : "");
 
             // Color determinista según el nombre de la materia
@@ -112,16 +113,20 @@ public class CursoController {
 
         Map<String, Object> res = new HashMap<>();
         try {
-            UUID horarioId = (horarioIdStr != null && !horarioIdStr.isBlank() && !horarioIdStr.equals("null")) 
-                    ? UUID.fromString(horarioIdStr) : null;
-            UUID docenteId = (docenteIdStr != null && !docenteIdStr.isBlank() && !docenteIdStr.equals("null")) 
-                    ? UUID.fromString(docenteIdStr) : null;
+            UUID horarioId = (horarioIdStr != null && !horarioIdStr.isBlank() && !horarioIdStr.equals("null"))
+                    ? UUID.fromString(horarioIdStr)
+                    : null;
+            UUID docenteId = (docenteIdStr != null && !docenteIdStr.isBlank() && !docenteIdStr.equals("null"))
+                    ? UUID.fromString(docenteIdStr)
+                    : null;
 
             Horario h;
             if (horarioId != null) {
-                h = cursoService.actualizarHorario(horarioId, cursoId, diaSemana, materiaId, docenteId, horaInicio, horaFin, salon);
+                h = cursoService.actualizarHorario(horarioId, cursoId, diaSemana, materiaId, docenteId, horaInicio,
+                        horaFin, salon);
             } else {
-                h = cursoService.guardarHorarioBloque(cursoId, diaSemana, materiaId, docenteId, horaInicio, horaFin, salon);
+                h = cursoService.guardarHorarioBloque(cursoId, diaSemana, materiaId, docenteId, horaInicio, horaFin,
+                        salon);
             }
 
             res.put("success", true);
@@ -133,7 +138,7 @@ public class CursoController {
             res.put("materiaNombre", h.getMateria() != null ? h.getMateria().getNombre() : "");
             res.put("docenteId", h.getDocente() != null ? h.getDocente().getId().toString() : "");
             res.put("docenteNombre", h.getDocente() != null ? h.getDocente().getNombreCompleto() : "Sin Docente");
-            res.put("salon", h.getSalon() != null ? h.getSalon() : "Aula 101");
+            res.put("salon", h.getSalonNombre());
 
             int hash = Math.abs(h.getMateria() != null ? h.getMateria().getNombre().hashCode() : 0);
             res.put("color", PALETA_COLORES[hash % PALETA_COLORES.length]);
@@ -221,7 +226,8 @@ public class CursoController {
             RedirectAttributes redirectAttributes) {
 
         try {
-            UUID directorId = (directorIdStr != null && !directorIdStr.isBlank()) ? UUID.fromString(directorIdStr) : null;
+            UUID directorId = (directorIdStr != null && !directorIdStr.isBlank()) ? UUID.fromString(directorIdStr)
+                    : null;
             if (idStr != null && !idStr.isBlank()) {
                 UUID cursoId = UUID.fromString(idStr);
                 cursoService.actualizarCurso(cursoId, grado, jornada, cupos, directorId, anoLectivo);
@@ -291,7 +297,8 @@ public class CursoController {
             UUID docenteId = (docenteIdStr != null && !docenteIdStr.isBlank()) ? UUID.fromString(docenteIdStr) : null;
 
             cursoService.guardarHorarioBloque(cursoId, diaSemana, materiaId, docenteId, horaInicio, horaFin, salon);
-            redirectAttributes.addFlashAttribute("mensajeExito", "Horario asignado exitosamente para el día " + diaSemana);
+            redirectAttributes.addFlashAttribute("mensajeExito",
+                    "Horario asignado exitosamente para el día " + diaSemana);
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("mensajeError", "Error al asignar horario: " + ex.getMessage());
         }
@@ -308,7 +315,8 @@ public class CursoController {
         try {
             int guardados = cursoGestionAppService.procesarGuardadoHorarioGrid(cursoId, allParams);
             if (guardados > 0) {
-                redirectAttributes.addFlashAttribute("mensajeExito", "Horario asignado exitosamente (" + guardados + " clases configuradas).");
+                redirectAttributes.addFlashAttribute("mensajeExito",
+                        "Horario asignado exitosamente (" + guardados + " clases configuradas).");
             } else {
                 redirectAttributes.addFlashAttribute("mensajeExito", "Horario del curso actualizado.");
             }
@@ -364,7 +372,8 @@ public class CursoController {
     @PostMapping("/clases/mapear-estudiantes")
     public String mapearEstudiantes(@RequestParam("cursoId") UUID cursoId, RedirectAttributes redirectAttributes) {
         if (!currentUserContextService.esAdminOAdministrativo()) {
-            redirectAttributes.addFlashAttribute("mensajeError", "Acceso denegado: solo Administradores y Personal Administrativo pueden auto-mapear estudiantes.");
+            redirectAttributes.addFlashAttribute("mensajeError",
+                    "Acceso denegado: solo Administradores y Personal Administrativo pueden auto-mapear estudiantes.");
             Optional<Curso> cOpt = cursoService.buscarPorId(cursoId);
             String codigo = cOpt.map(Curso::getCodigoCurso).orElse("11-01");
             return "redirect:/clases/gestion?codigo=" + codigo;
@@ -372,7 +381,8 @@ public class CursoController {
 
         try {
             int count = cursoService.mapearEstudiantesMatriculados(cursoId);
-            redirectAttributes.addFlashAttribute("mensajeExito", "Se han auto-mapeado " + count + " estudiantes matriculados a este curso.");
+            redirectAttributes.addFlashAttribute("mensajeExito",
+                    "Se han auto-mapeado " + count + " estudiantes matriculados a este curso.");
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("mensajeError", "Error al mapear estudiantes: " + ex.getMessage());
         }
@@ -384,10 +394,11 @@ public class CursoController {
 
     @PostMapping("/clases/promover-estudiantes")
     public String promoverEstudiantes(@RequestParam("cursoId") UUID cursoId,
-                                      @RequestParam(value = "notasJson", required = false) String notasJson,
-                                      RedirectAttributes redirectAttributes) {
+            @RequestParam(value = "notasJson", required = false) String notasJson,
+            RedirectAttributes redirectAttributes) {
         if (!currentUserContextService.esAdminOAdministrativo()) {
-            redirectAttributes.addFlashAttribute("mensajeError", "Acceso denegado: solo Administradores y Personal Administrativo pueden promover estudiantes.");
+            redirectAttributes.addFlashAttribute("mensajeError",
+                    "Acceso denegado: solo Administradores y Personal Administrativo pueden promover estudiantes.");
             Optional<Curso> cOpt = cursoService.buscarPorId(cursoId);
             String codigo = cOpt.map(Curso::getCodigoCurso).orElse("11-01");
             return "redirect:/clases/gestion?codigo=" + codigo;
@@ -429,8 +440,7 @@ public class CursoController {
         boolean esAdmin = currentUserContextService.esAdmin();
 
         CursoTablaNotasDTO dto = cursoGestionAppService.prepararTablaNotas(
-                cursoId, materiaNombre, materiaId, periodo, fecha, docLogueadoOpt, esAdmin
-        );
+                cursoId, materiaNombre, materiaId, periodo, fecha, docLogueadoOpt, esAdmin);
 
         model.addAttribute("cursoId", dto.getCursoId());
         model.addAttribute("periodo", dto.getPeriodo());
@@ -503,7 +513,8 @@ public class CursoController {
         if (pesoStr != null && !pesoStr.isBlank()) {
             try {
                 peso = new BigDecimal(pesoStr.trim().replace(',', '.')).setScale(2, RoundingMode.HALF_UP);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         calificacionesService.actualizarPesoEvaluacion(evaluacionId, peso);
@@ -524,7 +535,8 @@ public class CursoController {
         if (notaStr != null && !notaStr.isBlank()) {
             try {
                 nota = new BigDecimal(notaStr.trim().replace(',', '.')).setScale(2, RoundingMode.HALF_UP);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         calificacionesService.registrarONota(evaluacionId, estudianteId, nota, null);

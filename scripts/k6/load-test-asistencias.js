@@ -6,6 +6,7 @@ import { Counter, Rate, Trend } from 'k6/metrics';
 const readDuration = new Trend('lectura_mapa_duration_ms');
 const writeDuration = new Trend('escritura_40_estudiantes_duration_ms');
 const contentionDuration = new Trend('contencion_abrir_dia_duration_ms');
+const batchCollisionDuration = new Trend('colision_batch_duration_ms');
 const successfulWrites = new Counter('escrituras_40_filas_exitosas');
 const contentionSuccess = new Rate('contencion_tasa_exito');
 
@@ -43,14 +44,25 @@ export const options = {
             tags: { escenario: 'escritura' },
         },
 
-        // Escenario 3: Contención concurrente abriendo el mismo día del mismo curso (Punto 4)
-        escenario_3_contencion: {
+        // Escenario 3a: Colisión concurrente real con http.batch (12 peticiones simultáneas con sesiones independientes)
+        escenario_3a_colision_batch: {
+            executor: 'shared-iterations',
+            vus: 1,
+            iterations: 1,
+            maxDuration: '10s',
+            exec: 'ejecutarColisionBatch',
+            startTime: '48s',
+            tags: { escenario: 'colision_batch' },
+        },
+
+        // Escenario 3b: Idempotencia y consulta concurrente continua (Punto 4)
+        escenario_3b_idempotencia: {
             executor: 'shared-iterations',
             vus: 12,
             iterations: 40,
             maxDuration: '20s',
             exec: 'ejecutarContencion',
-            startTime: '50s',
+            startTime: '52s',
             tags: { escenario: 'contencion' },
         },
     },
@@ -61,6 +73,7 @@ export const options = {
         lectura_mapa_duration_ms: ['p(95)<300'],
         escritura_40_estudiantes_duration_ms: ['p(95)<500'],
         contencion_abrir_dia_duration_ms: ['p(95)<300'],
+        colision_batch_duration_ms: ['p(95)<500'],
     },
 };
 
@@ -77,7 +90,7 @@ export function setup() {
         throw new Error('Fallo crítico al autenticar super admin en setup');
     }
 
-    const fechaHoy = '2026-09-29';
+    const fechaHoy = __ENV.TEST_DATE || new Date().toISOString().slice(0, 10);
     const sesionesPorCurso = {};
 
     // Abrir día para los primeros 10 cursos de secundaria
@@ -96,22 +109,48 @@ export function setup() {
         if (res.status === 200) {
             try {
                 const sesiones = JSON.parse(res.body);
-                sesionesPorCurso[c.id] = sesiones.map(s => ({
-                    id: s.id,
-                    docenteId: s.docente ? s.docente.id : null,
-                    docenteEmail: s.docente ? (s.docente.numeroDocumento === '1010000001' ? 'carlos.mendoza@ieaci.edu.co' :
-                                              s.docente.numeroDocumento === '1010000002' ? 'ana.garcia@ieaci.edu.co' : 'jorge.herrera@ieaci.edu.co') : null
-                }));
+                sesionesPorCurso[c.id] = sesiones.map(s => {
+                    const docId = s.docente ? (typeof s.docente === 'string' ? s.docente : s.docente.id) : null;
+                    const docNum = s.docente && typeof s.docente === 'object' ? s.docente.numeroDocumento : null;
+                    let email = null;
+                    if (docId === 'd0000000-0000-0000-0000-000000000001' || docNum === '1010000001') {
+                        email = 'carlos.mendoza@ieaci.edu.co';
+                    } else if (docId === 'd0000000-0000-0000-0000-000000000002' || docNum === '1010000002') {
+                        email = 'ana.garcia@ieaci.edu.co';
+                    } else if (docId === 'd0000000-0000-0000-0000-000000000003' || docNum === '1010000003') {
+                        email = 'jorge.herrera@ieaci.edu.co';
+                    }
+                    return {
+                        id: s.id,
+                        docenteId: docId,
+                        docenteEmail: email
+                    };
+                });
+                console.log(`[SETUP] Curso ${c.grado} ${c.grupo} (${c.id}) -> ${sesiones.length} sesiones abiertas`);
             } catch (e) {
                 console.error(`Error parseando sesiones para curso ${c.id}: ${e}`);
             }
+        } else {
+            console.error(`[SETUP ERROR] Status: ${res.status} Body: ${res.body}`);
         }
     }
 
-    console.log(`[SETUP] Sesiones inicializadas para ${Object.keys(sesionesPorCurso).length} cursos.`);
+    // Crear 12 sesiones independientes para colisión paralela en Escenario 3a
+    const distinctSessions = [];
+    for (let i = 0; i < 12; i++) {
+        const doc = fixtures.docentes[i % fixtures.docentes.length];
+        const s = loginUsuario(doc.email, doc.password);
+        if (s) distinctSessions.push(s);
+    }
+    console.log(`[SETUP] ${distinctSessions.length} sesiones independientes creadas para colisión batch.`);
+
+    const collisionCourse = fixtures.cursos.length > 15 ? fixtures.cursos[15] : fixtures.cursos[fixtures.cursos.length - 1];
     return {
         sesionesPorCurso: sesionesPorCurso,
         contentionCourseId: fixtures.cursos[0].id,
+        unopenedCourseId: collisionCourse.id,
+        fechaHoy: fechaHoy,
+        distinctSessions: distinctSessions,
     };
 }
 
@@ -197,7 +236,8 @@ export function ejecutarLectura(data) {
     const curso = fixtures.cursos[cursoIndex];
 
     const t0 = new Date().getTime();
-    const res = http.get(`${BASE_URL}/asistencias/curso/${curso.id}/mapa?fecha=2026-09-29`, {
+    const fecha = data && data.fechaHoy ? data.fechaHoy : new Date().toISOString().slice(0, 10);
+    const res = http.get(`${BASE_URL}/asistencias/curso/${curso.id}/mapa?fecha=${fecha}`, {
         headers: {
             'Accept': 'application/json',
         },
@@ -237,17 +277,33 @@ export function ejecutarEscritura(data) {
     const candidateCourses = [];
     for (let cId of cursoIds) {
         const sesiones = data.sesionesPorCurso[cId];
-        const match = sesiones.find(s => s.docenteEmail === session.email);
-        if (match) {
-            const cur = fixtures.cursos.find(c => c.id === cId);
-            if (cur) {
-                candidateCourses.push({ sesionId: match.id, curso: cur });
+        for (let s of sesiones) {
+            if (s.docenteEmail === session.email) {
+                const cur = fixtures.cursos.find(c => c.id === cId);
+                if (cur) {
+                    candidateCourses.push({ sesionId: s.id, curso: cur });
+                }
             }
         }
     }
 
-    if (candidateCourses.length === 0) return;
-    const selected = candidateCourses[Math.floor(Math.random() * candidateCourses.length)];
+    if (candidateCourses.length === 0) {
+        for (let cId of cursoIds) {
+            const sesiones = data.sesionesPorCurso[cId];
+            if (sesiones && sesiones.length > 0) {
+                const cur = fixtures.cursos.find(c => c.id === cId);
+                if (cur) {
+                    candidateCourses.push({ sesionId: sesiones[0].id, curso: cur });
+                }
+            }
+        }
+    }
+    if (candidateCourses.length === 0) {
+        sleep(0.5);
+        return;
+    }
+    const vuIndex = (__VU - 1) % candidateCourses.length;
+    const selected = candidateCourses[vuIndex];
     targetSesionId = selected.sesionId;
     targetCurso = selected.curso;
 
@@ -298,15 +354,69 @@ export function ejecutarEscritura(data) {
 }
 
 /**
- * Escenario 3: Contención - Múltiples VUs concurrentes abriendo el mismo día del mismo curso
- * Valida la mitigación de DataIntegrityViolationException e idempotencia concurrente (Punto 4)
+ * Escenario 3a: Colisión concurrente real con http.batch
+ * 12 peticiones HTTP concurrentes con sesiones independientes (sin serialización de sesión Tomcat)
+ * sobre un curso virgen, provocando colisión física en la base de datos (uk_sesion_curso_fecha_hora)
+ * y verificando que Spring Boot + PostgreSQL resuelvan la condición de carrera retornando HTTP 200.
+ */
+export function ejecutarColisionBatch(data) {
+    const cursoId = data.unopenedCourseId;
+    const fecha = data && data.fechaHoy ? data.fechaHoy : new Date().toISOString().slice(0, 10);
+    const sessions = data.distinctSessions || [];
+
+    const requests = [];
+    for (let i = 0; i < 12; i++) {
+        const sess = sessions.length > 0 ? sessions[i % sessions.length] : null;
+        requests.push({
+            method: 'POST',
+            url: `${BASE_URL}/asistencias/abrir-dia?cursoId=${cursoId}&fecha=${fecha}`,
+            params: {
+                headers: sess ? { 'X-XSRF-TOKEN': sess.csrfToken } : {},
+                cookies: sess ? sess.flatCookies : {},
+                tags: { escenario: 'colision_batch' },
+            },
+        });
+    }
+
+    const t0 = new Date().getTime();
+    const responses = http.batch(requests);
+    const dur = new Date().getTime() - t0;
+    batchCollisionDuration.add(dur);
+
+    let all200 = true;
+    let validArray = false;
+    for (let res of responses) {
+        if (res.status !== 200) {
+            all200 = false;
+            console.error(`[COLISION BATCH ERROR] Status: ${res.status} Body: ${res.body}`);
+        } else {
+            try {
+                const list = JSON.parse(res.body);
+                if (Array.isArray(list) && list.length > 0) {
+                    validArray = true;
+                }
+            } catch (e) {
+                // ignorar
+            }
+        }
+    }
+
+    check(responses, {
+        'batch colision: todas las 12 peticiones retornan 200': () => all200,
+        'batch colision: cuerpo contiene array de sesiones': () => validArray,
+    });
+}
+
+/**
+ * Escenario 3b: Idempotencia y consulta concurrente continua (Punto 4)
+ * Múltiples VUs concurrentes consultando/abriendo el mismo día del mismo curso ya existente.
  */
 export function ejecutarContencion(data) {
     const session = getVUSession();
     if (!session) return;
 
     const cursoId = data.contentionCourseId;
-    const fecha = '2026-09-29';
+    const fecha = data && data.fechaHoy ? data.fechaHoy : new Date().toISOString().slice(0, 10);
 
     const t0 = new Date().getTime();
     const res = http.post(

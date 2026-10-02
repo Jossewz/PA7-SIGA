@@ -89,6 +89,7 @@ public class SecurityConfig {
                                 "/calificaciones/**",
                                 "/certificados/**",
                                 "/mi-jornada/**",
+                                "/chat/**",
                                 "/soporte/**",
                                 "/"
                         ).authenticated()

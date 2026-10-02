@@ -90,6 +90,10 @@ public class Curso {
         return grado != null ? GradoAcademico.find(grado).orElse(null) : null;
     }
 
+    public String getNombre() {
+        return (grado != null ? grado : "Curso") + " " + (grupo != null ? grupo : "01");
+    }
+
     public String getGrupo() {
         return grupo;
     }

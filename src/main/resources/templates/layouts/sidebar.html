@@ -138,6 +138,15 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
                 <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Cursos</span>
             </a>
 
+            <!-- Asistente Institucional (Chatbot) -->
+            <a th:href="@{/chat}"
+               class="sidebar-nav-item"
+               th:classappend="${(activePage == 'chat' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/chat'))) ? 'is-active' : ''}"
+               title="Asistente IEACI">
+                <i data-lucide="bot" class="size-5 shrink-0 stroke-2"></i>
+                <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Asistente IEACI</span>
+            </a>
+
             <!-- Configuración -->
             <a th:href="@{/configuracion}"
                th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CONFIGURACION'))}"
@@ -249,6 +258,12 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
                    th:classappend="${(activePage == 'clases' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/clases'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="graduation-cap" class="size-5 stroke-2"></i>
                     <span>Cursos</span>
+                </a>
+                <a th:href="@{/chat}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
+                   th:classappend="${(activePage == 'chat' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/chat'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
+                    <i data-lucide="bot" class="size-5 stroke-2"></i>
+                    <span>Asistente IEACI</span>
                 </a>
                 <a th:href="@{/configuracion}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CONFIGURACION'))}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"

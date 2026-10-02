@@ -2,8 +2,10 @@ package com.siga.siga_iea.auth.service;
 
 import com.siga.siga_iea.auth.enums.RolEnum;
 import com.siga.siga_iea.usuarios.entity.Docente;
+import com.siga.siga_iea.usuarios.entity.Estudiante;
 import com.siga.siga_iea.usuarios.entity.Usuario;
 import com.siga.siga_iea.usuarios.repository.DocenteRepository;
+import com.siga.siga_iea.usuarios.repository.EstudianteRepository;
 import com.siga.siga_iea.usuarios.repository.UsuarioRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,10 +22,14 @@ public class CurrentUserContextService {
 
     private final UsuarioRepository usuarioRepository;
     private final DocenteRepository docenteRepository;
+    private final EstudianteRepository estudianteRepository;
 
-    public CurrentUserContextService(UsuarioRepository usuarioRepository, DocenteRepository docenteRepository) {
+    public CurrentUserContextService(UsuarioRepository usuarioRepository, 
+                                     DocenteRepository docenteRepository,
+                                     EstudianteRepository estudianteRepository) {
         this.usuarioRepository = usuarioRepository;
         this.docenteRepository = docenteRepository;
+        this.estudianteRepository = estudianteRepository;
     }
 
     public Optional<Authentication> getAuthentication() {
@@ -54,6 +60,10 @@ public class CurrentUserContextService {
         return getRolAutenticado().esDocente();
     }
 
+    public boolean esEstudiante() {
+        return getRolAutenticado().esEstudiante();
+    }
+
     public boolean esPersonalAdministrativo() {
         return getRolAutenticado().esPersonalAdministrativo();
     }
@@ -68,5 +78,13 @@ public class CurrentUserContextService {
                 .map(Usuario::getNumeroDocumento)
                 .filter(doc -> doc != null && !doc.isBlank())
                 .flatMap(doc -> docenteRepository.findByNumeroDocumento(doc.trim()));
+    }
+
+    public Optional<Estudiante> getEstudianteAutenticado() {
+        return getUsuarioAutenticado()
+                .filter(u -> u.getRolEnum().esEstudiante())
+                .map(Usuario::getNumeroDocumento)
+                .filter(doc -> doc != null && !doc.isBlank())
+                .flatMap(doc -> estudianteRepository.findByNumeroDocumento(doc.trim()));
     }
 }

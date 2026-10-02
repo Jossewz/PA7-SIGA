@@ -170,6 +170,18 @@ public class ChatOrchestratorService {
                     log.warn("Error ejecutando consultarEstadisticasGenerales: {}", e.getMessage());
                 }
             }
+            if (query.contains("buscar") || (query.contains("estudiante") && !query.contains("estadistica"))) {
+                try {
+                    String criterio = query.replaceAll("(?i)(buscar|estudiante|alumno|informacion|datos|de|el)", "").trim();
+                    if (!criterio.isBlank()) {
+                        ToolExecutionResult res = toolsService.buscarEstudiante(criterio);
+                        herramientasInvocadas.add(res.nombreHerramienta());
+                        contexto.append("RESULTADOS DE BÚSQUEDA DE ESTUDIANTE:\n").append(res.datos()).append("\n\n");
+                    }
+                } catch (Exception e) {
+                    log.warn("Error ejecutando buscarEstudiante: {}", e.getMessage());
+                }
+            }
         }
     }
 
@@ -225,6 +237,9 @@ public class ChatOrchestratorService {
         } else if (contexto.contains("ESTADÍSTICAS INSTITUCIONALES")) {
             sb.append("🏛️ **Panel Directivo IEACI**\n");
             sb.append("Información institucional consolidada para el año lectivo en curso.\n\n");
+        } else if (contexto.contains("RESULTADOS DE BÚSQUEDA DE ESTUDIANTE")) {
+            sb.append("🔍 **Búsqueda Administrativa de Estudiantes**\n");
+            sb.append("Se identificaron registros coincidentes en la base de datos institucional (acotado a 5 resultados para protección de datos). Consulta el expediente completo en el módulo de Estudiantes.\n\n");
         }
 
         if (sb.isEmpty()) {

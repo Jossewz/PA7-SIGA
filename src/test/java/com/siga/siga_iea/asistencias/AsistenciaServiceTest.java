@@ -570,4 +570,62 @@ class AsistenciaServiceTest {
         assertNotNull(nueva.getId());
         assertEquals("DICTADA", nueva.getEstado());
     }
+
+    @Test
+    @DisplayName("Prueba 12: Concurrencia en registrar asistencia: dos hilos simultáneos para la misma sesión y estudiante resuelven colisión")
+    void testConcurrenciaRegistrarMismaSesionResuelveColision() throws Exception {
+        Curso curso = crearCurso("11°", "01", "Mañana", "2026");
+        Materia mat = crearMateria("Cálculo 11", "CAL-11-" + UUID.randomUUID());
+        Docente doc = crearDocente("Profesor", "Cálculo", "DOC-CAL-" + UUID.randomUUID());
+        cursoMateriaRepository.save(new CursoMateria(curso, mat, doc, "2026"));
+
+        Horario h = new Horario();
+        h.setCurso(curso);
+        h.setMateria(mat);
+        h.setDiaSemana("Miércoles");
+        h.setHoraInicio(LocalTime.of(7, 0));
+        h.setHoraFin(LocalTime.of(8, 30));
+        horarioRepository.save(h);
+
+        LocalDate fecha = LocalDate.of(2026, 3, 4);
+        List<SesionClase> sesiones = asistenciaService.abrirDia(curso.getId(), fecha);
+        UUID sesionId = sesiones.get(0).getId();
+
+        Estudiante est = crearEstudiante("Estudiante", "Concurrente", "EST-CONC-" + UUID.randomUUID());
+        cursoEstudianteRepository.save(new CursoEstudiante(curso, est, "2026"));
+
+        int numHilos = 2;
+        ExecutorService executor = Executors.newFixedThreadPool(numHilos);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        List<Future<List<Asistencia>>> futures = new ArrayList<>();
+
+        for (int i = 0; i < numHilos; i++) {
+            final int index = i;
+            futures.add(executor.submit(() -> {
+                startLatch.await();
+                String estado = (index == 0) ? "PRESENTE" : "RETARDO";
+                return asistenciaService.registrar(
+                        sesionId,
+                        List.of(new AsistenciaItemDto(est.getId(), estado)),
+                        null,
+                        RolEnum.ADMIN
+                );
+            }));
+        }
+
+        startLatch.countDown();
+
+        for (Future<List<Asistencia>> future : futures) {
+            List<Asistencia> res = future.get(5, TimeUnit.SECONDS);
+            assertNotNull(res);
+            assertEquals(1, res.size());
+        }
+
+        executor.shutdown();
+
+        // En BD debe existir exactamente 1 registro de asistencia para este estudiante y sesión
+        List<Asistencia> enBd = asistenciaRepository.findBySesionId(sesionId);
+        assertEquals(1, enBd.size(), "No debe existir violación de unicidad ni registros duplicados");
+    }
 }
+

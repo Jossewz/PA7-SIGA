@@ -280,7 +280,6 @@ public class AsistenciaService {
      * - Valida que cada estudiante esté inscrito en el curso (CursoEstudiante).
      * - Realiza upsert sobre uk_asistencia_sesion_estudiante.
      */
-    @Transactional
     public List<Asistencia> registrar(UUID sesionId, List<AsistenciaItemDto> items, Docente docenteOperador, RolEnum rolOperador) {
         if (sesionId == null) {
             throw new IllegalArgumentException("sesionId es obligatorio");
@@ -289,6 +288,18 @@ public class AsistenciaService {
             return Collections.emptyList();
         }
 
+        try {
+            AsistenciaService service = (self != null) ? self : this;
+            return service.registrarInterno(sesionId, items, docenteOperador, rolOperador);
+        } catch (DataIntegrityViolationException ex) {
+            log.info("Colisión concurrente detectada en persistencia de asistencias para sesión {}. Reintentando actualización.", sesionId);
+            AsistenciaService service = (self != null) ? self : this;
+            return service.registrarInterno(sesionId, items, docenteOperador, rolOperador);
+        }
+    }
+
+    @Transactional
+    public List<Asistencia> registrarInterno(UUID sesionId, List<AsistenciaItemDto> items, Docente docenteOperador, RolEnum rolOperador) {
         SesionClase sesion = sesionClaseRepository.findById(sesionId)
                 .orElseThrow(() -> new IllegalArgumentException("Sesión no encontrada: " + sesionId));
 
@@ -329,7 +340,7 @@ public class AsistenciaService {
                 asistencia = new Asistencia(sesion, estudiante, estadoNormalizado, item.observaciones());
             }
 
-            guardadas.add(asistenciaRepository.save(asistencia));
+            guardadas.add(asistenciaRepository.saveAndFlush(asistencia));
         }
 
         return guardadas;

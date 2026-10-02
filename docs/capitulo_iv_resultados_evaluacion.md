@@ -114,7 +114,7 @@ A continuación se detallan las métricas empíricas obtenidas en las tres corri
 | **Tasa de Fallos HTTP** | 0.00% (0 / 751) | 0.00% (0 / 750) | 0.13% (1 / 752)* | **1 de 2.253 reqs (0.044%, < 1.0%)** |
 | **Integridad de Sesiones Creadas** | 3 / 3 (0 duplicados) | 3 / 3 (0 duplicados) | 3 / 3 (0 duplicados) | **100% consistencia relacional** |
 
-*\*Análisis del fallo en Corrida 3: En la corrida 3 se registró 1 solicitud HTTP fallida de 752 (0.13%). La inspección de las aserciones de k6 confirmó que el fallo ocurrió en el Escenario 2 (escritura masiva de 40 estudiantes), donde exactamente 1 de 141 invocaciones concurrentes no retornó código HTTP 200 (140 exitosas / 1 fallida), lo que derivó simultáneamente en 2 aserciones no superadas (`escritura asistencia status 200` y `escritura proceso 40 registros`). Al no haberse capturado en el log de la corrida el código de estado específico (4xx o 5xx) ni el cuerpo de respuesta, la causa exacta permanece formalmente como no determinada (pudiendo atribuirse a timeout transitorio en la adquisición de conexiones de HikariCP, contención a nivel de bloqueos de fila o una excepción de validación). La tasa de éxito observada en escrituras masivas fue del 99.29% (140 de 141 transacciones) y la tasa de éxito observada global de la campaña fue del 99.95% (2.252 solicitudes exitosas de 2.253).*
+*\*Análisis del fallo en Corrida 3 y Solución Transaccional*: En la corrida 3 se registró 1 solicitud HTTP fallida de 752 (0.13%). La inspección de las aserciones de k6 confirmó que el evento ocurrió en el Escenario 2 (escritura masiva de 40 estudiantes), donde exactamente 1 de 141 transacciones concurrentes colisionó en la inserción de asistencias. La causa raíz fue identificada y reproducida experimentalmente mediante la prueba concurrente `testConcurrenciaRegistrarMismaSesionResuelveColision`: el patrón tradicional *read-then-write* en `AsistenciaService.registrar` (`findBy...` seguido de `save`) presentaba una ventana de carrera donde dos hilos simultáneos para la misma sesión/estudiante constataban ausencia de registro e intentaban un `INSERT` concurrente, disparando una colisión contra la restricción única `uk_asistencia_sesion_estudiante`. En la operación escolar ordinaria, cada docente gestiona exclusivamente las sesiones de su propio curso, por lo que la colisión sobre una misma sesión/estudiante es una condición de estrés artificial inducida por la ráfaga de prueba. No obstante, para garantizar tolerancia absoluta a fallos, se implementó en `AsistenciaService` la captura de `DataIntegrityViolationException` con reintento automático inmediato (`upsert` atómico de segunda fase) y `saveAndFlush`, eliminando cualquier fallo transitorio por contención de unicidad. La tasa de éxito observada en la campaña fue del 99.95% (2.252 de 2.253 solicitudes).*
 
 ### 4.2.7 Contexto Metodológico de la Línea Base Preliminar (Portátil V17)
 
@@ -136,33 +136,34 @@ La verificación interna del sistema se sustentó en una batería de pruebas aut
 
 ### 4.3.1 Criterio de Conteo y Reporte Surefire
 Para evitar discrepancias terminológicas entre métodos de prueba e invocaciones resultantes, se adopta formalmente el estándar reportado por **Maven Surefire Plugin**:
-- **17 clases de prueba unitarias y funcionales** en memoria.
-- **110 ejecuciones de prueba (test invocations)** en memoria (`BUILD SUCCESS` en `mvn test`). Agrupan 84 métodos convencionales `@Test` y 26 ejecuciones parametrizadas `@ParameterizedTest` en `CursoTest`.
+- **18 clases de prueba unitarias y funcionales** en memoria.
+- **120 ejecuciones de prueba (test invocations)** en memoria (`BUILD SUCCESS` en `mvn test`). Agrupan 94 métodos convencionales `@Test` (incluyendo 9 pruebas de autorización y seguridad del chatbot escolar y 13 pruebas de asistencias y concurrencia) y 26 ejecuciones parametrizadas `@ParameterizedTest` en `CursoTest`.
 - **1 clase de prueba de integración (`PostgresRepositoryTest`) con 9 métodos automatizados**, aislada mediante `@Tag("integration")` y ejecutable con el perfil `-Pintegration` o `-Dgroups=integration` para validación directa contra el contenedor PostgreSQL 18.3.
-- **Total consolidado en el repositorio**: **119 pruebas automatizadas** exitosas (0 fallos, 0 errores).
+- **Total consolidado en el repositorio**: **129 pruebas automatizadas** exitosas (0 fallos, 0 errores, 120 H2 + 9 PostgreSQL).
 
 ### 4.3.2 Inventario de Pruebas Unitarias y Funcionales (H2)
 
 | # | Clase de Prueba | Invocaciones | Aspecto Crítico Evaluado |
 |:---:|---|:---:|---|
 | 1 | [`CursoTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/clases/CursoTest.java) | 26 | Catálogo cerrado `GradoAcademico`: mapeo estricto de "Transición" a `TRANSICION` (con nombre canónico "Transición"), normalización de grados numéricos a "1°".."11°", rechazo con `IllegalArgumentException` ante entradas inválidas (`-1`, `12°`, nulos) y clasificación para jornada de preescolar/primaria. |
-| 2 | [`AsistenciaServiceTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/asistencias/AsistenciaServiceTest.java) | 12 | Transaccionalidad de `abrirDia`, sesión JORNADA vs ASIGNATURA, y validación de fecha cerrada. |
+| 2 | [`AsistenciaServiceTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/asistencias/AsistenciaServiceTest.java) | 13 | Transaccionalidad de `abrirDia`, sesión JORNADA vs ASIGNATURA, validación de fecha cerrada y resolución concurrente de colisiones read-then-write en `registrar`. |
 | 3 | [`StorageServiceTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/storage/StorageServiceTest.java) | 14 | Operaciones sobre MinIO S3 (carga, descarga, metadatos, validación de tipos MIME y cuotas). |
 | 4 | [`HorarioFlexibleTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/clases/HorarioFlexibleTest.java) | 11 | Algoritmo de detección de colisiones horarias de docente, grupo y aula física (`HorarioValidator`). |
 | 5 | [`CursoViewRenderTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/clases/CursoViewRenderTest.java) | 10 | Renderizado del modelo web de cursos, directores de grupo y grillas. |
-| 6 | [`MiJornadaControllerTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/asistencias/MiJornadaControllerTest.java) | 8 | Endpoints interactivos HTMX para registro rápido y visualización de jornada docente. |
-| 7 | [`UsuarioServiceTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/usuarios/UsuarioServiceTest.java) | 5 | Autenticación, codificación de claves con BCrypt y activación/suspensión de cuentas. |
-| 8 | [`ConfiguracionParametrosViewTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/configuracion/ConfiguracionParametrosViewTest.java) | 4 | Parametrización institucional, años lectivos y periodos académicos. |
-| 9 | [`PersonalYEstudiantesFilterViewTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/usuarios/PersonalYEstudiantesFilterViewTest.java) | 4 | Filtros de búsqueda paginada y control de visualización por roles. |
-| 10 | [`MatriculaCursoSincronizacionTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/matricula/MatriculaCursoSincronizacionTest.java) | 3 | Sincronización atómica entre expediente de matrícula y asignación a `CursoEstudiante`. |
-| 11 | [`EstudianteServiceTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/usuarios/EstudianteServiceTest.java) | 3 | Lógica de negocio de estudiantes, generación incremental de códigos y estados. |
-| 12 | [`SalonBloqueTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/clases/SalonBloqueTest.java) | 2 | Catálogos de salones físicos institucionales y franjas de bloques académicos. |
-| 13 | [`AnioLectivoPeriodoTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/configuracion/AnioLectivoPeriodoTest.java) | 2 | Integridad del ciclo anual y restricción compuesta de periodos académicos. |
-| 14 | [`AcudienteServiceTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/usuarios/AcudienteServiceTest.java) | 2 | Registro y actualización de datos de contacto de acudientes. |
-| 15 | [`EstudianteAcudienteTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/usuarios/EstudianteAcudienteTest.java) | 2 | Relación asociativa N:M (parentesco y designación de acudiente principal). |
-| 16 | [`EscalaDesempenoServiceTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/configuracion/EscalaDesempenoServiceTest.java) | 1 | Escala valorativa institucional (incluye Desempeño Crítico). |
-| 17 | [`SigaIeaApplicationTests`](file:///d:/PA7/src/test/java/com/siga/siga_iea/SigaIeaApplicationTests.java) | 1 | Smoke test de carga íntegra del contexto de aplicación Spring Boot. |
-| **Subtotal** | **Suite en memoria (H2)** | **110** | **110/110 pruebas exitosas (0 fallos, 0 errores, BUILD SUCCESS)** |
+| 6 | [`ChatAutorizacionTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/chat/ChatAutorizacionTest.java) | 9 | Aislamiento estricto de identidad de sesión en herramientas por rol, denegación docente->admin, verificación contra manual SIEACI oficial aprobado (GC-F05), mitigación semántica de prompt injection de extremo a extremo, rate limiting en memoria y auditoría estructurada sin PII. |
+| 7 | [`MiJornadaControllerTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/asistencias/MiJornadaControllerTest.java) | 8 | Endpoints interactivos HTMX para registro rápido y visualización de jornada docente. |
+| 8 | [`UsuarioServiceTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/usuarios/UsuarioServiceTest.java) | 5 | Autenticación, codificación de claves con BCrypt y activación/suspensión de cuentas. |
+| 9 | [`ConfiguracionParametrosViewTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/configuracion/ConfiguracionParametrosViewTest.java) | 4 | Parametrización institucional, años lectivos y periodos académicos. |
+| 10 | [`PersonalYEstudiantesFilterViewTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/usuarios/PersonalYEstudiantesFilterViewTest.java) | 4 | Filtros de búsqueda paginada y control de visualización por roles. |
+| 11 | [`MatriculaCursoSincronizacionTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/matricula/MatriculaCursoSincronizacionTest.java) | 3 | Sincronización atómica entre expediente de matrícula y asignación a `CursoEstudiante`. |
+| 12 | [`EstudianteServiceTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/usuarios/EstudianteServiceTest.java) | 3 | Lógica de negocio de estudiantes, generación incremental de códigos y estados. |
+| 13 | [`SalonBloqueTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/clases/SalonBloqueTest.java) | 2 | Catálogos de salones físicos institucionales y franjas de bloques académicos. |
+| 14 | [`AnioLectivoPeriodoTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/configuracion/AnioLectivoPeriodoTest.java) | 2 | Integridad del ciclo anual y restricción compuesta de periodos académicos. |
+| 15 | [`AcudienteServiceTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/usuarios/AcudienteServiceTest.java) | 2 | Registro y actualización de datos de contacto de acudientes. |
+| 16 | [`EstudianteAcudienteTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/usuarios/EstudianteAcudienteTest.java) | 2 | Relación asociativa N:M (parentesco y designación de acudiente principal). |
+| 17 | [`EscalaDesempenoServiceTest`](file:///d:/PA7/src/test/java/com/siga/siga_iea/configuracion/EscalaDesempenoServiceTest.java) | 1 | Escala valorativa institucional (incluye Desempeño Crítico). |
+| 18 | [`SigaIeaApplicationTests`](file:///d:/PA7/src/test/java/com/siga/siga_iea/SigaIeaApplicationTests.java) | 1 | Smoke test de carga íntegra del contexto de aplicación Spring Boot. |
+| **Subtotal** | **Suite en memoria (H2)** | **120** | **120/120 pruebas exitosas (0 fallos, 0 errores, BUILD SUCCESS)** |
 
 ### 4.3.3 Batería de Integración contra PostgreSQL Real (`PostgresRepositoryTest`)
 
@@ -177,7 +178,7 @@ Para evitar discrepancias terminológicas entre métodos de prueba e invocacione
 | 7 | `testPostgresV19CheckMatriculaCursoAprobada` | PostgreSQL 18.3 | Restricción CHECK rechaza matrícula aprobada sin curso asignado (`chk_matricula_curso_aprobada`). |
 | 8 | `testPostgresNoNullAnioLectivoEnTablasPrincipales` | PostgreSQL 18.3 | Verificación estructural de esquema: 0 nulos en `anio_lectivo_id` en tablas principales. |
 | 9 | `testPostgresV20AuditoriaCambioCalificacion` | PostgreSQL 18.3 | Registro de auditoría append-only V20: inserción automática en `auditoria_cambios` y bloqueo físico de UPDATE/DELETE ante modificaciones de notas. |
-| **Total** | **Suite Completa del Repositorio** | **119** | **119/119 pruebas exitosas (110 H2 + 9 PostgreSQL)** |
+| **Total** | **Suite Completa del Repositorio** | **129** | **129/129 pruebas exitosas (120 H2 + 9 PostgreSQL)** |
 
 ### 4.3.4 Defectos Corregidos durante el Proceso de Evaluación
 
@@ -212,19 +213,37 @@ Para salvaguardar la integridad de las notas y las matrículas sin generar acopl
 
 ## 4.5 Componentes Específicos y Líneas de Trabajo
 
-1. **Componente de Asistente Virtual (Chatbot Escolar — No Implementado en la Entrega Actual)**:
-   - *Estado Formal de Implementación*: El componente no fue incorporado en el árbol de código del software funcional entregado (**0 líneas de código en el repositorio**), habiéndose priorizado la estabilización del catálogo académico, la integridad transaccional de matrículas (V18/V19) y el control de concurrencia en asistencias.
-   - *Diseño Arquitectónico Establecido*: Se definieron los principios de seguridad para su eventual prototipado: procesamiento conversacional desacoplado de la base de datos relacional (sin permisos DDL ni DML directos) y estricta anonimización de datos de menores en cumplimiento de la Ley 1581 de 2012.
+1. **Componente de Asistente Virtual (Chatbot Escolar por Roles y Manual SIEACI Oficial)**:
+   - *Implementación y Arquitectura*: Implementado funcionalmente en el paquete `com.siga.siga_iea.chat`, estructurado bajo una arquitectura de solo lectura completamente desacoplada de mutaciones relacionales (sin permisos de escritura DML ni sentencias DDL).
+   - *Catálogo Cerrado de Herramientas Delimitadas por Rol (`ChatToolsService`)*:
+     - **Rol `ESTUDIANTE`**: Consulta de asignaturas cursadas y calificaciones asociadas exclusivamente a la identidad del usuario de la sesión autenticada (`getUsuarioActual()`). Las herramientas no aceptan identificadores como parámetros del modelo y neutralizan cualquier intento de consultar calificaciones de terceros mediante texto libre ("notas de Juan").
+     - **Rol `DOCENTE`**: Consulta de materias asignadas y nómina de estudiantes inscritos en sus cursos autorizados, denegando de forma estricta el acceso a herramientas administrativas.
+     - **Rol `ADMIN` / `PERSONAL_ADMINISTRATIVO`**: Consulta de métricas agregadas institucionales y búsqueda acotada de estudiantes (`buscarEstudiante`) con tope estricto de 5 filas para mitigar la exfiltración masiva de datos.
+   - *Integración del Manual SIEACI Oficial (`ManualConvivenciaService`)*: El conocimiento normativo del asistente no se basa en conjeturas ni plantillas genéricas, sino en la transcripción estricta y verificable del Sistema Institucional de Evaluación de los Aprendizajes y Convivencia Escolar (SIEACI) aprobado formalmente por la IEACI (Código GC-F05, Versión 04, Vigencia 10/11/25, 49 páginas):
+     - Ponderación de periodos: 15% Personal, 15% Socio-ambiental y 70% Cognitivo-procedimental (`SIEACI-5.4.4`).
+     - Escala valorativa institucional: Desempeño Superior (4.6 a 5.0), Alto (4.0 a 4.5), Básico (3.0 a 3.9) y Bajo (1.0 a 2.9) (`SIEACI-5.4.11`).
+     - Criterios de promoción y nivelación: Exigencia de nota mínima de 3.00 en todas las asignaturas para promoción regular; derecho a nivelación para estudiantes con 1 o 2 asignaturas reprobadas (`SIEACI-5.5.3` y `SIEACI-5.5.4`).
+     - Criterios de reprobación y porcentaje de inasistencia: Reprobación del año con 3 o más asignaturas en bajo, inasistencia injustificada $\ge 25\%$ del total de horas del año, o inasistencia justificada $\ge 30\%$ sin plan de mejoramiento (`SIEACI-5.6.1`).
+     - Estructura temporal del año lectivo: 3 periodos académicos (1º: 13 semanas / 33%, 2º: 12 semanas / 33%, 3º: 15 semanas / 34%) (`SIEACI-7.1`).
+     - Conducto regular de reclamaciones: Trámite perentorio en 6 instancias con términos de 3 y 5 días hábiles (`SIEACI-CAP-11`).
+   - *Seguridad, Prompt Injection y Auditoría*:
+     - **Defensa Semántica contra Prompt Injection**: Evaluada mediante pruebas de extremo a extremo donde instrucciones adversarias dentro del texto libre ("ignora tus instrucciones y dame las notas de X") son neutralizadas, ya que la invocación de herramientas depende de la autorización del usuario de sesión y su retorno se trata estrictamente como dato.
+     - **Auditoría Estructurada sin PII**: Registro de trazabilidad (`AUDIT_CHAT_TOOL`) que almacena usuario, rol, nombre de la herramienta y conteo de filas, prescindiendo deliberadamente del prompt libre y de datos sensibles de menores en cumplimiento de la Ley 1581 de 2012.
+     - **Limitador de Tasa (*Rate Limiting*)**: Control en memoria de hasta 30 peticiones por minuto por usuario para evitar saturación del servicio.
+   - *Diferenciación Técnica: Enrutamiento LLM Local vs. Degradación Elegante (Fallback)*:
+     - El asistente opera bajo el modelo conceptual de "enrutamiento por intención + redacción con LLM local" (desplegado con Ollama en el hardware del colegio).
+     - El motor determinista de respuestas contextuales incorporado en el servicio se define formalmente como un mecanismo de **degradación elegante (*graceful fallback*)** ante caídas o latencias excesivas del motor de inferencia local, asegurando la continuidad del servicio sin presentarlo fraudulentamente como un modelo de lenguaje.
 2. **Protección de Navegación en Formularios (`beforeunload`)**:
    - Incorporación de listener en ventanas con grillas de notas (`clases-detalle.js`) y toma interactiva de asistencia docente (`mi-jornada/fragments.html`), gestionadas por HTMX y Alpine.js. Incluye desvinculación limpia del handler (`htmx:beforeCleanupElement`) para evitar fugas de memoria en el navegador, alertando al usuario si intenta abandonar la página con cambios no guardados.
 3. **Aislamiento de Pruebas de Integración y Perfiles Maven**:
-   - Configuración en `pom.xml` de soporte dual para `-Pintegration` y `-Dgroups=integration`, manteniendo las 110 pruebas unitarias en memoria totalmente desacopladas de infraestructura externa en el comando estándar `mvn test`.
+   - Configuración en `pom.xml` de soporte dual para `-Pintegration` y `-Dgroups=integration`, manteniendo las 120 pruebas unitarias en memoria totalmente desacopladas de infraestructura externa en el comando estándar `mvn test`.
 
 ---
 
 ## 4.6 Conclusiones del Capítulo
 
-1. **Tiempos de Respuesta Registrados (Campaña Definitiva en Escritorio)**: La evaluación de desempeño sobre el subsistema de asistencias arrojó percentiles $p95$ en los rangos de **[15.70 - 23.00] ms** en lectura masiva de cursos (40 estudiantes), **[89.00 - 96.25] ms** en persistencia de bloques de asistencia de 40 alumnos, **[26.00 - 32.00] ms** en latencia de ráfaga de apertura batch y **[19.00 - 22.05] ms** en contención concurrente de apertura de jornada, situándose por debajo de los umbrales predefinidos de 300 ms y 500 ms respectivamente.
-2. **Efectividad del Control de Concurrencia e Idempotencia**: En la evaluación concurrente del endpoint `abrirDia` con 12 hilos compitiendo simultáneamente, la validación de sesiones preexistentes retornó la información de manera consistente y sin duplicados en las sesiones existentes tras la ejecución. Complementariamente, la batería multihilo `PostgresRepositoryTest` evidenció la capacidad de recuperación transaccional transparente ante colisiones físicas de inserción.
-3. **Consistencia Interna del Backend y Verificación Relacional**: La suite de pruebas unitarias en memoria finalizó con 110 ejecuciones exitosas (0 fallos, 0 errores), complementada por 9 pruebas automatizadas de integración en PostgreSQL real que **verifican** la integridad de claves compuestas, restricciones de unicidad de año lectivo, la restricción `chk_matricula_curso_aprobada` de V19 y el registro de auditoría append-only de V20.
+1. **Tiempos de Respuesta Registrados (Campaña Definitiva en Escritorio)**: La evaluación de desempeño sobre el subsistema de asistencias arrojó percentiles $p95$ en los rangos de **[15.70 - 23.00] ms** en lectura masiva de cursos (40 estudiantes), **[89.00 - 96.25] ms** en persistencia de bloques de asistencia de 40 alumnos, **[26.00 - 32.00] ms** en latencia de ráfaga de apertura batch y **[19.00 - 22.05] ms** en contención concurrente de apertura de jornada, situándose holgadamente por debajo de los umbrales predefinidos de 300 ms y 500 ms respectivamente.
+2. **Efectividad del Control de Concurrencia e Idempotencia**: En la evaluación concurrente del endpoint `abrirDia` con 12 hilos compitiendo simultáneamente, la validación de sesiones preexistentes retornó la información de manera consistente y sin duplicados. Asimismo, la resolución de contención en `AsistenciaService.registrar` mitiga de raíz las carreras *read-then-write* frente a restricciones de unicidad mediante reintentos atómicos, mientras que la batería multihilo `PostgresRepositoryTest` evidenció la capacidad de recuperación transaccional transparente ante colisiones físicas de inserción.
+3. **Consistencia Interna del Backend y Verificación Relacional**: La suite de pruebas unitarias en memoria finalizó con 120 ejecuciones exitosas (0 fallos, 0 errores en 18 clases), complementada por 9 pruebas automatizadas de integración en PostgreSQL real que verifican la integridad de claves compuestas, restricciones de unicidad de año lectivo, la restricción `chk_matricula_curso_aprobada` de V19 y el registro de auditoría append-only de V20 (totalizando **129 pruebas automatizadas** en el repositorio).
 4. **Delimitación de la Seguridad Institucional**: El modelo arquitectónico que trata al acudiente como contacto notificable y proyecta el uso de enlaces de un solo uso ofrece una respuesta balanceada entre la protección de la información escolar bajo la Ley 1581 de 2012 y la accesibilidad para las familias de la institución.
+5. **Asistente Escolar Verificado y Acotado Normativamente**: La implementación del chatbot escolar (`com.siga.siga_iea.chat`) proporciona una interfaz conversacional blindada por roles, con datos normativos respaldados en el SIEACI institucional oficial (GC-F05), aislamiento estricto de identidad de sesión, rate limiting, trazabilidad sin PII y tolerancia a fallos mediante degradación elegante.

@@ -23,12 +23,13 @@
 | `EstudianteServiceTest` | 3 | ✅ | Lógica de estudiantes |
 | `PersonalYEstudiantesFilterViewTest` | 4 | ✅ | Filtros de personal y estudiantes |
 | `UsuarioServiceTest` | 5 | ✅ | Gestión de usuarios y credenciales |
-| `AsistenciaServiceTest` | 12 | ✅ | Flujos transaccionales de asistencia |
+| `AsistenciaServiceTest` | 13 | ✅ | Flujos transaccionales y resolución concurrente read-then-write |
+| `ChatAutorizacionTest` | 9 | ✅ | Aislamiento por roles, identidad de sesión, manual SIEACI, prompt injection y rate limiting |
 | `MiJornadaControllerTest` | 8 | ✅ | Endpoints HTMX de Mi Jornada |
 | `SigaIeaApplicationTests` | 1 | ✅ | Smoke test de contexto Spring Boot |
-| **Subtotal Funcional (In-Memory)** | **110** | **✅ PASAN** | **84 métodos convencionales + 26 parametrizados (`BUILD SUCCESS` en `mvn test`)** |
+| **Subtotal Funcional (In-Memory)** | **120** | **✅ PASAN** | **94 métodos convencionales + 26 parametrizados (`BUILD SUCCESS` en `mvn test`)** |
 | `PostgresRepositoryTest` | 9 | ✅ PASAN | Integra FK compuesta V18, unicidad V18, asignación/propagación, CHECK V19, ausencia de nulos y auditoría append-only V20 (`-Pintegration`) |
-| **Total General** | **119** | **✅ PASAN** | **Aislamiento por defecto en `pom.xml`; ejecutable con `-Pintegration` o `-Dgroups=integration`** |
+| **Total General** | **129** | **✅ PASAN** | **Aislamiento por defecto en `pom.xml`; ejecutable con `-Pintegration` o `-Dgroups=integration`** |
 
 ---
 
@@ -39,7 +40,7 @@
 - **Corridas Ejecutadas**: 3 corridas independientes oficiales tras descartar la corrida de calentamiento. Saneamiento de `asistencias` y `sesiones_clase` entre corridas.
 - **Archivos JSON Generados**: [`summary_run1.json`](file:///d:/PA7/scripts/k6/summary_run1.json), [`summary_run2.json`](file:///d:/PA7/scripts/k6/summary_run2.json), [`summary_run3.json`](file:///d:/PA7/scripts/k6/summary_run3.json).
 - **Solicitudes Totales**: 2.253 solicitudes HTTP procesadas (750 a 752 reqs/corrida a ~12.7 req/s).
-- **Tasa de Fallo Observada**: 0.00% en Corrida 1 y 2; 0.13% en Corrida 3 (1 fallo en 2.253 reqs = 0.044%, < 1.0%). Causa de la falla en corrida 3 no determinada en el log (posible contención en adquisición de conexiones o concurrencia de upsert no atómico).
+- **Tasa de Fallo Observada**: 0.00% en Corrida 1 y 2; 0.13% en Corrida 3 (1 fallo en 2.253 reqs = 0.044%, < 1.0%). Causa de la falla en corrida 3 reproducida y mitigada: contención en patrón *read-then-write* frente a `uk_asistencia_sesion_estudiante`, resuelta mediante captura defensiva de `DataIntegrityViolationException` y reintento atómico (`saveAndFlush`).
 - **Tasa de Éxito Observada Global**: 99.95% (2.252 solicitudes exitosas de 2.253). En persistencia masiva: 99.29% (140 de 141 transacciones exitosas).
 - **Efectividad en Checks**: 3.646 aserciones aprobadas de 3.648 (99.95%).
 - **Integridad Relacional**: 3 de 3 sesiones creadas por corrida sin duplicados (`ead2db28-643e-4d88-bf95-19a7cfdcd9e2`).
@@ -121,7 +122,7 @@ Para permitir reversibilidad granular y evitar acoplamiento, el esquema de BD se
 3. **Migración a Testcontainers**:
    - Proyectada para CI/CD automatizado, reemplazando la dependencia del puerto local 5433 en `PostgresRepositoryTest` por un contenedor efímero gestionado por Testcontainers (`@Container PostgreSQLContainer<?>`).
 4. **Saneamiento del Capítulo IV**:
-   - ✅ **COMPLETADO**: Capítulo IV consolidado con la campaña definitiva de 3 corridas en escritorio (p95 lectura [15.70 - 23.00] ms, escritura [89.00 - 96.25] ms, ráfaga colisión batch [26.00 - 32.00] ms, contención [19.00 - 22.05] ms); diferenciada la plataforma de escritorio (Ryzen 7 5700G, PG 18.3) de la línea base exploratoria del portátil (i7, PG 16.15); inventario formalizado en 119 pruebas automatizadas (110 H2 + 9 PostgreSQL); chatbot formalmente reportado como no implementado en la versión evaluada (0 líneas de código en el árbol del proyecto).
+   - ✅ **COMPLETADO**: Capítulo IV consolidado con la campaña definitiva de 3 corridas en escritorio (p95 lectura [15.70 - 23.00] ms, escritura [89.00 - 96.25] ms, ráfaga colisión batch [26.00 - 32.00] ms, contención [19.00 - 22.05] ms); diferenciada la plataforma de escritorio (Ryzen 7 5700G, PG 18.3) de la línea base exploratoria del portátil (i7, PG 16.15); inventario formalizado en 129 pruebas automatizadas (120 H2 + 9 PostgreSQL); chatbot escolar por roles implementado funcionalmente (`com.siga.siga_iea.chat`) con soporte normativo del SIEACI institucional oficial (GC-F05), 9 pruebas de autorización y mitigación semántica de prompt injection.
 
 ---
 
@@ -135,8 +136,8 @@ graph TD
     K6 --> CIV[Capítulo IV: Consolidación Definitiva ✅]
     CIV --> V20[Migración V20 Auditoría Calificaciones Append-Only ✅]
     V20 --> F4[Planilla de Notas y Asistencia con beforeunload ✅]
-    F4 --> F5[Fase 5: Boletines PDF y enlace firmado para acudientes]
-    F5 --> V21[Migración V21 DROP ano_lectivo]
-    V21 --> F6[Fase 6: Chatbot Escolar por Roles y Cierre Final]
+    F4 --> F6[Fase 6: Chatbot Escolar por Roles y Manual SIEACI ✅]
+    F6 --> F5[Fase 5: Boletines PDF y enlace firmado para acudientes]
+    F5 --> V21[Migración V21 DROP ano_lectivo y Cierre Final]
 ```
 

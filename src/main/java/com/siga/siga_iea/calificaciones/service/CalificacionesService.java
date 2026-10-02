@@ -38,6 +38,29 @@ public class CalificacionesService {
     private final MateriaRepository materiaRepository;
     private final CursoEstudianteRepository cursoEstudianteRepository;
     private final EscalaDesempenoService escalaDesempenoService;
+    private final com.siga.siga_iea.auditoria.service.AuditoriaService auditoriaService;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public CalificacionesService(CalificacionesRepository calificacionesRepository,
+                                 EvaluacionRepository evaluacionRepository,
+                                 CursoMateriaRepository cursoMateriaRepository,
+                                 EstudianteRepository estudianteRepository,
+                                 CursoRepository cursoRepository,
+                                 MateriaRepository materiaRepository,
+                                 CursoEstudianteRepository cursoEstudianteRepository,
+                                 EscalaDesempenoService escalaDesempenoService,
+                                 @org.springframework.beans.factory.annotation.Autowired(required = false)
+                                 com.siga.siga_iea.auditoria.service.AuditoriaService auditoriaService) {
+        this.calificacionesRepository = calificacionesRepository;
+        this.evaluacionRepository = evaluacionRepository;
+        this.cursoMateriaRepository = cursoMateriaRepository;
+        this.estudianteRepository = estudianteRepository;
+        this.cursoRepository = cursoRepository;
+        this.materiaRepository = materiaRepository;
+        this.cursoEstudianteRepository = cursoEstudianteRepository;
+        this.escalaDesempenoService = escalaDesempenoService;
+        this.auditoriaService = auditoriaService;
+    }
 
     public CalificacionesService(CalificacionesRepository calificacionesRepository,
                                  EvaluacionRepository evaluacionRepository,
@@ -47,14 +70,9 @@ public class CalificacionesService {
                                  MateriaRepository materiaRepository,
                                  CursoEstudianteRepository cursoEstudianteRepository,
                                  EscalaDesempenoService escalaDesempenoService) {
-        this.calificacionesRepository = calificacionesRepository;
-        this.evaluacionRepository = evaluacionRepository;
-        this.cursoMateriaRepository = cursoMateriaRepository;
-        this.estudianteRepository = estudianteRepository;
-        this.cursoRepository = cursoRepository;
-        this.materiaRepository = materiaRepository;
-        this.cursoEstudianteRepository = cursoEstudianteRepository;
-        this.escalaDesempenoService = escalaDesempenoService;
+        this(calificacionesRepository, evaluacionRepository, cursoMateriaRepository,
+             estudianteRepository, cursoRepository, materiaRepository,
+             cursoEstudianteRepository, escalaDesempenoService, null);
     }
 
     public List<Calificacion> obtenerCalificacionesEstudiante(UUID estudianteId) {
@@ -89,11 +107,32 @@ public class CalificacionesService {
                 .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
 
         Optional<Calificacion> opt = calificacionesRepository.findByEvaluacionIdAndEstudianteId(evaluacionId, estudianteId);
-        Calificacion c = opt.orElseGet(() -> new Calificacion(ev, est, BigDecimal.ZERO));
-        c.setNota(nota != null ? nota.setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO);
+        Calificacion c;
+        BigDecimal valorAnterior = null;
+        if (opt.isPresent()) {
+            c = opt.get();
+            valorAnterior = c.getNota();
+        } else {
+            c = new Calificacion(ev, est, BigDecimal.ZERO);
+        }
+
+        BigDecimal nuevaNota = (nota != null ? nota.setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO);
+        c.setNota(nuevaNota);
         if (observaciones != null) c.setObservaciones(observaciones);
 
-        return calificacionesRepository.save(c);
+        Calificacion guardada = calificacionesRepository.save(c);
+
+        if (auditoriaService != null && (valorAnterior == null || valorAnterior.compareTo(nuevaNota) != 0)) {
+            auditoriaService.registrarCambio(
+                    "CALIFICACION",
+                    guardada.getId(),
+                    "nota",
+                    valorAnterior != null ? valorAnterior.toString() : "SIN_NOTA",
+                    nuevaNota.toString()
+            );
+        }
+
+        return guardada;
     }
 
     @Transactional

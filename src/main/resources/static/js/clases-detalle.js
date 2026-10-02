@@ -141,3 +141,46 @@ document.addEventListener('htmx:afterSwap', () => {
         lucide.createIcons();
     }
 });
+
+// --- Control de Cambios Pendientes y Protección beforeunload en Planilla de Notas ---
+let cambiosPendientes = false;
+let peticionesEnVuelo = 0;
+
+function handleBeforeUnload(e) {
+    if (cambiosPendientes || peticionesEnVuelo > 0) {
+        e.preventDefault();
+        e.returnValue = 'Tiene calificaciones o cambios pendientes por guardar. ¿Está seguro de abandonar la página?';
+        return e.returnValue;
+    }
+}
+
+window.addEventListener('beforeunload', handleBeforeUnload);
+
+// Escuchar cambios en inputs de notas para marcar cambios pendientes
+document.addEventListener('input', (e) => {
+    if (e.target && e.target.classList && e.target.classList.contains('n-input')) {
+        cambiosPendientes = true;
+    }
+});
+
+// Contabilizar peticiones HTMX en vuelo
+document.addEventListener('htmx:configRequest', (e) => {
+    peticionesEnVuelo++;
+});
+
+// Cuando HTMX finaliza la respuesta del servidor
+document.addEventListener('htmx:afterRequest', (e) => {
+    if (peticionesEnVuelo > 0) peticionesEnVuelo--;
+    if (peticionesEnVuelo === 0) {
+        cambiosPendientes = false;
+    }
+});
+
+// Limpieza de memoria ante swap de elementos del DOM
+document.addEventListener('htmx:beforeCleanupElement', (e) => {
+    if (e.target && e.target.id === 'contenedor-tabla-notas') {
+        cambiosPendientes = false;
+        peticionesEnVuelo = 0;
+    }
+});
+

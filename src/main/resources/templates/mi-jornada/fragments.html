@@ -96,14 +96,36 @@
      x-data="{
          dirty: false,
          est: JSON.parse($el.getAttribute('data-estados') || '{}'),
+         beforeUnloadHandler: null,
          marcarTodos() {
              document.querySelectorAll('input[name=estudianteId]').forEach(el => {
                  this.est[el.value] = 'PRESENTE';
              });
              this.dirty = true;
+         },
+         init() {
+             this.beforeUnloadHandler = (e) => {
+                 if (this.dirty) {
+                     e.preventDefault();
+                     e.returnValue = 'Tienes cambios de asistencia sin guardar. ¿Deseas salir?';
+                     return e.returnValue;
+                 }
+             };
+             window.addEventListener('beforeunload', this.beforeUnloadHandler);
+
+             document.addEventListener('htmx:beforeCleanupElement', (evt) => {
+                 if (evt.target && evt.target.id === 'tabla-sesion' && this.beforeUnloadHandler) {
+                     window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+                 }
+             });
+
+             document.addEventListener('htmx:afterRequest', (evt) => {
+                 if (evt.detail && evt.detail.successful && evt.target && evt.target.closest('#tabla-sesion')) {
+                     this.dirty = false;
+                 }
+             });
          }
      }"
-     x-init="window.onbeforeunload = () => dirty ? 'Tienes cambios de asistencia sin guardar. ¿Deseas salir?' : null"
      class="flex flex-col gap-5">
 
     <!-- Encabezado de la Sesión Seleccionada -->
@@ -251,7 +273,6 @@
 
             <div class="flex items-center gap-3">
                 <button type="submit"
-                        @click="dirty = false"
                         th:disabled="${sesion.estado == 'CANCELADA'}"
                         class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-forest-green text-white font-bold text-sm shadow-xs hover:bg-forest-green/90 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
                     <span id="spinner-guardar" class="htmx-indicator">

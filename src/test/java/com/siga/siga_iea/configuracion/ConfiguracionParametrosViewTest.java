@@ -46,14 +46,14 @@ class ConfiguracionParametrosViewTest {
                 .andExpect(content().string(containsString("Roles y Permisos")))
                 // Secciones de Parámetros del Sistema
                 .andExpect(content().string(containsString("1. Periodos Académicos y Ponderación Oficial")))
-                .andExpect(content().string(containsString("2. Escala de Desempeño y Calificaciones (0.00 a 5.00)")))
-                // Los 6 niveles de desempeño
+                .andExpect(content().string(containsString("2. Escala de Desempeño y Calificaciones (1.00 a 5.00 - SIEACI Oficial)")))
+                // Los 4 niveles oficiales de desempeño del SIEACI
                 .andExpect(content().string(containsString("Desempeño Superior")))
                 .andExpect(content().string(containsString("Desempeño Alto")))
                 .andExpect(content().string(containsString("Desempeño Básico")))
                 .andExpect(content().string(containsString("Desempeño Bajo")))
-                .andExpect(content().string(containsString("Desempeño Muy Bajo")))
-                .andExpect(content().string(containsString("Desempeño Crítico")))
+                .andExpect(content().string(not(containsString("Desempeño Muy Bajo"))))
+                .andExpect(content().string(not(containsString("Desempeño Crítico"))))
                 // Asegurar que la vista mock antigua NO exista
                 .andExpect(content().string(not(containsString("Cargos de Nómina"))))
                 .andExpect(content().string(not(containsString("Tipos de Certificado"))))
@@ -78,11 +78,11 @@ class ConfiguracionParametrosViewTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attributeExists("mensajeError"));
 
-        // Suma válida (100%)
+        // Suma válida SIEACI (33% + 33% + 34% = 100%)
         mockMvc.perform(post("/configuracion/periodos").with(csrf())
-                        .param("pesoP1", "30")
-                        .param("pesoP2", "35")
-                        .param("pesoP3", "35")
+                        .param("pesoP1", "33")
+                        .param("pesoP2", "33")
+                        .param("pesoP3", "34")
                         .param("fIniP1", "2026-02-01")
                         .param("fFinP1", "2026-06-15")
                         .param("fIniP2", "2026-07-15")

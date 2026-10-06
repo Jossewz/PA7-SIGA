@@ -5,6 +5,7 @@ import com.siga.siga_iea.auth.service.CurrentUserContextService;
 import com.siga.siga_iea.configuracion.service.RolPermisoService;
 import com.siga.siga_iea.usuarios.entity.Docente;
 import com.siga.siga_iea.usuarios.entity.Usuario;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
@@ -21,6 +22,19 @@ public class GlobalModelAdvice {
                              RolPermisoService rolPermisoService) {
         this.userContextService = userContextService;
         this.rolPermisoService = rolPermisoService;
+    }
+
+    @ModelAttribute("currentUri")
+    public String populateCurrentUri(HttpServletRequest request) {
+        return request != null ? request.getRequestURI() : "";
+    }
+
+    @ModelAttribute("currentRolCode")
+    public String populateRolCode() {
+        if (userContextService.getAuthentication().isPresent()) {
+            return userContextService.getRolAutenticado().name();
+        }
+        return "INVITADO";
     }
 
     @ModelAttribute("modulosPermitidos")

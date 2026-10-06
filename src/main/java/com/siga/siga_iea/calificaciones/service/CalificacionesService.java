@@ -247,9 +247,9 @@ public class CalificacionesService {
 
         if (ponderacionesPeriodos == null || ponderacionesPeriodos.isEmpty()) {
             ponderacionesPeriodos = new HashMap<>();
-            ponderacionesPeriodos.put(1, new BigDecimal("30.00"));
-            ponderacionesPeriodos.put(2, new BigDecimal("35.00"));
-            ponderacionesPeriodos.put(3, new BigDecimal("35.00"));
+            ponderacionesPeriodos.put(1, new BigDecimal("33.00"));
+            ponderacionesPeriodos.put(2, new BigDecimal("33.00"));
+            ponderacionesPeriodos.put(3, new BigDecimal("34.00"));
         }
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM");

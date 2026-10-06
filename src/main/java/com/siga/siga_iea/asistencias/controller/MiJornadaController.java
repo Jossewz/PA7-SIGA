@@ -53,6 +53,7 @@ public class MiJornadaController {
 
     @GetMapping
     public String ver(Model model) {
+        model.addAttribute("activePage", "mi-jornada");
         Docente d = ctx.getDocenteAutenticado().orElse(null);
         if (d == null) {
             model.addAttribute("sinDocente", true);

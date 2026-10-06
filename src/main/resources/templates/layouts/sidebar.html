@@ -43,7 +43,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             <!-- Inicio -->
             <a th:href="@{/}"
                class="sidebar-nav-item"
-               th:classappend="${(activePage == 'dashboard' or (#httpServletRequest != null and #strings.equals(#httpServletRequest.requestURI, '/'))) ? 'is-active' : ''}"
+               th:classappend="${(activePage == 'dashboard' or (currentUri != null and #strings.equals(currentUri, '/')) or (#httpServletRequest != null and #strings.equals(#httpServletRequest.requestURI, '/'))) ? 'is-active' : ''}"
                title="Inicio">
                 <i data-lucide="home" class="size-5 shrink-0 stroke-2"></i>
                 <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Inicio</span>
@@ -52,7 +52,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             <!-- Mi Jornada -->
             <a th:href="@{/mi-jornada}"
                class="sidebar-nav-item"
-               th:classappend="${(activePage == 'mi-jornada' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/mi-jornada'))) ? 'is-active' : ''}"
+               th:classappend="${(activePage == 'mi-jornada' or (currentUri != null and #strings.startsWith(currentUri, '/mi-jornada')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/mi-jornada'))) ? 'is-active' : ''}"
                title="Mi Jornada">
                 <i data-lucide="clipboard-check" class="size-5 shrink-0 stroke-2"></i>
                 <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Mi Jornada</span>
@@ -62,7 +62,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             <a th:href="@{/matricula}"
                th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MATRICULAS'))}"
                class="sidebar-nav-item"
-               th:classappend="${(activePage == 'matricula' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/matricula'))) ? 'is-active' : ''}"
+               th:classappend="${(activePage == 'matricula' or (currentUri != null and #strings.startsWith(currentUri, '/matricula')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/matricula'))) ? 'is-active' : ''}"
                title="Matrícula">
                 <i data-lucide="user-plus" class="size-5 shrink-0 stroke-2"></i>
                 <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Matrícula</span>
@@ -72,7 +72,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             <a th:href="@{/calificaciones}"
                th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CALIFICACIONES'))}"
                class="sidebar-nav-item"
-               th:classappend="${(activePage == 'calificaciones' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/calificaciones'))) ? 'is-active' : ''}"
+               th:classappend="${(activePage == 'calificaciones' or (currentUri != null and #strings.startsWith(currentUri, '/calificaciones')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/calificaciones'))) ? 'is-active' : ''}"
                title="Calificaciones">
                 <i data-lucide="star" class="size-5 shrink-0 stroke-2"></i>
                 <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Calificaciones</span>
@@ -82,7 +82,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             <a th:href="@{/certificados}"
                th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CERTIFICADOS'))}"
                class="sidebar-nav-item"
-               th:classappend="${(activePage == 'certificados' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/certificados'))) ? 'is-active' : ''}"
+               th:classappend="${(activePage == 'certificados' or (currentUri != null and #strings.startsWith(currentUri, '/certificados')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/certificados'))) ? 'is-active' : ''}"
                title="Certificados">
                 <i data-lucide="badge-check" class="size-5 shrink-0 stroke-2"></i>
                 <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Certificados</span>
@@ -92,7 +92,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             <a th:href="@{/reportes}"
                th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('REPORTES'))}"
                class="sidebar-nav-item"
-               th:classappend="${(activePage == 'reportes' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/reportes'))) ? 'is-active' : ''}"
+               th:classappend="${(activePage == 'reportes' or (currentUri != null and #strings.startsWith(currentUri, '/reportes')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/reportes'))) ? 'is-active' : ''}"
                title="Reportes">
                 <i data-lucide="bar-chart-3" class="size-5 shrink-0 stroke-2"></i>
                 <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Reportes</span>
@@ -102,7 +102,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             <a th:href="@{/ambiental}"
                th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MODULO_AMBIENTAL'))}"
                class="sidebar-nav-item"
-               th:classappend="${(activePage == 'ambiental' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/ambiental'))) ? 'is-active' : ''}"
+               th:classappend="${(activePage == 'ambiental' or (currentUri != null and #strings.startsWith(currentUri, '/ambiental')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/ambiental'))) ? 'is-active' : ''}"
                title="Módulo Ambiental">
                 <i data-lucide="sprout" class="size-5 shrink-0 stroke-2"></i>
                 <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Módulo Ambiental</span>
@@ -112,7 +112,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             <a th:href="@{/personal}"
                th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('PERSONAL'))}"
                class="sidebar-nav-item"
-               th:classappend="${(activePage == 'personal' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/personal'))) ? 'is-active' : ''}"
+               th:classappend="${(activePage == 'personal' or (currentUri != null and #strings.startsWith(currentUri, '/personal')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/personal'))) ? 'is-active' : ''}"
                title="Personal">
                 <i data-lucide="users" class="size-5 shrink-0 stroke-2"></i>
                 <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Personal</span>
@@ -122,7 +122,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             <a th:href="@{/estudiantes}"
                th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MATRICULAS'))}"
                class="sidebar-nav-item"
-               th:classappend="${(activePage == 'estudiantes' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/estudiantes'))) ? 'is-active' : ''}"
+               th:classappend="${(activePage == 'estudiantes' or (currentUri != null and #strings.startsWith(currentUri, '/estudiantes')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/estudiantes'))) ? 'is-active' : ''}"
                title="Estudiantes">
                 <i data-lucide="user-check" class="size-5 shrink-0 stroke-2"></i>
                 <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Estudiantes</span>
@@ -132,26 +132,17 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             <a th:href="@{/clases}"
                th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CURSOS_HORARIOS'))}"
                class="sidebar-nav-item"
-               th:classappend="${(activePage == 'clases' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/clases'))) ? 'is-active' : ''}"
+               th:classappend="${(activePage == 'clases' or (currentUri != null and #strings.startsWith(currentUri, '/clases')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/clases'))) ? 'is-active' : ''}"
                title="Cursos">
                 <i data-lucide="graduation-cap" class="size-5 shrink-0 stroke-2"></i>
                 <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Cursos</span>
-            </a>
-
-            <!-- Asistente Institucional (Chatbot) -->
-            <a th:href="@{/chat}"
-               class="sidebar-nav-item"
-               th:classappend="${(activePage == 'chat' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/chat'))) ? 'is-active' : ''}"
-               title="Asistente IEACI">
-                <i data-lucide="bot" class="size-5 shrink-0 stroke-2"></i>
-                <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Asistente IEACI</span>
             </a>
 
             <!-- Configuración -->
             <a th:href="@{/configuracion}"
                th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CONFIGURACION'))}"
                class="sidebar-nav-item"
-               th:classappend="${(activePage == 'configuracion' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/configuracion'))) ? 'is-active' : ''}"
+               th:classappend="${(activePage == 'configuracion' or (currentUri != null and #strings.startsWith(currentUri, '/configuracion')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/configuracion'))) ? 'is-active' : ''}"
                title="Configuración">
                 <i data-lucide="settings" class="size-5 shrink-0 stroke-2"></i>
                 <span x-show="sidebarOpen" x-cloak class="truncate sidebar-label">Configuración</span>
@@ -202,72 +193,66 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             <!-- Navegación móvil -->
             <nav class="flex-1 overflow-y-auto space-y-1">
                 <a th:href="@{/}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
-                   th:classappend="${(activePage == 'dashboard' or (#httpServletRequest != null and #strings.equals(#httpServletRequest.requestURI, '/'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
+                   th:classappend="${(activePage == 'dashboard' or (currentUri != null and #strings.equals(currentUri, '/')) or (#httpServletRequest != null and #strings.equals(#httpServletRequest.requestURI, '/'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="home" class="size-5 stroke-2"></i>
                     <span>Inicio</span>
                 </a>
                 <a th:href="@{/mi-jornada}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
-                   th:classappend="${(activePage == 'mi-jornada' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/mi-jornada'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
+                   th:classappend="${(activePage == 'mi-jornada' or (currentUri != null and #strings.startsWith(currentUri, '/mi-jornada')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/mi-jornada'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="clipboard-check" class="size-5 stroke-2"></i>
                     <span>Mi Jornada</span>
                 </a>
                 <a th:href="@{/matricula}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MATRICULAS'))}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
-                   th:classappend="${(activePage == 'matricula' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/matricula'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
+                   th:classappend="${(activePage == 'matricula' or (currentUri != null and #strings.startsWith(currentUri, '/matricula')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/matricula'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="user-plus" class="size-5 stroke-2"></i>
                     <span>Matrícula</span>
                 </a>
                 <a th:href="@{/calificaciones}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CALIFICACIONES'))}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
-                   th:classappend="${(activePage == 'calificaciones' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/calificaciones'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
+                   th:classappend="${(activePage == 'calificaciones' or (currentUri != null and #strings.startsWith(currentUri, '/calificaciones')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/calificaciones'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="star" class="size-5 stroke-2"></i>
                     <span>Calificaciones</span>
                 </a>
                 <a th:href="@{/certificados}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CERTIFICADOS'))}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
-                   th:classappend="${(activePage == 'certificados' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/certificados'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
+                   th:classappend="${(activePage == 'certificados' or (currentUri != null and #strings.startsWith(currentUri, '/certificados')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/certificados'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="badge-check" class="size-5 stroke-2"></i>
                     <span>Certificados</span>
                 </a>
                 <a th:href="@{/reportes}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('REPORTES'))}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
-                   th:classappend="${(activePage == 'reportes' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/reportes'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
+                   th:classappend="${(activePage == 'reportes' or (currentUri != null and #strings.startsWith(currentUri, '/reportes')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/reportes'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="bar-chart-3" class="size-5 stroke-2"></i>
                     <span>Reportes</span>
                 </a>
                 <a th:href="@{/ambiental}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MODULO_AMBIENTAL'))}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
-                   th:classappend="${(activePage == 'ambiental' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/ambiental'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
+                   th:classappend="${(activePage == 'ambiental' or (currentUri != null and #strings.startsWith(currentUri, '/ambiental')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/ambiental'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="sprout" class="size-5 stroke-2"></i>
                     <span>Módulo Ambiental</span>
                 </a>
                 <a th:href="@{/personal}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('PERSONAL'))}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
-                   th:classappend="${(activePage == 'personal' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/personal'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
+                   th:classappend="${(activePage == 'personal' or (currentUri != null and #strings.startsWith(currentUri, '/personal')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/personal'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="users" class="size-5 stroke-2"></i>
                     <span>Personal</span>
                 </a>
                 <a th:href="@{/estudiantes}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('MATRICULAS'))}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
-                   th:classappend="${(activePage == 'estudiantes' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/estudiantes'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
+                   th:classappend="${(activePage == 'estudiantes' or (currentUri != null and #strings.startsWith(currentUri, '/estudiantes')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/estudiantes'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="user-check" class="size-5 stroke-2"></i>
                     <span>Estudiantes</span>
                 </a>
                 <a th:href="@{/clases}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CURSOS_HORARIOS'))}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
-                   th:classappend="${(activePage == 'clases' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/clases'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
+                   th:classappend="${(activePage == 'clases' or (currentUri != null and #strings.startsWith(currentUri, '/clases')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/clases'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="graduation-cap" class="size-5 stroke-2"></i>
                     <span>Cursos</span>
                 </a>
-                <a th:href="@{/chat}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
-                   th:classappend="${(activePage == 'chat' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/chat'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
-                    <i data-lucide="bot" class="size-5 stroke-2"></i>
-                    <span>Asistente IEACI</span>
-                </a>
                 <a th:href="@{/configuracion}" th:if="${esAdmin or (modulosPermitidos != null and modulosPermitidos.contains('CONFIGURACION'))}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-forest-green/85 text-sm font-semibold hover:bg-forest-green/10 hover:text-forest-green transition"
-                   th:classappend="${(activePage == 'configuracion' or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/configuracion'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
+                   th:classappend="${(activePage == 'configuracion' or (currentUri != null and #strings.startsWith(currentUri, '/configuracion')) or (#httpServletRequest != null and #strings.startsWith(#httpServletRequest.requestURI, '/configuracion'))) ? 'bg-forest-green text-white font-extrabold shadow-sm' : ''}">
                     <i data-lucide="settings" class="size-5 stroke-2"></i>
                     <span>Configuración</span>
                 </a>

@@ -49,9 +49,9 @@ public class PeriodoConfigService {
         List<PeriodoAcademico> list = periodoAcademicoRepository.findByAnioLectivoOrderByNumeroPeriodoAsc(anio);
         if (list.isEmpty()) {
             list = List.of(
-                    periodoAcademicoRepository.save(new PeriodoAcademico(anio, 1, "Primer Período", new BigDecimal("30.00"), LocalDate.parse("2026-02-01"), LocalDate.parse("2026-06-15"), "Activo")),
-                    periodoAcademicoRepository.save(new PeriodoAcademico(anio, 2, "Segundo Período", new BigDecimal("35.00"), LocalDate.parse("2026-07-15"), LocalDate.parse("2026-09-15"), "Activo")),
-                    periodoAcademicoRepository.save(new PeriodoAcademico(anio, 3, "Tercer Período", new BigDecimal("35.00"), LocalDate.parse("2026-09-16"), LocalDate.parse("2026-11-30"), "Activo"))
+                    periodoAcademicoRepository.save(new PeriodoAcademico(anio, 1, "Primer Período", new BigDecimal("33.00"), LocalDate.parse("2026-02-01"), LocalDate.parse("2026-06-15"), "Activo")),
+                    periodoAcademicoRepository.save(new PeriodoAcademico(anio, 2, "Segundo Período", new BigDecimal("33.00"), LocalDate.parse("2026-07-15"), LocalDate.parse("2026-09-15"), "Activo")),
+                    periodoAcademicoRepository.save(new PeriodoAcademico(anio, 3, "Tercer Período", new BigDecimal("34.00"), LocalDate.parse("2026-09-16"), LocalDate.parse("2026-11-30"), "Activo"))
             );
         }
         return list;
@@ -63,9 +63,9 @@ public class PeriodoConfigService {
         for (PeriodoAcademico p : periodos) {
             map.put(p.getNumeroPeriodo(), p.getPesoPorcentaje());
         }
-        map.putIfAbsent(1, new BigDecimal("30.00"));
-        map.putIfAbsent(2, new BigDecimal("35.00"));
-        map.putIfAbsent(3, new BigDecimal("35.00"));
+        map.putIfAbsent(1, new BigDecimal("33.00"));
+        map.putIfAbsent(2, new BigDecimal("33.00"));
+        map.putIfAbsent(3, new BigDecimal("34.00"));
         return map;
     }
 

@@ -41,6 +41,15 @@ public class ChatOrchestratorService {
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
 
+    @Value("${siga.chat.groq.api-key:}")
+    private String groqApiKey;
+
+    @Value("${siga.chat.groq.url:https://api.groq.com/openai/v1}")
+    private String groqUrl;
+
+    @Value("${siga.chat.groq.model:openai/gpt-oss-120b}")
+    private String groqModel;
+
     @Value("${siga.chat.ollama.url:http://localhost:11434}")
     private String ollamaUrl;
 
@@ -59,11 +68,15 @@ public class ChatOrchestratorService {
         this.objectMapper = objectMapper;
 
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(Duration.ofMillis(1500));
-        requestFactory.setReadTimeout(Duration.ofMillis(3500));
+        requestFactory.setConnectTimeout(Duration.ofMillis(3000));
+        requestFactory.setReadTimeout(Duration.ofMillis(8000));
         this.restClient = RestClient.builder()
                 .requestFactory(requestFactory)
                 .build();
+    }
+
+    public void setGroqApiKey(String groqApiKey) {
+        this.groqApiKey = groqApiKey;
     }
 
     public ChatMessageResponse procesarMensaje(ChatMessageRequest request) {
@@ -90,9 +103,26 @@ public class ChatOrchestratorService {
         // 2. Detección y ejecución de herramientas según rol
         ejecutarHerramientasPorIntencion(mensaje, rol, herramientasInvocadas, contextoDatos);
 
-        // 3. Intento de generación con LLM local (Ollama)
-        String promptCompleto = promptSafety.construirPromptConContexto(rol, contextoDatos.toString(), mensaje);
-        Optional<String> respuestaLlm = intentarLlamadaOllama(promptCompleto);
+        // 3. Cascada de Inferencia: Groq Cloud -> Ollama Local -> Fallback Determinista
+        Optional<String> respuestaLlm = Optional.empty();
+        String proveedor = "Motor Normativo Interno";
+
+        // Nivel 1: Groq Cloud (Prioridad si API Key está presente - Ultra rápido en LPUs)
+        if (groqApiKey != null && !groqApiKey.isBlank()) {
+            respuestaLlm = intentarLlamadaGroq(rol, contextoDatos.toString(), mensaje);
+            if (respuestaLlm.isPresent() && !respuestaLlm.get().isBlank()) {
+                proveedor = "Groq (" + (groqModel != null && !groqModel.isBlank() ? groqModel : "llama-3.3-70b-versatile") + ")";
+            }
+        }
+
+        // Nivel 2: Ollama Local (Fallback offline en localhost:11434 si Groq no está configurado o falla)
+        if (respuestaLlm.isEmpty()) {
+            String promptCompleto = promptSafety.construirPromptConContexto(rol, contextoDatos.toString(), mensaje);
+            respuestaLlm = intentarLlamadaOllama(promptCompleto);
+            if (respuestaLlm.isPresent() && !respuestaLlm.get().isBlank()) {
+                proveedor = "Ollama Local (" + ollamaModel + ")";
+            }
+        }
 
         String respuestaFinal;
         boolean procesadoLocalmente;
@@ -101,9 +131,10 @@ public class ChatOrchestratorService {
             respuestaFinal = respuestaLlm.get();
             procesadoLocalmente = true;
         } else {
-            // Fallback determinista: genera respuesta estructurada con los datos de las herramientas y normativa
+            // Nivel 3: Fallback determinista seguro con base de datos e índices normativos
             respuestaFinal = generarRespuestaFallback(mensaje, rol, normativas, contextoDatos.toString());
             procesadoLocalmente = false;
+            proveedor = "Motor Normativo Interno";
         }
 
         long latencia = System.currentTimeMillis() - t0;
@@ -113,7 +144,8 @@ public class ChatOrchestratorService {
                 herramientasInvocadas,
                 referenciasNormativas,
                 latencia,
-                procesadoLocalmente
+                procesadoLocalmente,
+                proveedor
         );
     }
 
@@ -124,12 +156,20 @@ public class ChatOrchestratorService {
 
         if ("ESTUDIANTE".equalsIgnoreCase(rol)) {
             if (query.contains("nota") || query.contains("calificacion") || query.contains("periodo")) {
-                try {
-                    ToolExecutionResult res = toolsService.consultarMisNotas();
-                    herramientasInvocadas.add(res.nombreHerramienta());
-                    contexto.append("DATOS DE TUS CALIFICACIONES:\n").append(res.datos()).append("\n\n");
-                } catch (Exception e) {
-                    log.warn("Error ejecutando consultarMisNotas: {}", e.getMessage());
+                boolean consultaTercero = (query.contains("nota de ") || query.contains("notas de ")
+                        || query.contains("calificacion de ") || query.contains("calificaciones de "))
+                        && !query.contains("de mi") && !query.contains("de mis");
+                if (consultaTercero) {
+                    contexto.append("AVISO DE PRIVACIDAD:\n")
+                            .append("Por motivos de confidencialidad institucional y protección de datos (Ley 1581 de 2012), únicamente puedes acceder a tus propias calificaciones. No está autorizado consultar las notas de otros estudiantes.\n\n");
+                } else {
+                    try {
+                        ToolExecutionResult res = toolsService.consultarMisNotas();
+                        herramientasInvocadas.add(res.nombreHerramienta());
+                        contexto.append("DATOS DE TUS CALIFICACIONES:\n").append(res.datos()).append("\n\n");
+                    } catch (Exception e) {
+                        log.warn("Error ejecutando consultarMisNotas: {}", e.getMessage());
+                    }
                 }
             }
             if (query.contains("horario") || query.contains("clase hoy") || query.contains("salon")) {
@@ -185,6 +225,57 @@ public class ChatOrchestratorService {
         }
     }
 
+    private Optional<String> intentarLlamadaGroq(String rol, String contexto, String mensaje) {
+        if (groqApiKey == null || groqApiKey.isBlank()) {
+            return Optional.empty();
+        }
+        try {
+            String systemContent = ChatPromptSafety.PROMPT_SISTEMA_BASE + "\n"
+                    + "ROL DE LA SESIÓN AUTENTICADA: [" + rol + "]\n\n"
+                    + "<datos_contexto>\n"
+                    + (contexto != null && !contexto.isBlank() ? contexto : "No se requirieron datos operacionales adicionales para esta consulta.")
+                    + "\n</datos_contexto>";
+
+            Map<String, Object> systemMsg = Map.of("role", "system", "content", systemContent);
+            Map<String, Object> userMsg = Map.of("role", "user", "content", mensaje);
+
+            String modelToUse = (groqModel != null && !groqModel.isBlank()) ? groqModel.trim() : "llama-3.3-70b-versatile";
+            Map<String, Object> payload = Map.of(
+                    "model", modelToUse,
+                    "messages", List.of(systemMsg, userMsg),
+                    "temperature", 0.2,
+                    "max_tokens", 1024
+            );
+
+            String targetUrl = (groqUrl != null && !groqUrl.isBlank() ? groqUrl.replaceAll("/+$", "") : "https://api.groq.com/openai/v1") + "/chat/completions";
+
+            String responseBody = restClient.post()
+                    .uri(targetUrl)
+                    .header("Authorization", "Bearer " + groqApiKey.trim())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(payload)
+                    .retrieve()
+                    .body(String.class);
+
+            if (responseBody != null) {
+                JsonNode root = objectMapper.readTree(responseBody);
+                JsonNode choices = root.get("choices");
+                if (choices != null && choices.isArray() && !choices.isEmpty()) {
+                    JsonNode messageNode = choices.get(0).get("message");
+                    if (messageNode != null && messageNode.has("content")) {
+                        String text = messageNode.get("content").asText().trim();
+                        if (!text.isBlank()) {
+                            return Optional.of(text);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Llamada a Groq Cloud falló ({}: {}). Activando fallback de inferencia.", e.getClass().getSimpleName(), e.getMessage());
+        }
+        return Optional.empty();
+    }
+
     private Optional<String> intentarLlamadaOllama(String prompt) {
         try {
             Map<String, Object> payload = Map.of(
@@ -225,7 +316,10 @@ public class ChatOrchestratorService {
             }
         }
 
-        if (contexto.contains("DATOS DE TUS CALIFICACIONES")) {
+        if (contexto.contains("AVISO DE PRIVACIDAD:")) {
+            sb.append("🔒 **Restricción de Privacidad y Protección de Datos**\n");
+            sb.append("Por motivos de confidencialidad institucional (Ley 1581 de 2012), únicamente puedes acceder a tus propias calificaciones. No está autorizado consultar las notas de otros estudiantes.\n\n");
+        } else if (contexto.contains("DATOS DE TUS CALIFICACIONES")) {
             sb.append("📊 **Resumen de Calificaciones Registradas**\n");
             sb.append("Se consultó tu historial académico activo. Puedes consultar el detalle completo por materia en el módulo de calificaciones.\n\n");
         } else if (contexto.contains("DATOS DE TU HORARIO DE HOY")) {
@@ -233,7 +327,7 @@ public class ChatOrchestratorService {
             sb.append("Tu curso cuenta con franjas lectivas programadas para el día de hoy. Recuerda consultar tu salón asignado.\n\n");
         } else if (contexto.contains("DATOS DE TU ASISTENCIA")) {
             sb.append("📅 **Estado de Asistencia Institucional**\n");
-            sb.append("Recuerda que según el SIEE, una inasistencia injustificada igual o superior al 25% puede comprometer la aprobación de la asignatura.\n\n");
+            sb.append("Recuerda que según el SIEACI (Ítem 5.6.1), una inasistencia injustificada igual o superior al 25% de las actividades académicas es causal de reprobación del grado.\n\n");
         } else if (contexto.contains("ESTADÍSTICAS INSTITUCIONALES")) {
             sb.append("🏛️ **Panel Directivo IEACI**\n");
             sb.append("Información institucional consolidada para el año lectivo en curso.\n\n");
@@ -243,7 +337,7 @@ public class ChatOrchestratorService {
         }
 
         if (sb.isEmpty()) {
-            sb.append("👋 Hola. Soy el Asistente Institucional del SIGA - IEACI.\n\n");
+            sb.append("👋 Hola. Soy Mangle, el Asistente Institucional del SIGA - IEACI.\n\n");
             sb.append("Actualmente tu rol autenticado es **").append(rol).append("**.\n\n");
             sb.append("Puedo orientarte sobre:\n");
             sb.append("1. **Manual de Convivencia y SIEE**: Faltas Tipo I, II y III, escalas valorativas y debido proceso.\n");

@@ -262,7 +262,6 @@ public class AsistenciaService {
     /**
      * Registra asistencia usando el contexto de seguridad autenticado (Docente asignado, Admin o Coordinación).
      */
-    @Transactional
     public List<Asistencia> registrar(UUID sesionId, List<AsistenciaItemDto> items) {
         Docente docente = null;
         RolEnum rol = null;
@@ -292,7 +291,7 @@ public class AsistenciaService {
             AsistenciaService service = (self != null) ? self : this;
             return service.registrarInterno(sesionId, items, docenteOperador, rolOperador);
         } catch (DataIntegrityViolationException ex) {
-            log.info("Colisión concurrente detectada en persistencia de asistencias para sesión {}. Reintentando actualización.", sesionId);
+            log.info("Colisión concurrente detectada en persistencia de asistencias para sesión {}. Reintentando actualización en transacción nueva.", sesionId);
             AsistenciaService service = (self != null) ? self : this;
             return service.registrarInterno(sesionId, items, docenteOperador, rolOperador);
         }

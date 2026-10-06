@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Fragmento del Chatbot Asistente Institucional Flotante (Mangle - SIGA IEACI) -->
+<th:block th:fragment="widget">
+    <div id="siga-chatbot-container" class="relative z-50" x-data="sigaChatbotWidget()" x-init="init()">
+
+        <!-- ══════════════════════════════════════════════════════════
+             1. GLOBO DE SALUDO FLOTANTE ("HOLA, SOY MANGLE")
+             ══════════════════════════════════════════════════════════ -->
+        <div x-show="!isOpen && showGreetingBubble"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="fixed bottom-22 sm:bottom-24 right-6 sm:right-8 z-50 select-none cursor-pointer group"
+             @click="toggleChat()">
+
+            <!-- Pastilla verde de saludo -->
+            <div class="bg-[#134e1e] hover:bg-[#1b6327] text-white text-xs font-semibold px-3.5 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 border border-emerald-500/40 hover:scale-105 transition-transform duration-200">
+                <span class="inline-block">🌿</span>
+                <span>Hola, soy Mangle...</span>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             2. BOTÓN CIRCULAR FLOTANTE (FAB CON AVATAR MANGLE)
+             ══════════════════════════════════════════════════════════ -->
+        <button type="button"
+                id="btn-siga-chatbot-toggle"
+                @click="toggleChat()"
+                class="fixed bottom-6 right-6 sm:right-8 size-14 sm:size-16 rounded-full bg-[#134e1e] hover:bg-[#1b6327] text-white shadow-2xl ring-4 ring-amber-400/90 flex items-center justify-center transition-all duration-300 transform hover:scale-105 active:scale-95 z-50 cursor-pointer group"
+                aria-label="Abrir asistente virtual Mangle">
+            
+            <!-- Avatar Mangle institucional SVG 100% Original -->
+            <div class="relative size-11 sm:size-12 rounded-full overflow-hidden flex items-center justify-center bg-[#0d3815]">
+                <svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="mangleBgMain" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#134e1e"/>
+                            <stop offset="100%" stop-color="#0a2a10"/>
+                        </linearGradient>
+                        <linearGradient id="leafGradMain" x1="0%" y1="100%" x2="50%" y2="0%">
+                            <stop offset="0%" stop-color="#15803d"/>
+                            <stop offset="100%" stop-color="#4ade80"/>
+                        </linearGradient>
+                        <linearGradient id="faceGradMain" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#ffffff"/>
+                            <stop offset="100%" stop-color="#e8f5e9"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Fondo circular verde bosque profundo -->
+                    <circle cx="50" cy="50" r="48" fill="url(#mangleBgMain)"/>
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#f59e0b" stroke-width="1.5" opacity="0.6"/>
+
+                    <!-- Hojas de Mangle en la cabeza -->
+                    <path d="M48 30 C38 19, 30 25, 35 36 C40 38, 46 36, 48 30 Z" fill="url(#leafGradMain)"/>
+                    <path d="M52 30 C62 19, 70 25, 65 36 C60 38, 54 36, 52 30 Z" fill="url(#leafGradMain)"/>
+                    <path d="M50 14 C42 21, 45 33, 50 34 C55 33, 58 21, 50 14 Z" fill="#22c55e"/>
+                    <path d="M50 17 L50 33" stroke="#14532d" stroke-width="1" stroke-linecap="round"/>
+                    <circle cx="50" cy="15" r="2" fill="#38bdf8"/>
+
+                    <!-- Cabeza amigable tipo cápsula ecológica -->
+                    <rect x="25" y="32" width="50" height="42" rx="21" fill="url(#faceGradMain)" stroke="#15803d" stroke-width="1.8"/>
+
+                    <!-- Auriculares / Sensores dorados -->
+                    <circle cx="23" cy="53" r="4.5" fill="#f59e0b"/>
+                    <circle cx="23" cy="53" r="2.5" fill="#134e1e"/>
+                    <circle cx="77" cy="53" r="4.5" fill="#f59e0b"/>
+                    <circle cx="77" cy="53" r="2.5" fill="#134e1e"/>
+
+                    <!-- Visor de ojos -->
+                    <ellipse cx="50" cy="52" rx="19" ry="11" fill="#0f2913"/>
+
+                    <!-- Ojos digitales expresivos verde esmeralda -->
+                    <ellipse cx="42" cy="52" rx="4.5" ry="5.5" fill="#10b981"/>
+                    <ellipse cx="58" cy="52" rx="4.5" ry="5.5" fill="#10b981"/>
+                    <circle cx="40.5" cy="50" r="1.6" fill="#ffffff"/>
+                    <circle cx="56.5" cy="50" r="1.6" fill="#ffffff"/>
+                    <circle cx="43.5" cy="53.5" r="0.8" fill="#a7f3d0"/>
+                    <circle cx="59.5" cy="53.5" r="0.8" fill="#a7f3d0"/>
+
+                    <!-- Mejillas sonrosadas suaves -->
+                    <ellipse cx="33" cy="62" rx="3.5" ry="1.8" fill="#86efac" opacity="0.8"/>
+                    <ellipse cx="67" cy="62" rx="3.5" ry="1.8" fill="#86efac" opacity="0.8"/>
+
+                    <!-- Sonrisa cordial -->
+                    <path d="M44 63 Q50 68 56 63" fill="none" stroke="#134e1e" stroke-width="2" stroke-linecap="round"/>
+
+                    <!-- Torso institucional verde con pañuelo dorado -->
+                    <path d="M35 73 Q50 79 65 73 L69 88 Q50 94 31 88 Z" fill="#15803d"/>
+                    <path d="M42 76 L50 86 L58 76 Z" fill="#f59e0b"/>
+                    <circle cx="50" cy="81" r="1.5" fill="#134e1e"/>
+                </svg>
+            </div>
+
+            <!-- Indicador verde online parpadeante -->
+            <span class="absolute bottom-0 right-0 size-4 bg-emerald-400 border-2 border-white rounded-full">
+                <span class="absolute inset-0 size-full rounded-full bg-emerald-400 animate-ping opacity-75"></span>
+            </span>
+        </button>
+
+        <!-- ══════════════════════════════════════════════════════════
+             3. VENTANA MODAL FLOTANTE DEL CHATBOT (MANGLE)
+             ══════════════════════════════════════════════════════════ -->
+        <div x-show="isOpen"
+             x-cloak
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-8 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-y-8 scale-95"
+             class="fixed bottom-24 right-4 sm:right-8 w-[380px] sm:w-[420px] max-w-[calc(100vw-2rem)] h-[580px] max-h-[calc(100vh-7.5rem)] bg-white rounded-2xl shadow-2xl border border-slate-200/90 flex flex-col z-50 overflow-hidden font-sans">
+
+            <!-- ─── HEADER INSTITUCIONAL (VERDE BOSQUE / AMBIENTAL) ─── -->
+            <div class="bg-[#134e1e] p-3.5 sm:p-4 text-white flex items-center justify-between shadow-md relative">
+                <!-- Avatar y Nombre -->
+                <div class="flex items-center gap-3">
+                    <div class="relative size-10 rounded-full bg-[#0d3815] ring-2 ring-amber-400 flex items-center justify-center overflow-hidden shrink-0">
+                        <!-- Mini Avatar SVG de Mangle -->
+                        <svg viewBox="0 0 100 100" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="50" r="48" fill="#134e1e"/>
+                            <!-- Hojas de Mangle -->
+                            <path d="M48 30 C38 19, 30 25, 35 36 C40 38, 46 36, 48 30 Z" fill="#15803d"/>
+                            <path d="M52 30 C62 19, 70 25, 65 36 C60 38, 54 36, 52 30 Z" fill="#15803d"/>
+                            <path d="M50 14 C42 21, 45 33, 50 34 C55 33, 58 21, 50 14 Z" fill="#22c55e"/>
+                            <!-- Cabeza y Visor -->
+                            <rect x="25" y="32" width="50" height="42" rx="21" fill="#ffffff" stroke="#15803d" stroke-width="1.8"/>
+                            <ellipse cx="50" cy="52" rx="19" ry="11" fill="#0f2913"/>
+                            <ellipse cx="42" cy="52" rx="4.5" ry="5.5" fill="#10b981"/>
+                            <ellipse cx="58" cy="52" rx="4.5" ry="5.5" fill="#10b981"/>
+                            <circle cx="40.5" cy="50" r="1.6" fill="#ffffff"/>
+                            <circle cx="56.5" cy="50" r="1.6" fill="#ffffff"/>
+                            <path d="M44 63 Q50 68 56 63" fill="none" stroke="#134e1e" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M35 73 Q50 79 65 73 L69 88 Q50 94 31 88 Z" fill="#15803d"/>
+                            <path d="M42 76 L50 86 L58 76 Z" fill="#f59e0b"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <h3 class="text-sm font-extrabold tracking-tight leading-none text-white">Asistente Virtual</h3>
+                            <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        </div>
+                        <div class="flex items-center gap-1.5 mt-1">
+                            <span class="text-xs font-semibold text-emerald-100">Mangle · IEACI</span>
+                            <span class="text-[10px] uppercase font-bold px-1.5 py-0.2 rounded bg-white/20 text-white tracking-wider"
+                                  th:text="${currentRolCode ?: 'USUARIO'}">ROL</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción: Reiniciar y Cerrar -->
+                <div class="flex items-center gap-2">
+                    <!-- Botón Reiniciar conversación -->
+                    <button type="button"
+                            @click="reiniciarConversacion()"
+                            class="size-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer"
+                            title="Reiniciar conversación">
+                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                            <path d="M3 3v5h5"/>
+                        </svg>
+                    </button>
+
+                    <!-- Botón Cerrar (Círculo blanco con X) -->
+                    <button type="button"
+                            @click="toggleChat()"
+                            class="size-8 rounded-full bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-100 shadow flex items-center justify-center transition cursor-pointer"
+                            title="Minimizar">
+                        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 6 6 18M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ─── CUERPO DE MENSAJES CON HISTORIAL ─── -->
+            <div id="floating-chat-scroll"
+                 class="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FDFBF7] scroll-smooth">
+                
+                <!-- Bucle de Mensajes -->
+                <template x-for="(msg, idx) in messages" :key="idx">
+                    <div>
+                        <!-- Mensaje de Usuario -->
+                        <template x-if="msg.sender === 'user'">
+                            <div class="flex justify-end gap-2 ml-8">
+                                <div class="bg-[#134e1e] text-white text-xs sm:text-[13px] leading-relaxed rounded-2xl rounded-tr-none px-4 py-2.5 shadow-sm max-w-[85%] break-words">
+                                    <p x-text="msg.text"></p>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Mensaje de Mangle -->
+                        <template x-if="msg.sender === 'bot'">
+                            <div class="flex gap-2.5 mr-6">
+                                <!-- Avatar miniatura de Mangle en mensaje -->
+                                <div class="size-7 rounded-full bg-[#0d3815] ring-1 ring-amber-400 flex items-center justify-center shrink-0 overflow-hidden mt-0.5">
+                                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                                        <circle cx="50" cy="50" r="48" fill="#134e1e"/>
+                                        <path d="M50 14 C42 21, 45 33, 50 34 C55 33, 58 21, 50 14 Z" fill="#22c55e"/>
+                                        <rect x="25" y="32" width="50" height="42" rx="21" fill="#ffffff" stroke="#15803d" stroke-width="1.8"/>
+                                        <ellipse cx="50" cy="52" rx="19" ry="11" fill="#0f2913"/>
+                                        <ellipse cx="42" cy="52" rx="4.5" ry="5.5" fill="#10b981"/>
+                                        <ellipse cx="58" cy="52" rx="4.5" ry="5.5" fill="#10b981"/>
+                                        <path d="M44 63 Q50 68 56 63" fill="none" stroke="#134e1e" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <div class="flex flex-col gap-1 w-full max-w-[90%]">
+                                    <!-- Tarjeta de contenido -->
+                                    <div class="bg-white border border-slate-200/90 rounded-2xl rounded-tl-none p-3.5 text-xs sm:text-[13px] text-slate-800 leading-relaxed shadow-xs space-y-2">
+                                        <div class="whitespace-pre-line break-words text-slate-700" x-html="formatearMensaje(msg.text)"></div>
+
+                                        <!-- Referencias Normativas Citadas -->
+                                        <template x-if="msg.referencias && msg.referencias.length > 0">
+                                            <div class="pt-2 border-t border-slate-100 flex flex-wrap gap-1">
+                                                <template x-for="ref in msg.referencias" :key="ref">
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 border border-amber-200 text-amber-800"
+                                                          x-text="'📜 ' + ref"></span>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <!-- Herramientas Invocadas -->
+                                        <template x-if="msg.herramientas && msg.herramientas.length > 0">
+                                            <div class="pt-1.5 flex flex-wrap gap-1">
+                                                <template x-for="tool in msg.herramientas" :key="tool">
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-50 border border-indigo-200 text-indigo-700"
+                                                          x-text="'⚡ ' + tool + '()'"></span>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <!-- Metadatos de la respuesta (Proveedor y Latencia) -->
+                                    <div class="flex items-center gap-1.5 text-[10px] text-slate-400 pl-1">
+                                        <span x-text="msg.proveedor || 'Mangle · IEACI'" class="font-medium"></span>
+                                        <span>•</span>
+                                        <span x-text="msg.latencia ? (msg.latencia + ' ms') : 'inmediato'"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Indicador de Carga / Escribiendo -->
+                <div x-show="isLoading" class="flex gap-2.5 items-center mr-6 animate-pulse">
+                    <div class="size-7 rounded-full bg-[#0d3815] ring-1 ring-amber-400 flex items-center justify-center shrink-0 overflow-hidden">
+                        <svg viewBox="0 0 100 100" class="w-full h-full">
+                            <circle cx="50" cy="50" r="48" fill="#134e1e"/>
+                            <rect x="25" y="32" width="50" height="42" rx="21" fill="#ffffff"/>
+                            <ellipse cx="50" cy="52" rx="19" ry="11" fill="#0f2913"/>
+                        </svg>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-4 py-2.5 shadow-xs flex items-center gap-1.5">
+                        <span class="text-xs text-slate-500 font-semibold">Mangle está pensando</span>
+                        <span class="flex gap-1 items-center">
+                            <span class="size-1.5 bg-[#134e1e] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                            <span class="size-1.5 bg-[#134e1e] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                            <span class="size-1.5 bg-[#134e1e] rounded-full animate-bounce"></span>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ─── SUGERENCIAS RÁPIDAS DE PREGUNTAS (CHIPS) ─── -->
+            <div x-show="showSuggestions" class="bg-slate-50/80 px-3 py-2 border-t border-slate-200 flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs">
+                <span class="text-[11px] font-bold text-slate-400 shrink-0">Sugerencias:</span>
+
+                <!-- Chips para Estudiante -->
+                <th:block th:if="${currentRolCode == 'ESTUDIANTE'}">
+                    <button type="button" @click="enviarPreguntaRapida('¿Cuáles son mis notas registradas?')"
+                            class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-emerald-600 hover:text-emerald-700 text-slate-700 font-medium shrink-0 transition shadow-2xs">
+                        📊 Mis notas
+                    </button>
+                    <button type="button" @click="enviarPreguntaRapida('¿Qué clases tengo hoy en mi horario?')"
+                            class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-emerald-600 hover:text-emerald-700 text-slate-700 font-medium shrink-0 transition shadow-2xs">
+                        ⏰ Mi horario hoy
+                    </button>
+                    <button type="button" @click="enviarPreguntaRapida('¿Cuánto porcentaje de inasistencia causa reprobación según el SIEE?')"
+                            class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-emerald-600 hover:text-emerald-700 text-slate-700 font-medium shrink-0 transition shadow-2xs">
+                        📅 Inasistencia SIEE
+                    </button>
+                </th:block>
+
+                <!-- Chips para Docente -->
+                <th:block th:if="${currentRolCode == 'DOCENTE'}">
+                    <button type="button" @click="enviarPreguntaRapida('¿Cuáles son mis cursos asignados?')"
+                            class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-emerald-600 hover:text-emerald-700 text-slate-700 font-medium shrink-0 transition shadow-2xs">
+                        👥 Mis cursos
+                    </button>
+                    <button type="button" @click="enviarPreguntaRapida('¿Qué procedimiento aplica ante una falta disciplinaria tipo II?')"
+                            class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-emerald-600 hover:text-emerald-700 text-slate-700 font-medium shrink-0 transition shadow-2xs">
+                        ⚖️ Faltas Tipo II
+                    </button>
+                    <button type="button" @click="enviarPreguntaRapida('¿Cuál es la escala valorativa institucional del SIEE?')"
+                            class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-emerald-600 hover:text-emerald-700 text-slate-700 font-medium shrink-0 transition shadow-2xs">
+                        🎯 Escala SIEE
+                    </button>
+                </th:block>
+
+                <!-- Chips para Directivos y Otros Roles -->
+                <th:block th:if="${currentRolCode != 'ESTUDIANTE' and currentRolCode != 'DOCENTE'}">
+                    <button type="button" @click="enviarPreguntaRapida('¿Cuáles son las estadísticas generales de la institución?')"
+                            class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-emerald-600 hover:text-emerald-700 text-slate-700 font-medium shrink-0 transition shadow-2xs">
+                        📈 Estadísticas IEACI
+                    </button>
+                    <button type="button" @click="enviarPreguntaRapida('¿Cuáles son las faltas disciplinarias Tipo I en el Manual?')"
+                            class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-emerald-600 hover:text-emerald-700 text-slate-700 font-medium shrink-0 transition shadow-2xs">
+                        📘 Faltas Tipo I
+                    </button>
+                </th:block>
+            </div>
+
+            <!-- ─── BARRA DE ENTRADA Y ENVÍO (INPUT MODERNO) ─── -->
+            <div class="bg-white p-2.5 sm:p-3 border-t border-slate-200 flex items-center gap-2">
+                <!-- Botón + para mostrar/ocultar sugerencias -->
+                <button type="button"
+                        @click="showSuggestions = !showSuggestions"
+                        class="size-9 rounded-full bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 flex items-center justify-center transition cursor-pointer shrink-0"
+                        title="Alternar sugerencias">
+                    <svg class="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                </button>
+
+                <!-- Campo de Texto -->
+                <div class="flex-1 relative">
+                    <input type="text"
+                           x-ref="inputField"
+                           x-model="inputMessage"
+                           @keydown.enter.prevent="enviarMensaje()"
+                           placeholder="Escribe tu mensaje a Mangle..."
+                           :disabled="isLoading"
+                           class="w-full pl-3.5 pr-3 py-2.5 rounded-full bg-slate-100 border border-transparent focus:border-[#134e1e] focus:bg-white focus:ring-2 focus:ring-[#134e1e]/20 text-xs sm:text-sm font-medium text-slate-800 placeholder:text-slate-400 outline-none transition" />
+                </div>
+
+                <!-- Botón Enviar Circular Verde con Avión de Papel -->
+                <button type="button"
+                        @click="enviarMensaje()"
+                        :disabled="isLoading || !inputMessage.trim()"
+                        class="size-10 rounded-full bg-[#134e1e] hover:bg-[#1b6327] disabled:bg-slate-300 disabled:cursor-not-allowed text-white shadow-md flex items-center justify-center transition duration-200 transform active:scale-95 cursor-pointer shrink-0"
+                        title="Enviar mensaje">
+                    <svg class="size-4.5 translate-x-0.5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         4. CONTROLADOR JAVASCRIPT DEL WIDGET (ALPINES.JS)
+         ══════════════════════════════════════════════════════════ -->
+    <script>
+        function sigaChatbotWidget() {
+            return {
+                isOpen: false,
+                showGreetingBubble: true,
+                showSuggestions: true,
+                inputMessage: '',
+                isLoading: false,
+                messages: [],
+
+                init() {
+                    // Cargar estado de conversación desde sessionStorage para no perder mensajes al navegar
+                    try {
+                        // Limpieza obligatoria de versiones previas con 'Catalina'
+                        sessionStorage.removeItem('siga_chat_history');
+                        sessionStorage.removeItem('siga_chat_greeting_dismissed');
+
+                        const savedMessages = sessionStorage.getItem('siga_mangle_chat_history');
+                        if (savedMessages && !savedMessages.includes('Catalina')) {
+                            this.messages = JSON.parse(savedMessages);
+                        } else {
+                            sessionStorage.removeItem('siga_mangle_chat_history');
+                            this.inicializarBienvenida();
+                        }
+
+                        const wasOpen = sessionStorage.getItem('siga_chat_open');
+                        if (wasOpen === 'true') {
+                            this.isOpen = true;
+                            this.showGreetingBubble = false;
+                            this.$nextTick(() => this.scrollToBottom());
+                        }
+                    } catch (e) {
+                        this.inicializarBienvenida();
+                    }
+                },
+
+                inicializarBienvenida() {
+                    this.messages = [
+                        {
+                            sender: 'bot',
+                            text: '¡Hola! 🌿 Soy Mangle, tu asistente virtual de la Institución Educativa Ambientalista de Cartagena de Indias.\n\n¿En qué puedo orientarte hoy? Puedes consultarme sobre el Manual de Convivencia, el SIEE, tus calificaciones, horarios o asistencias.',
+                            referencias: [],
+                            herramientas: [],
+                            latencia: null,
+                            proveedor: 'Mangle · IEACI'
+                        }
+                    ];
+                    this.guardarEnStorage();
+                },
+
+                toggleChat() {
+                    this.isOpen = !this.isOpen;
+                    if (this.isOpen) {
+                        this.showGreetingBubble = false;
+                        sessionStorage.setItem('siga_chat_open', 'true');
+                        this.$nextTick(() => {
+                            this.scrollToBottom();
+                            if (this.$refs.inputField) this.$refs.inputField.focus();
+                        });
+                    } else {
+                        sessionStorage.setItem('siga_chat_open', 'false');
+                    }
+                },
+
+                dismissGreeting() {
+                    this.showGreetingBubble = false;
+                    try { sessionStorage.setItem('siga_mangle_greeting_dismissed', 'true'); } catch (e) {}
+                },
+
+                reiniciarConversacion() {
+                    sessionStorage.removeItem('siga_chat_history');
+                    sessionStorage.removeItem('siga_mangle_chat_history');
+                    this.inicializarBienvenida();
+                    this.scrollToBottom();
+                },
+
+                enviarPreguntaRapida(pregunta) {
+                    this.inputMessage = pregunta;
+                    this.enviarMensaje();
+                },
+
+                async enviarMensaje() {
+                    const texto = (this.inputMessage || '').trim();
+                    if (!texto || this.isLoading) return;
+
+                    // Agregar mensaje del usuario a la lista
+                    this.messages.push({
+                        sender: 'user',
+                        text: texto
+                    });
+                    this.inputMessage = '';
+                    this.isLoading = true;
+                    this.guardarEnStorage();
+                    this.$nextTick(() => this.scrollToBottom());
+
+                    // Obtener token CSRF
+                    const csrfToken = document.querySelector('meta[name="_csrf"]')?.content || '';
+                    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
+
+                    try {
+                        const response = await fetch('/chat/api/mensaje', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                [csrfHeader]: csrfToken
+                            },
+                            body: JSON.stringify({
+                                mensaje: texto,
+                                rolUsuario: null
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Error en el servidor (' + response.status + ')');
+                        }
+
+                        const data = await response.json();
+                        this.messages.push({
+                            sender: 'bot',
+                            text: data.respuesta || 'Respuesta generada.',
+                            referencias: data.referenciasNormativas || [],
+                            herramientas: data.herramientasInvocadas || [],
+                            latencia: data.latenciaMs,
+                            proveedor: data.proveedor || (data.procesadoLocalmente ? 'Groq / LLM' : 'Motor Normativo')
+                        });
+                    } catch (err) {
+                        this.messages.push({
+                            sender: 'bot',
+                            text: '⚠️ Disculpa, ocurrió una dificultad técnica temporal al contactar al asistente. Por favor intenta de nuevo en unos instantes.',
+                            referencias: [],
+                            herramientas: [],
+                            latencia: null,
+                            proveedor: 'Servicio Institucional'
+                        });
+                    } finally {
+                        this.isLoading = false;
+                        this.guardarEnStorage();
+                        this.$nextTick(() => this.scrollToBottom());
+                    }
+                },
+
+                guardarEnStorage() {
+                    try {
+                        sessionStorage.setItem('siga_mangle_chat_history', JSON.stringify(this.messages));
+                    } catch (e) {}
+                },
+
+                scrollToBottom() {
+                    const el = document.getElementById('floating-chat-scroll');
+                    if (el) {
+                        el.scrollTop = el.scrollHeight;
+                    }
+                },
+
+                formatearMensaje(text) {
+                    if (!text) return '';
+                    // Convertir negrita **texto** a <strong>texto</strong>
+                    let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    // Convertir viñetas en líneas legibles
+                    formatted = formatted.replace(/^• /gm, '• ');
+                    return formatted;
+                }
+            };
+        }
+    </script>
+</th:block>
+
+</body>
+</html>

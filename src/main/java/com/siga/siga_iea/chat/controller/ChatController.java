@@ -23,6 +23,7 @@ public class ChatController {
 
     @GetMapping
     public String index(Model model) {
+        model.addAttribute("activePage", "chat");
         model.addAttribute("rol", userContextService.getRolAutenticado().name());
         model.addAttribute("usuarioNombre", userContextService.getUsuarioAutenticado()
                 .map(u -> u.getEmail())

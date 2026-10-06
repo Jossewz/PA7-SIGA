@@ -131,6 +131,20 @@ class ChatAutorizacionTest {
     }
 
     @Test
+    @DisplayName("Privacidad y Confidencialidad: Estudiante pidiendo notas de un tercero recibe advertencia de privacidad en vez de notas ajenas")
+    void testEstudiantePidiendoNotasDeTerceroAdviertePrivacidad() {
+        when(userContextService.getRolAutenticado()).thenReturn(RolEnum.ESTUDIANTE);
+
+        ChatMessageResponse resp = orchestratorService.procesarMensaje(
+                new ChatMessageRequest("¿Cuáles son las notas de Juan Pérez?", "ESTUDIANTE")
+        );
+
+        assertTrue(resp.respuesta().contains("Restricción de Privacidad"), "Debe advertir la restricción de privacidad");
+        assertTrue(resp.respuesta().contains("Ley 1581 de 2012"));
+        assertTrue(resp.herramientasInvocadas().isEmpty(), "No debe ejecutar consultarMisNotas para evitar confusión al estudiante");
+    }
+
+    @Test
     @DisplayName("Aislamiento de Rol: Estudiante no puede ejecutar consultarMisCursos() de docente")
     void testEstudianteNoPuedeEjecutarHerramientasDocente() {
         when(userContextService.getDocenteAutenticado()).thenReturn(Optional.empty());

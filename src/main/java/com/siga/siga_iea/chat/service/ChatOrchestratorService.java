@@ -38,8 +38,21 @@ public class ChatOrchestratorService {
     private final ChatToolsService toolsService;
     private final ManualConvivenciaService manualConvivenciaService;
     private final ChatPromptSafety promptSafety;
-    private final RestClient restClient;
+    private RestClient restClient;
     private final ObjectMapper objectMapper;
+
+    // Patrones de detección de posibles datos personales en texto libre (Ley 1581 de 2012)
+    private static final java.util.regex.Pattern PATRON_DOCUMENTO = java.util.regex.Pattern.compile("\\b\\d{7,12}\\b");
+    private static final java.util.regex.Pattern PATRON_EMAIL = java.util.regex.Pattern.compile("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
+    private static final java.util.regex.Pattern PATRON_TELEFONO = java.util.regex.Pattern.compile("(?:\\+?57)?\\s*3\\d{2}[\\s.-]?\\d{7}");
+    // Exclusión de términos institucionales, órganos colegiados y documentos normativos
+    private static final String EXCLUSIONES_INSTITUCIONALES =
+            "(?:Colegio|Instituci[oó]n|Manual|Sistema|Decreto|Ley|Escala|Periodo|Comisi[oó]n|Consejo|Comit[eé]|Gobierno|Evaluaci[oó]n|Promoci[oó]n|Convivencia|Acad[eé]mico|Directivo|Personero|Contralor|Rector|Rector[ií]a|Coordinaci[oó]n|Coordinador|Cartagena|Ambientalista)";
+
+    private static final java.util.regex.Pattern PATRON_NOMBRE_PROPIO = java.util.regex.Pattern.compile(
+            "\\b(?!" + EXCLUSIONES_INSTITUCIONALES + "\\b)[A-ZÁÉÍÓÚÑ][a-záéíóúñ]{1,15}\\s+(?!" + EXCLUSIONES_INSTITUCIONALES + "\\b)[A-ZÁÉÍÓÚÑ][a-záéíóúñ]{1,15}\\b"
+            + "|\\b(?:[Ee]studiante|[Aa]lumn[oa]|[Dd]ocente|[Pp]rofesor(?:a)?)\\s+(?!" + EXCLUSIONES_INSTITUCIONALES + "\\b)[A-ZÁÉÍÓÚÑ][a-záéíóúñ]{2,15}\\b"
+    );
 
     @Value("${siga.chat.groq.api-key:}")
     private String groqApiKey;
@@ -79,9 +92,47 @@ public class ChatOrchestratorService {
         this.groqApiKey = groqApiKey;
     }
 
+    public void setGroqModel(String groqModel) {
+        this.groqModel = groqModel;
+    }
+
+    public void setRestClient(RestClient restClient) {
+        this.restClient = restClient;
+    }
+
+    /**
+     * Detección heurística de datos personales en el texto libre del usuario (Ley 1581 de 2012).
+     * Identifica números de documento, correos electrónicos, teléfonos y patrones de nombres de personas.
+     */
+    public boolean contienePosibleDatoPersonal(String mensaje) {
+        if (mensaje == null || mensaje.isBlank()) {
+            return false;
+        }
+        return PATRON_DOCUMENTO.matcher(mensaje).find()
+                || PATRON_EMAIL.matcher(mensaje).find()
+                || PATRON_TELEFONO.matcher(mensaje).find()
+                || PATRON_NOMBRE_PROPIO.matcher(mensaje).find();
+    }
+
+    /**
+     * Frontera de Confianza: Criterio estricto de lista blanca (Local por defecto).
+     * Solo permite salida a Groq Cloud si:
+     * 1. No se invocó ninguna herramienta con datos transaccionales.
+     * 2. Se clasificó positivamente normativa pública que citar.
+     * 3. No contiene números de documento, correos, teléfonos ni nombres de personas en el mensaje.
+     */
+    public boolean puedeSalirANube(String mensaje, List<String> herramientasInvocadas, List<ArticuloNormativo> normativas) {
+        return herramientasInvocadas.isEmpty()
+                && normativas != null && !normativas.isEmpty()
+                && !contienePosibleDatoPersonal(mensaje);
+    }
+
     public ChatMessageResponse procesarMensaje(ChatMessageRequest request) {
         long t0 = System.currentTimeMillis();
         String mensaje = promptSafety.sanitizarEntradaUsuario(request.mensaje());
+        if (mensaje != null && mensaje.length() > 250) {
+            mensaje = mensaje.substring(0, 250);
+        }
         String rol = userContextService.getRolAutenticado().name();
 
         List<String> herramientasInvocadas = new ArrayList<>();
@@ -103,24 +154,25 @@ public class ChatOrchestratorService {
         // 2. Detección y ejecución de herramientas según rol
         ejecutarHerramientasPorIntencion(mensaje, rol, herramientasInvocadas, contextoDatos);
 
-        // 3. Cascada de Inferencia: Groq Cloud -> Ollama Local -> Fallback Determinista
+        // 3. Cascada de Inferencia con Frontera de Confianza (Lista Blanca / Local por Defecto)
+        boolean puedeSalir = puedeSalirANube(mensaje, herramientasInvocadas, normativas);
         Optional<String> respuestaLlm = Optional.empty();
-        String proveedor = "Motor Normativo Interno";
+        String proveedor = "Motor Determinista Seguro (On-Premise)";
 
-        // Nivel 1: Groq Cloud (Prioridad si API Key está presente - Ultra rápido en LPUs)
-        if (groqApiKey != null && !groqApiKey.isBlank()) {
+        // Nivel 1: Groq Cloud (Únicamente si cumple TODAS las condiciones de la lista de permitidos)
+        if (puedeSalir && groqApiKey != null && !groqApiKey.isBlank()) {
             respuestaLlm = intentarLlamadaGroq(rol, contextoDatos.toString(), mensaje);
             if (respuestaLlm.isPresent() && !respuestaLlm.get().isBlank()) {
-                proveedor = "Groq (" + (groqModel != null && !groqModel.isBlank() ? groqModel : "llama-3.3-70b-versatile") + ")";
+                proveedor = "Groq Cloud (" + (groqModel != null && !groqModel.isBlank() ? groqModel : "openai/gpt-oss-120b") + ")";
             }
         }
 
-        // Nivel 2: Ollama Local (Fallback offline en localhost:11434 si Groq no está configurado o falla)
+        // Nivel 2: Ollama Local (Inferencia on-premise en localhost:11434 sin salida de datos a internet)
         if (respuestaLlm.isEmpty()) {
             String promptCompleto = promptSafety.construirPromptConContexto(rol, contextoDatos.toString(), mensaje);
             respuestaLlm = intentarLlamadaOllama(promptCompleto);
             if (respuestaLlm.isPresent() && !respuestaLlm.get().isBlank()) {
-                proveedor = "Ollama Local (" + ollamaModel + ")";
+                proveedor = "Ollama Local On-Premise (" + ollamaModel + ")";
             }
         }
 
@@ -131,10 +183,12 @@ public class ChatOrchestratorService {
             respuestaFinal = respuestaLlm.get();
             procesadoLocalmente = true;
         } else {
-            // Nivel 3: Fallback determinista seguro con base de datos e índices normativos
+            // Nivel 3: Fallback determinista seguro estructurado en Java (Garantía Zero-Failure)
             respuestaFinal = generarRespuestaFallback(mensaje, rol, normativas, contextoDatos.toString());
             procesadoLocalmente = false;
-            proveedor = "Motor Normativo Interno";
+            proveedor = !puedeSalir 
+                    ? "Motor Institucional Seguro (On-Premise - Ley 1581)" 
+                    : "Motor Normativo Interno (Offline)";
         }
 
         long latencia = System.currentTimeMillis() - t0;
@@ -156,9 +210,12 @@ public class ChatOrchestratorService {
 
         if ("ESTUDIANTE".equalsIgnoreCase(rol)) {
             if (query.contains("nota") || query.contains("calificacion") || query.contains("periodo")) {
+                boolean esConsultaPropia = query.contains("mis notas") || query.contains("mi nota")
+                        || query.contains("mis calificaciones") || query.contains("mi calificacion")
+                        || query.contains("de mi") || query.contains("de mis");
                 boolean consultaTercero = (query.contains("nota de ") || query.contains("notas de ")
                         || query.contains("calificacion de ") || query.contains("calificaciones de "))
-                        && !query.contains("de mi") && !query.contains("de mis");
+                        && !esConsultaPropia;
                 if (consultaTercero) {
                     contexto.append("AVISO DE PRIVACIDAD:\n")
                             .append("Por motivos de confidencialidad institucional y protección de datos (Ley 1581 de 2012), únicamente puedes acceder a tus propias calificaciones. No está autorizado consultar las notas de otros estudiantes.\n\n");
@@ -239,7 +296,7 @@ public class ChatOrchestratorService {
             Map<String, Object> systemMsg = Map.of("role", "system", "content", systemContent);
             Map<String, Object> userMsg = Map.of("role", "user", "content", mensaje);
 
-            String modelToUse = (groqModel != null && !groqModel.isBlank()) ? groqModel.trim() : "llama-3.3-70b-versatile";
+            String modelToUse = (groqModel != null && !groqModel.isBlank()) ? groqModel.trim() : "openai/gpt-oss-120b";
             Map<String, Object> payload = Map.of(
                     "model", modelToUse,
                     "messages", List.of(systemMsg, userMsg),
@@ -270,6 +327,9 @@ public class ChatOrchestratorService {
                     }
                 }
             }
+        } catch (org.springframework.web.client.RestClientResponseException e) {
+            log.warn("Llamada a Groq Cloud falló con código {} ({}): {}. Activando fallback de inferencia.",
+                    e.getStatusCode(), e.getStatusText(), e.getResponseBodyAsString());
         } catch (Exception e) {
             log.warn("Llamada a Groq Cloud falló ({}: {}). Activando fallback de inferencia.", e.getClass().getSimpleName(), e.getMessage());
         }

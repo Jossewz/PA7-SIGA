@@ -4,7 +4,7 @@
 
 <!-- Fragmento del Chatbot Asistente Institucional Flotante (Mangle - SIGA IEACI) -->
 <th:block th:fragment="widget">
-    <div id="siga-chatbot-container" class="relative z-50" x-data="sigaChatbotWidget()" x-init="init()">
+    <div id="siga-chatbot-container" class="relative z-50" x-data="sigaChatbotWidget()" th:data-current-user="${currentUser != null ? currentUser.email : ''}" x-init="init()">
 
         <!-- ══════════════════════════════════════════════════════════
              1. GLOBO DE SALUDO FLOTANTE ("HOLA, SOY MANGLE")
@@ -317,6 +317,14 @@
                 </th:block>
             </div>
 
+            <!-- ─── AVISO DE PRIVACIDAD INSTITUCIONAL (LEY 1581 DE 2012) ─── -->
+            <div class="px-3.5 py-1.5 bg-amber-50/90 border-t border-amber-200/80 text-[11px] font-semibold text-amber-900 flex items-center gap-1.5">
+                <svg class="size-3.5 text-amber-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+                <span>Aviso Ley 1581: No escribas nombres, documentos ni datos de estudiantes.</span>
+            </div>
+
             <!-- ─── BARRA DE ENTRADA Y ENVÍO (INPUT MODERNO) ─── -->
             <div class="bg-white p-2.5 sm:p-3 border-t border-slate-200 flex items-center gap-2">
                 <!-- Botón + para mostrar/ocultar sugerencias -->
@@ -332,6 +340,7 @@
                     <input type="text"
                            x-ref="inputField"
                            x-model="inputMessage"
+                           maxlength="250"
                            @keydown.enter.prevent="enviarMensaje()"
                            placeholder="Escribe tu mensaje a Mangle..."
                            :disabled="isLoading"
@@ -373,6 +382,29 @@
                         // Limpieza obligatoria de versiones previas con 'Catalina'
                         sessionStorage.removeItem('siga_chat_history');
                         sessionStorage.removeItem('siga_chat_greeting_dismissed');
+
+                        // Mitigación de seguridad multi-usuario en equipos compartidos:
+                        // Si el usuario autenticado actual difiere del guardado, purgar historial de notas
+                        const currentUserEmail = this.$el.getAttribute('data-current-user') || '';
+                        const savedUserEmail = sessionStorage.getItem('siga_mangle_chat_user');
+                        if (savedUserEmail && currentUserEmail && savedUserEmail !== currentUserEmail) {
+                            sessionStorage.removeItem('siga_mangle_chat_history');
+                        }
+                        if (currentUserEmail) {
+                            sessionStorage.setItem('siga_mangle_chat_user', currentUserEmail);
+                        }
+
+                        // Vincular purga inmediata de sessionStorage a cualquier evento submit de logout
+                        document.querySelectorAll('form[action*="logout"]').forEach(f => {
+                            if (!f.dataset.chatCleanBound) {
+                                f.dataset.chatCleanBound = 'true';
+                                f.addEventListener('submit', () => {
+                                    sessionStorage.removeItem('siga_mangle_chat_history');
+                                    sessionStorage.removeItem('siga_mangle_chat_user');
+                                    sessionStorage.removeItem('siga_chat_open');
+                                });
+                            }
+                        });
 
                         const savedMessages = sessionStorage.getItem('siga_mangle_chat_history');
                         if (savedMessages && !savedMessages.includes('Catalina')) {
@@ -454,7 +486,7 @@
 
                     // Obtener token CSRF
                     const csrfToken = document.querySelector('meta[name="_csrf"]')?.content || '';
-                    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
+                    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-XSRF-TOKEN';
 
                     try {
                         const response = await fetch('/chat/api/mensaje', {

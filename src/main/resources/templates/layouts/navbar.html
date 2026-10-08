@@ -58,7 +58,7 @@
 
                     <!-- Acción Cerrar Sesión -->
                     <div class="p-1.5">
-                        <form th:action="@{/logout}" method="post" class="w-full m-0">
+                        <form th:action="@{/logout}" method="post" class="w-full m-0" onsubmit="sessionStorage.removeItem('siga_mangle_chat_history'); sessionStorage.removeItem('siga_mangle_chat_user'); sessionStorage.removeItem('siga_chat_open');">
                             <button type="submit" 
                                     class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-alert-red hover:bg-red-50 transition-colors cursor-pointer text-left">
                                 <div class="size-6 rounded-lg bg-red-100/70 text-alert-red grid place-items-center shrink-0">

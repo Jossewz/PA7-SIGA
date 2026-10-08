@@ -2,13 +2,13 @@
 
     <!-- ÚLTIMOS MOVIMIENTOS / TIMELINE -->
     <article th:fragment="activityTimelineCard()" 
-             class="p-6 rounded-xl bg-white border border-[#c4eec0]/40 shadow-soft flex flex-col h-full">
+             class="p-6 rounded-xl bg-white border border-border shadow-soft flex flex-col h-full">
         <h3 class="flex items-center gap-2 text-sidebar text-base font-black uppercase tracking-wider mb-5">
             <i data-lucide="activity" class="size-[18px] stroke-[2.2]"></i>
             Línea de Actividad
         </h3>
 
-        <div class="relative border-l border-[#c4eec0]/40 ml-2.5 pl-6 space-y-4 flex-1">
+        <div class="relative border-l border-border ml-2.5 pl-6 space-y-4 flex-1">
             <div th:if="${#lists.isEmpty(stats.actividadTimeline)}" class="py-4 text-xs text-text-muted italic">
                 Sin actividad reciente registrada en el sistema.
             </div>

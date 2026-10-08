@@ -2,8 +2,8 @@ package com.siga.siga_iea.config;
 
 import com.siga.siga_iea.usuarios.entity.Usuario;
 import com.siga.siga_iea.usuarios.repository.UsuarioRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,12 +14,17 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-@RequiredArgsConstructor
-@Slf4j
 public class DataSeeder implements ApplicationRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+
+    public DataSeeder(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     @Transactional

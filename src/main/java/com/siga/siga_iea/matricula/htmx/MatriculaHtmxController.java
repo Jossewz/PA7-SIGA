@@ -1,5 +1,7 @@
 package com.siga.siga_iea.matricula.htmx;
 
+import com.siga.siga_iea.clases.entity.Curso;
+import com.siga.siga_iea.clases.repository.CursoRepository;
 import com.siga.siga_iea.matricula.entity.Matricula;
 import com.siga.siga_iea.matricula.service.MatriculaService;
 import com.siga.siga_iea.storage.entity.Documento;
@@ -17,9 +19,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/matricula")
@@ -29,15 +33,18 @@ public class MatriculaHtmxController {
     private final DocumentoService documentoService;
     private final EstudianteService estudianteService;
     private final AcudienteService acudienteService;
+    private final CursoRepository cursoRepository;
 
     public MatriculaHtmxController(MatriculaService matriculaService,
                                    DocumentoService documentoService,
                                    EstudianteService estudianteService,
-                                   AcudienteService acudienteService) {
+                                   AcudienteService acudienteService,
+                                   CursoRepository cursoRepository) {
         this.matriculaService = matriculaService;
         this.documentoService = documentoService;
         this.estudianteService = estudianteService;
         this.acudienteService = acudienteService;
+        this.cursoRepository = cursoRepository;
     }
 
     @PostMapping("/update-name")
@@ -89,6 +96,12 @@ public class MatriculaHtmxController {
             @RequestParam(value = "parentId", required = false) String parentId,
             @RequestParam(value = "parentRelation", required = false) String parentRelation,
             @RequestParam(value = "parentPhone", required = false) String parentPhone,
+            @RequestParam(value = "parentEmail", required = false) String parentEmail,
+            @RequestParam(value = "parentSecondaryEmail", required = false) String parentSecondaryEmail,
+            @RequestParam(value = "autorizaTratamientoDatos", required = false) Boolean autorizaTratamientoDatos,
+            @RequestParam(value = "sede", required = false) String sede,
+            @RequestParam(value = "grado", required = false) String grado,
+            @RequestParam(value = "jornada", required = false) String jornada,
             HttpSession session,
             Model model) {
 
@@ -107,6 +120,13 @@ public class MatriculaHtmxController {
         if (parentId != null) session.setAttribute("parentId", parentId);
         if (parentRelation != null) session.setAttribute("parentRelation", parentRelation);
         if (parentPhone != null) session.setAttribute("parentPhone", parentPhone);
+        if (parentEmail != null) session.setAttribute("parentEmail", parentEmail);
+        if (parentSecondaryEmail != null) session.setAttribute("parentSecondaryEmail", parentSecondaryEmail);
+        if (autorizaTratamientoDatos != null) session.setAttribute("autorizaTratamientoDatos", autorizaTratamientoDatos);
+
+        if (sede != null && !sede.isBlank()) session.setAttribute("sede", sede);
+        if (grado != null && !grado.isBlank()) session.setAttribute("grado", grado);
+        if (jornada != null && !jornada.isBlank()) session.setAttribute("jornada", jornada);
 
         populateModelFromSession(session, model);
         model.addAttribute("currentStep", step);
@@ -190,10 +210,12 @@ public class MatriculaHtmxController {
         String parentId = (String) session.getAttribute("parentId");
         String parentRelation = (String) session.getAttribute("parentRelation");
         String parentPhone = (String) session.getAttribute("parentPhone");
+        String parentEmail = (String) session.getAttribute("parentEmail");
+        String parentSecondaryEmail = (String) session.getAttribute("parentSecondaryEmail");
 
         Acudiente acudiente = acudienteService.buscarOCrear(
                 parentNames, parentSurnames, parentRelation,
-                parentDocType, parentId, parentPhone
+                parentDocType, parentId, parentPhone, parentEmail, parentSecondaryEmail
         );
 
         // 2. Guardar Estudiante con sus datos reales
@@ -230,15 +252,33 @@ public class MatriculaHtmxController {
         try {
             estudiante = estudianteService.guardar(estudiante);
 
-            // 3. Guardar Matrícula
+            if (acudiente != null) {
+                estudianteService.asociarAcudiente(estudiante.getId(), acudiente.getId(),
+                        parentRelation != null ? parentRelation : "Acudiente Principal", true);
+            }
+
+            // 3. Guardar Matrícula con Curso y Consentimiento Ley 1581
             Matricula nuevaMatricula = new Matricula();
             nuevaMatricula.setEstudiante(estudiante);
 
             String grado = (String) session.getAttribute("grado");
             nuevaMatricula.setGrado(grado != null ? grado : "No Asignado");
+            nuevaMatricula.setSalon("01");
             nuevaMatricula.setAnoLectivo(String.valueOf(Year.now().getValue()));
             nuevaMatricula.setEstado("PENDIENTE_DE_REVISION");
             nuevaMatricula.setFechaMatricula(LocalDate.now());
+
+            Boolean autoriza = (Boolean) session.getAttribute("autorizaTratamientoDatos");
+            nuevaMatricula.setAutorizaTratamientoDatos(autoriza != null ? autoriza : true);
+            nuevaMatricula.setFechaAutorizacionDatos(LocalDateTime.now());
+
+            if (grado != null && !grado.isBlank()) {
+                Optional<Curso> cursoOpt = cursoRepository.findByGradoAndGrupoAndAnoLectivo(grado, "01", nuevaMatricula.getAnoLectivo());
+                if (cursoOpt.isEmpty()) {
+                    cursoOpt = cursoRepository.findByGradoAndGrupo(grado, "01");
+                }
+                cursoOpt.ifPresent(nuevaMatricula::setCurso);
+            }
 
             matriculaService.guardar(nuevaMatricula);
 
@@ -281,7 +321,8 @@ public class MatriculaHtmxController {
                 "studentNames", "studentSurnames", "studentDocType", "studentDocNumber",
                 "studentGender", "studentPhone", "studentBirthday", "studentAddress",
                 "parentNames", "parentSurnames", "parentDocType", "parentId", "parentRelation",
-                "parentPhone", "parentDocName", "civilDocName",
+                "parentPhone", "parentEmail", "parentSecondaryEmail", "autorizaTratamientoDatos",
+                "parentDocName", "civilDocName",
                 "saludFileName", "fotoFileName", "historialFileName"
         );
         keysToRemove.forEach(session::removeAttribute);
@@ -315,6 +356,9 @@ public class MatriculaHtmxController {
         model.addAttribute("parentId", session.getAttribute("parentId"));
         model.addAttribute("parentRelation", session.getAttribute("parentRelation"));
         model.addAttribute("parentPhone", session.getAttribute("parentPhone"));
+        model.addAttribute("parentEmail", session.getAttribute("parentEmail"));
+        model.addAttribute("parentSecondaryEmail", session.getAttribute("parentSecondaryEmail"));
+        model.addAttribute("autorizaTratamientoDatos", session.getAttribute("autorizaTratamientoDatos"));
 
         model.addAttribute("sede", session.getAttribute("sede"));
         model.addAttribute("grado", session.getAttribute("grado"));

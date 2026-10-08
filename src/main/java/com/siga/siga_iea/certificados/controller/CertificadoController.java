@@ -23,15 +23,30 @@ public class CertificadoController {
     private final EstudianteService estudianteService;
     private final CurrentUserContextService currentUserContextService;
     private final MatriculaService matriculaService;
+    private final com.siga.siga_iea.clases.repository.CursoEstudianteRepository cursoEstudianteRepository;
 
     public CertificadoController(CertificadoService certificadoService,
                                  EstudianteService estudianteService,
                                  CurrentUserContextService currentUserContextService,
-                                 MatriculaService matriculaService) {
+                                 MatriculaService matriculaService,
+                                 com.siga.siga_iea.clases.repository.CursoEstudianteRepository cursoEstudianteRepository) {
         this.certificadoService = certificadoService;
         this.estudianteService = estudianteService;
         this.currentUserContextService = currentUserContextService;
         this.matriculaService = matriculaService;
+        this.cursoEstudianteRepository = cursoEstudianteRepository;
+    }
+
+    private String resolverGradoEstudiante(Estudiante e) {
+        if (e == null) return "Sin grado";
+        List<com.siga.siga_iea.clases.entity.CursoEstudiante> ces = cursoEstudianteRepository.findByEstudianteId(e.getId());
+        if (!ces.isEmpty()) {
+            com.siga.siga_iea.clases.entity.Curso c = ces.get(ces.size() - 1).getCurso();
+            return c.getGrado() + " - " + (c.getGrupo() != null ? c.getGrupo() : "01");
+        }
+        return matriculaService.buscarUltimaMatriculaEstudiante(e.getId())
+                .map(m -> (m.getGrado() != null ? m.getGrado() : "Sin grado") + " - " + (m.getSalon() != null ? m.getSalon() : "01"))
+                .orElse("Sin grado");
     }
 
     private Optional<Usuario> getUsuarioLogueado() {
@@ -80,8 +95,7 @@ public class CertificadoController {
 
         if (estudianteSeleccionado != null) {
             model.addAttribute("estudianteNombre", estudianteSeleccionado.getNombreCompleto());
-            Optional<Matricula> matOpt = matriculaService.buscarUltimaMatriculaEstudiante(estudianteSeleccionado.getId());
-            String grado = matOpt.map(m -> m.getGrado() != null ? m.getGrado() : "11°").orElse("11°");
+            String grado = resolverGradoEstudiante(estudianteSeleccionado);
             model.addAttribute("estudianteGrado", grado);
             model.addAttribute("estudianteDocumento", estudianteSeleccionado.getNumeroDocumento());
             model.addAttribute("estudianteId", estudianteSeleccionado.getId());
@@ -114,7 +128,10 @@ public class CertificadoController {
             map.put("id", s.getCodigo());
             map.put("estudiante", s.getEstudiante() != null ? s.getEstudiante().getNombreCompleto() : "N/A");
             map.put("documento", s.getEstudiante() != null ? s.getEstudiante().getNumeroDocumento() : "N/A");
-            map.put("grado", s.getGradoReferencia() != null ? s.getGradoReferencia() : "11° - 01");
+            String grado = (s.getGradoReferencia() != null && !s.getGradoReferencia().isBlank())
+                    ? s.getGradoReferencia()
+                    : resolverGradoEstudiante(s.getEstudiante());
+            map.put("grado", grado);
             map.put("tipo", s.getTipo());
             map.put("categoria", s.getCategoria());
             map.put("motivo", s.getMotivo());

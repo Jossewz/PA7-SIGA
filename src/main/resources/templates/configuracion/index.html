@@ -14,7 +14,7 @@
                 <p class="text-text-secondary text-sm font-semibold">Parámetros institucionales, periodos, escala de desempeños, asignaturas y permisos de roles.</p>
             </div>
             <div class="flex items-center gap-2">
-                <span class="px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-pill-green text-sidebar border border-[#8ce383] flex items-center gap-1.5 shadow-2xs">
+                <span class="px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-pill-green text-sidebar border border-[#cbe5c7] flex items-center gap-1.5 shadow-2xs">
                     <i data-lucide="check-circle-2" class="size-3.5 stroke-[2.5]"></i>
                     <span>Año Lectivo: <strong th:text="${anoLectivo}">2026</strong></span>
                 </span>
@@ -35,23 +35,23 @@
         <div class="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6 items-start">
             
             <!-- Side Navigation Links -->
-            <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-3.5 flex flex-col gap-1.5 shrink-0">
-                <button type="button" class="cfg-tab-btn w-full text-left px-4 py-3 rounded-lg text-[11px] font-black uppercase tracking-wider text-sidebar bg-[#f1fbe4] transition-all cursor-pointer" onclick="switchConfigTab(this, 'cfg-institucion')">
+            <div class="bg-white rounded-xl border border-border shadow-soft p-3.5 flex flex-col gap-1.5 shrink-0">
+                <button type="button" class="cfg-tab-btn w-full text-left px-4 py-3 rounded-lg text-[11px] font-black uppercase tracking-wider text-sidebar bg-brand-100 transition-all cursor-pointer" onclick="switchConfigTab(this, 'cfg-institucion')">
                     <span class="flex items-center gap-2.5">
                         <i data-lucide="building" class="size-4 stroke-2"></i> Institución
                     </span>
                 </button>
-                <button type="button" class="cfg-tab-btn w-full text-left px-4 py-3 rounded-lg text-[11px] font-black uppercase tracking-wider text-text-secondary hover:bg-[#fcfdfb] transition-all cursor-pointer" onclick="switchConfigTab(this, 'cfg-parametros')">
+                <button type="button" class="cfg-tab-btn w-full text-left px-4 py-3 rounded-lg text-[11px] font-black uppercase tracking-wider text-text-secondary hover:bg-brand-100/50 transition-all cursor-pointer" onclick="switchConfigTab(this, 'cfg-parametros')">
                     <span class="flex items-center gap-2.5">
                         <i data-lucide="sliders" class="size-4 stroke-2"></i> Parámetros del Sistema
                     </span>
                 </button>
-                <button type="button" class="cfg-tab-btn w-full text-left px-4 py-3 rounded-lg text-[11px] font-black uppercase tracking-wider text-text-secondary hover:bg-[#fcfdfb] transition-all cursor-pointer" onclick="switchConfigTab(this, 'cfg-asignaturas')">
+                <button type="button" class="cfg-tab-btn w-full text-left px-4 py-3 rounded-lg text-[11px] font-black uppercase tracking-wider text-text-secondary hover:bg-brand-100/50 transition-all cursor-pointer" onclick="switchConfigTab(this, 'cfg-asignaturas')">
                     <span class="flex items-center gap-2.5">
                         <i data-lucide="book-marked" class="size-4 stroke-2"></i> Asignaturas
                     </span>
                 </button>
-                <button type="button" sec:authorize="hasRole('ADMIN')" class="cfg-tab-btn w-full text-left px-4 py-3 rounded-lg text-[11px] font-black uppercase tracking-wider text-text-secondary hover:bg-[#fcfdfb] transition-all cursor-pointer" onclick="switchConfigTab(this, 'cfg-roles')">
+                <button type="button" sec:authorize="hasRole('ADMIN')" class="cfg-tab-btn w-full text-left px-4 py-3 rounded-lg text-[11px] font-black uppercase tracking-wider text-text-secondary hover:bg-brand-100/50 transition-all cursor-pointer" onclick="switchConfigTab(this, 'cfg-roles')">
                     <span class="flex items-center gap-2.5">
                         <i data-lucide="shield" class="size-4 stroke-2"></i> Roles y Permisos
                     </span>
@@ -59,7 +59,7 @@
             </div>
 
             <!-- Main Config Panel -->
-            <div class="bg-white rounded-xl border border-[#c4eec0]/40 shadow-soft p-8 min-h-[480px]">
+            <div class="bg-white rounded-xl border border-border shadow-soft p-8 min-h-[480px]">
                 
                 <!-- ==================== TAB 1: INSTITUCIÓN ==================== -->
                 <div id="cfg-institucion" class="config-tab-content flex flex-col gap-6">
@@ -138,10 +138,10 @@
                             <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-[#f9fbf8] flex flex-col gap-3.5">
                                 <div class="flex items-center justify-between border-b border-[#c4eec0]/30 pb-2">
                                     <span class="text-xs font-black text-sidebar uppercase">Primer Período</span>
-                                    <div class="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-[#c4eec0]">
-                                        <span class="text-[10px] font-bold text-text-secondary">Peso:</span>
-                                        <input type="number" id="cfg-peso-p1" name="pesoP1" th:value="${pesoP1 ?: 30}" min="1" max="100" step="1" oninput="recalcularSumaPeriodosCfg()" class="w-10 text-center font-black text-sidebar text-xs focus:outline-none" required />
-                                        <span class="text-[10px] font-bold text-sidebar">%</span>
+                                    <div class="flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-[#c4eec0] shadow-2xs">
+                                        <span class="text-[11px] font-bold text-text-secondary select-none">Peso:</span>
+                                        <input type="number" id="cfg-peso-p1" name="pesoP1" th:value="${pesoP1 != null ? (pesoP1.stripTrailingZeros().scale() <= 0 ? pesoP1.intValue() : pesoP1) : 33}" min="1" max="100" step="any" oninput="recalcularSumaPeriodosCfg()" class="w-14 text-center font-black text-sidebar text-xs focus:outline-none bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" required />
+                                        <span class="text-[11px] font-bold text-sidebar select-none">%</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-2 text-[11px]">
@@ -156,10 +156,10 @@
                             <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-[#f9fbf8] flex flex-col gap-3.5">
                                 <div class="flex items-center justify-between border-b border-[#c4eec0]/30 pb-2">
                                     <span class="text-xs font-black text-sidebar uppercase">Segundo Período</span>
-                                    <div class="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-[#c4eec0]">
-                                        <span class="text-[10px] font-bold text-text-secondary">Peso:</span>
-                                        <input type="number" id="cfg-peso-p2" name="pesoP2" th:value="${pesoP2 ?: 35}" min="1" max="100" step="1" oninput="recalcularSumaPeriodosCfg()" class="w-10 text-center font-black text-sidebar text-xs focus:outline-none" required />
-                                        <span class="text-[10px] font-bold text-sidebar">%</span>
+                                    <div class="flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-[#c4eec0] shadow-2xs">
+                                        <span class="text-[11px] font-bold text-text-secondary select-none">Peso:</span>
+                                        <input type="number" id="cfg-peso-p2" name="pesoP2" th:value="${pesoP2 != null ? (pesoP2.stripTrailingZeros().scale() <= 0 ? pesoP2.intValue() : pesoP2) : 33}" min="1" max="100" step="any" oninput="recalcularSumaPeriodosCfg()" class="w-14 text-center font-black text-sidebar text-xs focus:outline-none bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" required />
+                                        <span class="text-[11px] font-bold text-sidebar select-none">%</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-2 text-[11px]">
@@ -174,10 +174,10 @@
                             <div class="p-4 rounded-xl border border-[#c4eec0]/50 bg-[#f9fbf8] flex flex-col gap-3.5">
                                 <div class="flex items-center justify-between border-b border-[#c4eec0]/30 pb-2">
                                     <span class="text-xs font-black text-sidebar uppercase">Tercer Período</span>
-                                    <div class="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-[#c4eec0]">
-                                        <span class="text-[10px] font-bold text-text-secondary">Peso:</span>
-                                        <input type="number" id="cfg-peso-p3" name="pesoP3" th:value="${pesoP3 ?: 35}" min="1" max="100" step="1" oninput="recalcularSumaPeriodosCfg()" class="w-10 text-center font-black text-sidebar text-xs focus:outline-none" required />
-                                        <span class="text-[10px] font-bold text-sidebar">%</span>
+                                    <div class="flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-[#c4eec0] shadow-2xs">
+                                        <span class="text-[11px] font-bold text-text-secondary select-none">Peso:</span>
+                                        <input type="number" id="cfg-peso-p3" name="pesoP3" th:value="${pesoP3 != null ? (pesoP3.stripTrailingZeros().scale() <= 0 ? pesoP3.intValue() : pesoP3) : 34}" min="1" max="100" step="any" oninput="recalcularSumaPeriodosCfg()" class="w-14 text-center font-black text-sidebar text-xs focus:outline-none bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" required />
+                                        <span class="text-[11px] font-bold text-sidebar select-none">%</span>
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-2 text-[11px]">
@@ -197,15 +197,15 @@
                         </div>
                     </form>
 
-                    <!-- SECCIÓN B: ESCALA DE DESEMPEÑO Y CALIFICACIONES (AMPLIADA 6 NIVELES) -->
+                    <!-- SECCIÓN B: ESCALA DE DESEMPEÑO Y CALIFICACIONES (4 NIVELES SIEACI OFICIAL) -->
                     <form th:action="@{/configuracion/escala-desempeno}" method="post" class="flex flex-col gap-5 pt-4 border-t border-[#c4eec0]/30">
                         <div class="flex items-center justify-between border-b border-[#c4eec0]/20 pb-2">
                             <div>
                                 <h4 class="text-sidebar text-xs font-black uppercase tracking-wider flex items-center gap-2">
                                     <i data-lucide="award" class="size-4 stroke-2"></i>
-                                    <span>2. Escala de Desempeño y Calificaciones (0.00 a 5.00)</span>
+                                    <span>2. Escala de Desempeño y Calificaciones (1.00 a 5.00 - SIEACI Oficial)</span>
                                 </h4>
-                                <p class="text-text-secondary text-[11px] font-semibold mt-0.5">Define los umbrales numéricos que rigen los boletines, reportes y cursos.</p>
+                                <p class="text-text-secondary text-[11px] font-semibold mt-0.5">Define los umbrales numéricos de los 4 niveles de desempeño (Decreto 1290 / SIEACI 5.4.11).</p>
                             </div>
                         </div>
 
@@ -385,12 +385,12 @@
             if (target) target.classList.remove('hidden');
             
             document.querySelectorAll('.cfg-tab-btn').forEach(b => {
-                b.classList.remove('bg-[#f1fbe4]', 'text-sidebar');
-                b.classList.add('text-text-secondary', 'hover:bg-[#fcfdfb]');
+                b.classList.remove('bg-brand-100', 'text-sidebar');
+                b.classList.add('text-text-secondary', 'hover:bg-brand-100/50');
             });
             if (btn) {
-                btn.classList.add('bg-[#f1fbe4]', 'text-sidebar');
-                btn.classList.remove('text-text-secondary', 'hover:bg-[#fcfdfb]');
+                btn.classList.add('bg-brand-100', 'text-sidebar');
+                btn.classList.remove('text-text-secondary', 'hover:bg-brand-100/50');
             }
         }
 
@@ -406,9 +406,9 @@
 
             if (badge) {
                 if (suma === 100) {
-                    badge.className = "px-3.5 py-1.5 rounded-full text-[11px] font-black flex items-center gap-1.5 shadow-2xs bg-pill-green text-sidebar border border-[#8ce383]";
+                    badge.className = "px-3.5 py-1.5 rounded-full text-[11px] font-black flex items-center gap-1.5 shadow-2xs bg-pill-green text-sidebar border border-[#cbe5c7]";
                 } else {
-                    badge.className = "px-3.5 py-1.5 rounded-full text-[11px] font-black flex items-center gap-1.5 shadow-2xs bg-pill-red text-alert-red border border-red-300";
+                    badge.className = "px-3.5 py-1.5 rounded-full text-[11px] font-black flex items-center gap-1.5 shadow-2xs bg-pill-red text-alert-red border border-[#f5cece]";
                 }
             }
         }

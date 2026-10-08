@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/base :: html(~{::content})}">
+<head>
+    <title>Asistente Escolar – SIGA IEACI</title>
+</head>
+<body>
+
+<th:block th:fragment="content">
+    <div class="flex flex-col h-[calc(100vh-140px)] max-w-5xl mx-auto gap-4" x-data="{ mensaje: '' }">
+        
+        <!-- Header del Asistente -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="size-12 rounded-xl bg-sidebar/10 text-sidebar flex items-center justify-center font-bold text-xl">
+                    🤖
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-text-primary text-xl font-black tracking-tight">Mangle · Asistente IEACI</h1>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-sidebar/10 text-sidebar uppercase"
+                              th:text="${rol}">ROL</span>
+                    </div>
+                    <p class="text-text-secondary text-xs font-semibold mt-0.5">
+                        Consultas sobre Manual de Convivencia, SIEE y gestión académica en tiempo real.
+                    </p>
+                </div>
+            </div>
+            <div class="hidden sm:flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
+                <span class="size-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Modelo Seguro de Solo Lectura</span>
+            </div>
+        </div>
+
+        <!-- Área de Mensajes -->
+        <div id="chat-messages" 
+             class="flex-1 bg-white border border-slate-200 rounded-2xl p-6 overflow-y-auto space-y-6 shadow-xs scroll-smooth">
+            
+            <!-- Mensaje de bienvenida inicial -->
+            <div class="flex gap-3 max-w-3xl">
+                <div class="size-9 rounded-lg bg-sidebar/10 text-sidebar flex items-center justify-center shrink-0 font-bold">
+                    🌿
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <span class="text-[11px] font-bold text-slate-400">Mangle · Asistente SIGA IEACI</span>
+                    <div class="bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl rounded-tl-none p-4 text-sm leading-relaxed space-y-3">
+                        <p>
+                            ¡Hola, <strong th:text="${usuarioNombre}">Usuario</strong>! Soy <strong>Mangle</strong>, tu asistente virtual institucional de la Institución Educativa Ambientalista de Cartagena de Indias.
+                        </p>
+                        <p class="text-xs text-slate-600">
+                            Puedes preguntarme sobre el <strong>Manual de Convivencia</strong> (faltas tipo I, II y III, debido proceso, uniforme), 
+                            criterios de evaluación del <strong>SIEE</strong>, o realizar consultas operacionales según tu rol.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sugerencias Rápidas de Preguntas -->
+        <div class="flex items-center gap-2 overflow-x-auto py-1 px-1 text-xs no-scrollbar">
+            <span class="text-slate-400 font-bold shrink-0">Sugerencias:</span>
+            
+            <th:block th:if="${rol == 'ESTUDIANTE'}">
+                <button type="button" 
+                        class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-sidebar/10 hover:text-sidebar font-semibold text-slate-700 transition-colors shrink-0"
+                        @click="mensaje = '¿Cuáles son mis notas registradas?'; $refs.chatForm.requestSubmit()">
+                    📊 Mis notas
+                </button>
+                <button type="button" 
+                        class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-sidebar/10 hover:text-sidebar font-semibold text-slate-700 transition-colors shrink-0"
+                        @click="mensaje = '¿Qué clases tengo hoy en mi horario?'; $refs.chatForm.requestSubmit()">
+                    ⏰ Horario de hoy
+                </button>
+                <button type="button" 
+                        class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-sidebar/10 hover:text-sidebar font-semibold text-slate-700 transition-colors shrink-0"
+                        @click="mensaje = '¿Cuánto porcentaje de inasistencia causa reprobación?'; $refs.chatForm.requestSubmit()">
+                    📅 Inasistencia SIEE
+                </button>
+            </th:block>
+
+            <th:block th:if="${rol == 'DOCENTE'}">
+                <button type="button" 
+                        class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-sidebar/10 hover:text-sidebar font-semibold text-slate-700 transition-colors shrink-0"
+                        @click="mensaje = '¿Cuáles son mis cursos asignados?'; $refs.chatForm.requestSubmit()">
+                    👥 Mis cursos
+                </button>
+                <button type="button" 
+                        class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-sidebar/10 hover:text-sidebar font-semibold text-slate-700 transition-colors shrink-0"
+                        @click="mensaje = '¿Qué procedimiento aplica ante una falta tipo 2?'; $refs.chatForm.requestSubmit()">
+                    ⚖️ Faltas Tipo II
+                </button>
+            </th:block>
+
+            <th:block th:if="${rol == 'ADMIN' or rol == 'PERSONAL_ADMINISTRATIVO'}">
+                <button type="button" 
+                        class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-sidebar/10 hover:text-sidebar font-semibold text-slate-700 transition-colors shrink-0"
+                        @click="mensaje = '¿Cuáles son las estadísticas generales de la institución?'; $refs.chatForm.requestSubmit()">
+                    📈 Estadísticas IEACI
+                </button>
+            </th:block>
+
+            <button type="button" 
+                    class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-sidebar/10 hover:text-sidebar font-semibold text-slate-700 transition-colors shrink-0"
+                    @click="mensaje = '¿Cuáles son las faltas disciplinarias Tipo I?'; $refs.chatForm.requestSubmit()">
+                📘 Faltas Tipo I
+            </button>
+            <button type="button" 
+                    class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-sidebar/10 hover:text-sidebar font-semibold text-slate-700 transition-colors shrink-0"
+                    @click="mensaje = '¿Cuál es la escala valorativa institucional?'; $refs.chatForm.requestSubmit()">
+                🎯 Escala SIEE
+            </button>
+        </div>
+
+        <!-- Barra de Entrada y Envío -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-xs">
+            <form x-ref="chatForm"
+                  hx-post="/chat/mensaje"
+                  hx-target="#chat-messages"
+                  hx-swap="beforeend"
+                  hx-indicator="#chat-loading"
+                  @htmx:after-request="mensaje = ''; $nextTick(() => { const el = document.getElementById('chat-messages'); el.scrollTop = el.scrollHeight; })"
+                  class="flex items-center gap-3">
+                
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf}" />
+                
+                <div class="relative flex-1">
+                    <input type="text"
+                           name="mensaje"
+                           x-model="mensaje"
+                           placeholder="Escribe tu consulta escolar (ej: '¿Cuáles son mis notas?' o '¿Qué es una falta tipo II?')..."
+                           required
+                           class="w-full pl-4 pr-10 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-sidebar focus:ring-2 focus:ring-sidebar/20 text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-hidden transition-all" />
+                </div>
+
+                <button type="submit"
+                        class="px-5 py-3 rounded-xl bg-sidebar hover:bg-sidebar-hover text-white font-bold text-sm flex items-center gap-2 transition-all shadow-xs cursor-pointer">
+                    <span>Enviar</span>
+                    <span id="chat-loading" class="htmx-indicator animate-spin">⏳</span>
+                </button>
+            </form>
+        </div>
+
+    </div>
+</th:block>
+
+</body>
+</html>

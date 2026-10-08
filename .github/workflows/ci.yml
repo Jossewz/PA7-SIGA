@@ -11,6 +11,21 @@ jobs:
     name: Build, Test & Cobertura
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        ports:
+          - 5433:5432
+        env:
+          POSTGRES_DB: siga_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: siga
+        options: >-
+          --health-cmd="pg_isready -U postgres -d siga_test"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
     steps:
       - name: Checkout del repositorio
         uses: actions/checkout@v4

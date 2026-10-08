@@ -6,11 +6,11 @@ import com.siga.siga_iea.calificaciones.entity.Calificacion;
 import com.siga.siga_iea.calificaciones.entity.Evaluacion;
 import com.siga.siga_iea.calificaciones.repository.CalificacionesRepository;
 import com.siga.siga_iea.calificaciones.repository.EvaluacionRepository;
-import com.siga.siga_iea.clases.entity.Clase;
+import com.siga.siga_iea.clases.entity.Curso;
 import com.siga.siga_iea.clases.entity.CursoEstudiante;
 import com.siga.siga_iea.clases.entity.CursoMateria;
 import com.siga.siga_iea.clases.entity.Materia;
-import com.siga.siga_iea.clases.repository.ClaseRepository;
+import com.siga.siga_iea.clases.repository.CursoRepository;
 import com.siga.siga_iea.clases.repository.CursoEstudianteRepository;
 import com.siga.siga_iea.clases.repository.CursoMateriaRepository;
 import com.siga.siga_iea.clases.repository.MateriaRepository;
@@ -34,27 +34,45 @@ public class CalificacionesService {
     private final EvaluacionRepository evaluacionRepository;
     private final CursoMateriaRepository cursoMateriaRepository;
     private final EstudianteRepository estudianteRepository;
-    private final ClaseRepository claseRepository;
+    private final CursoRepository cursoRepository;
     private final MateriaRepository materiaRepository;
     private final CursoEstudianteRepository cursoEstudianteRepository;
     private final EscalaDesempenoService escalaDesempenoService;
+    private final com.siga.siga_iea.auditoria.service.AuditoriaService auditoriaService;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public CalificacionesService(CalificacionesRepository calificacionesRepository,
+                                 EvaluacionRepository evaluacionRepository,
+                                 CursoMateriaRepository cursoMateriaRepository,
+                                 EstudianteRepository estudianteRepository,
+                                 CursoRepository cursoRepository,
+                                 MateriaRepository materiaRepository,
+                                 CursoEstudianteRepository cursoEstudianteRepository,
+                                 EscalaDesempenoService escalaDesempenoService,
+                                 @org.springframework.beans.factory.annotation.Autowired(required = false)
+                                 com.siga.siga_iea.auditoria.service.AuditoriaService auditoriaService) {
+        this.calificacionesRepository = calificacionesRepository;
+        this.evaluacionRepository = evaluacionRepository;
+        this.cursoMateriaRepository = cursoMateriaRepository;
+        this.estudianteRepository = estudianteRepository;
+        this.cursoRepository = cursoRepository;
+        this.materiaRepository = materiaRepository;
+        this.cursoEstudianteRepository = cursoEstudianteRepository;
+        this.escalaDesempenoService = escalaDesempenoService;
+        this.auditoriaService = auditoriaService;
+    }
 
     public CalificacionesService(CalificacionesRepository calificacionesRepository,
                                  EvaluacionRepository evaluacionRepository,
                                  CursoMateriaRepository cursoMateriaRepository,
                                  EstudianteRepository estudianteRepository,
-                                 ClaseRepository claseRepository,
+                                 CursoRepository cursoRepository,
                                  MateriaRepository materiaRepository,
                                  CursoEstudianteRepository cursoEstudianteRepository,
                                  EscalaDesempenoService escalaDesempenoService) {
-        this.calificacionesRepository = calificacionesRepository;
-        this.evaluacionRepository = evaluacionRepository;
-        this.cursoMateriaRepository = cursoMateriaRepository;
-        this.estudianteRepository = estudianteRepository;
-        this.claseRepository = claseRepository;
-        this.materiaRepository = materiaRepository;
-        this.cursoEstudianteRepository = cursoEstudianteRepository;
-        this.escalaDesempenoService = escalaDesempenoService;
+        this(calificacionesRepository, evaluacionRepository, cursoMateriaRepository,
+             estudianteRepository, cursoRepository, materiaRepository,
+             cursoEstudianteRepository, escalaDesempenoService, null);
     }
 
     public List<Calificacion> obtenerCalificacionesEstudiante(UUID estudianteId) {
@@ -65,7 +83,7 @@ public class CalificacionesService {
     public CursoMateria obtenerOCrearCursoMateria(UUID cursoId, UUID materiaId, String anoLectivo) {
         return cursoMateriaRepository.findByCursoIdAndMateriaIdAndAnoLectivo(cursoId, materiaId, anoLectivo)
                 .orElseGet(() -> {
-                    Clase curso = claseRepository.findById(cursoId)
+                    Curso curso = cursoRepository.findById(cursoId)
                             .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
                     Materia materia = materiaRepository.findById(materiaId)
                             .orElseThrow(() -> new IllegalArgumentException("Materia no encontrada"));
@@ -89,11 +107,32 @@ public class CalificacionesService {
                 .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
 
         Optional<Calificacion> opt = calificacionesRepository.findByEvaluacionIdAndEstudianteId(evaluacionId, estudianteId);
-        Calificacion c = opt.orElseGet(() -> new Calificacion(ev, est, BigDecimal.ZERO));
-        c.setNota(nota != null ? nota.setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO);
+        Calificacion c;
+        BigDecimal valorAnterior = null;
+        if (opt.isPresent()) {
+            c = opt.get();
+            valorAnterior = c.getNota();
+        } else {
+            c = new Calificacion(ev, est, BigDecimal.ZERO);
+        }
+
+        BigDecimal nuevaNota = (nota != null ? nota.setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO);
+        c.setNota(nuevaNota);
         if (observaciones != null) c.setObservaciones(observaciones);
 
-        return calificacionesRepository.save(c);
+        Calificacion guardada = calificacionesRepository.save(c);
+
+        if (auditoriaService != null && (valorAnterior == null || valorAnterior.compareTo(nuevaNota) != 0)) {
+            auditoriaService.registrarCambio(
+                    "CALIFICACION",
+                    guardada.getId(),
+                    "nota",
+                    valorAnterior != null ? valorAnterior.toString() : "SIN_NOTA",
+                    nuevaNota.toString()
+            );
+        }
+
+        return guardada;
     }
 
     @Transactional
@@ -208,9 +247,9 @@ public class CalificacionesService {
 
         if (ponderacionesPeriodos == null || ponderacionesPeriodos.isEmpty()) {
             ponderacionesPeriodos = new HashMap<>();
-            ponderacionesPeriodos.put(1, new BigDecimal("30.00"));
-            ponderacionesPeriodos.put(2, new BigDecimal("35.00"));
-            ponderacionesPeriodos.put(3, new BigDecimal("35.00"));
+            ponderacionesPeriodos.put(1, new BigDecimal("33.00"));
+            ponderacionesPeriodos.put(2, new BigDecimal("33.00"));
+            ponderacionesPeriodos.put(3, new BigDecimal("34.00"));
         }
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM");

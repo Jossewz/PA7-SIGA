@@ -2,7 +2,7 @@ package com.siga.siga_iea.configuracion;
 
 import com.siga.siga_iea.clases.entity.Materia;
 import com.siga.siga_iea.clases.repository.MateriaRepository;
-import com.siga.siga_iea.clases.service.ClaseService;
+import com.siga.siga_iea.clases.service.CursoService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -30,7 +31,7 @@ class ConfiguracionParametrosViewTest {
     private MateriaRepository materiaRepository;
 
     @Autowired
-    private ClaseService claseService;
+    private CursoService cursoService;
 
     @Test
     @WithMockUser(roles = "ADMIN")
@@ -45,14 +46,14 @@ class ConfiguracionParametrosViewTest {
                 .andExpect(content().string(containsString("Roles y Permisos")))
                 // Secciones de Parámetros del Sistema
                 .andExpect(content().string(containsString("1. Periodos Académicos y Ponderación Oficial")))
-                .andExpect(content().string(containsString("2. Escala de Desempeño y Calificaciones (0.00 a 5.00)")))
-                // Los 6 niveles de desempeño
+                .andExpect(content().string(containsString("2. Escala de Desempeño y Calificaciones (1.00 a 5.00 - SIEACI Oficial)")))
+                // Los 4 niveles oficiales de desempeño del SIEACI
                 .andExpect(content().string(containsString("Desempeño Superior")))
                 .andExpect(content().string(containsString("Desempeño Alto")))
                 .andExpect(content().string(containsString("Desempeño Básico")))
                 .andExpect(content().string(containsString("Desempeño Bajo")))
-                .andExpect(content().string(containsString("Desempeño Muy Bajo")))
-                .andExpect(content().string(containsString("Desempeño Crítico")))
+                .andExpect(content().string(not(containsString("Desempeño Muy Bajo"))))
+                .andExpect(content().string(not(containsString("Desempeño Crítico"))))
                 // Asegurar que la vista mock antigua NO exista
                 .andExpect(content().string(not(containsString("Cargos de Nómina"))))
                 .andExpect(content().string(not(containsString("Tipos de Certificado"))))
@@ -64,7 +65,7 @@ class ConfiguracionParametrosViewTest {
     @DisplayName("POST /configuracion/periodos debe validar que la suma sea 100%")
     void testValidacionSumaPonderaciones() throws Exception {
         // Suma errónea (90%)
-        mockMvc.perform(post("/configuracion/periodos")
+        mockMvc.perform(post("/configuracion/periodos").with(csrf())
                         .param("pesoP1", "30")
                         .param("pesoP2", "30")
                         .param("pesoP3", "30")
@@ -77,11 +78,11 @@ class ConfiguracionParametrosViewTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attributeExists("mensajeError"));
 
-        // Suma válida (100%)
-        mockMvc.perform(post("/configuracion/periodos")
-                        .param("pesoP1", "30")
-                        .param("pesoP2", "35")
-                        .param("pesoP3", "35")
+        // Suma válida SIEACI (33% + 33% + 34% = 100%)
+        mockMvc.perform(post("/configuracion/periodos").with(csrf())
+                        .param("pesoP1", "33")
+                        .param("pesoP2", "33")
+                        .param("pesoP3", "34")
                         .param("fIniP1", "2026-02-01")
                         .param("fFinP1", "2026-06-15")
                         .param("fIniP2", "2026-07-15")
@@ -106,7 +107,7 @@ class ConfiguracionParametrosViewTest {
         activa.setEstado("Activo");
         materiaRepository.save(activa);
 
-        List<Materia> activasParaHorarios = claseService.listarMateriasActivas();
+        List<Materia> activasParaHorarios = cursoService.listarMateriasActivas();
 
         assertTrue(activasParaHorarios.stream().anyMatch(m -> m.getNombre().equals("Biología Molecular")));
         assertFalse(activasParaHorarios.stream().anyMatch(m -> m.getNombre().equals("Astronomía Experimental")));
@@ -117,7 +118,7 @@ class ConfiguracionParametrosViewTest {
     @DisplayName("Actualizar permisos de ESTUDIANTE debe habilitar dinámicamente el acceso al módulo PERSONAL")
     void testPermisosRolesActualizacionYAccesoDinamico() throws Exception {
         // Asignar acceso al módulo PERSONAL para el rol ESTUDIANTE
-        mockMvc.perform(post("/configuracion/roles/permisos")
+        mockMvc.perform(post("/configuracion/roles/permisos").with(csrf())
                         .param("rol", "ESTUDIANTE")
                         .param("modulosAcceso", "MATRICULAS", "PERSONAL", "CURSOS_HORARIOS"))
                 .andExpect(status().is3xxRedirection())

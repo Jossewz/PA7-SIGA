@@ -2,8 +2,8 @@ package com.siga.siga_iea.calificaciones.controller;
 
 import com.siga.siga_iea.calificaciones.dto.BoletinMateriaDTO;
 import com.siga.siga_iea.calificaciones.service.CalificacionesService;
-import com.siga.siga_iea.clases.entity.Clase;
-import com.siga.siga_iea.clases.service.ClaseService;
+import com.siga.siga_iea.clases.entity.Curso;
+import com.siga.siga_iea.clases.service.CursoService;
 import com.siga.siga_iea.configuracion.service.PeriodoConfigService;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
 import com.siga.siga_iea.usuarios.service.EstudianteService;
@@ -20,17 +20,23 @@ public class CalificacionController {
 
     private final CalificacionesService calificacionesService;
     private final EstudianteService estudianteService;
-    private final ClaseService claseService;
+    private final CursoService cursoService;
     private final PeriodoConfigService periodoConfigService;
+    private final com.siga.siga_iea.clases.repository.CursoEstudianteRepository cursoEstudianteRepository;
+    private final com.siga.siga_iea.matricula.service.MatriculaService matriculaService;
 
     public CalificacionController(CalificacionesService calificacionesService, 
                                   EstudianteService estudianteService,
-                                  ClaseService claseService,
-                                  PeriodoConfigService periodoConfigService) {
+                                  CursoService cursoService,
+                                  PeriodoConfigService periodoConfigService,
+                                  com.siga.siga_iea.clases.repository.CursoEstudianteRepository cursoEstudianteRepository,
+                                  com.siga.siga_iea.matricula.service.MatriculaService matriculaService) {
         this.calificacionesService = calificacionesService;
         this.estudianteService = estudianteService;
-        this.claseService = claseService;
+        this.cursoService = cursoService;
         this.periodoConfigService = periodoConfigService;
+        this.cursoEstudianteRepository = cursoEstudianteRepository;
+        this.matriculaService = matriculaService;
     }
 
     @GetMapping("/calificaciones")
@@ -59,7 +65,19 @@ public class CalificacionController {
             model.addAttribute("estudianteSeleccionadoId", seleccionado.getId().toString());
             model.addAttribute("estudianteNombre", seleccionado.getNombreCompleto());
             model.addAttribute("estudianteDocumento", seleccionado.getNumeroDocumento());
-            model.addAttribute("estudianteGrado", "11° - 01");
+
+            String gradoStr = "Sin grado";
+            List<com.siga.siga_iea.clases.entity.CursoEstudiante> ces = cursoEstudianteRepository.findByEstudianteId(seleccionado.getId());
+            if (!ces.isEmpty()) {
+                Curso c = ces.get(ces.size() - 1).getCurso();
+                gradoStr = c.getGrado() + " - " + (c.getGrupo() != null ? c.getGrupo() : "01");
+            } else {
+                Optional<com.siga.siga_iea.matricula.entity.Matricula> matOpt = matriculaService.buscarUltimaMatriculaEstudiante(seleccionado.getId());
+                if (matOpt.isPresent() && matOpt.get().getGrado() != null) {
+                    gradoStr = matOpt.get().getGrado() + " - " + (matOpt.get().getSalon() != null ? matOpt.get().getSalon() : "01");
+                }
+            }
+            model.addAttribute("estudianteGrado", gradoStr);
 
             List<BoletinMateriaDTO> boletin = calificacionesService.obtenerBoletinEstudiante(seleccionado.getId(), "2026", ponderaciones);
             model.addAttribute("boletin", boletin);
@@ -71,7 +89,7 @@ public class CalificacionController {
             model.addAttribute("boletin", Collections.emptyList());
         }
 
-        List<Clase> cursos = claseService.listarTodosLosCursos();
+        List<Curso> cursos = cursoService.listarTodosLosCursos();
         model.addAttribute("cursosList", cursos);
 
         return "calificaciones/index";

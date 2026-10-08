@@ -1,0 +1,396 @@
+{
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "lectura mapa status 200": {
+                    "id": "41f2c556a1ddc101821f16112a080e08",
+                    "passes": 415,
+                    "fails": 0,
+                    "name": "lectura mapa status 200",
+                    "path": "::lectura mapa status 200"
+                },
+                "lectura contiene estudiantes": {
+                    "name": "lectura contiene estudiantes",
+                    "path": "::lectura contiene estudiantes",
+                    "id": "78e978327f828ad0d30772820ecba13c",
+                    "passes": 415,
+                    "fails": 0
+                },
+                "escritura asistencia status 200": {
+                    "passes": 133,
+                    "fails": 0,
+                    "name": "escritura asistencia status 200",
+                    "path": "::escritura asistencia status 200",
+                    "id": "5d3fb1ef7820808be1c9ae21739beb29"
+                },
+                "escritura proceso 40 registros": {
+                    "passes": 133,
+                    "fails": 0,
+                    "name": "escritura proceso 40 registros",
+                    "path": "::escritura proceso 40 registros",
+                    "id": "12cd8b4a0b62b8280b5aa9ca5a0bf5bc"
+                },
+                "batch colision: todas las 12 peticiones retornan 200": {
+                    "name": "batch colision: todas las 12 peticiones retornan 200",
+                    "path": "::batch colision: todas las 12 peticiones retornan 200",
+                    "id": "b6837fa901c8bc049fdb1c6c2476f9da",
+                    "passes": 1,
+                    "fails": 0
+                },
+                "batch colision: cuerpo contiene array de sesiones": {
+                    "name": "batch colision: cuerpo contiene array de sesiones",
+                    "path": "::batch colision: cuerpo contiene array de sesiones",
+                    "id": "6f40e231c0e4bd0b6be19eecf38e064f",
+                    "passes": 1,
+                    "fails": 0
+                },
+                "contencion abrir-dia status 200": {
+                    "passes": 40,
+                    "fails": 0,
+                    "name": "contencion abrir-dia status 200",
+                    "path": "::contencion abrir-dia status 200",
+                    "id": "485af5432e9f177d2b77e3ebc54bc096"
+                },
+                "contencion retorna sesiones": {
+                    "name": "contencion retorna sesiones",
+                    "path": "::contencion retorna sesiones",
+                    "id": "2d2e9a89370c0665a2c7728ffa954061",
+                    "passes": 40,
+                    "fails": 0
+                }
+            }
+    },
+    "metrics": {
+        "http_req_tls_handshaking": {
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0,
+            "min": 0,
+            "med": 0
+        },
+        "escrituras_40_filas_exitosas": {
+            "count": 133,
+            "rate": 2.416814246307656
+        },
+        "http_req_blocked": {
+            "min": 0.002405,
+            "med": 0.005941,
+            "max": 3.378279,
+            "p(90)": 0.01043,
+            "p(95)": 0.0302365,
+            "avg": 0.030830355029585824
+        },
+        "contencion_tasa_exito": {
+            "passes": 40,
+            "fails": 0,
+            "value": 1
+        },
+        "colision_batch_duration_ms": {
+            "p(90)": 58,
+            "p(95)": 58,
+            "avg": 58,
+            "min": 58,
+            "med": 58,
+            "max": 58,
+            "thresholds": {
+                "p(95)<500": false
+            }
+        },
+        "http_req_waiting": {
+            "avg": 45.629688007396474,
+            "min": 10.986149,
+            "med": 21.624908,
+            "max": 224.416153,
+            "p(90)": 116.606224,
+            "p(95)": 141.93738975
+        },
+        "http_req_connecting": {
+            "min": 0,
+            "med": 0,
+            "max": 0.83632,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.016037760355029587
+        },
+        "iteration_duration": {
+            "min": 316.111786,
+            "med": 521.27698,
+            "max": 1523.419407,
+            "p(90)": 1119.9627052,
+            "p(95)": 1146.2204474,
+            "avg": 656.9072721646859
+        },
+        "escritura_40_estudiantes_duration_ms": {
+            "p(90)": 161.39999999999998,
+            "p(95)": 170.39999999999998,
+            "avg": 122.01503759398496,
+            "min": 81,
+            "med": 114,
+            "max": 218,
+            "thresholds": {
+                "p(95)<500": false
+            }
+        },
+        "data_sent": {
+            "count": 750273,
+            "rate": 13633.61259413522
+        },
+        "checks": {
+            "fails": 0,
+            "passes": 1178,
+            "value": 1
+        },
+        "iterations": {
+            "count": 589,
+            "rate": 10.703034519362477
+        },
+        "vus": {
+            "value": 4,
+            "min": 0,
+            "max": 12
+        },
+        "vus_max": {
+            "value": 21,
+            "min": 21,
+            "max": 21
+        },
+        "data_received": {
+            "count": 2384104,
+            "rate": 43322.83091638397
+        },
+        "http_req_duration": {
+            "med": 22.3856015,
+            "max": 527.571832,
+            "p(90)": 131.205917,
+            "p(95)": 162.4106135,
+            "avg": 52.72508940384613,
+            "min": 11.164129,
+            "thresholds": {
+                "p(95)<300": false
+            }
+        },
+        "http_req_duration{expected_response:true}": {
+            "max": 527.571832,
+            "p(90)": 131.205917,
+            "p(95)": 162.4106135,
+            "avg": 52.72508940384613,
+            "min": 11.164129,
+            "med": 22.3856015
+        },
+        "http_reqs": {
+            "count": 676,
+            "rate": 12.283958124090043
+        },
+        "http_req_receiving": {
+            "p(95)": 2.7347105,
+            "avg": 7.02120775443787,
+            "min": 0.056301,
+            "med": 0.1998525,
+            "max": 310.97536,
+            "p(90)": 0.924877
+        },
+        "http_req_sending": {
+            "med": 0.046657,
+            "max": 0.470376,
+            "p(90)": 0.192147,
+            "p(95)": 0.22474624999999998,
+            "avg": 0.07419364201183433,
+            "min": 0.006643
+        },
+        "contencion_abrir_dia_duration_ms": {
+            "p(90)": 32.50000000000001,
+            "p(95)": 37.099999999999994,
+            "avg": 24.475,
+            "min": 15,
+            "med": 23,
+            "max": 46,
+            "thresholds": {
+                "p(95)<300": false
+            }
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 676,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "lectura_mapa_duration_ms": {
+            "avg": 21.079518072289158,
+            "min": 11,
+            "med": 19,
+            "max": 54,
+            "p(90)": 31,
+            "p(95)": 37,
+            "thresholds": {
+                "p(95)<300": false
+            }
+        }
+    },
+    "setup_data": {
+        "contentionCourseId": "903ba96e-448a-4276-a093-5ddb8662e8f3",
+        "fechaHoy": "2026-10-01",
+        "sesionesPorCurso": {
+            "2cb4c214-adf6-489e-8df7-038039fe5237": [
+                {
+                    "docenteEmail": "carlos.mendoza@ieaci.edu.co",
+                    "docenteId": "d0000000-0000-0000-0000-000000000001",
+                    "id": "4de1e9bf-2121-44d9-9dfa-50d41b2a5a59"
+                },
+                {
+                    "docenteEmail": "ana.garcia@ieaci.edu.co",
+                    "docenteId": "d0000000-0000-0000-0000-000000000002",
+                    "id": "3af2d17c-08c4-4c91-8e84-b1aa380c3a58"
+                },
+                {
+                    "docenteEmail": "jorge.herrera@ieaci.edu.co",
+                    "docenteId": "d0000000-0000-0000-0000-000000000003",
+                    "id": "80a6b8b2-80a4-498e-bcf3-6364328d8912"
+                }
+            ],
+            "903ba96e-448a-4276-a093-5ddb8662e8f3": [
+                {
+                    "docenteEmail": "carlos.mendoza@ieaci.edu.co",
+                    "docenteId": "d0000000-0000-0000-0000-000000000001",
+                    "id": "b47495e5-b704-4477-95a9-d7407c626aea"
+                },
+                {
+                    "id": "f4941cee-367c-4ed1-9cec-0e61ed44c3e0",
+                    "docenteEmail": "ana.garcia@ieaci.edu.co",
+                    "docenteId": "d0000000-0000-0000-0000-000000000002"
+                },
+                {
+                    "docenteId": "d0000000-0000-0000-0000-000000000003",
+                    "id": "ccd110f1-d0af-4a96-a5f4-64b26a674079",
+                    "docenteEmail": "jorge.herrera@ieaci.edu.co"
+                }
+            ],
+            "bac733d6-58c4-4c5a-944b-6e16423d40f8": [
+                {
+                    "docenteEmail": "carlos.mendoza@ieaci.edu.co",
+                    "docenteId": "d0000000-0000-0000-0000-000000000001",
+                    "id": "fe0e7cf6-d028-4b56-9e96-4b7ccdebf860"
+                },
+                {
+                    "docenteEmail": "ana.garcia@ieaci.edu.co",
+                    "docenteId": "d0000000-0000-0000-0000-000000000002",
+                    "id": "9b63e051-d3a4-4f49-aed3-f38195726024"
+                },
+                {
+                    "docenteEmail": "jorge.herrera@ieaci.edu.co",
+                    "docenteId": "d0000000-0000-0000-0000-000000000003",
+                    "id": "7669f551-e0b7-4f99-b492-150c6ff79dbe"
+                }
+            ],
+            "eb9e70e2-c576-4a71-9856-d144f2b4b636": [],
+            "f5f004ec-09e9-46fc-88e3-09fae7e24741": [
+                    {
+                        "docenteEmail": "carlos.mendoza@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000001",
+                        "id": "605df63e-e08d-4dd3-995a-a73258e2cedf"
+                    },
+                    {
+                        "docenteEmail": "ana.garcia@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000002",
+                        "id": "0680d5bf-f332-4f6d-acb6-ebecf8ae45cf"
+                    },
+                    {
+                        "docenteEmail": "jorge.herrera@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000003",
+                        "id": "47deb3ec-ec22-41c0-ac3e-efa072e7c608"
+                    }
+                ],
+            "fd28c615-8f38-445e-811d-c9f139258ca9": [
+                    {
+                        "docenteEmail": "carlos.mendoza@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000001",
+                        "id": "da2c588f-06bb-4d36-8b4f-c36ff77dea6a"
+                    },
+                    {
+                        "docenteEmail": "ana.garcia@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000002",
+                        "id": "879b0bf4-1958-47d4-804a-0b55a6fed42f"
+                    },
+                    {
+                        "docenteEmail": "jorge.herrera@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000003",
+                        "id": "493b0312-db45-4905-82f5-974e931da46a"
+                    }
+                ],
+            "88cdba4c-f643-4010-ac75-e36c02e06014": [
+                    {
+                        "id": "be1dbcc1-477f-44c0-bfaa-f57ebb05d798",
+                        "docenteEmail": "carlos.mendoza@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000001"
+                    },
+                    {
+                        "docenteEmail": "ana.garcia@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000002",
+                        "id": "9a9f8c84-c488-4e1b-9cb6-3894c25f6f82"
+                    },
+                    {
+                        "id": "b8f7a3f7-65a7-43d7-899e-b266618c74a6",
+                        "docenteEmail": "jorge.herrera@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000003"
+                    }
+                ],
+            "941da0d9-601f-4ce6-b931-ee47577a50c9": [
+                    {
+                        "docenteEmail": "carlos.mendoza@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000001",
+                        "id": "f96a0547-bc6c-4eca-ba0f-c017713c3bc5"
+                    },
+                    {
+                        "docenteEmail": "ana.garcia@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000002",
+                        "id": "2cb86a03-1b9b-4a47-8c6d-4c1ce82fd6c6"
+                    },
+                    {
+                        "docenteEmail": "jorge.herrera@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000003",
+                        "id": "4c362ef8-9b05-4c44-b50b-1c8a85f78ea5"
+                    }
+                ],
+            "9465a8d8-04b8-4882-b099-47a33ba698c9": [
+                    {
+                        "docenteEmail": "carlos.mendoza@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000001",
+                        "id": "e316eb10-0aaa-4cff-8a42-cc1f9b7fede5"
+                    },
+                    {
+                        "docenteEmail": "ana.garcia@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000002",
+                        "id": "ea3df078-f055-4441-b12e-c65ecf8fb15b"
+                    },
+                    {
+                        "docenteEmail": "jorge.herrera@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000003",
+                        "id": "1a3c7ad8-bebd-4a0b-be20-c1e4ea2a9483"
+                    }
+                ],
+            "ba88e945-eee1-4255-84e4-9417d239d073": [
+                    {
+                        "docenteEmail": "carlos.mendoza@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000001",
+                        "id": "d26bdbca-9b43-4c7f-901e-fb9d85cb94ec"
+                    },
+                    {
+                        "docenteEmail": "ana.garcia@ieaci.edu.co",
+                        "docenteId": "d0000000-0000-0000-0000-000000000002",
+                        "id": "ce4a8324-feba-4199-9d06-8d96bfa7e713"
+                    },
+                    {
+                        "docenteId": "d0000000-0000-0000-0000-000000000003",
+                        "id": "bcc23f2a-98fd-4ba1-bc87-3c7412906493",
+                        "docenteEmail": "jorge.herrera@ieaci.edu.co"
+                    }
+                ]
+        },
+        "unopenedCourseId": "ead2db28-643e-4d88-bf95-19a7cfdcd9e2"
+    }
+}

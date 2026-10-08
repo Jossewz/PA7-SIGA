@@ -25,15 +25,33 @@ public class ReporteController {
     private final EstudianteService estudianteService;
     private final PersonalService personalService;
     private final CurrentUserContextService currentUserContextService;
+    private final com.siga.siga_iea.clases.repository.CursoEstudianteRepository cursoEstudianteRepository;
+    private final com.siga.siga_iea.matricula.service.MatriculaService matriculaService;
 
     public ReporteController(ReportesService reportesService,
                              EstudianteService estudianteService,
                              PersonalService personalService,
-                             CurrentUserContextService currentUserContextService) {
+                             CurrentUserContextService currentUserContextService,
+                             com.siga.siga_iea.clases.repository.CursoEstudianteRepository cursoEstudianteRepository,
+                             com.siga.siga_iea.matricula.service.MatriculaService matriculaService) {
         this.reportesService = reportesService;
         this.estudianteService = estudianteService;
         this.personalService = personalService;
         this.currentUserContextService = currentUserContextService;
+        this.cursoEstudianteRepository = cursoEstudianteRepository;
+        this.matriculaService = matriculaService;
+    }
+
+    private String resolverGradoEstudiante(Estudiante e) {
+        if (e == null) return "Sin grado";
+        List<com.siga.siga_iea.clases.entity.CursoEstudiante> ces = cursoEstudianteRepository.findByEstudianteId(e.getId());
+        if (!ces.isEmpty()) {
+            com.siga.siga_iea.clases.entity.Curso c = ces.get(ces.size() - 1).getCurso();
+            return c.getGrado() + " - " + (c.getGrupo() != null ? c.getGrupo() : "01");
+        }
+        return matriculaService.buscarUltimaMatriculaEstudiante(e.getId())
+                .map(m -> (m.getGrado() != null ? m.getGrado() : "Sin grado") + " - " + (m.getSalon() != null ? m.getSalon() : "01"))
+                .orElse("Sin grado");
     }
 
     private Optional<Usuario> getUsuarioLogueado() {
@@ -88,7 +106,7 @@ public class ReporteController {
             Map<String, Object> map = new HashMap<>();
             map.put("id", e.getId().toString());
             map.put("nombre", e.getNombreCompleto());
-            map.put("grado", "11° - 01");
+            map.put("grado", resolverGradoEstudiante(e));
             estudiantesList.add(map);
         }
 
@@ -107,7 +125,7 @@ public class ReporteController {
             map.put("dbId", r.getId().toString());
             map.put("id", r.getCodigo());
             map.put("estudiante", r.getEstudiante() != null ? r.getEstudiante().getNombreCompleto() : "N/A");
-            map.put("grado", "11° - 01");
+            map.put("grado", resolverGradoEstudiante(r.getEstudiante()));
             map.put("docente", r.getDocente() != null ? r.getDocente().getNombreCompleto() : "N/A");
             map.put("categoria", r.getCategoria());
             map.put("razon", r.getRazon());

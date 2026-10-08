@@ -12,6 +12,7 @@ import java.util.UUID;
 public interface CursoEstudianteRepository extends JpaRepository<CursoEstudiante, UUID> {
     List<CursoEstudiante> findByCursoId(UUID cursoId);
     Optional<CursoEstudiante> findByCursoIdAndEstudianteIdAndAnoLectivo(UUID cursoId, UUID estudianteId, String anoLectivo);
+    Optional<CursoEstudiante> findByEstudianteIdAndAnoLectivo(UUID estudianteId, String anoLectivo);
     List<CursoEstudiante> findByEstudianteId(UUID estudianteId);
     boolean existsByEstudianteIdAndAnoLectivo(UUID estudianteId, String anoLectivo);
     boolean existsByCursoIdAndEstudianteId(UUID cursoId, UUID estudianteId);

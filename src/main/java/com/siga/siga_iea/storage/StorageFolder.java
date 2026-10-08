@@ -1,12 +1,5 @@
 package com.siga.siga_iea.storage;
 
-import lombok.Getter;
-
-/**
- * Enum representing the logical folder structure inside the MinIO bucket.
- * Use this instead of raw strings to avoid typos and keep consistency.
- */
-@Getter
 public enum StorageFolder {
 
     ESTUDIANTES("estudiantes"),
@@ -23,5 +16,9 @@ public enum StorageFolder {
 
     StorageFolder(String path) {
         this.path = path;
+    }
+
+    public String getPath() {
+        return path;
     }
 }

@@ -10,10 +10,16 @@ import com.siga.siga_iea.reportes.entity.Reporte;
 import com.siga.siga_iea.reportes.repository.ReporteRepository;
 import com.siga.siga_iea.storage.entity.Documento;
 import com.siga.siga_iea.storage.repository.DocumentoRepository;
+import com.siga.siga_iea.usuarios.entity.Acudiente;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
+import com.siga.siga_iea.usuarios.entity.EstudianteAcudiente;
 import com.siga.siga_iea.usuarios.entity.Usuario;
+import com.siga.siga_iea.usuarios.repository.AcudienteRepository;
+import com.siga.siga_iea.usuarios.repository.EstudianteAcudienteRepository;
 import com.siga.siga_iea.usuarios.repository.EstudianteRepository;
 import com.siga.siga_iea.usuarios.repository.UsuarioRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +40,8 @@ public class EstudianteService {
     private final CursoEstudianteRepository cursoEstudianteRepository;
     private final ReporteRepository reporteRepository;
     private final SolicitudCertificadoRepository certificadoRepository;
+    private final EstudianteAcudienteRepository estudianteAcudienteRepository;
+    private final AcudienteRepository acudienteRepository;
 
     public EstudianteService(EstudianteRepository estudianteRepository,
                              UsuarioRepository usuarioRepository,
@@ -42,7 +50,9 @@ public class EstudianteService {
                              DocumentoRepository documentoRepository,
                              CursoEstudianteRepository cursoEstudianteRepository,
                              ReporteRepository reporteRepository,
-                             SolicitudCertificadoRepository certificadoRepository) {
+                             SolicitudCertificadoRepository certificadoRepository,
+                             EstudianteAcudienteRepository estudianteAcudienteRepository,
+                             AcudienteRepository acudienteRepository) {
         this.estudianteRepository = estudianteRepository;
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
@@ -51,6 +61,8 @@ public class EstudianteService {
         this.cursoEstudianteRepository = cursoEstudianteRepository;
         this.reporteRepository = reporteRepository;
         this.certificadoRepository = certificadoRepository;
+        this.estudianteAcudienteRepository = estudianteAcudienteRepository;
+        this.acudienteRepository = acudienteRepository;
     }
 
     public List<Estudiante> listarTodos() {
@@ -59,6 +71,10 @@ public class EstudianteService {
 
     public List<Estudiante> buscar(String search, String estado) {
         return estudianteRepository.searchEstudiantes(search, estado);
+    }
+
+    public Page<Estudiante> buscarPaginado(String search, String estado, String nivel, Pageable pageable) {
+        return estudianteRepository.searchEstudiantesPaginado(search, estado, nivel, pageable);
     }
 
     public Optional<Estudiante> buscarPorId(UUID id) {
@@ -197,5 +213,46 @@ public class EstudianteService {
         String normalized = Normalizer.normalize(text.toLowerCase(), Normalizer.Form.NFD);
         return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
                          .replaceAll("[^a-z0-9]", "");
+    }
+
+    public List<EstudianteAcudiente> listarAcudientesDeEstudiante(UUID estudianteId) {
+        return estudianteAcudienteRepository.findByEstudianteId(estudianteId);
+    }
+
+    public Optional<Acudiente> obtenerAcudientePrincipal(UUID estudianteId) {
+        return estudianteAcudienteRepository.findByEstudianteIdAndEsPrincipalTrue(estudianteId)
+                .map(EstudianteAcudiente::getAcudiente)
+                .or(() -> estudianteRepository.findById(estudianteId).map(Estudiante::getAcudiente));
+    }
+
+    @Transactional
+    public EstudianteAcudiente asociarAcudiente(UUID estudianteId, UUID acudienteId, String parentesco, boolean esPrincipal) {
+        Estudiante est = estudianteRepository.findById(estudianteId)
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
+        Acudiente acu = acudienteRepository.findById(acudienteId)
+                .orElseThrow(() -> new IllegalArgumentException("Acudiente no encontrado"));
+
+        if (esPrincipal) {
+            List<EstudianteAcudiente> actuales = estudianteAcudienteRepository.findByEstudianteId(estudianteId);
+            for (EstudianteAcudiente ea : actuales) {
+                if (Boolean.TRUE.equals(ea.getEsPrincipal())) {
+                    ea.setEsPrincipal(false);
+                    estudianteAcudienteRepository.save(ea);
+                }
+            }
+            est.setAcudiente(acu);
+            estudianteRepository.save(est);
+        }
+
+        Optional<EstudianteAcudiente> existente = estudianteAcudienteRepository.findByEstudianteIdAndAcudienteId(estudianteId, acudienteId);
+        if (existente.isPresent()) {
+            EstudianteAcudiente ea = existente.get();
+            ea.setParentesco(parentesco);
+            ea.setEsPrincipal(esPrincipal);
+            return estudianteAcudienteRepository.save(ea);
+        } else {
+            EstudianteAcudiente nuevo = new EstudianteAcudiente(est, acu, esPrincipal, parentesco);
+            return estudianteAcudienteRepository.save(nuevo);
+        }
     }
 }

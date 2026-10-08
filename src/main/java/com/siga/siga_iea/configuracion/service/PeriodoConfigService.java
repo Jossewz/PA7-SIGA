@@ -1,7 +1,9 @@
 package com.siga.siga_iea.configuracion.service;
 
+import com.siga.siga_iea.configuracion.entity.AnioLectivo;
 import com.siga.siga_iea.configuracion.entity.ConfiguracionInstitucional;
 import com.siga.siga_iea.configuracion.entity.PeriodoAcademico;
+import com.siga.siga_iea.configuracion.repository.AnioLectivoRepository;
 import com.siga.siga_iea.configuracion.repository.ConfiguracionInstitucionalRepository;
 import com.siga.siga_iea.configuracion.repository.PeriodoAcademicoRepository;
 import org.springframework.stereotype.Service;
@@ -20,20 +22,36 @@ public class PeriodoConfigService {
 
     private final PeriodoAcademicoRepository periodoAcademicoRepository;
     private final ConfiguracionInstitucionalRepository configuracionInstitucionalRepository;
+    private final AnioLectivoRepository anioLectivoRepository;
 
     public PeriodoConfigService(PeriodoAcademicoRepository periodoAcademicoRepository,
-                                ConfiguracionInstitucionalRepository configuracionInstitucionalRepository) {
+                                ConfiguracionInstitucionalRepository configuracionInstitucionalRepository,
+                                AnioLectivoRepository anioLectivoRepository) {
         this.periodoAcademicoRepository = periodoAcademicoRepository;
         this.configuracionInstitucionalRepository = configuracionInstitucionalRepository;
+        this.anioLectivoRepository = anioLectivoRepository;
+    }
+
+    public AnioLectivo obtenerAnioLectivoActual() {
+        return anioLectivoRepository.findByEsActualTrue()
+                .orElseGet(() -> anioLectivoRepository.findByAnio(2026)
+                        .orElseGet(() -> anioLectivoRepository.save(new AnioLectivo(
+                                2026, "ACTIVO", LocalDate.of(2026, 1, 15), LocalDate.of(2026, 11, 30), true
+                        ))));
+    }
+
+    public List<AnioLectivo> listarAniosLectivos() {
+        return anioLectivoRepository.findAllByOrderByAnioDesc();
     }
 
     public List<PeriodoAcademico> listarPeriodos() {
-        List<PeriodoAcademico> list = periodoAcademicoRepository.findAllByOrderByNumeroPeriodoAsc();
+        AnioLectivo anio = obtenerAnioLectivoActual();
+        List<PeriodoAcademico> list = periodoAcademicoRepository.findByAnioLectivoOrderByNumeroPeriodoAsc(anio);
         if (list.isEmpty()) {
             list = List.of(
-                    periodoAcademicoRepository.save(new PeriodoAcademico(1, "Primer Período", new BigDecimal("30.00"), LocalDate.parse("2026-02-01"), LocalDate.parse("2026-06-15"), "Activo")),
-                    periodoAcademicoRepository.save(new PeriodoAcademico(2, "Segundo Período", new BigDecimal("35.00"), LocalDate.parse("2026-07-15"), LocalDate.parse("2026-09-15"), "Activo")),
-                    periodoAcademicoRepository.save(new PeriodoAcademico(3, "Tercer Período", new BigDecimal("35.00"), LocalDate.parse("2026-09-16"), LocalDate.parse("2026-11-30"), "Activo"))
+                    periodoAcademicoRepository.save(new PeriodoAcademico(anio, 1, "Primer Período", new BigDecimal("33.00"), LocalDate.parse("2026-02-01"), LocalDate.parse("2026-06-15"), "Activo")),
+                    periodoAcademicoRepository.save(new PeriodoAcademico(anio, 2, "Segundo Período", new BigDecimal("33.00"), LocalDate.parse("2026-07-15"), LocalDate.parse("2026-09-15"), "Activo")),
+                    periodoAcademicoRepository.save(new PeriodoAcademico(anio, 3, "Tercer Período", new BigDecimal("34.00"), LocalDate.parse("2026-09-16"), LocalDate.parse("2026-11-30"), "Activo"))
             );
         }
         return list;
@@ -45,9 +63,9 @@ public class PeriodoConfigService {
         for (PeriodoAcademico p : periodos) {
             map.put(p.getNumeroPeriodo(), p.getPesoPorcentaje());
         }
-        map.putIfAbsent(1, new BigDecimal("30.00"));
-        map.putIfAbsent(2, new BigDecimal("35.00"));
-        map.putIfAbsent(3, new BigDecimal("35.00"));
+        map.putIfAbsent(1, new BigDecimal("33.00"));
+        map.putIfAbsent(2, new BigDecimal("33.00"));
+        map.putIfAbsent(3, new BigDecimal("34.00"));
         return map;
     }
 
@@ -62,9 +80,13 @@ public class PeriodoConfigService {
     }
 
     private void actualizarPeriodoIndividual(int numero, String nombre, BigDecimal peso, String fIni, String fFin) {
-        PeriodoAcademico periodo = periodoAcademicoRepository.findByNumeroPeriodo(numero)
-                .orElse(new PeriodoAcademico(numero, nombre, peso != null ? peso : BigDecimal.valueOf(33.33), LocalDate.now(), LocalDate.now(), "Activo"));
+        AnioLectivo anio = obtenerAnioLectivoActual();
+        PeriodoAcademico periodo = periodoAcademicoRepository.findByAnioLectivoIdAndNumeroPeriodo(anio.getId(), numero)
+                .orElse(new PeriodoAcademico(anio, numero, nombre, peso != null ? peso : BigDecimal.valueOf(33.33), LocalDate.now(), LocalDate.now(), "Activo"));
 
+        if (periodo.getAnioLectivo() == null) {
+            periodo.setAnioLectivo(anio);
+        }
         if (peso != null) periodo.setPesoPorcentaje(peso);
         if (fIni != null && !fIni.isBlank()) {
             try { periodo.setFechaInicio(LocalDate.parse(fIni.trim())); } catch (DateTimeParseException ignored) {}
@@ -95,7 +117,16 @@ public class PeriodoConfigService {
         if (direccion != null) cfg.setDireccionInst(direccion.trim());
         if (telefono != null) cfg.setTelefonoInst(telefono.trim());
         if (correo != null) cfg.setCorreoInst(correo.trim());
-        if (anoLectivo != null && !anoLectivo.isBlank()) cfg.setAnoLectivo(anoLectivo.trim());
+        if (anoLectivo != null && !anoLectivo.isBlank()) {
+            cfg.setAnoLectivo(anoLectivo.trim());
+            try {
+                int anioInt = Integer.parseInt(anoLectivo.trim());
+                Optional<AnioLectivo> anioOpt = anioLectivoRepository.findByAnio(anioInt);
+                if (anioOpt.isEmpty()) {
+                    anioLectivoRepository.save(new AnioLectivo(anioInt, "ACTIVO", LocalDate.of(anioInt, 1, 15), LocalDate.of(anioInt, 11, 30), true));
+                }
+            } catch (NumberFormatException ignored) {}
+        }
         configuracionInstitucionalRepository.save(cfg);
     }
 

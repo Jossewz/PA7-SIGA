@@ -2,7 +2,7 @@
 
     <!-- ALERTAS OPERATIVAS (NECESITA ATENCIÓN) -->
     <article th:fragment="alertsNeedsAttentionCard()" 
-             class="p-6 rounded-xl bg-white border border-[#c4eec0]/40 shadow-soft flex flex-col h-full">
+             class="p-6 rounded-xl bg-white border border-border shadow-soft flex flex-col h-full">
         <h3 class="flex items-center gap-2 text-sidebar text-base font-black uppercase tracking-wider mb-5">
             <i data-lucide="bell" class="size-[18px] text-alert-red stroke-[2.2]"></i>
             Necesita Atención
@@ -15,10 +15,10 @@
 
             <div th:each="alerta : ${stats.alertasOperativas}" 
                  class="flex items-start gap-3 p-3 rounded-lg text-xs"
-                 th:classappend="${alerta.tipo == 'alert'} ? 'bg-red-50/50 border border-[#ffc2c4]/45' : 'bg-amber-50/50 border border-amber-200/40'">
+                 th:classappend="${alerta.tipo == 'alert'} ? 'bg-pill-red border border-[#f5cece]' : 'bg-pill-warning border border-[#f0dec0]'">
                 <i th:attr="data-lucide=${alerta.icono ?: 'alert-triangle'}" 
                    class="size-4.5 shrink-0 stroke-[2] mt-0.5"
-                   th:classappend="${alerta.tipo == 'alert'} ? 'text-alert-red' : 'text-[#e6a100]'"></i>
+                   th:classappend="${alerta.tipo == 'alert'} ? 'text-alert-red' : 'text-[#8f5b12]'"></i>
                 <div class="flex-1">
                     <p class="font-extrabold text-text-primary" th:text="${alerta.titulo}">Alerta pendiente</p>
                     <p class="text-[10px] text-text-muted mt-0.5" th:text="${alerta.subtitulo}">Detalle</p>

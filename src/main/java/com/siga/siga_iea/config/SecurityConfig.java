@@ -3,14 +3,18 @@ package com.siga.siga_iea.config;
 import com.siga.siga_iea.auth.security.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 
 @Configuration
 @EnableMethodSecurity
@@ -43,9 +47,32 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Mantener disabled o habilitar si es necesario
+                // Protección CSRF robusta basada en cookies (compatible con SPA / HTMX / Fetch)
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .ignoringRequestMatchers("/error")
+                )
+                // Cabeceras estrictas de seguridad web (Criterios OWASP / SEGI)
+                .headers(headers -> headers
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(31536000)
+                        )
+                        .frameOptions(frame -> frame.sameOrigin())
+                        .contentTypeOptions(Customizer.withDefaults())
+                        .xssProtection(Customizer.withDefaults())
+                        .referrerPolicy(referrer -> referrer
+                                .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
+                        )
+                        .permissionsPolicy(permissions -> permissions
+                                .policy("camera=(), microphone=(), geolocation=()")
+                        )
+                )
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
+                        // Bloqueo explícito de métodos TRACE y TRACK (mitigación XST)
+                        .requestMatchers(HttpMethod.valueOf("TRACE"), "/**").denyAll()
+                        .requestMatchers(HttpMethod.valueOf("TRACK"), "/**").denyAll()
                         .requestMatchers("/login", "/logout", "/css/**", "/js/**", "/img/**", "/icons/**", "/fonts/**", "/favicon.ico", "/error").permitAll()
                         .requestMatchers("/configuracion/roles/**").hasRole("ADMIN")
                         .requestMatchers("/clases/mapear-estudiantes", "/clases/promover-estudiantes").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO")
@@ -61,6 +88,8 @@ public class SecurityConfig {
                                 "/reportes/**",
                                 "/calificaciones/**",
                                 "/certificados/**",
+                                "/mi-jornada/**",
+                                "/chat/**",
                                 "/soporte/**",
                                 "/"
                         ).authenticated()

@@ -17,6 +17,10 @@ public interface MatriculaRepository extends JpaRepository<Matricula, UUID> {
 
     List<Matricula> findByEstudianteId(UUID estudianteId);
 
+    Optional<Matricula> findByEstudianteIdAndAnoLectivo(UUID estudianteId, String anoLectivo);
+
+    List<Matricula> findByCursoId(UUID cursoId);
+
     @Query("SELECT m FROM Matricula m JOIN FETCH m.estudiante e WHERE " +
            "(:grado IS NULL OR :grado = '' OR m.grado = :grado) AND " +
            "(:estado IS NULL OR :estado = '' OR m.estado = :estado) " +

@@ -19,6 +19,11 @@ th:fragment="html(content)">
         SIGA
     </title>
 
+    <!-- Metadatos de seguridad CSRF para Fetch/AJAX -->
+    <meta name="_csrf" th:if="${_csrf}" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:if="${_csrf}" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf_param" th:if="${_csrf}" th:content="${_csrf.parameterName}"/>
+
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -67,8 +72,22 @@ th:fragment="html(content)">
         } catch(e) {}
     </script>
 
+    <!-- Metadatos de Seguridad CSRF -->
+    <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}">
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}">
+
     <!-- Scripts locales (cero dependencias de CDN externas) -->
     <script th:src="@{/js/htmx.min.js}"></script>
+    <script>
+        // Inyectar automáticamente el token CSRF en todas las peticiones asíncronas de HTMX
+        document.addEventListener('htmx:configRequest', function(evt) {
+            const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+            if (token && header) {
+                evt.detail.headers[header] = token;
+            }
+        });
+    </script>
     <script th:src="@{/js/lucide.min.js}"></script>
     <script defer th:src="@{/js/alpine.min.js}"></script>
 </head>
@@ -143,6 +162,9 @@ th:fragment="html(content)">
 
 </div>
 
+<!-- CHATBOT ASISTENTE INSTITUCIONAL FLOTANTE (MANGLE) -->
+<th:block th:replace="~{fragments/chatbot-flotante :: widget}"></th:block>
+
 <!-- Funciones globales de respaldo para interactividad garantizada -->
 <script>
     window.toggleSigaSidebar = function() {
@@ -170,9 +192,20 @@ th:fragment="html(content)">
         if (drawer) drawer.style.display = 'none';
     };
 
-    if (window.lucide) lucide.createIcons();
-    document.addEventListener('htmx:afterSwap', function() {
-        if (window.lucide) lucide.createIcons();
+    function initLucideIcons() {
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+        }
+    }
+    document.addEventListener('DOMContentLoaded', initLucideIcons);
+    initLucideIcons();
+    document.addEventListener('htmx:afterSwap', initLucideIcons);
+
+    document.body.addEventListener('htmx:beforeSwap', function(e) {
+        if ([403, 409].includes(e.detail.xhr.status)) {
+            e.detail.shouldSwap = true;
+            e.detail.isError = false;
+        }
     });
 </script>
 

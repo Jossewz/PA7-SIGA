@@ -33,3 +33,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Temporary Scripts & Playwright Scratch ###
+scratch/
+*.dump
+backup_*.sql
+

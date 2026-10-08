@@ -3,78 +3,98 @@
 @source "../../templates";
 
 @theme {
+  /* Identidad Institucional y Contenedores */
   --color-sidebar: #134e1e;
-  --color-sidebar-text: #ecffe4;
-  --color-sidebar-active: rgba(255, 255, 255, 0.14);
-  --color-sidebar-border: #8ce383;
-  --color-action-btn: #8cf483;
-  --color-action-btn-text: #134e1e;
-  --color-page-bg: #eafbe4;
-  --color-card-bg: rgba(255, 255, 255, 0.1);
-  --color-card-border: rgba(172, 244, 164, 0.45);
+  --color-sidebar-container: #F4EFE6;
+  --color-sidebar-bg: #F4EFE6;
+  --color-sidebar-text: #134e1e;
+  --color-sidebar-active: #134e1e;
+  --color-sidebar-border: #E8E2D5;
+  --color-action-btn: #134e1e;
+  --color-action-btn-text: #ffffff;
   
-  --color-card-green: #d3fccc;
-  --color-card-green-light: #c8f2c0;
-  --color-card-green-gradient-from: #c5f8bd;
-  --color-card-green-gradient-to: #d8ffcf;
-  --color-card-warning: #f7efd9;
+  /* Lienzo y Superficies Biofílicas */
+  --color-page-bg: #FDFBF7;           /* Lienzo marfil suave */
+  --color-sand-soft: #F4EFE6;         /* Arena suave para sidebar y paneles de apoyo */
+  --color-forest-green: #134e1e;      /* Verde bosque institucional */
   
-  --color-text-primary: #173518;
-  --color-text-secondary: #527254;
-  --color-text-muted: #6f826f;
+  --color-surface: #ffffff;           /* Blanco puro para tarjetas principales */
+  --color-surface-muted: #FAF7F2;     /* Crema ultra suave para filas alternas y hover suave */
+  --color-surface-sunken: #F4EFE6;    /* Arena de bajo relieve para inputs o secciones neutras */
+  --color-border: #E8E2D5;            /* Borde arena neutro unificado */
+  --color-border-strong: #D5CBBA;     /* Borde acentuado para separadores */
   
-  --color-icon-green: #b7f3ae;
-  --color-icon-warning: #fff2e8;
+  --color-card-bg: #ffffff;
+  --color-card-border: #E8E2D5;
+  --color-card-warning: #FBF3E6;
   
-  --color-pill-green: #a9f2a3;
-  --color-pill-red: #ffc2c4;
+  /* Tipografía (Excelente contraste WCAG y tonos orgánicos sin negro absoluto) */
+  --color-text-primary: #1C2E20;      /* Carbón orgánico profundo */
+  --color-text-headings: #134e1e;     /* Verde bosque para títulos */
+  --color-text-secondary: #556858;    /* Sálvia / piedra neutro para subtítulos y metadatos */
+  --color-text-muted: #7E8F81;        /* Muted para timestamps y estados vacíos */
+  --color-search-placeholder: #8A978D;
   
-  --color-alert-red: #c13025;
+  /* Sistema Semántico Coherente (Pills, Badges e Iconos - Cero Neón / Sin Arcoíris) */
+  /* 1. Éxito / Activo / Aprobado / Docente: Verde Bosque Suave */
+  --color-pill-green: #EBF5E9;
+  --color-pill-green-text: #134e1e;
+  --color-pill-green-border: #CBE5C7;
+  --color-icon-green: #EBF5E9;
+  --color-dot-green: #1B6327;
   
-  --color-dot-green: #148f2b;
-  --color-dot-red: #c82333;
+  /* 2. Advertencia / Pendiente / Citación: Ámbar Tierra Cálido */
+  --color-pill-warning: #FBF3E6;
+  --color-pill-warning-text: #8F5B12;
+  --color-pill-warning-border: #F0DEC0;
+  --color-icon-warning: #FBF3E6;
+  --color-dot-warning: #B27218;
   
-  --color-search-placeholder: #8a978d;
-  --color-notification-red: #e53935;
+  /* 3. Alerta / Error / Inactivo / Rechazado: Arcilla / Terracota Suave */
+  --color-pill-red: #FCEBEB;
+  --color-pill-red-text: #A82A2A;
+  --color-pill-red-border: #F5CECE;
+  --color-alert-red: #A82A2A;
+  --color-notification-red: #A82A2A;
+  --color-dot-red: #A82A2A;
+  
+  /* 4. Neutro / Sin cuenta / Administrativo: Arena Suave */
+  --color-pill-neutral: #F4EFE6;
+  --color-pill-neutral-text: #556858;
+  --color-pill-neutral-border: #E8E2D5;
 
-  /* Tokens semánticos estandarizados (SEGI design system adaptado a SIGA) */
-  --color-surface: #ffffff;
-  --color-surface-muted: #f8faf7;
-  --color-surface-sunken: #f0f7ef;
-  --color-border: #d4eed0;
-  --color-border-strong: #b6e4b3;
+  /* Escala Brand unificada */
+  --color-brand-50: #FDFBF7;
+  --color-brand-100: #EBF5E9;
+  --color-brand-200: #D0E8CD;
+  --color-brand-300: #A8D7A4;
+  --color-brand-400: #6CAE67;
+  --color-brand-500: #3A7A3B;
+  --color-brand-600: #266323;
+  --color-brand-700: #1B4E1A;
+  --color-brand-800: #134e1e;
+  --color-brand-900: #134e1e;
+  --color-brand-950: #0A290F;
 
-  --color-brand-50: #f4fbf3;
-  --color-brand-100: #e5f7e3;
-  --color-brand-200: #cbeec8;
-  --color-brand-300: #a2dda0;
-  --color-brand-400: #6fc26c;
-  --color-brand-500: #429f3f;
-  --color-brand-600: #2f812d;
-  --color-brand-700: #256624;
-  --color-brand-800: #1b4e1a;
-  --color-brand-900: #143e14;
-  --color-brand-950: #0a230a;
-
-  --color-accent-50: #f0fdf4;
-  --color-accent-100: #dcfce7;
-  --color-accent-200: #bbf7d0;
-  --color-accent-500: #22c55e;
-  --color-accent-600: #16a34a;
-  --color-accent-700: #15803d;
+  --color-accent-50: #FAF7F2;
+  --color-accent-100: #EBF5E9;
+  --color-accent-200: #CBE5C7;
+  --color-accent-500: #1B6327;
+  --color-accent-600: #134e1e;
+  --color-accent-700: #0F3D17;
 
   --radius-control: 0.5rem;
   --radius-surface: 0.75rem;
 
-  --shadow-card: 0 1px 3px 0 rgba(20, 95, 34, 0.06), 0 1px 2px -1px rgba(20, 95, 34, 0.06);
-  --shadow-pop: 0 10px 25px -5px rgba(20, 95, 34, 0.15);
+  --shadow-card: 0 1px 3px 0 rgba(19, 78, 30, 0.05), 0 1px 2px -1px rgba(19, 78, 30, 0.05);
+  --shadow-pop: 0 10px 25px -5px rgba(19, 78, 30, 0.12);
 
   --radius-xl: 14px;
   --radius-lg: 8px;
   --radius-md: 6px;
   --radius-sm: 4px;
 
-  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-soft: 0 4px 20px rgba(19, 78, 30, 0.05);
 }
 
 @layer base {
@@ -110,17 +130,28 @@
    en columnas y thead pegajoso (sticky).
    ------------------------------------------------------------------------- */
 @layer components {
+  .tabla-siga thead th {
+    background-color: var(--color-sidebar-container, #F4EFE6) !important;
+    color: var(--color-forest-green, #134e1e) !important;
+    border-bottom: 1px solid var(--color-border);
+    border-right: 1px solid var(--color-border-strong);
+  }
+
+  .tabla-siga thead th:last-child {
+    border-right: 0;
+  }
+
   .tabla-siga tbody tr {
     border-bottom: 1px solid var(--color-border);
     transition: background-color 120ms ease;
   }
 
   .tabla-siga tbody tr:nth-child(even) {
-    background-color: var(--color-surface-muted);
+    background-color: var(--color-surface-muted, #FAF7F2);
   }
 
   .tabla-siga tbody tr:hover {
-    background-color: var(--color-accent-50);
+    background-color: var(--color-brand-100, #EBF5E9) !important;
   }
 
   .tabla-siga tbody td {
@@ -128,14 +159,6 @@
   }
 
   .tabla-siga tbody td:last-child {
-    border-right: 0;
-  }
-
-  .tabla-siga thead th {
-    border-right: 1px solid var(--color-border-strong);
-  }
-
-  .tabla-siga thead th:last-child {
     border-right: 0;
   }
 
@@ -153,12 +176,95 @@
 }
 
 /* =========================================================================
+   Mapeo Universal de Normalización Visual (Eliminación del Efecto Arcoíris)
+   ========================================================================= */
+@layer utilities {
+  /* Bordes arbitrarios legacy unificados al borde biofílico arena */
+  .border-\[\#c4eec0\],
+  .border-\[\#c4eec0\]\/10,
+  .border-\[\#c4eec0\]\/20,
+  .border-\[\#c4eec0\]\/25,
+  .border-\[\#c4eec0\]\/30,
+  .border-\[\#c4eec0\]\/40,
+  .border-\[\#c4eec0\]\/60 {
+    border-color: var(--color-border, #E8E2D5) !important;
+  }
+
+  .border-\[\#8ce383\],
+  .border-\[\#a8e8a0\] {
+    border-color: #CBE5C7 !important;
+  }
+
+  /* Fondos verdosos fluorescentes mapeados al marfil/crema o sálvia suave */
+  .bg-\[\#f1fbe4\],
+  .bg-\[\#f7fcf6\],
+  .bg-\[\#eafbe4\],
+  .bg-\[\#e3f7dc\],
+  .bg-\[\#d3fccc\],
+  .bg-\[\#c8f2c0\],
+  .bg-\[\#eafbe4\]\/20,
+  .bg-\[\#eafbe4\]\/40 {
+    background-color: var(--color-surface-muted, #FAF7F2) !important;
+  }
+
+  /* Hovers unificados a menta/sálvia suave */
+  .hover\:bg-\[\#f1fbe4\]:hover,
+  .hover\:bg-\[\#f7fcf6\]:hover,
+  .hover\:bg-\[\#fcfdfb\]:hover,
+  .hover\:bg-\[\#fcfdfa\]\/50:hover {
+    background-color: #EBF5E9 !important;
+  }
+
+  /* Divisores de tablas y cajas */
+  .divide-\[\#c4eec0\]\/20 > :not([hidden]) ~ :not([hidden]),
+  .divide-\[\#c4eec0\]\/30 > :not([hidden]) ~ :not([hidden]),
+  .divide-\[\#c4eec0\]\/40 > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--color-border, #E8E2D5) !important;
+  }
+
+  /* Textos legacy unificados a la tipografía orgánica */
+  .text-\[\#243d28\],
+  .text-\[\#1a331e\] {
+    color: var(--color-text-primary, #1C2E20) !important;
+  }
+
+  .text-\[\#0d4117\],
+  .text-\[\#145f22\] {
+    color: var(--color-forest-green, #134e1e) !important;
+  }
+
+  /* Semáforos e indicadores de estado estandarizados */
+  .bg-\[\#148f2b\] {
+    background-color: #1B6327 !important;
+  }
+  .text-\[\#148f2b\] {
+    color: #134e1e !important;
+  }
+  .bg-\[\#e6a100\] {
+    background-color: #8F5B12 !important;
+  }
+  .text-\[\#e6a100\] {
+    color: #8F5B12 !important;
+  }
+  .bg-\[\#c82333\],
+  .bg-\[\#d9534f\] {
+    background-color: #A82A2A !important;
+  }
+  .text-\[\#c82333\],
+  .text-\[\#c93831\],
+  .text-\[\#d9534f\] {
+    color: #A82A2A !important;
+  }
+}
+
+/* =========================================================================
    Sidebar Desktop Colapsable (Arquitectura y estilos inspirados en SEGI)
    ========================================================================= */
 #sidebar-desktop {
   width: 244px;
   padding: 32px 14px 24px;
-  background-color: var(--color-sidebar, #134e1e);
+  background-color: var(--color-sidebar-container, #F4EFE6);
+  border-right: 1px solid var(--color-sidebar-border, #e2dbce);
   transition: width 200ms cubic-bezier(0.4, 0, 0.2, 1), padding 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -193,7 +299,7 @@
   transform: rotate(180deg) !important;
 }
 
-/* ═══ Navegación Sidebar: Elementos Activos con Indicador Lateral (SEGI Style) ═══ */
+/* ═══ Navegación Sidebar: Elementos Activos con Indicador Lateral (SEGI / Biophilic) ═══ */
 .sidebar-nav-item {
   position: relative;
   display: flex;
@@ -204,21 +310,38 @@
   padding-right: 0.875rem;
   border-radius: 0.5rem;
   border-left: 4px solid transparent;
-  color: rgba(236, 255, 228, 0.78);
+  color: var(--color-forest-green, #134e1e);
+  opacity: 0.85;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 150ms ease-in-out;
 }
 
 .sidebar-nav-item:hover {
-  background-color: rgba(255, 255, 255, 0.09);
-  color: #ffffff;
+  background-color: rgba(19, 78, 30, 0.08);
+  color: var(--color-forest-green, #134e1e);
+  opacity: 1;
 }
 
 .sidebar-nav-item.is-active {
-  background-color: rgba(255, 255, 255, 0.14) !important;
+  background-color: var(--color-forest-green, #134e1e) !important;
   color: #ffffff !important;
+  opacity: 1 !important;
   font-weight: 700 !important;
-  border-left: 4px solid var(--color-action-btn, #8cf483) !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12) !important;
+  border-left: 4px solid var(--color-forest-green, #134e1e) !important;
+  box-shadow: 0 4px 12px rgba(19, 78, 30, 0.22) !important;
+}
+
+.sidebar-nav-item.is-active:hover {
+  background-color: #0f3d17 !important;
+  color: #ffffff !important;
+}
+
+.sidebar-nav-item.is-active i {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.sidebar-nav-item.is-active span {
+  color: #ffffff !important;
 }

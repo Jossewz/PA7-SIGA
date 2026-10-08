@@ -2,8 +2,8 @@ package com.siga.siga_iea.dashboard.service;
 
 import com.siga.siga_iea.certificados.entity.SolicitudCertificado;
 import com.siga.siga_iea.certificados.repository.SolicitudCertificadoRepository;
-import com.siga.siga_iea.clases.entity.Clase;
-import com.siga.siga_iea.clases.repository.ClaseRepository;
+import com.siga.siga_iea.clases.entity.Curso;
+import com.siga.siga_iea.clases.repository.CursoRepository;
 import com.siga.siga_iea.dashboard.dto.DashboardStatsDTO;
 import com.siga.siga_iea.matricula.entity.Matricula;
 import com.siga.siga_iea.matricula.repository.MatriculaRepository;
@@ -24,20 +24,20 @@ public class DashboardService {
     private final ReporteRepository reporteRepository;
     private final SolicitudCertificadoRepository certificadoRepository;
     private final MatriculaRepository matriculaRepository;
-    private final ClaseRepository claseRepository;
+    private final CursoRepository cursoRepository;
 
     public DashboardService(EstudianteRepository estudianteRepository,
                             DocenteRepository docenteRepository,
                             ReporteRepository reporteRepository,
                             SolicitudCertificadoRepository certificadoRepository,
                             MatriculaRepository matriculaRepository,
-                            ClaseRepository claseRepository) {
+                            CursoRepository cursoRepository) {
         this.estudianteRepository = estudianteRepository;
         this.docenteRepository = docenteRepository;
         this.reporteRepository = reporteRepository;
         this.certificadoRepository = certificadoRepository;
         this.matriculaRepository = matriculaRepository;
-        this.claseRepository = claseRepository;
+        this.cursoRepository = cursoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -46,7 +46,7 @@ public class DashboardService {
         long docentesCount = docenteRepository.count();
         long totalReportes = reporteRepository.count();
         long totalMatriculas = matriculaRepository.count();
-        long totalCursos = claseRepository.count();
+        long totalCursos = cursoRepository.count();
 
         List<Reporte> reportesPendientes = reporteRepository.findByEstado("Pendiente");
         List<SolicitudCertificado> certsPendientes = certificadoRepository.findByEstado("Pendiente");
@@ -113,7 +113,7 @@ public class DashboardService {
             alertasOperativas.add(a);
         }
 
-        List<Clase> clasesDB = claseRepository.findAll();
+        List<Curso> clasesDB = cursoRepository.findAll();
         long clasesSinDirector = clasesDB.stream().filter(c -> c.getDirector() == null).count();
         if (clasesSinDirector > 0) {
             Map<String, Object> a = new HashMap<>();

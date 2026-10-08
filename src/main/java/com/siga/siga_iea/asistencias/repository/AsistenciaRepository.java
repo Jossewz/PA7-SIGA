@@ -2,6 +2,8 @@ package com.siga.siga_iea.asistencias.repository;
 
 import com.siga.siga_iea.asistencias.entity.Asistencia;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -12,13 +14,19 @@ import java.util.UUID;
 @Repository
 public interface AsistenciaRepository extends JpaRepository<Asistencia, UUID> {
 
-    List<Asistencia> findByCursoIdAndFecha(UUID cursoId, LocalDate fecha);
+    List<Asistencia> findBySesionId(UUID sesionId);
 
-    List<Asistencia> findByCursoIdAndMateriaIdAndFecha(UUID cursoId, UUID materiaId, LocalDate fecha);
+    Optional<Asistencia> findBySesionIdAndEstudianteId(UUID sesionId, UUID estudianteId);
 
-    Optional<Asistencia> findByCursoIdAndEstudianteIdAndFechaAndMateriaId(UUID cursoId, UUID estudianteId, LocalDate fecha, UUID materiaId);
-
-    Optional<Asistencia> findByCursoIdAndEstudianteIdAndFecha(UUID cursoId, UUID estudianteId, LocalDate fecha);
+    boolean existsBySesionIdAndEstudianteId(UUID sesionId, UUID estudianteId);
 
     List<Asistencia> findByEstudianteId(UUID estudianteId);
+
+    @Query("SELECT a FROM Asistencia a WHERE a.sesion.curso.id = :cursoId AND a.sesion.fecha = :fecha")
+    List<Asistencia> findByCursoIdAndFecha(@Param("cursoId") UUID cursoId, @Param("fecha") LocalDate fecha);
+
+    @Query("SELECT a FROM Asistencia a WHERE a.sesion.curso.id = :cursoId AND a.sesion.cursoMateria.materia.id = :materiaId AND a.sesion.fecha = :fecha")
+    List<Asistencia> findByCursoIdAndMateriaIdAndFecha(@Param("cursoId") UUID cursoId,
+                                                      @Param("materiaId") UUID materiaId,
+                                                      @Param("fecha") LocalDate fecha);
 }

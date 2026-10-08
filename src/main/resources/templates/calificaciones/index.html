@@ -16,14 +16,14 @@
             
             <!-- Selector y Badge Estudiante -->
             <div class="flex items-center gap-3 max-sm:flex-col max-sm:items-start">
-                <form method="get" th:action="@{/calificaciones}" class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-[#c4eec0]/60 shadow-2xs">
+                <form method="get" th:action="@{/calificaciones}" class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-border shadow-2xs">
                     <label for="select-estudiante" class="text-[10px] font-black uppercase text-sidebar tracking-wider">Estudiante:</label>
-                    <select id="select-estudiante" name="estudianteId" onchange="this.form.submit()" class="h-9 px-3 bg-[#f9fbf8] border border-[#c4eec0] rounded-lg text-xs font-black text-sidebar focus:ring-1 focus:ring-sidebar cursor-pointer">
+                    <select id="select-estudiante" name="estudianteId" onchange="this.form.submit()" class="h-9 px-3 bg-surface-sunken border border-border rounded-lg text-xs font-black text-sidebar focus:ring-1 focus:ring-sidebar cursor-pointer">
                         <option th:each="est : ${estudiantes}" th:value="${est.id}" th:text="${est.nombreCompleto}" th:selected="${est.id.toString() == estudianteSeleccionadoId}">Mateo Álvarez</option>
                     </select>
                 </form>
 
-                <div class="bg-white rounded-xl border border-[#c4eec0]/60 p-3.5 flex items-center gap-3.5 shadow-sm">
+                <div class="bg-white rounded-xl border border-border p-3.5 flex items-center gap-3.5 shadow-sm">
                     <div class="size-10 rounded-lg bg-sidebar/10 text-sidebar grid place-items-center shrink-0">
                         <i data-lucide="user" class="size-5 stroke-[2.5]"></i>
                     </div>

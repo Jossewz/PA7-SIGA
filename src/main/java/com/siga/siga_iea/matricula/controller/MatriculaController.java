@@ -42,6 +42,9 @@ public class MatriculaController {
         model.addAttribute("parentRelation", session.getAttribute("parentRelation"));
         model.addAttribute("parentId", session.getAttribute("parentId"));
         model.addAttribute("parentPhone", session.getAttribute("parentPhone"));
+        model.addAttribute("parentEmail", session.getAttribute("parentEmail"));
+        model.addAttribute("parentSecondaryEmail", session.getAttribute("parentSecondaryEmail"));
+        model.addAttribute("autorizaTratamientoDatos", session.getAttribute("autorizaTratamientoDatos"));
 
         model.addAttribute("sede", session.getAttribute("sede"));
         model.addAttribute("grado", session.getAttribute("grado"));

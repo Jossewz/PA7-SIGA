@@ -214,4 +214,140 @@ class ChatAutorizacionTest {
         assertFalse(response.procesadoLocalmente(), "Debe reportar que operó bajo el motor de degradación local");
         assertTrue(response.latenciaMs() >= 0);
     }
+
+    // =========================================================================
+    // PRUEBAS DE FRONTERA DE CONFIANZA Y PRIVACIDAD (Ley 1581 de 2012)
+    // =========================================================================
+
+    @Test
+    @DisplayName("Frontera de Privacidad 1: Si se invoca herramienta académica, NUNCA se llama a Groq Cloud")
+    void testFronteraPrivacidad_HerramientaInvocadaNuncaLlamaGroq() {
+        org.springframework.web.client.RestClient mockRestClient = mock(org.springframework.web.client.RestClient.class);
+        orchestratorService.setRestClient(mockRestClient);
+        orchestratorService.setGroqApiKey("gsk_test_key_valida");
+
+        when(userContextService.getRolAutenticado()).thenReturn(RolEnum.ESTUDIANTE);
+        when(toolsService.consultarMisNotas()).thenReturn(new ToolExecutionResult("consultarMisNotas", true, "Notas del estudiante", java.util.Map.of("promedio", 4.2)));
+
+        ChatMessageResponse response = orchestratorService.procesarMensaje(
+                new ChatMessageRequest("¿Cuáles son mis notas de este periodo?", "ESTUDIANTE")
+        );
+
+        assertNotNull(response);
+        assertTrue(response.herramientasInvocadas().contains("consultarMisNotas"));
+        verify(mockRestClient, never()).post();
+        assertTrue(response.proveedor().contains("On-Premise") || response.proveedor().contains("Ley 1581"));
+    }
+
+    @Test
+    @DisplayName("Frontera de Privacidad 2: Mensaje con documento (TI/CC) o correo NUNCA llama a Groq Cloud")
+    void testFronteraPrivacidad_MensajeConDocumentoOCorreoNuncaLlamaGroq() {
+        org.springframework.web.client.RestClient mockRestClient = mock(org.springframework.web.client.RestClient.class);
+        orchestratorService.setRestClient(mockRestClient);
+        orchestratorService.setGroqApiKey("gsk_test_key_valida");
+
+        when(userContextService.getRolAutenticado()).thenReturn(RolEnum.ESTUDIANTE);
+
+        // Caso A: Mensaje con número de documento (TI de 10 dígitos)
+        ChatMessageResponse respA = orchestratorService.procesarMensaje(
+                new ChatMessageRequest("¿Qué falta cometió el estudiante con TI 1045678901?", "ESTUDIANTE")
+        );
+        assertNotNull(respA);
+        verify(mockRestClient, never()).post();
+
+        // Caso B: Mensaje con correo electrónico
+        ChatMessageResponse respB = orchestratorService.procesarMensaje(
+                new ChatMessageRequest("Enviar copia a acudiente_juan@gmail.com sobre las faltas", "ESTUDIANTE")
+        );
+        assertNotNull(respB);
+        verify(mockRestClient, never()).post();
+
+        // Caso C: Mensaje con nombre de persona sin documento ni correo ("¿Cuántas faltas tiene Pedro Gómez?")
+        ChatMessageResponse respC = orchestratorService.procesarMensaje(
+                new ChatMessageRequest("¿Cuántas faltas tiene Pedro Gómez?", "ESTUDIANTE")
+        );
+        assertNotNull(respC);
+        verify(mockRestClient, never()).post();
+        assertTrue(respC.proveedor().contains("On-Premise") || respC.proveedor().contains("Interno"));
+    }
+
+    @Test
+    @DisplayName("Frontera de Privacidad 3: Pregunta normativa pura llama a Groq y no fuga datos personales")
+    void testFronteraPrivacidad_PreguntaNormativaLlamaGroqSinDatosPersonales() {
+        org.springframework.web.client.RestClient mockRestClient = mock(org.springframework.web.client.RestClient.class);
+        org.springframework.web.client.RestClient.RequestBodyUriSpec uriSpec = mock(org.springframework.web.client.RestClient.RequestBodyUriSpec.class);
+        org.springframework.web.client.RestClient.RequestBodySpec bodySpec = mock(org.springframework.web.client.RestClient.RequestBodySpec.class);
+        org.springframework.web.client.RestClient.ResponseSpec responseSpec = mock(org.springframework.web.client.RestClient.ResponseSpec.class);
+
+        doReturn(uriSpec).when(mockRestClient).post();
+        doReturn(bodySpec).when(uriSpec).uri(anyString());
+        doReturn(bodySpec).when(bodySpec).header(anyString(), anyString());
+        doReturn(bodySpec).when(bodySpec).contentType(any());
+        doReturn(bodySpec).when(bodySpec).body((Object) any());
+        doReturn(responseSpec).when(bodySpec).retrieve();
+        doReturn("{\"choices\":[{\"message\":{\"content\":\"Las faltas tipo I son leves según el manual.\"}}]}").when(responseSpec).body(String.class);
+
+        orchestratorService.setRestClient(mockRestClient);
+        orchestratorService.setGroqApiKey("gsk_test_key_valida");
+
+        when(userContextService.getRolAutenticado()).thenReturn(RolEnum.ESTUDIANTE);
+
+        ChatMessageResponse response = orchestratorService.procesarMensaje(
+                new ChatMessageRequest("¿Cuáles son las faltas tipo I en el manual?", "ESTUDIANTE")
+        );
+
+        assertNotNull(response);
+        verify(mockRestClient, times(1)).post();
+        assertTrue(response.proveedor().contains("Groq Cloud"));
+        assertTrue(response.respuesta().contains("faltas tipo I"));
+    }
+
+    @Test
+    @DisplayName("Frontera de Privacidad 3B: Pregunta normativa que contiene la palabra 'estudiante' sí llega a Groq Cloud")
+    void testFronteraPrivacidad_PreguntaNormativaConPalabraEstudianteLlamaGroq() {
+        org.springframework.web.client.RestClient mockRestClient = mock(org.springframework.web.client.RestClient.class);
+        org.springframework.web.client.RestClient.RequestBodyUriSpec uriSpec = mock(org.springframework.web.client.RestClient.RequestBodyUriSpec.class);
+        org.springframework.web.client.RestClient.RequestBodySpec bodySpec = mock(org.springframework.web.client.RestClient.RequestBodySpec.class);
+        org.springframework.web.client.RestClient.ResponseSpec responseSpec = mock(org.springframework.web.client.RestClient.ResponseSpec.class);
+
+        doReturn(uriSpec).when(mockRestClient).post();
+        doReturn(bodySpec).when(uriSpec).uri(anyString());
+        doReturn(bodySpec).when(bodySpec).header(anyString(), anyString());
+        doReturn(bodySpec).when(bodySpec).contentType(any());
+        doReturn(bodySpec).when(bodySpec).body((Object) any());
+        doReturn(responseSpec).when(bodySpec).retrieve();
+        doReturn("{\"choices\":[{\"message\":{\"content\":\"Un estudiante reprueba con el 25% de inasistencias.\"}}]}").when(responseSpec).body(String.class);
+
+        orchestratorService.setRestClient(mockRestClient);
+        orchestratorService.setGroqApiKey("gsk_test_key_valida");
+
+        when(userContextService.getRolAutenticado()).thenReturn(RolEnum.DOCENTE);
+
+        ChatMessageResponse response = orchestratorService.procesarMensaje(
+                new ChatMessageRequest("¿Cuántas fallas puede tener un estudiante para reprobar según el manual?", "DOCENTE")
+        );
+
+        assertNotNull(response);
+        verify(mockRestClient, times(1)).post();
+        assertTrue(response.proveedor().contains("Groq Cloud"));
+    }
+
+    @Test
+    @DisplayName("Frontera de Privacidad 4: Sin clave de Groq configurada opera 100% en local sin fallas")
+    void testFronteraPrivacidad_SinClaveGroqOperaEnLocal() {
+        org.springframework.web.client.RestClient mockRestClient = mock(org.springframework.web.client.RestClient.class);
+        orchestratorService.setRestClient(mockRestClient);
+        orchestratorService.setGroqApiKey(""); // Sin clave
+
+        when(userContextService.getRolAutenticado()).thenReturn(RolEnum.ESTUDIANTE);
+
+        ChatMessageResponse response = orchestratorService.procesarMensaje(
+                new ChatMessageRequest("¿Qué es una falta tipo II?", "ESTUDIANTE")
+        );
+
+        assertNotNull(response);
+        verify(mockRestClient, never()).post();
+        assertTrue(response.respuesta().contains("Faltas Tipo II"));
+        assertTrue(response.proveedor().contains("Interno") || response.proveedor().contains("On-Premise"));
+    }
 }

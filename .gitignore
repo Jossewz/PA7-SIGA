@@ -39,3 +39,13 @@ scratch/
 *.dump
 backup_*.sql
 
+
+### Visualización de Datos II (Power BI & Datos Analíticos) ###
+*.pbix
+*.xlsx
+scripts/bi/data/
+scripts/bi/generar_datos_estrella.ps1
+
+*.pdf
+AGENTS.md
+

@@ -4,6 +4,7 @@ import com.siga.siga_iea.storage.exception.StorageFileNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -86,7 +87,7 @@ public class StorageController {
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, contentType)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename="" + getFilename(cleanPath) + """)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.inline().filename(getFilename(cleanPath)).build().toString())
                     .body(new InputStreamResource(stream));
 
         } catch (StorageFileNotFoundException e) {

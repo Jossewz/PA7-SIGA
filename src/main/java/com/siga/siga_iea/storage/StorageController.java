@@ -1,35 +1,46 @@
 package com.siga.siga_iea.storage;
 
 import com.siga.siga_iea.storage.exception.StorageFileNotFoundException;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.InputStream;
 import java.net.URLConnection;
 
 /**
- * Controller that serves ONLY public files (logos, banners, institutional images).
+ * Controller that serves public files and resource previews.
  * <p>
- * Protected files (student photos, documents, etc.) are served by their respective
- * domain controllers, which validate permissions before delegating to {@link StorageService}.
+ * Protected files are served by domain controllers after validating permissions.
  * </p>
  */
 @Controller
 @RequestMapping("/storage/public")
-@RequiredArgsConstructor
 public class StorageController {
+
+    private static final Logger log = LoggerFactory.getLogger(StorageController.class);
 
     private final StorageService storageService;
 
+    public StorageController(StorageService storageService) {
+        this.storageService = storageService;
+    }
+
     @GetMapping("/view")
-    public ResponseEntity<InputStreamResource> viewFile(@org.springframework.web.bind.annotation.RequestParam("key") String key) {
+    public ResponseEntity<InputStreamResource> viewFile(@RequestParam(value = "key", required = false) String key) {
+        if (key == null || key.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
         try {
             InputStream stream = storageService.download(key);
             String contentType = URLConnection.guessContentTypeFromName(key);
@@ -38,51 +49,51 @@ public class StorageController {
                 if (lower.endsWith(".png")) contentType = "image/png";
                 else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) contentType = "image/jpeg";
                 else if (lower.endsWith(".pdf")) contentType = "application/pdf";
-                else contentType = "image/jpeg";
+                else contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
             }
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, contentType)
                     .body(new InputStreamResource(stream));
-        } catch (Exception e) {
+        } catch (StorageFileNotFoundException e) {
+            log.warn("Archivo no encontrado con key: {}", key);
             return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Error al descargar archivo con key '{}': {}", key, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     /**
      * Serves a public file from the "institucion/" folder of the bucket.
-     * The path after /storage/public/ maps to the object key under "institucion/".
-     * <p>
-     * Example: GET /storage/public/logo.png → key "institucion/logo.png"
-     * </p>
+     * Example: GET /storage/public/logo.png -> key "institucion/logo.png"
      */
-    @GetMapping("/**")
-    public ResponseEntity<InputStreamResource> servePublicFile(HttpServletRequest request) {
-        // Extract the path after "/storage/public/"
-        String path = request.getRequestURI().substring("/storage/public/".length());
-
-        if (path.isEmpty()) {
+    @GetMapping("/{*path}")
+    public ResponseEntity<InputStreamResource> servePublicFile(@PathVariable(value = "path", required = false) String path) {
+        if (path == null || path.isBlank() || path.equals("/") || path.equals("/view")) {
             return ResponseEntity.badRequest().build();
         }
 
-        // All public files live under the "institucion/" folder
-        String key = StorageFolder.INSTITUCION.getPath() + "/" + path;
+        String cleanPath = path.startsWith("/") ? path.substring(1) : path;
+        String key = StorageFolder.INSTITUCION.getPath() + "/" + cleanPath;
 
         try {
             InputStream stream = storageService.download(key);
 
-            // Guess content type from the filename
-            String contentType = URLConnection.guessContentTypeFromName(path);
+            String contentType = URLConnection.guessContentTypeFromName(cleanPath);
             if (contentType == null) {
                 contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
             }
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, contentType)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + getFilename(path) + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename="" + getFilename(cleanPath) + """)
                     .body(new InputStreamResource(stream));
 
         } catch (StorageFileNotFoundException e) {
             return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Error al servir archivo institucional '{}': {}", cleanPath, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

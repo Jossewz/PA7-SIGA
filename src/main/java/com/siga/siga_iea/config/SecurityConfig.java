@@ -73,7 +73,7 @@ public class SecurityConfig {
                         // Bloqueo explícito de métodos TRACE y TRACK (mitigación XST)
                         .requestMatchers(HttpMethod.valueOf("TRACE"), "/**").denyAll()
                         .requestMatchers(HttpMethod.valueOf("TRACK"), "/**").denyAll()
-                        .requestMatchers("/login", "/logout", "/css/**", "/js/**", "/img/**", "/icons/**", "/fonts/**", "/favicon.ico", "/error").permitAll()
+                        .requestMatchers("/login", "/logout", "/css/**", "/js/**", "/img/**", "/icons/**", "/fonts/**", "/favicon.ico", "/error", "/storage/public/**").permitAll()
                         .requestMatchers("/configuracion/roles/**").hasRole("ADMIN")
                         .requestMatchers("/clases/mapear-estudiantes", "/clases/promover-estudiantes").hasAnyRole("ADMIN", "PERSONAL_ADMINISTRATIVO")
                         .requestMatchers(

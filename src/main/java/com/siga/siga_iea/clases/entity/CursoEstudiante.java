@@ -24,7 +24,7 @@ public class CursoEstudiante {
     private Estudiante estudiante;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "anio_lectivo_id")
     private AnioLectivo anioLectivo;
 
@@ -38,8 +38,11 @@ public class CursoEstudiante {
         this.curso = curso;
         this.estudiante = estudiante;
         this.anioLectivo = anioLectivo;
-        if (anioLectivo != null && anioLectivo.getAnio() != null) {
-            this.anoLectivo = anioLectivo.getAnio().toString();
+        try {
+            if (anioLectivo != null && org.hibernate.Hibernate.isInitialized(anioLectivo) && anioLectivo.getAnio() != null) {
+                this.anoLectivo = anioLectivo.getAnio().toString();
+            }
+        } catch (Exception ignored) {
         }
     }
 
@@ -48,8 +51,11 @@ public class CursoEstudiante {
         this.curso = curso;
         this.estudiante = estudiante;
         this.anoLectivo = anoLectivo;
-        if (curso != null && curso.getAnioLectivo() != null) {
-            this.anioLectivo = curso.getAnioLectivo();
+        try {
+            if (curso != null && curso.getAnioLectivo() != null) {
+                this.anioLectivo = curso.getAnioLectivo();
+            }
+        } catch (Exception ignored) {
         }
     }
 
@@ -59,8 +65,15 @@ public class CursoEstudiante {
     public Curso getCurso() { return curso; }
     public void setCurso(Curso curso) {
         this.curso = curso;
-        if (this.anioLectivo == null && curso != null && curso.getAnioLectivo() != null) {
-            this.setAnioLectivo(curso.getAnioLectivo());
+        try {
+            if (this.anioLectivo == null && curso != null && curso.getAnioLectivo() != null) {
+                if (org.hibernate.Hibernate.isInitialized(curso.getAnioLectivo())) {
+                    this.setAnioLectivo(curso.getAnioLectivo());
+                } else {
+                    this.anioLectivo = curso.getAnioLectivo();
+                }
+            }
+        } catch (Exception ignored) {
         }
     }
 
@@ -71,19 +84,27 @@ public class CursoEstudiante {
     public AnioLectivo getAnioLectivo() { return anioLectivo; }
     public void setAnioLectivo(AnioLectivo anioLectivo) {
         this.anioLectivo = anioLectivo;
-        if (anioLectivo != null && anioLectivo.getAnio() != null) {
-            this.anoLectivo = anioLectivo.getAnio().toString();
+        try {
+            if (anioLectivo != null && org.hibernate.Hibernate.isInitialized(anioLectivo) && anioLectivo.getAnio() != null) {
+                this.anoLectivo = anioLectivo.getAnio().toString();
+            }
+        } catch (Exception ignored) {
         }
     }
 
     @PrePersist
     @PreUpdate
     public void syncDerivations() {
-        if (this.anioLectivo != null && this.anioLectivo.getAnio() != null) {
-            this.anoLectivo = this.anioLectivo.getAnio().toString();
-        } else if (this.curso != null && this.curso.getAnioLectivo() != null) {
-            this.anioLectivo = this.curso.getAnioLectivo();
-            this.anoLectivo = this.anioLectivo.getAnio().toString();
+        try {
+            if (this.anioLectivo != null && org.hibernate.Hibernate.isInitialized(this.anioLectivo) && this.anioLectivo.getAnio() != null) {
+                this.anoLectivo = this.anioLectivo.getAnio().toString();
+            } else if (this.curso != null && this.curso.getAnioLectivo() != null) {
+                this.anioLectivo = this.curso.getAnioLectivo();
+                if (org.hibernate.Hibernate.isInitialized(this.anioLectivo) && this.anioLectivo.getAnio() != null) {
+                    this.anoLectivo = this.anioLectivo.getAnio().toString();
+                }
+            }
+        } catch (Exception ignored) {
         }
     }
 

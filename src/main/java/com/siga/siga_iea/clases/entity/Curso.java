@@ -35,7 +35,7 @@ public class Curso {
     private Docente director;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "anio_lectivo_id")
     private AnioLectivo anioLectivo;
 
@@ -148,14 +148,20 @@ public class Curso {
 
     public void setAnioLectivo(AnioLectivo anioLectivo) {
         this.anioLectivo = anioLectivo;
-        if (anioLectivo != null && anioLectivo.getAnio() != null) {
-            this.anoLectivo = anioLectivo.getAnio().toString();
+        try {
+            if (anioLectivo != null && org.hibernate.Hibernate.isInitialized(anioLectivo) && anioLectivo.getAnio() != null) {
+                this.anoLectivo = anioLectivo.getAnio().toString();
+            }
+        } catch (Exception ignored) {
         }
     }
 
     public void syncDerivations() {
-        if (this.anioLectivo != null && this.anioLectivo.getAnio() != null) {
-            this.anoLectivo = this.anioLectivo.getAnio().toString();
+        try {
+            if (this.anioLectivo != null && org.hibernate.Hibernate.isInitialized(this.anioLectivo) && this.anioLectivo.getAnio() != null) {
+                this.anoLectivo = this.anioLectivo.getAnio().toString();
+            }
+        } catch (Exception ignored) {
         }
     }
 

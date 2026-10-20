@@ -104,7 +104,8 @@
                     <tr th:if="${estudiantesCE == null || #lists.isEmpty(estudiantesCE)}">
                         <td th:colspan="${(evaluaciones != null ? #lists.size(evaluaciones) : 0) + 4}" class="p-8 text-center text-text-muted italic">
                             No hay estudiantes asignados a este curso actualmente. <br>
-                            <span class="text-[11px] font-normal text-text-secondary mt-1 inline-block">Haga clic en el botón <strong>'Auto-Mapear Matriculados'</strong> superior para asignar automáticamente estudiantes matriculados en este grado.</span>
+                            <span class="text-[11px] font-normal text-text-secondary mt-1 inline-block" th:if="${puedeAdministrarCursos}">Haga clic en el botón <strong>'Auto-Mapear Matriculados'</strong> superior para asignar automáticamente estudiantes matriculados en este grado.</span>
+                            <span class="text-[11px] font-normal text-text-secondary mt-1 inline-block" th:unless="${puedeAdministrarCursos}">Comuníquese con el personal administrativo para la asignación de estudiantes a este curso.</span>
                         </td>
                     </tr>
 

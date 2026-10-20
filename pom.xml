@@ -129,6 +129,13 @@
             <version>8.5.14</version>
         </dependency>
 
+        <!-- OpenPDF: Generación oficial de Boletines y Certificados en PDF -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+
     </dependencies>
 
     <build>

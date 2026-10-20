@@ -16,4 +16,7 @@ public interface EvaluacionRepository extends JpaRepository<Evaluacion, UUID> {
 
     @Query("SELECT e FROM Evaluacion e WHERE e.cursoMateria.id = :cursoMateriaId ORDER BY e.createdAt ASC, e.nombre ASC")
     List<Evaluacion> findByCursoMateriaId(@Param("cursoMateriaId") UUID cursoMateriaId);
+
+    @Query("SELECT e FROM Evaluacion e WHERE e.cursoMateria.id IN :cursoMateriaIds ORDER BY e.createdAt ASC, e.nombre ASC")
+    List<Evaluacion> findByCursoMateriaIdIn(@Param("cursoMateriaIds") List<UUID> cursoMateriaIds);
 }

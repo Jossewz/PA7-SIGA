@@ -27,13 +27,17 @@ public class CursoGestionAppService {
     private final CursoService cursoService;
     private final CalificacionesService calificacionesService;
     private final AsistenciaService asistenciaService;
+    private final com.siga.siga_iea.configuracion.service.PeriodoConfigService periodoConfigService;
 
     public CursoGestionAppService(CursoService cursoService,
                                   CalificacionesService calificacionesService,
-                                  AsistenciaService asistenciaService) {
+                                  AsistenciaService asistenciaService,
+                                  @org.springframework.beans.factory.annotation.Autowired(required = false)
+                                  com.siga.siga_iea.configuracion.service.PeriodoConfigService periodoConfigService) {
         this.cursoService = cursoService;
         this.calificacionesService = calificacionesService;
         this.asistenciaService = asistenciaService;
+        this.periodoConfigService = periodoConfigService;
     }
 
     public static String obtenerNombreDiaEspanol(DayOfWeek dow) {
@@ -51,14 +55,15 @@ public class CursoGestionAppService {
 
     @Transactional
     public CursoGestionDetalleDTO prepararGestionDetalle(String codigo, Optional<Docente> docenteLogueadoOpt, boolean esAdmin) {
-        Optional<Curso> cursoOpt = cursoService.buscarPorCodigo(codigo, "2026");
+        String anioActivo = periodoConfigService != null ? String.valueOf(periodoConfigService.obtenerAnioLectivoActual().getAnio()) : "2026";
+        Optional<Curso> cursoOpt = cursoService.buscarPorCodigo(codigo, anioActivo);
         Curso c;
         if (cursoOpt.isPresent()) {
             c = cursoOpt.get();
         } else {
             String degree = (codigo != null && codigo.contains("-")) ? codigo.split("-")[0] + "°" : (codigo != null ? codigo : "11°");
             String group = (codigo != null && codigo.contains("-")) ? codigo.split("-")[1] : "01";
-            c = cursoService.crearCurso(degree, group, "Mañana", 35, null, "2026");
+            c = cursoService.crearCurso(degree, group, "Mañana", 35, null, anioActivo);
         }
 
         CursoGestionDetalleDTO detalleDTO = new CursoGestionDetalleDTO();

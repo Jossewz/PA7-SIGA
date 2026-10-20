@@ -47,10 +47,18 @@
                     <span class="inline-flex items-center rounded-full bg-surface-sunken border border-border px-2.5 py-0.5 text-xs font-bold uppercase text-brand-700 shadow-2xs">
                         <span th:text="${(boletin != null ? #lists.size(boletin) : 0) + ' ASIGNATURAS'}">0 ASIGNATURAS</span>
                     </span>
-                </div>
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-control bg-surface-sunken border border-border text-xs font-bold text-brand-600">
-                    <i data-lucide="calendar" class="size-3.5 stroke-2 text-brand-500"></i>
-                    <span>Año Lectivo 2026</span>
+                <div class="flex items-center gap-2">
+                    <a th:if="${estudianteSeleccionadoId != null and !#strings.isEmpty(estudianteSeleccionadoId)}"
+                       th:href="@{/calificaciones/boletin/pdf(estudianteId=${estudianteSeleccionadoId},anoLectivo=${anoLectivo})}"
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-control bg-sidebar text-white text-xs font-bold hover:brightness-110 transition shadow-2xs"
+                       title="Descargar Boletín Oficial en PDF">
+                        <i data-lucide="download" class="size-3.5 stroke-[2.5]"></i>
+                        <span>Descargar PDF</span>
+                    </a>
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-control bg-surface-sunken border border-border text-xs font-bold text-brand-600">
+                        <i data-lucide="calendar" class="size-3.5 stroke-2 text-brand-500"></i>
+                        <span th:text="${'Año Lectivo ' + anoLectivo}">Año Lectivo 2026</span>
+                    </div>
                 </div>
             </div>
 

@@ -15,6 +15,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import java.io.InputStream;
 import java.net.URLConnection;
 
@@ -38,8 +42,17 @@ public class StorageController {
 
     @GetMapping("/view")
     public ResponseEntity<InputStreamResource> viewFile(@RequestParam(value = "key", required = false) String key) {
-        if (key == null || key.isBlank()) {
+        if (key == null || key.isBlank() || key.contains("..")) {
             return ResponseEntity.badRequest().build();
+        }
+
+        // Blindaje contra IDOR: si el archivo no es un asset público o foto permitida, requiere autenticación
+        if (!esArchivoPublicoPermitido(key)) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+                log.warn("Intento de acceso anónimo bloqueado a archivo privado con key: {}", key);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
         }
 
         try {
@@ -62,6 +75,24 @@ public class StorageController {
             log.error("Error al descargar archivo con key '{}': {}", key, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    private boolean esArchivoPublicoPermitido(String key) {
+        if (key == null || key.isBlank() || key.contains("..")) return false;
+        String lower = key.toLowerCase();
+
+        // 1. Recursos institucionales oficiales
+        if (lower.startsWith(StorageFolder.INSTITUCION.getPath() + "/") || lower.startsWith("institucion/")) {
+            return true;
+        }
+
+        // 2. Fotos de perfil o previsualizaciones temporales de imágenes permitidas
+        boolean esImagen = lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".webp");
+        if (esImagen && (lower.contains("foto") || lower.startsWith("fotos/") || lower.startsWith("temp/"))) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

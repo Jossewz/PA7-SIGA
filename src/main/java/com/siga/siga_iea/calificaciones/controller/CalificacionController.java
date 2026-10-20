@@ -1,12 +1,16 @@
 package com.siga.siga_iea.calificaciones.controller;
 
 import com.siga.siga_iea.calificaciones.dto.BoletinMateriaDTO;
+import com.siga.siga_iea.calificaciones.service.BoletinPdfService;
 import com.siga.siga_iea.calificaciones.service.CalificacionesService;
 import com.siga.siga_iea.clases.entity.Curso;
 import com.siga.siga_iea.clases.service.CursoService;
 import com.siga.siga_iea.configuracion.service.PeriodoConfigService;
 import com.siga.siga_iea.usuarios.entity.Estudiante;
 import com.siga.siga_iea.usuarios.service.EstudianteService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,19 +28,22 @@ public class CalificacionController {
     private final PeriodoConfigService periodoConfigService;
     private final com.siga.siga_iea.clases.repository.CursoEstudianteRepository cursoEstudianteRepository;
     private final com.siga.siga_iea.matricula.service.MatriculaService matriculaService;
+    private final BoletinPdfService boletinPdfService;
 
     public CalificacionController(CalificacionesService calificacionesService, 
                                   EstudianteService estudianteService,
                                   CursoService cursoService,
                                   PeriodoConfigService periodoConfigService,
                                   com.siga.siga_iea.clases.repository.CursoEstudianteRepository cursoEstudianteRepository,
-                                  com.siga.siga_iea.matricula.service.MatriculaService matriculaService) {
+                                  com.siga.siga_iea.matricula.service.MatriculaService matriculaService,
+                                  BoletinPdfService boletinPdfService) {
         this.calificacionesService = calificacionesService;
         this.estudianteService = estudianteService;
         this.cursoService = cursoService;
         this.periodoConfigService = periodoConfigService;
         this.cursoEstudianteRepository = cursoEstudianteRepository;
         this.matriculaService = matriculaService;
+        this.boletinPdfService = boletinPdfService;
     }
 
     @GetMapping("/calificaciones")
@@ -79,7 +86,9 @@ public class CalificacionController {
             }
             model.addAttribute("estudianteGrado", gradoStr);
 
-            List<BoletinMateriaDTO> boletin = calificacionesService.obtenerBoletinEstudiante(seleccionado.getId(), "2026", ponderaciones);
+            String anioActivo = String.valueOf(periodoConfigService.obtenerAnioLectivoActual().getAnio());
+            model.addAttribute("anoLectivo", anioActivo);
+            List<BoletinMateriaDTO> boletin = calificacionesService.obtenerBoletinEstudiante(seleccionado.getId(), anioActivo, ponderaciones);
             model.addAttribute("boletin", boletin);
         } else {
             model.addAttribute("estudianteSeleccionadoId", "");
@@ -93,5 +102,41 @@ public class CalificacionController {
         model.addAttribute("cursosList", cursos);
 
         return "calificaciones/index";
+    }
+
+    @GetMapping("/calificaciones/boletin/pdf")
+    public ResponseEntity<byte[]> descargarBoletinPdf(
+            @RequestParam("estudianteId") UUID estudianteId,
+            @RequestParam(value = "anoLectivo", required = false) String anoLectivo) {
+
+        Estudiante estudiante = estudianteService.buscarPorId(estudianteId)
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
+
+        String anio = (anoLectivo != null && !anoLectivo.isBlank()) ? anoLectivo.trim() :
+                String.valueOf(periodoConfigService.obtenerAnioLectivoActual().getAnio());
+
+        String gradoStr = "Sin grado";
+        List<com.siga.siga_iea.clases.entity.CursoEstudiante> ces = cursoEstudianteRepository.findByEstudianteId(estudiante.getId());
+        if (!ces.isEmpty()) {
+            com.siga.siga_iea.clases.entity.Curso c = ces.get(ces.size() - 1).getCurso();
+            gradoStr = c.getGrado() + " - " + (c.getGrupo() != null ? c.getGrupo() : "01");
+        } else {
+            Optional<com.siga.siga_iea.matricula.entity.Matricula> matOpt = matriculaService.buscarUltimaMatriculaEstudiante(estudiante.getId());
+            if (matOpt.isPresent() && matOpt.get().getGrado() != null) {
+                gradoStr = matOpt.get().getGrado() + " - " + (matOpt.get().getSalon() != null ? matOpt.get().getSalon() : "01");
+            }
+        }
+
+        Map<Integer, BigDecimal> ponderaciones = periodoConfigService.getPonderaciones();
+        List<BoletinMateriaDTO> boletin = calificacionesService.obtenerBoletinEstudiante(estudiante.getId(), anio, ponderaciones);
+
+        byte[] pdfBytes = boletinPdfService.generarBoletinPdf(estudiante, gradoStr, anio, boletin);
+
+        String filename = "Boletin_" + estudiante.getNumeroDocumento() + "_" + anio + ".pdf";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .body(pdfBytes);
     }
 }

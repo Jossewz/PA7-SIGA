@@ -24,15 +24,19 @@ public class ReportesService {
     private final EstudianteRepository estudianteRepository;
     private final DocenteRepository docenteRepository;
     private final PersonalAdministrativoRepository personalRepository;
+    private final com.siga.siga_iea.configuracion.service.PeriodoConfigService periodoConfigService;
 
     public ReportesService(ReporteRepository reporteRepository,
                            EstudianteRepository estudianteRepository,
                            DocenteRepository docenteRepository,
-                           PersonalAdministrativoRepository personalRepository) {
+                           PersonalAdministrativoRepository personalRepository,
+                           @org.springframework.beans.factory.annotation.Autowired(required = false)
+                           com.siga.siga_iea.configuracion.service.PeriodoConfigService periodoConfigService) {
         this.reporteRepository = reporteRepository;
         this.estudianteRepository = estudianteRepository;
         this.docenteRepository = docenteRepository;
         this.personalRepository = personalRepository;
+        this.periodoConfigService = periodoConfigService;
     }
 
     public List<Reporte> listarTodos() {
@@ -65,8 +69,11 @@ public class ReportesService {
         Docente doc = docenteRepository.findById(docenteId)
                 .orElseThrow(() -> new IllegalArgumentException("Docente no encontrado"));
 
+        String anio = periodoConfigService != null ? String.valueOf(periodoConfigService.obtenerAnioLectivoActual().getAnio()) : "2026";
+        long consecutivo = reporteRepository.count() + 1;
+
         Reporte r = new Reporte();
-        r.setCodigo("REP-2026-" + (100 + new Random().nextInt(900)));
+        r.setCodigo(String.format("REP-%s-%04d", anio, consecutivo));
         r.setEstudiante(est);
         r.setDocente(doc);
         r.setCategoria(categoria);

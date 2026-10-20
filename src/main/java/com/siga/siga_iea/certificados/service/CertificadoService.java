@@ -25,15 +25,19 @@ public class CertificadoService {
     private final EstudianteRepository estudianteRepository;
     private final PersonalAdministrativoRepository personalRepository;
     private final StorageService storageService;
+    private final com.siga.siga_iea.configuracion.service.PeriodoConfigService periodoConfigService;
 
     public CertificadoService(SolicitudCertificadoRepository solicitudRepository,
                               EstudianteRepository estudianteRepository,
                               PersonalAdministrativoRepository personalRepository,
-                              StorageService storageService) {
+                              StorageService storageService,
+                              @org.springframework.beans.factory.annotation.Autowired(required = false)
+                              com.siga.siga_iea.configuracion.service.PeriodoConfigService periodoConfigService) {
         this.solicitudRepository = solicitudRepository;
         this.estudianteRepository = estudianteRepository;
         this.personalRepository = personalRepository;
         this.storageService = storageService;
+        this.periodoConfigService = periodoConfigService;
     }
 
     public List<SolicitudCertificado> listarTodas() {
@@ -65,13 +69,17 @@ public class CertificadoService {
         Estudiante est = estudianteRepository.findById(estudianteId)
                 .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado"));
 
+        String anio = (anoLectivo != null && !anoLectivo.isBlank()) ? anoLectivo.trim() :
+                (periodoConfigService != null ? String.valueOf(periodoConfigService.obtenerAnioLectivoActual().getAnio()) : "2026");
+
+        long consecutivo = solicitudRepository.count() + 1;
         SolicitudCertificado s = new SolicitudCertificado();
-        s.setCodigo("CERT-2026-" + (100 + new Random().nextInt(900)));
+        s.setCodigo(String.format("CERT-%s-%04d", anio, consecutivo));
         s.setEstudiante(est);
         s.setTipo(tipo);
         s.setCategoria(categoria != null ? categoria : "Constancias Administrativas");
         s.setMotivo(motivo);
-        s.setAnoLectivo(anoLectivo != null ? anoLectivo : "2026");
+        s.setAnoLectivo(anio);
         s.setGradoReferencia(gradoReferencia != null ? gradoReferencia : "11°");
         s.setEstado("Pendiente");
 

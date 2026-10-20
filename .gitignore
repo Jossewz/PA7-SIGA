@@ -49,3 +49,5 @@ scripts/bi/generar_datos_estrella.ps1
 *.pdf
 AGENTS.md
 
+
+.antigravity/

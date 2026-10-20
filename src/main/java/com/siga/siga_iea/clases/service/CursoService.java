@@ -36,6 +36,7 @@ public class CursoService {
     private final BloqueRepository bloqueRepository;
     private final HorarioValidator horarioValidator;
     private final com.siga.siga_iea.configuracion.repository.AnioLectivoRepository anioLectivoRepository;
+    private final com.siga.siga_iea.asistencias.repository.AsistenciaRepository asistenciaRepository;
 
     public CursoService(CursoRepository cursoRepository,
                         MateriaRepository materiaRepository,
@@ -49,7 +50,9 @@ public class CursoService {
                         SalonRepository salonRepository,
                         BloqueRepository bloqueRepository,
                         HorarioValidator horarioValidator,
-                        com.siga.siga_iea.configuracion.repository.AnioLectivoRepository anioLectivoRepository) {
+                        com.siga.siga_iea.configuracion.repository.AnioLectivoRepository anioLectivoRepository,
+                        @org.springframework.beans.factory.annotation.Autowired(required = false)
+                        com.siga.siga_iea.asistencias.repository.AsistenciaRepository asistenciaRepository) {
         this.cursoRepository = cursoRepository;
         this.materiaRepository = materiaRepository;
         this.cursoMateriaRepository = cursoMateriaRepository;
@@ -63,6 +66,7 @@ public class CursoService {
         this.bloqueRepository = bloqueRepository;
         this.horarioValidator = horarioValidator;
         this.anioLectivoRepository = anioLectivoRepository;
+        this.asistenciaRepository = asistenciaRepository;
     }
 
     public List<Curso> listarTodosLosCursos() {
@@ -500,29 +504,30 @@ public class CursoService {
                     promedio = calcularNotaPromedioEstudiante(e.getId(), cursoOrigen.getId());
                 }
 
-                boolean aprobado = (promedio >= 3.0) && !"Retirado".equalsIgnoreCase(e.getEstado());
+                double faltasPct = calcularPorcentajeInasistenciaEstudiante(e.getId(), cursoOrigen.getId());
+                boolean repruebaPorFaltas = faltasPct >= 25.0; // Criterio normativo SIEACI Art. Inasistencias
+                boolean aprobado = (promedio >= 3.0) && !repruebaPorFaltas && !"Retirado".equalsIgnoreCase(e.getEstado());
 
                 if (aprobado) {
                     e.setEstado("Graduado");
                     estudianteRepository.save(e);
-                    aEliminarDeOrigen.add(ce);
                     promovidos++;
                 } else {
                     repitentes++;
-                    nombresNoAprobados.add(e.getNombreCompleto() + " (Nota: " + String.format("%.2f", promedio) + ")");
+                    if (repruebaPorFaltas) {
+                        nombresNoAprobados.add(e.getNombreCompleto() + " (Inasistencia: " + String.format("%.1f", faltasPct) + "% >= 25%, Nota: " + String.format("%.2f", promedio) + ")");
+                    } else {
+                        nombresNoAprobados.add(e.getNombreCompleto() + " (Nota: " + String.format("%.2f", promedio) + ")");
+                    }
                 }
             }
 
-            if (!aEliminarDeOrigen.isEmpty()) {
-                cursoEstudianteRepository.deleteAll(aEliminarDeOrigen);
-            }
-
             if (repitentes > 0) {
-                return String.format("Proceso de Graduación Concluido: Se han graduado satisfactoriamente %d estudiante(s) con calificación igual o superior a 3.0. " +
-                        "Un total de %d estudiante(s) (%s) no alcanzaron la nota mínima aprobatoria (menos de 3.0) y NO se graduarán en esta cohorte, permaneciendo asignados al curso %s.",
-                        promovidos, repitentes, String.join(", ", nombresNoAprobados), cursoOrigen.getCodigoCurso());
+                return String.format("Proceso de Graduación Concluido: Se han graduado satisfactoriamente %d estudiante(s) con calificación igual o superior a 3.0 y asistencia adecuada. " +
+                        "Un total de %d estudiante(s) (%s) no cumplieron los requisitos académicos o de asistencia y NO se graduarán en esta cohorte.",
+                        promovidos, repitentes, String.join(", ", nombresNoAprobados));
             } else {
-                return String.format("Proceso de Graduación Concluido Con Éxito: El 100%% de los estudiantes (%d inscritos) del curso %s obtuvieron calificaciones aprobatorias (≥ 3.0) y han sido promovidos al estado de Graduados. El salón queda disponible para el siguiente ciclo académico.",
+                return String.format("Proceso de Graduación Concluido Con Éxito: El 100%% de los estudiantes (%d inscritos) del curso %s obtuvieron calificaciones aprobatorias (≥ 3.0) y han sido promovidos al estado de Graduados.",
                         promovidos, cursoOrigen.getCodigoCurso());
             }
         }
@@ -553,35 +558,47 @@ public class CursoService {
                 promedio = calcularNotaPromedioEstudiante(e.getId(), cursoOrigen.getId());
             }
 
-            boolean aprobado = (promedio >= 3.0) && !"Retirado".equalsIgnoreCase(e.getEstado());
+            double faltasPct = calcularPorcentajeInasistenciaEstudiante(e.getId(), cursoOrigen.getId());
+            boolean repruebaPorFaltas = faltasPct >= 25.0; // Criterio normativo SIEACI Art. Inasistencias
+            boolean aprobado = (promedio >= 3.0) && !repruebaPorFaltas && !"Retirado".equalsIgnoreCase(e.getEstado());
 
             if (aprobado) {
-                boolean yaEnDestino = cursoEstudianteRepository.existsByCursoIdAndEstudianteId(cursoDestino.getId(), e.getId());
-                if (!yaEnDestino) {
-                    CursoEstudiante nuevoCE = new CursoEstudiante(cursoDestino, e, cursoOrigen.getAnoLectivo());
-                    cursoEstudianteRepository.save(nuevoCE);
-                }
-                aEliminarDeOrigen.add(ce);
+                // Reasignar la inscripción al curso destino preservando la integridad del registro
+                ce.setCurso(cursoDestino);
+                cursoEstudianteRepository.save(ce);
                 promovidos++;
             } else {
                 repitentes++;
-                nombresNoAprobados.add(e.getNombreCompleto() + " (Nota: " + String.format("%.2f", promedio) + ")");
+                if (repruebaPorFaltas) {
+                    nombresNoAprobados.add(e.getNombreCompleto() + " (Inasistencia: " + String.format("%.1f", faltasPct) + "% >= 25%, Nota: " + String.format("%.2f", promedio) + ")");
+                } else {
+                    nombresNoAprobados.add(e.getNombreCompleto() + " (Nota: " + String.format("%.2f", promedio) + ")");
+                }
             }
         }
 
-        // Vaciar a los promovidos de este salón para que ingresen los de la cohorte inferior
-        if (!aEliminarDeOrigen.isEmpty()) {
-            cursoEstudianteRepository.deleteAll(aEliminarDeOrigen);
-        }
-
         if (repitentes > 0) {
-            return String.format("Proceso de Promoción Académica Ejecutado: %d estudiante(s) con desempeño aprobatorio (≥ 3.0) fueron promovidos al curso %s (%s). " +
-                    "Se informa que %d estudiante(s) (%s) obtuvieron nota final inferior a 3.0 y no cumplen el requisito para avanzar, por lo que permanecerán en el curso %s compartiendo aula con la nueva cohorte.",
+            return String.format("Proceso de Promoción Académica Ejecutado: %d estudiante(s) con desempeño aprobatorio (≥ 3.0) y asistencia requerida fueron promovidos al curso %s (%s). " +
+                    "Se informa que %d estudiante(s) (%s) no alcanzaron los requisitos de promoción y permanecerán en el curso %s.",
                     promovidos, cursoDestino.getCodigoCurso(), siguienteGrado, repitentes, String.join(", ", nombresNoAprobados), cursoOrigen.getCodigoCurso());
         } else {
-            return String.format("Proceso de Promoción Académica Concluido Con Éxito: El 100%% de los estudiantes (%d inscritos) alcanzaron o superaron la nota mínima de 3.0 y avanzan satisfactoriamente al curso %s (%s).",
+            return String.format("Proceso de Promoción Académica Concluido Con Éxito: El 100%% de los estudiantes (%d inscritos) cumplieron los requisitos académicos y de asistencia, avanzando satisfactoriamente al curso %s (%s).",
                     promovidos, cursoDestino.getCodigoCurso(), siguienteGrado);
         }
+    }
+
+    public double calcularPorcentajeInasistenciaEstudiante(UUID estudianteId, UUID cursoId) {
+        if (asistenciaRepository == null || estudianteId == null || cursoId == null) return 0.0;
+        List<com.siga.siga_iea.asistencias.entity.Asistencia> asistencias = asistenciaRepository.findByEstudianteId(estudianteId);
+        long totalEnCurso = asistencias.stream()
+                .filter(a -> a.getSesion() != null && a.getSesion().getCurso() != null && cursoId.equals(a.getSesion().getCurso().getId()))
+                .count();
+        if (totalEnCurso == 0) return 0.0;
+        long ausencias = asistencias.stream()
+                .filter(a -> a.getSesion() != null && a.getSesion().getCurso() != null && cursoId.equals(a.getSesion().getCurso().getId()))
+                .filter(a -> "AUSENTE".equalsIgnoreCase(a.getEstado()))
+                .count();
+        return (ausencias * 100.0) / totalEnCurso;
     }
 
     public String promoverEstudiantesAprobados(UUID cursoId) {
